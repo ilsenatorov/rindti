@@ -33,7 +33,8 @@ Additionally, scripts that give an example of model training are provided (`trai
 1. activate the environment with `conda activate rindti`
 1. clone rinerator repository into your home dir with `git clone --branch perf https://wibi-git.helmholtz-hzi.de/ske18/rinerator/ ~/rinerator`
 1. install rinerator with `pip install ~/rinerator`
-1. ensure you have probe and reduce installed (check rinerator README for info)
+1. install reduce from https://github.com/rlabduke/reduce (build the binary and add to path)
+1. install probe from https://github.com/rlabduke/probe (build the binary and add to path)
 
 ## Usage
 
