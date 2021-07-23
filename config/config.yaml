@@ -1,0 +1,47 @@
+bsite:
+  # radius (in Angstroms) around ligands for which residues are considered to be part of the binding site
+  radius: 5
+# rinerator parameter decides whether only calculate RINs of bsites, or of whole protein (bsite/whole)
+# templates folder must be present for bsite to work
+rinerator: whole
+
+# If set to true, only computes the proteins data (useful for pretraining)
+only_proteins: false
+
+# Seed for reproducibility of random processes
+seed: 42
+
+prepare_proteins:
+  # data can be graph or sequence
+  data: graph
+  # features can be label, onehot or custom (which is onehot plus some derived numbers)
+  features: label
+  graph:
+    edge_attr:
+      # - type1
+      # - type2
+  sequence:
+    maxlen: 600
+
+
+split:
+  # available methods: random, coldtarget
+  method: coldtarget
+  train: 0.7
+  val: 0.2
+  # test is created as a remainder of train and val
+
+prepare_all:
+  # if threshold==0, the model is treated as regression
+  threshold: 1000
+
+parse_glass:
+  species: human
+  druglikeness: 0.1
+  max_atoms: 150
+  # filtering can be posneg, balanced or none
+  filtering: posneg
+  # valmax and valmin are boundaries for outlier activity values
+  valmax: 1000000
+  valmin: 0.01
+  mininter: 5 # Lowest allowed number of interactions per protein

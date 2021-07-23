@@ -25,11 +25,11 @@ The GNN model is shipped as a package, located in the `rindti` directory.
 Additionally, scripts that give an example of model training are provided (`train.py` and `pretrain_graphlog.py`), which can be used as plug-and-play, or as inspiration to create custom training approaches.
 ## Installation
 
-1. clone the repository with `git clone`
+1. clone the repository with `git clone https://github.com/ilsenatorov/rindti`
 1. change in the root directory with `cd rindti`
 1. unzip the gpcr data in the `resources` folder with `tar -xvf resources/gpcr_data.tar.gz`
-1. install mamba with `conda install -n base -c conda-forge mamba`
-1. create the conda environment with `mamba env create -f workflow/envs/main.yml`
+1. *(Optional)* install mamba with `conda install -n base -c conda-forge mamba`
+1. create the conda environment with `mamba env create -f workflow/envs/main.yml` (might take some time)
 1. activate the environment with `conda activate rindti`
 1. pull rinerator submodule with `git submodule update --init --recursive`
 1. cd into rinerator directory with `cd resources/tools/rinerator`

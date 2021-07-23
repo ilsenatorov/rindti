@@ -284,7 +284,7 @@ dependencies:
     - ray==1.4.1
     - redis==3.5.3
     - rich==10.6.0
-    - rinerator==0.99
+    # - rinerator==0.99
     - simple-parsing==0.0.15.post1
     - six==1.15.0
     - smart-open==5.1.0
