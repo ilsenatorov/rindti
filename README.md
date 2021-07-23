@@ -27,14 +27,12 @@ Additionally, scripts that give an example of model training are provided (`trai
 
 1. clone the repository with `git clone https://github.com/ilsenatorov/rindti`
 1. change in the root directory with `cd rindti`
-1. unzip the gpcr data in the `resources` folder with `tar -xvf resources/gpcr_data.tar.gz`
+1. unzip the gpcr data with `tar -xvf gpcr_data.tar.gz`
 1. *(Optional)* install mamba with `conda install -n base -c conda-forge mamba`
 1. create the conda environment with `mamba env create -f workflow/envs/main.yml` (might take some time)
 1. activate the environment with `conda activate rindti`
-1. pull rinerator submodule with `git submodule update --init --recursive`
-1. cd into rinerator directory with `cd resources/tools/rinerator`
-1. checkout into perf branch with `git checkout perf`
-1. install rinerator with `pip install .`
+1. clone rinerator repository into your home dir with `git clone --branch perf https://wibi-git.helmholtz-hzi.de/ske18/rinerator/ ~/rinerator`
+1. install rinerator with `pip install ~/rinerator`
 1. ensure you have probe and reduce installed (check rinerator README for info)
 
 ## Usage
