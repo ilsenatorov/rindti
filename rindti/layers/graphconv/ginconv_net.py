@@ -46,7 +46,7 @@ class GINConvNet(BaseLayer):
     def forward(self,
                 x: torch.Tensor,
                 edge_index: torch.Tensor,
-                batch: torch.Tensor,
+                *args,
                 **kwargs):
         x = self.inp(x, edge_index)
         for module in self.mid_layers:

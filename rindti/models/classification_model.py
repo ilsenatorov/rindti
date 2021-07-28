@@ -9,11 +9,10 @@ from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
-from ..layers import (MLP, ChebConvNet, DiffPoolNet, GINConvNet, GMTNet,
-                      MeanPool, NoneNet, SequenceEmbedding, GatConvNet)
-from ..utils import remove_arg_prefix
+from ..layers import (MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet,
+                      GMTNet, MeanPool, NoneNet, SequenceEmbedding)
+from ..utils import combine_parameters, remove_arg_prefix
 from .base_model import BaseModel
-from .graphlog_model import GraphLogModel
 
 node_embedders = {'ginconv': GINConvNet,
                   'chebconv': ChebConvNet,
@@ -46,17 +45,13 @@ class ClassificationModel(BaseModel):
         mlp_param = remove_arg_prefix('mlp_', kwargs)
         self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
 
-    def forward(self, data):
-        datavars = vars(data)
-        prot_data = remove_arg_prefix('prot_', datavars)
-        drug_data = remove_arg_prefix('drug_', datavars)
-        prot_data['x'] = self.prot_feat_embed(prot_data['x'])
-        drug_data['x'] = self.drug_feat_embed(drug_data['x'])
-        prot_data['x'] = self.prot_node_embed(**prot_data)
-        drug_data['x'] = self.drug_node_embed(**drug_data)
-        prot_embed = self.prot_pool(**prot_data)
-        drug_embed = self.drug_pool(**drug_data)
-
+    def forward(self, prot_x, drug_x, prot_edge_index, drug_edge_index, prot_batch, drug_batch):
+        prot_x = self.prot_feat_embed(prot_x)
+        drug_x = self.drug_feat_embed(drug_x)
+        prot_x = self.prot_node_embed(prot_x, prot_edge_index, prot_batch)
+        drug_x = self.drug_node_embed(drug_x, drug_edge_index, drug_batch)
+        prot_embed = self.prot_pool(prot_x, prot_edge_index, prot_batch)
+        drug_embed = self.drug_pool(drug_x, drug_edge_index, drug_batch)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         logit = self.mlp(joint_embedding)
         return torch.sigmoid(logit)
@@ -67,7 +62,13 @@ class ClassificationModel(BaseModel):
         :param data: ProteinData batch object
         :returns: dict of accuracy metrics (has to contain 'loss')
         '''
-        output = self.forward(data)
+        output = self.forward(
+            data.prot_x,
+            data.drug_x,
+            data.prot_edge_index,
+            data.drug_edge_index,
+            data.prot_x_batch,
+            data.drug_x_batch)
         labels = data.label.unsqueeze(1)
         if self.hparams.weighted:
             weight = 1/torch.sqrt(data.prot_count * data.drug_count)
@@ -97,6 +98,12 @@ class ClassificationModel(BaseModel):
         for i in entries:
             val = torch.stack([x[i] for x in outputs]).mean()
             self.logger.experiment.add_scalar('train_epoch_' + i, val, self.current_epoch)
+        self.logger.experiment.add_histogram("prot_feat_embed", combine_parameters(self.prot_feat_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("drug_feat_embed", combine_parameters(self.drug_feat_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("prot_node_embed", combine_parameters(self.prot_node_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("drug_node_embed", combine_parameters(self.drug_node_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("prot_pool", combine_parameters(self.prot_pool.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("drug_pool", combine_parameters(self.drug_pool.parameters()), self.current_epoch)
 
     def configure_optimizers(self):
         '''

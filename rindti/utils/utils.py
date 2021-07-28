@@ -1,5 +1,8 @@
 from argparse import (ArgumentDefaultsHelpFormatter, ArgumentParser,
                       _ArgumentGroup)
+from random import randint
+
+import torch
 
 
 def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
@@ -63,3 +66,16 @@ class _MyArgumentGroup(_ArgumentGroup):
     def add_argument(self, name, **kwargs):
         name = self.prefix + name
         super().add_argument(name, **kwargs)
+
+
+def combine_parameters(params):
+    return torch.cat([param.view(-1) for param in params])
+
+
+def fake_data():
+    return [torch.randint(low=0, high=5, size=(15,)),
+            torch.randint(low=0, high=5, size=(15,)),
+            torch.randint(low=0, high=5, size=(2, 10)),
+            torch.randint(low=0, high=5, size=(2, 10)),
+            torch.zeros((15,), dtype=torch.long),
+            torch.zeros((15,), dtype=torch.long)]

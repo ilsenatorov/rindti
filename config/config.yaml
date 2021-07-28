@@ -26,7 +26,7 @@ prepare_proteins:
 
 split:
   # available methods: random, coldtarget
-  method: coldtarget
+  method: random
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
@@ -40,7 +40,7 @@ parse_glass:
   druglikeness: 0.1
   max_atoms: 150
   # filtering can be posneg, balanced or none
-  filtering: none
+  filtering: posneg
   # valmax and valmin are boundaries for outlier activity values
   valmax: 1000000
   valmin: 0.01

@@ -5,8 +5,9 @@ from torch_geometric.data.dataloader import DataLoader
 
 from rindti.models import ClassificationModel, RegressionModel, NoisyNodesModel
 from rindti.utils.data import Dataset
+from rindti.utils import fake_data
 from rindti.utils.transforms import GnomadTransformer, RandomTransformer
-
+import torch
 
 def train(**kwargs):
     if kwargs['transformer'] != 'none':
@@ -29,7 +30,8 @@ def train(**kwargs):
         model_name = kwargs['model']
     logger = TensorBoardLogger('tb_logs',
                                name=model_name,
-                               default_hp_metric=False)
+                               default_hp_metric=False,
+                               log_graph=True)
     callbacks = [
         ModelCheckpoint(monitor='val_loss',
                         save_top_k=3,
@@ -52,12 +54,12 @@ def train(**kwargs):
         model = NoisyNodesModel(**kwargs)
     else:
         raise ValueError('Unknown model type')
-    print(model)
+    logger.experiment.add_graph(model, fake_data())
     dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ['batch_size', 'num_workers']}
     dataloader_kwargs.update({'follow_batch': ['prot_x', 'drug_x']})
-    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True)
-    val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
-    test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
+    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True, pin_memory=True)
+    val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False, pin_memory=True)
+    test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False, pin_memory=True)
     trainer.fit(model, train_dataloader, val_dataloader)
     trainer.test(model, test_dataloader)
 
@@ -72,7 +74,7 @@ if __name__ == '__main__':
 
     parser.add_argument('data', type=str)
     parser.add_argument('--batch_size', type=int, default=512, help='batch size')
-    parser.add_argument('--num_workers', type=int, default=16, help='number of workers for data loading')
+    parser.add_argument('--num_workers', type=int, default=4, help='number of workers for data loading')
     parser.add_argument('--early_stop_patience', type=int, default=60, help='epochs with no improvement before stop')
     parser.add_argument('--feat_method', type=str, default='concatenate',
                         help='How to combine drug and protein embeddings')
