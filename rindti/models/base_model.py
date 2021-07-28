@@ -1,13 +1,11 @@
 from argparse import ArgumentParser
+from logging import warning
 from typing import Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningModule
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
-from ..utils.data import TwoGraphData
-from ..utils.utils import remove_arg_prefix
 
 
 class BaseModel(LightningModule):
@@ -23,7 +21,6 @@ class BaseModel(LightningModule):
         tmp_parser.add_argument('--drug_pool', type=str, default='gmt')
         return parser
 
-
     def __init__(self):
         """Base model, only requires the dataset to function
 
@@ -31,29 +28,6 @@ class BaseModel(LightningModule):
             dataset (Optional[Dataset], optional): Member of the Dataset class. Defaults to Dataset().
         """
         super().__init__()
-
-    def embed(self, data: Union[TwoGraphData, dict],
-              who: str) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Embed the protein and drug given by an interaction pair
-
-        Args:
-            data (Union[TwoGraphData, dict]): Data entry
-            who (str): Drug or protein
-
-        Returns:
-            Tuple[torch.Tensor, torch.Tensor]: drug and protein embeddings
-        """
-        if not isinstance(data, dict):
-            data = vars(data)
-            data = remove_arg_prefix(who + '_', data)
-        if who == 'drug':
-            embed = self.drug_graph(**data, batch=None, x_batch=None)
-        elif who == 'prot':
-            print(data)
-            embed = self.prot_graph(**data, batch=None, x_batch=None)
-        else:
-            raise ValueError('Unknown prefix type')
-        return embed.detach().numpy().reshape(-1)
 
     def _determine_feat_method(self, kwargs):
         '''
@@ -122,16 +96,20 @@ class BaseModel(LightningModule):
         '''
         return self.shared_step(data)
 
+    def log_histograms(self):
+        warning("Function log_histograms is not defined for this class - weight distribution will not be logged")
+        return
+
     def training_epoch_end(self, outputs):
         '''
         What to log and save on train epoch end
         :param outputs: return of training_step in a tensor (dicts)
         '''
+        self.log_histograms()
         entries = outputs[0].keys()
         for i in entries:
             val = torch.stack([x[i] for x in outputs]).mean()
-            self.logger.experiment.add_scalar(
-                'train_epoch_' + i, val, self.current_epoch)
+            self.logger.experiment.add_scalar('train_epoch_' + i, val, self.current_epoch)
 
     def validation_epoch_end(self, outputs):
         '''
@@ -161,8 +139,7 @@ class BaseModel(LightningModule):
         Configure the optimizer/s.
         Relies on initially saved hparams to contain learning rates, weight decays etc
         '''
-        optimiser = {'adamw': AdamW, 'adam': Adam, 'sgd': SGD,
-                     'rmsprop': RMSprop}[self.hparams.optimiser]
+        optimiser = {'adamw': AdamW, 'adam': Adam, 'sgd': SGD, 'rmsprop': RMSprop}[self.hparams.optimiser]
         optimiser = optimiser(params=self.parameters(),
                               lr=self.hparams.lr,
                               weight_decay=self.hparams.weight_decay)
