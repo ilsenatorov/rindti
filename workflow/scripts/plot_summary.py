@@ -1,52 +1,82 @@
-import plotly.graph_objects as go
+import pickle
 from plotly.subplots import make_subplots
-from prepare_proteins import summary
+import plotly.graph_objects as go
+import pandas as pd
 
+def calculate_nnodes_nedges(df):
+    df['nnodes'] = df['data'].apply(lambda x: x['x'].size(0))
+    df['nedges'] = df['data'].apply(lambda x: x['edge_index'].size(1))
+    return df
 
-def plot_summary(filename, output, protein):
-    '''
-    Creates a summary plot for the given sif file of a protein
-    '''
-    info = summary(filename)
+if __name__ == "__main__":
 
-    fig = make_subplots(
-        rows=3, cols=2,
-        column_widths=[0.5, 0.5],
-        row_heights=[0.3, 0.4, 0.4],
-        vertical_spacing=0.13,
-        specs=[[{"type": "bar"}, {"type": "bar"}],
-               [{"type": "bar", "colspan": 2}, None],
-               [{"type": "bar", "colspan": 2}, None]],
-        subplot_titles=['Type 1 count', 'Type 2 count', 'Combined type count', 'Amino acid count'])
+    with open(snakemake.input.pickle, 'rb') as file:
+        all_data = pickle.load(file)
+
+    prot = all_data['prots']
+    drug = all_data['drugs']
+    inter = pd.DataFrame(all_data['data'])
+
+    prot = calculate_nnodes_nedges(prot)
+    drug = calculate_nnodes_nedges(drug)
+
+    drug_agg = inter.groupby("drug_id").agg('mean')
+    drug_agg['count'] = drug['count']
+
+    prot_agg = inter.groupby("prot_id").agg('mean')
+    prot_agg['count'] = prot['count']
+
+    fig = make_subplots(rows=2, cols=2,
+                        subplot_titles=('Prot nodes/edge distribution',
+                                        'Drug node/edge distribution',
+                                    'Prot label/count distribution',
+                                    'Drug label/count distribution'))
+
     fig.add_trace(
-        go.Bar(y=info['type1_count'].values, x=info['type1_count'].index),
-        row=1, col=1)
-    fig.add_trace(
-        go.Bar(y=info['type2_count'].values, x=info['type2_count'].index),
-        row=1, col=2)
-
-    fig.add_trace(
-        go.Bar(y=info['type_count'].values, x=info['type_count'].index),
-        row=2, col=1)
-
-    fig.add_trace(
-        go.Bar(y=info['aa_count'].values, x=info['aa_count'].index),
-        row=3, col=1)
-
-    fig.update_layout(
-        width=700,
-        height=700,
-        margin=dict(r=10, t=100, b=10, l=10),
-        showlegend=False,
-        title={
-            'text': "RIN summary for {protein}".format(protein=protein),
-            'x': 0.5,
-            'xanchor': 'center',
-            'yanchor': 'top'}
+        go.Scatter(x=prot['nnodes'],
+                y=prot['nedges'],
+                mode='markers',
+                name='prots',
+                text=prot.index),
+        row=1, col=1
     )
-    fig.write_image(output)
+
+    fig.add_trace(
+        go.Scatter(x=drug['nnodes'],
+                y=drug['nedges'],
+                mode='markers',
+                name='drugs',
+                text=drug.index),
+        row=1, col=2
+    )
+
+    fig.add_trace(
+        go.Scatter(x=prot_agg['label'],
+                y=prot_agg['count'],
+                mode='markers',
+                name='drugs',
+                text=prot_agg.index),
+        row=2, col=1
+    )
+
+    fig.add_trace(
+        go.Scatter(x=drug_agg['label'],
+                y=drug_agg['count'],
+                mode='markers',
+                name='drugs',
+                text=drug_agg.index),
+        row=2, col=2
+    )
 
 
-if __name__ == '__main__':
-    plot_summary(snakemake.input.sif, snakemake.output.png,
-                 snakemake.wildcards.protein)
+    fig['layout']['xaxis']['title'] = 'Number of nodes'
+    fig['layout']['yaxis']['title'] = 'Number of edges'
+    fig['layout']['xaxis2']['title'] = 'Number of nodes'
+    fig['layout']['yaxis2']['title'] = 'Number of edges'
+    fig['layout']['xaxis3']['title'] = 'Mean label'
+    fig['layout']['yaxis3']['title'] = 'Popularity'
+    fig['layout']['xaxis4']['title'] = 'Mean label'
+    fig['layout']['yaxis4']['title'] = 'Popularity'
+    fig.update_layout(height=1080, width=1920,
+                    title_text="Data on", showlegend=False)
+    fig.write_html(snakemake.output.html)

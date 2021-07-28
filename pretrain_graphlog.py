@@ -8,7 +8,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 
-dataset = PreTrainDataset('../protein_data_label.pkl')
+dataset = PreTrainDataset('../pretraining_rins/protein_data_label.pkl')[:1000]
 logger = TensorBoardLogger('tb_logs',
                            name='graphlog',
                            default_hp_metric=False)

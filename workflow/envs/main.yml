@@ -2,6 +2,7 @@ name: rindti
 channels:
   - rusty1s
   - schrodinger
+  - ilsenatorov
   - plotly
   - pytorch
   - conda-forge
@@ -10,7 +11,9 @@ dependencies:
   - _libgcc_mutex=0.1=conda_forge
   - _openmp_mutex=4.5=1_gnu
   - absl-py=0.13.0=py38h06a4308_0
+  - aiohttp=3.7.4.post0=py38h497a2fe_0
   - argon2-cffi=20.1.0=py38h27cfd23_1
+  - async-timeout=3.0.1=py_1000
   - async_generator=1.10=pyhd3eb1b0_0
   - attrs=21.2.0=pyhd3eb1b0_0
   - autopep8=1.5.7=pyhd3eb1b0_0
@@ -27,7 +30,7 @@ dependencies:
   - ca-certificates=2021.7.5=h06a4308_1
   - cachetools=4.2.2=pyhd3eb1b0_0
   - cairo=1.16.0=h18b612c_1001
-  - certifi=2021.5.30=py38h578d9bd_0
+  - certifi=2021.5.30=py38h06a4308_0
   - cffi=1.14.5=py38ha65f79e_0
   - chardet=4.0.0=py38h578d9bd_1
   - click=8.0.1=pyhd3eb1b0_0
@@ -36,6 +39,7 @@ dependencies:
   - cudatoolkit=11.1.1=h6406543_8
   - cycler=0.10.0=py_2
   - cython=0.29.24=py38h295c915_0
+  - dataclasses=0.8=pyhc8e2a94_1
   - dbus=1.13.18=hb2f20db_0
   - decorator=4.4.2=py_0
   - defusedxml=0.7.1=pyhd3eb1b0_0
@@ -117,6 +121,7 @@ dependencies:
   - mkl-service=2.3.0=py38h27cfd23_1
   - mkl_fft=1.3.0=py38h42c9631_2
   - mkl_random=1.2.1=py38ha9443f7_2
+  - multidict=5.1.0=py38h497a2fe_1
   - nbclient=0.5.3=pyhd3eb1b0_0
   - nbconvert=6.1.0=py38h06a4308_0
   - nbformat=5.1.3=pyhd3eb1b0_0
@@ -129,7 +134,7 @@ dependencies:
   - oauthlib=3.1.1=pyhd3eb1b0_0
   - olefile=0.46=py_0
   - openh264=2.1.0=hd408876_0
-  - openssl=1.1.1k=h7f98852_0
+  - openssl=1.1.1k=h27cfd23_0
   - packaging=21.0=pyhd3eb1b0_0
   - pandas=1.3.0=py38h1abd341_0
   - pandocfilters=1.4.3=py38h06a4308_1
@@ -141,6 +146,7 @@ dependencies:
   - pip=21.1.3=py38h06a4308_0
   - pixman=0.38.0=h516909a_1003
   - plotly=5.1.0=py_0
+  - probe=1.0=0
   - prometheus_client=0.11.0=pyhd3eb1b0_0
   - prompt-toolkit=3.0.17=pyh06a4308_0
   - prompt_toolkit=3.0.17=hd3eb1b0_0
@@ -167,12 +173,15 @@ dependencies:
   - pytorch-sparse=0.6.10=py38_torch_1.9.0_cu111
   - pytorch-spline-conv=1.2.1=py38_torch_1.9.0_cu111
   - pytz=2021.1=pyhd8ed1ab_0
+  - pyu2f=0.1.5=pyhd8ed1ab_0
+  - pyyaml=5.4.1=py38h497a2fe_0
   - pyzmq=20.0.0=py38h2531618_1
   - qt=5.9.7=h5867ecd_1
   - qtconsole=5.1.0=pyhd3eb1b0_0
   - qtpy=1.9.0=py_0
   - rdkit=2019.09.3=py38hb31dc5d_0
   - readline=8.1=h27cfd23_0
+  - reduce=4.7=0
   - requests=2.25.1=pyhd3deb0d_0
   - requests-oauthlib=1.3.0=py_0
   - rsa=4.7.2=pyhd3eb1b0_1
@@ -183,7 +192,7 @@ dependencies:
   - sip=4.19.13=py38he6710b0_0
   - sqlite=3.36.0=hc218d9a_0
   - tenacity=8.0.0=py38h06a4308_0
-  - tensorboard=2.5.0=py_0
+  - tensorboard-plugin-wit=1.8.0=pyh44b312d_0
   - terminado=0.9.4=py38h06a4308_0
   - testpath=0.5.0=pyhd3eb1b0_0
   - threadpoolctl=2.1.0=pyh5ca1d4c_0
@@ -197,6 +206,7 @@ dependencies:
   - urllib3=1.26.6=pyhd8ed1ab_0
   - wcwidth=0.2.5=py_0
   - webencodings=0.5.1=py38_1
+  - werkzeug=2.0.1=pyhd8ed1ab_0
   - wheel=0.36.2=pyhd3eb1b0_0
   - widgetsnbextension=3.5.1=py38_0
   - xorg-kbproto=1.0.7=h7f98852_1002
@@ -210,19 +220,18 @@ dependencies:
   - xorg-xproto=7.0.31=h7f98852_1007
   - xz=5.2.5=h7b6447c_0
   - yaml=0.2.5=h516909a_0
+  - yarl=1.6.3=py38h497a2fe_2
   - zeromq=4.3.4=h2531618_0
   - zipp=3.5.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.4.9=haebb681_0
   - pip:
-    - aiohttp==3.7.4.post0
     - aiohttp-cors==0.7.0
     - aioredis==1.3.1
     - amply==0.1.4
     - appdirs==1.4.4
     - astor==0.8.1
     - astunparse==1.6.3
-    - async-timeout==3.0.1
     - blessings==1.7
     - bytecode==0.12.0
     - colorama==0.4.4
@@ -249,14 +258,12 @@ dependencies:
     - h5py==3.1.0
     - hiredis==2.0.0
     - iniconfig==1.1.1
-    - ipython-genutils==0.2.0
     - jellyfish==0.8.2
     - kaleido==0.2.1
     - keras-nightly==2.5.0.dev2021032900
     - keras-preprocessing==1.1.2
     - llvmlite==0.36.0
     - msgpack==1.0.2
-    - multidict==5.1.0
     - mypy-extensions==0.4.3
     - numba==0.53.1
     - numpy==1.19.5
@@ -279,12 +286,11 @@ dependencies:
     - pyrsistent==0.18.0
     - pytest==6.2.4
     - pytorch-lightning==1.3.8
-    - pyyaml==5.4.1
     - ratelimiter==1.2.0.post0
     - ray==1.4.1
     - redis==3.5.3
     - rich==10.6.0
-    # - rinerator==0.99
+    - rinerator==0.99
     - simple-parsing==0.0.15.post1
     - six==1.15.0
     - smart-open==5.1.0
@@ -292,8 +298,8 @@ dependencies:
     - snakemake==6.5.3
     - stopit==1.1.2
     - tabulate==0.8.9
+    - tensorboard==2.4.1
     - tensorboard-data-server==0.6.1
-    - tensorboard-plugin-wit==1.8.0
     - tensorboardx==2.4
     - tensorflow-estimator==2.5.0
     - termcolor==1.1.0
@@ -301,6 +307,5 @@ dependencies:
     - torchmetrics==0.4.1
     - typing-extensions==3.7.4.3
     - typing-inspect==0.7.1
-    - werkzeug==2.0.1
     - wrapt==1.12.1
-    - yarl==1.6.3
+prefix: /home/ise20/miniconda3/envs/rindti

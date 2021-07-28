@@ -13,8 +13,8 @@ else:
 
 ### DEFINE OUTPUTS ###
 
-protein_output = "results/prepare_proteins/protein_data_{type}_{features}_{data}.pkl".format(
-            type=config["rinerator"],
+protein_output = "results/prepare_proteins/protein_data_{rinerator}_{features}_{data}.pkl".format(
+            rinerator="whole" if config['rinerator'] == 'whole' else 'bsite{x}'.format(x=config['bsite']['radius']),
             features=config["prepare_proteins"]["features"],
             data=config['prepare_proteins']['data'])
 
@@ -27,19 +27,22 @@ transformer_output = 'results/prepare_transformer/{features}_transformer.pkl'.fo
 final_output = "results/prepare_all/{split}_{protein_data}_{rinerator}_{features}_{filtering}_{type}.pkl".format(
     split=config["split"]["method"],
     protein_data=config["prepare_proteins"]["data"],
-    rinerator=config['rinerator'],
-    which=config["rinerator"],
+    rinerator="whole" if config['rinerator'] == 'whole' else 'bsite{x}'.format(x=config['bsite']['radius']),
     features=config["prepare_proteins"]["features"],
     filtering= config['parse_glass']['filtering'],
     type="class" if config["prepare_all"]["threshold"] else "regress",
 )
+
+plot_output = final_output.split('/')[-1].split(".")[0]
+plot_output = 'report/plot_summary/{out}.html'.format(out=plot_output)
+
 
 if config["prepare_proteins"]["data"] == "graph":
     prepare_proteins_rin_input = expand(osp.join(rinerator_dir, "{protein}", "{protein}_h.sif"), protein=targets)
 else:
     prepare_proteins_rin_input = []
 
-output = [final_output]
+output = [final_output, plot_output]
 
 ### CHECK IF FILES ARE PRESENT ###
 
@@ -249,54 +252,10 @@ rule prepare_transformer:
     script:
         "scripts/prepare_transformer.py"
 
-
-rule plot_protein_dist:
+rule plot_summary:
     input:
-        proteins=rules.prepare_proteins.output.protein_pickle,
+        pickle = rules.prepare_all.output.combined_pickle
     output:
-        density_png=report(
-            "report/protein_density.png",
-            caption="report/protein_dist.rst",
-            category="Graph distributions",
-        ),
-        density_html="report/protein_density.html",
+        html = plot_output
     script:
-        "scripts/plot_protein_distribution.py"
-
-
-rule plot_drug_dist:
-    input:
-        drugs=rules.prepare_drugs.output.drug_pickle,
-    output:
-        density_png=report(
-            "report/drug_density.png",
-            caption="report/drug_dist.rst",
-            category="Graph distributions",
-        ),
-        density_html="report/drug_density.html",
-    script:
-        "scripts/plot_drug_distribution.py"
-
-
-# rule plot_summary:
-#     input:
-#         sif = rules.rinerator.output.sif,
-#     output:
-#         png = report('report/plot_summary/{protein}.png',
-#                 caption='report/plot_summary.rst',
-#                 category='RIN summary')
-#     script:
-#         'scripts/plot_summary.py'
-# rule plot_glass:
-#     input:
-#         log = rules.parse_glass.output.log
-#     output:
-#         report_html = 'report/parse_glass.html',
-#         report_png = report('report/parse_glass.png',
-#                 caption='report/parse_glass.rst',
-#                 category='GLASS dataset'),
-#         report
-#     message:
-#         'Parsing the GLASS database'
-#     script:
-#         'scripts/parse_glass.py'
+        'scripts/plot_summary.py'
