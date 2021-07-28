@@ -2,22 +2,18 @@ from argparse import ArgumentParser
 from copy import deepcopy
 from math import ceil
 from typing import Union
-from rindti.utils.data import TwoGraphData
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch._C import device
+from rindti.utils.data import TwoGraphData
 from torch.nn import Embedding
-from torch.optim import SGD, Adam, AdamW, RMSprop
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
-from ..layers import (MLP, ChebConvNet, DiffPoolNet, GINConvNet, GMTNet,
-                      MeanPool, NoneNet, SequenceEmbedding, GatConvNet)
-from ..utils import remove_arg_prefix
+from ..layers import (MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet,
+                      GMTNet, MeanPool, NoneNet, SequenceEmbedding)
+from ..utils import combine_parameters, remove_arg_prefix
 from .base_model import BaseModel
-from .graphlog_model import GraphLogModel
 
 node_embedders = {'ginconv': GINConvNet,
                   'chebconv': ChebConvNet,
@@ -132,35 +128,13 @@ class NoisyNodesModel(BaseModel):
             'matthews': _mc,
         }
 
-    def training_epoch_end(self, outputs):
-        '''
-        What to log and save on train epoch end
-        :param outputs: return of training_step in a tensor (dicts)
-        '''
-        entries = outputs[0].keys()
-        for i in entries:
-            val = torch.stack([x[i] for x in outputs]).mean()
-            self.logger.experiment.add_scalar('train_epoch_' + i, val, self.current_epoch)
-
-    def configure_optimizers(self):
-        '''
-        Configure the optimizer/s.
-        Relies on initially saved hparams to contain learning rates, weight decays etc
-        '''
-        optimiser = {'adamw': AdamW, 'adam': Adam, 'sgd': SGD, 'rmsprop': RMSprop}[self.hparams.optimiser]
-        optimiser = optimiser(params=self.parameters(),
-                              lr=self.hparams.lr,
-                              weight_decay=self.hparams.weight_decay)
-        lr_scheduler = {
-            'scheduler': ReduceLROnPlateau(
-                optimiser,
-                factor=self.hparams.reduce_lr_factor,
-                patience=self.hparams.reduce_lr_patience,
-                verbose=True
-            ),
-            'monitor': 'val_loss',
-        }
-        return [optimiser], [lr_scheduler]
+    def log_histograms(self):
+        self.logger.experiment.add_histogram("prot_feat_embed", combine_parameters(self.prot_feat_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("drug_feat_embed", combine_parameters(self.drug_feat_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("prot_node_embed", combine_parameters(self.prot_node_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("drug_node_embed", combine_parameters(self.drug_node_embed.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("prot_pool", combine_parameters(self.prot_pool.parameters()), self.current_epoch)
+        self.logger.experiment.add_histogram("drug_pool", combine_parameters(self.drug_pool.parameters()), self.current_epoch)
 
     @staticmethod
     def add_arguments(parser):

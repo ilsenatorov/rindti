@@ -3,10 +3,7 @@ from argparse import ArgumentParser
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch._C import device
 from torch.nn import Embedding
-from torch.optim import SGD, Adam, AdamW, RMSprop
-from torch.optim.lr_scheduler import ReduceLROnPlateau, OneCycleLR
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from ..layers import (MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet,
