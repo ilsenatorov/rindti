@@ -57,9 +57,9 @@ def train(**kwargs):
         raise ValueError('Unknown model type')
     dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ['batch_size', 'num_workers']}
     dataloader_kwargs.update({'follow_batch': ['prot_x', 'drug_x']})
-    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True, pin_memory=True)
-    val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False, pin_memory=True)
-    test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False, pin_memory=True)
+    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True)
+    val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
+    test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
 
     logger.experiment.add_graph(model, fake_data())
 

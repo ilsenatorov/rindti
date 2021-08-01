@@ -42,7 +42,7 @@ class ClassificationModel(BaseModel):
         mlp_param = remove_arg_prefix('mlp_', kwargs)
         self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
 
-    def forward(self, prot_x, drug_x, prot_edge_index, drug_edge_index, prot_batch, drug_batch):
+    def forward(self, prot_x, drug_x, prot_edge_index, drug_edge_index, prot_batch, drug_batch, *args):
         prot_x = self.prot_feat_embed(prot_x)
         drug_x = self.drug_feat_embed(drug_x)
         prot_x = self.prot_node_embed(prot_x, prot_edge_index, prot_batch)
@@ -85,14 +85,6 @@ class ClassificationModel(BaseModel):
             'auroc': _auroc,
             'matthews': _mc,
         }
-    
-    def log_histograms(self):
-        self.logger.experiment.add_histogram("prot_feat_embed", combine_parameters(self.prot_feat_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("drug_feat_embed", combine_parameters(self.drug_feat_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("prot_node_embed", combine_parameters(self.prot_node_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("drug_node_embed", combine_parameters(self.drug_node_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("prot_pool", combine_parameters(self.prot_pool.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("drug_pool", combine_parameters(self.drug_pool.parameters()), self.current_epoch)
 
     @staticmethod
     def add_arguments(parser):

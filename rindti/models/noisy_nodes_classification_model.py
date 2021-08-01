@@ -73,24 +73,23 @@ class NoisyNodesModel(BaseModel):
         mlp_param = remove_arg_prefix('mlp_', kwargs)
         self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
 
-        self.prot_pred = node_embedders[prot_param['node_embed']](prot_param['hidden_dim'], 20, num_layers=3, hidden_dim=32)
-        self.drug_pred = node_embedders[drug_param['node_embed']](drug_param['hidden_dim'], 30, num_layers=3, hidden_dim=32)
+        self.prot_pred = node_embedders[prot_param['node_embed']](
+            prot_param['hidden_dim'], 20, num_layers=3, hidden_dim=32)
+        self.drug_pred = node_embedders[drug_param['node_embed']](
+            drug_param['hidden_dim'], 30, num_layers=3, hidden_dim=32)
 
-    def forward(self, data):
-        datavars = vars(data)
-        prot_data = remove_arg_prefix('prot_', datavars)
-        drug_data = remove_arg_prefix('drug_', datavars)
-        prot_data['x'] = self.prot_feat_embed(prot_data['x'])
-        drug_data['x'] = self.drug_feat_embed(drug_data['x'])
-        prot_data['x'] = self.prot_node_embed(**prot_data)
-        drug_data['x'] = self.drug_node_embed(**drug_data)
-        prot_embed = self.prot_pool(**prot_data)
-        drug_embed = self.drug_pool(**drug_data)
+    def forward(self, prot_x, drug_x, prot_edge_index, drug_edge_index, prot_batch, drug_batch, *args, **kwargs):
+        prot_x = self.prot_feat_embed(prot_x)
+        drug_x = self.drug_feat_embed(drug_x)
+        prot_x = self.prot_node_embed(prot_x, prot_edge_index)
+        drug_x = self.drug_node_embed(drug_x, drug_edge_index)
+        prot_embed = self.prot_pool(prot_x, prot_edge_index, prot_batch)
+        drug_embed = self.drug_pool(drug_x, drug_edge_index, drug_batch)
 
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         logit = self.mlp(joint_embedding)
-        prot_pred = self.prot_pred(**prot_data)
-        drug_pred = self.drug_pred(**drug_data)
+        prot_pred = self.prot_pred(prot_x, prot_edge_index)
+        drug_pred = self.drug_pred(drug_x, drug_edge_index)
         return torch.sigmoid(logit), prot_pred, drug_pred
 
     def shared_step(self, data):
@@ -100,7 +99,13 @@ class NoisyNodesModel(BaseModel):
         :returns: dict of accuracy metrics (has to contain 'loss')
         '''
         cor_data = self.corrupt_data(data, self.hparams.prot_frac, self.hparams.drug_frac)
-        output, prot_pred, drug_pred = self.forward(cor_data)
+        output, prot_pred, drug_pred = self.forward(
+            cor_data['prot_x'],
+            cor_data['drug_x'],
+            cor_data['prot_edge_index'],
+            cor_data['drug_edge_index'],
+            cor_data['prot_x_batch'],
+            cor_data['drug_x_batch'])
         labels = data.label.unsqueeze(1)
         if self.hparams.weighted:
             weight = 1/torch.sqrt(data.prot_count * data.drug_count)
@@ -127,14 +132,6 @@ class NoisyNodesModel(BaseModel):
             'auroc': _auroc,
             'matthews': _mc,
         }
-
-    def log_histograms(self):
-        self.logger.experiment.add_histogram("prot_feat_embed", combine_parameters(self.prot_feat_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("drug_feat_embed", combine_parameters(self.drug_feat_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("prot_node_embed", combine_parameters(self.prot_node_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("drug_node_embed", combine_parameters(self.drug_node_embed.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("prot_pool", combine_parameters(self.prot_pool.parameters()), self.current_epoch)
-        self.logger.experiment.add_histogram("drug_pool", combine_parameters(self.drug_pool.parameters()), self.current_epoch)
 
     @staticmethod
     def add_arguments(parser):

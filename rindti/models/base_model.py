@@ -97,8 +97,8 @@ class BaseModel(LightningModule):
         return self.shared_step(data)
 
     def log_histograms(self):
-        warning("Function log_histograms is not defined for this class - weight distribution will not be logged")
-        return
+        for name, param in self.named_parameters():
+            self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
     def training_epoch_end(self, outputs):
         '''
