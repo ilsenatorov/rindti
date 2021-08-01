@@ -1,8 +1,11 @@
-from prepare_proteins import parse_sif, aa_encoding
 import pandas as pd
+
+from prepare_proteins import aa_encoding, parse_sif
+
 
 def sort_edge(node1, node2):
     return tuple(sorted([node1, node2]))
+
 
 def prepare_protein(sif, index):
     nodes, edges = parse_sif(sif)
@@ -15,6 +18,7 @@ def prepare_protein(sif, index):
     for idx, row in edges.iterrows():
         res += 'e {first} {second} 0 1000\n'.format(first=row['s_edg'][0], second=row['s_edg'][1])
     return res
+
 
 proteins = pd.Series(list(snakemake.input.rins), name='sif')
 proteins = pd.DataFrame(proteins)

@@ -1,17 +1,16 @@
 from typing import Tuple, Union
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from pytorch_lightning.metrics.functional import (explained_variance,
                                                   mean_absolute_error)
 from torch.optim import SGD, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from ..layers import GINConvNet, DiffPoolNet, PrecalculatedNet, SequenceEmbedding
+from ..layers import (DiffPoolNet, GINConvNet, PrecalculatedNet,
+                      SequenceEmbedding)
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
-
 from .base_model import BaseModel
 
 embed_pairs = {

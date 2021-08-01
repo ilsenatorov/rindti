@@ -1,16 +1,17 @@
 import random
 from copy import deepcopy
+from math import ceil
 from typing import Tuple
 
 import torch
+from torch.nn import Embedding
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import Data, DataLoader
 
 from ..layers import GINConvNet, GMTNet
 from .base_model import BaseModel
-from torch.optim import Adam
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from math import ceil
-from torch.nn import Embedding
+
 # NCE loss between graphs and prototypes
 
 
@@ -75,7 +76,8 @@ class GraphLogModel(BaseModel):
     def intra_NCE_loss(self, node_reps, node_modify_reps, batch, tau=0.04, epsilon=1e-6):
         node_reps_norm = torch.norm(node_reps, dim=1).unsqueeze(-1)
         node_modify_reps_norm = torch.norm(node_modify_reps, dim=1).unsqueeze(-1)
-        sim = torch.mm(node_reps, node_modify_reps.t()) / (torch.mm(node_reps_norm, node_modify_reps_norm.t()) + epsilon)
+        sim = torch.mm(node_reps, node_modify_reps.t()) / \
+            (torch.mm(node_reps_norm, node_modify_reps_norm.t()) + epsilon)
         exp_sim = torch.exp(sim / tau)
 
         mask = torch.stack([(batch.batch == i).float() for i in batch.batch.tolist()], dim=1).to(self.device)

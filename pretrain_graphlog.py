@@ -1,12 +1,14 @@
+import sys
+
 import torch
 from pytorch_lightning import Trainer
-from rindti.utils.data import PreTrainDataset
-from torch_geometric.data import DataLoader, Data
-from rindti.models import GraphLogModel
-from torch.utils.data import random_split
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-import sys
+from torch.utils.data import random_split
+from torch_geometric.data import Data, DataLoader
+
+from rindti.models import GraphLogModel
+from rindti.utils.data import PreTrainDataset
 
 dataset = PreTrainDataset(sys.argv[1])
 logger = TensorBoardLogger('tb_logs',

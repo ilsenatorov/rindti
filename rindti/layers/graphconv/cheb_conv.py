@@ -1,5 +1,6 @@
-from ..base_layer import BaseLayer
 from torch_geometric.nn import ChebConv
+
+from ..base_layer import BaseLayer
 
 
 class ChebConvNet(BaseLayer):

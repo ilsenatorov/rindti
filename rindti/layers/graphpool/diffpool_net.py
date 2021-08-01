@@ -3,10 +3,11 @@ from math import ceil
 import torch
 import torch.nn.functional as F
 import torch_geometric
-from ..base_layer import BaseLayer
 from torch.nn import Embedding
 from torch_geometric.nn import (DenseSAGEConv, dense_diff_pool,
                                 dense_mincut_pool)
+
+from ..base_layer import BaseLayer
 
 
 class DiffPoolNet(BaseLayer):

@@ -3,7 +3,8 @@ import pickle
 import numpy as np
 import pandas as pd
 import torch
-from prepare_proteins import encode_residue, aa_encoding
+
+from prepare_proteins import aa_encoding, encode_residue
 
 
 def process(row: pd.Series):
@@ -27,9 +28,11 @@ def process(row: pd.Series):
 def process_df(df):
     return [process(row) for (_, row) in df.iterrows()]
 
+
 def del_index_mapping(x):
     del x['index_mapping']
     return x
+
 
 if __name__ == '__main__':
     import torch

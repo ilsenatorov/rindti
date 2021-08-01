@@ -2,7 +2,6 @@
 
 This repository aims to simplify the drug-target interaction prediction process which is based on protein residue interaction networks (RINs)
 
-
 ## Overview
 
 The repository aims to go from a simple collections of inputs - structures of proteins, interactions data on drugs to a fully-function GNN model
@@ -23,6 +22,7 @@ The result of the pipeline is a single pickle file, containing all the necessary
 The GNN model is shipped as a package, located in the `rindti` directory.
 
 Additionally, scripts that give an example of model training are provided (`train.py` and `pretrain_graphlog.py`), which can be used as plug-and-play, or as inspiration to create custom training approaches.
+
 ## Installation
 
 1. clone the repository with `git clone https://github.com/ilsenatorov/rindti`
@@ -46,9 +46,8 @@ Configuration file in `config/config.yml` can be used to change the parameters o
 
 ### Training
 
-A model can be trained with a simple `train.py results/prepare_all/<pickled_data>.pkl`, assuming pipeline has been ran in advance. 
+A model can be trained with a simple `train.py results/prepare_all/<pickled_data>.pkl`, assuming pipeline has been ran in advance.
 
 ### Pretraining
 
-In order to pretrain the model using the GraphLoG approach, one can run the 
-
+In order to pretrain the model using the GraphLoG approach, one can run the

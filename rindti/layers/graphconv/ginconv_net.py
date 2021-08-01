@@ -1,7 +1,6 @@
 import torch
-from torch.nn import BatchNorm1d, Linear, ReLU, Sequential
+from torch.nn import BatchNorm1d, Linear, ModuleList, ReLU, Sequential
 from torch_geometric.nn import GINConv, GraphSizeNorm
-from torch.nn import ModuleList
 
 from ..base_layer import BaseLayer
 
@@ -30,11 +29,11 @@ class GINConvNet(BaseLayer):
             BatchNorm1d(hidden_dim)
         ))
         mid_layers = [GINConv(Sequential(
-                Linear(hidden_dim, hidden_dim),
-                ReLU(),
-                Linear(hidden_dim, hidden_dim),
-                BatchNorm1d(hidden_dim)
-            )) for _ in range(num_layers-2)]
+            Linear(hidden_dim, hidden_dim),
+            ReLU(),
+            Linear(hidden_dim, hidden_dim),
+            BatchNorm1d(hidden_dim)
+        )) for _ in range(num_layers-2)]
         self.mid_layers = ModuleList(mid_layers)
         self.out = GINConv(Sequential(
             Linear(hidden_dim, hidden_dim),

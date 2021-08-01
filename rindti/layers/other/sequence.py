@@ -1,8 +1,7 @@
-from ..base_layer import BaseLayer
 import torch
+import torch.nn.functional as F
 from torch import nn
 from torch_geometric.utils import to_dense_batch
-import torch.nn.functional as F
 
 from ..base_layer import BaseLayer
 

@@ -1,8 +1,10 @@
-from prepare_proteins import aa_encoding, encode_residue
-import torch
-import pandas as pd
-import numpy as np
 import pickle
+
+import numpy as np
+import pandas as pd
+import torch
+
+from prepare_proteins import aa_encoding, encode_residue
 
 encoded_residues = {
     i: torch.tensor(

@@ -1,10 +1,10 @@
 import pickle
-from typing import Tuple, Optional
+from typing import Optional, Tuple
+
 import numpy as np
 import pandas as pd
 import torch
 from sklearn.preprocessing import OneHotEncoder
-
 from torch_geometric.utils import to_undirected
 
 aa_encoding = {'ala': 0,
@@ -315,7 +315,8 @@ if __name__ == '__main__':
         proteins = pd.DataFrame(proteins)
         proteins['ID'] = proteins["sif"].apply(extract_name)
         proteins.set_index('ID', inplace=True)
-        proteins['data'] = proteins['sif'].apply(process_protein, features=snakemake.config['prepare_proteins']['features'])
+        proteins['data'] = proteins['sif'].apply(
+            process_protein, features=snakemake.config['prepare_proteins']['features'])
     elif snakemake.config['prepare_proteins']['data'] == 'sequence':
         proteins = pd.read_csv(snakemake.input.targ)
         features = snakemake.config["prepare_proteins"]["features"]

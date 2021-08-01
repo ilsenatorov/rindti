@@ -1,5 +1,6 @@
-from ..base_layer import BaseLayer
 from torch_geometric.nn import GATv2Conv, GraphSizeNorm
+
+from ..base_layer import BaseLayer
 
 
 class GatConvNet(BaseLayer):

@@ -1,6 +1,8 @@
 from os import stat
-from ..base_layer import BaseLayer
+
 from torch import nn
+
+from ..base_layer import BaseLayer
 
 
 class MLP(BaseLayer):

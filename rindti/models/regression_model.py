@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pytorch_lightning.metrics.functional import mean_absolute_error, explained_variance
+from pytorch_lightning.metrics.functional import (explained_variance,
+                                                  mean_absolute_error)
 from torch.optim import SGD, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from ..layers import GINConvNet, DiffPoolNet, PrecalculatedNet, SequenceEmbedding, MLP
+from ..layers import (MLP, DiffPoolNet, GINConvNet, PrecalculatedNet,
+                      SequenceEmbedding)
 from ..utils import remove_arg_prefix
-
 from .base_model import BaseModel
 
 embed_pairs = {
@@ -101,8 +102,10 @@ class RegressionModel(BaseModel):
         '''
         optimiser = {'adamw': AdamW, 'sgd': SGD, 'rmsprop': RMSprop}[self.hparams.optimiser]
         optimiser = AdamW([
-            {'params': self.prot_graph.parameters(), 'lr': self.hparams.prot_lr, 'weight_decay': self.hparams.prot_weight_decay},
-            {'params': self.drug_graph.parameters(), 'lr': self.hparams.drug_lr, 'weight_decay': self.hparams.drug_weight_decay},
+            {'params': self.prot_graph.parameters(), 'lr': self.hparams.prot_lr,
+             'weight_decay': self.hparams.prot_weight_decay},
+            {'params': self.drug_graph.parameters(), 'lr': self.hparams.drug_lr,
+             'weight_decay': self.hparams.drug_weight_decay},
             {'params': self.mlp.parameters(), 'lr': self.hparams.mlp_lr, 'weight_decay': self.hparams.mlp_weight_decay},
         ])
         lr_scheduler = {

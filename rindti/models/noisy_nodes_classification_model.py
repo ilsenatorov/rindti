@@ -6,9 +6,10 @@ from typing import Union
 import numpy as np
 import torch
 import torch.nn.functional as F
-from rindti.utils.data import TwoGraphData
 from torch.nn import Embedding
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
+
+from rindti.utils.data import TwoGraphData
 
 from ..layers import (MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet,
                       GMTNet, MeanPool, NoneNet, SequenceEmbedding)
