@@ -157,14 +157,13 @@ class PreTrainDataset(InMemoryDataset):
     def process(self):
         info = {"max_nodes": 0, "feat_dim": 0}
         with open(self.filename, 'rb') as file:
-            data_list = pickle.load(file)
-            new_data_list = []
-            for x in data_list:
+            df = pickle.load(file)
+            data_list = []
+            for x in df['data']:
                 info['max_nodes'] = max(info['max_nodes'], x['x'].size(0))
                 info['feat_dim'] = max(info['feat_dim'], int(x['x'].max()))
                 del x['index_mapping']
-                new_data_list.append(Data(**x))
-            data_list = new_data_list
+                data_list.append(Data(**x))
 
             if self.pre_filter is not None:
                 data_list = [data for data in data_list if self.pre_filter(data)]

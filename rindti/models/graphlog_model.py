@@ -24,10 +24,9 @@ class GraphLogModel(BaseModel):
                  num_proto=8,
                  hierarchy=3,
                  batch_size=32,
-                 num_workers=32,
+                 num_workers=4,
                  **kwargs):
         super().__init__()
-        self.dataset = kwargs.pop('dataset')
         self.save_hyperparameters()
         self.decay_ratio = decay_ratio
         self.mask_rate = mask_rate
@@ -38,15 +37,14 @@ class GraphLogModel(BaseModel):
         self.hierarchy = hierarchy
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.embed_dim = kwargs['embed_dim']
-        self.feat_embed = Embedding(21, 16, padding_idx=20)
-        self.node_embed = GINConvNet(**kwargs)
-        self.pool = GMTNet(**kwargs)
-        embed_dim = kwargs['embed_dim']
+        self.embed_dim = 64
+        self.feat_embed = Embedding(21, 64, padding_idx=20)
+        self.node_embed = GINConvNet(64, 64, 64, num_layers=5)
+        self.pool = GMTNet(64, 64, 64, ratio=0.15)
         self.proj = torch.nn.Sequential(
-            torch.nn.Linear(embed_dim, embed_dim),
+            torch.nn.Linear(64, 128),
             torch.nn.ReLU(),
-            torch.nn.Linear(embed_dim, embed_dim)
+            torch.nn.Linear(128, 64)
         )
 
     def predict(self, x, edge_index):
@@ -189,7 +187,8 @@ class GraphLogModel(BaseModel):
         for _ in range(num_iter):
             for step, batch in enumerate(self.train_dataloader()):
                 # get node and graph representations
-                node_reps = self.node_embed(batch.x, batch.edge_index, batch.batch)
+                feat_reps = self.feat_embed(batch.x)
+                node_reps = self.node_embed(feat_reps, batch.edge_index, batch.batch)
                 graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
 
                 # feature projection
@@ -232,7 +231,8 @@ class GraphLogModel(BaseModel):
         return proto_selected, proto_connection
 
     def embed_batch(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
-        node_reps = self.node_embed(batch.x, batch.edge_index, batch.batch)
+        feat_embed = self.feat_embed(batch.x)
+        node_reps = self.node_embed(feat_embed, batch.edge_index, batch.batch)
         graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
         node_reps = self.proj(node_reps)
         graph_reps = self.proj(graph_reps)
@@ -290,9 +290,6 @@ class GraphLogModel(BaseModel):
                 self.proto_connection.append(tmp_proto_connection)
 
         return super().training_epoch_end(outputs)
-
-    def train_dataloader(self):
-        return DataLoader(self.dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=True)
 
     def configure_optimizers(self):
         '''

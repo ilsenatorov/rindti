@@ -6,9 +6,9 @@ from rindti.models import GraphLogModel
 from torch.utils.data import random_split
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+import sys
 
-
-dataset = PreTrainDataset('../pretraining_rins/protein_data_label.pkl')[:1000]
+dataset = PreTrainDataset(sys.argv[1])
 logger = TensorBoardLogger('tb_logs',
                            name='graphlog',
                            default_hp_metric=False)
@@ -35,7 +35,6 @@ model = GraphLogModel(feat_dim=dataset.info['feat_dim'],
                       weight_decay=0.01,
                       reduce_lr_patience=10,
                       reduce_lr_factor=0.1,
-                      hidden_dim=32,
-                      dataset=dataset)
-print(model)
-trainer.fit(model)
+                      hidden_dim=32)
+dl = DataLoader(dataset, batch_size=32, num_workers=4, shuffle=True)
+trainer.fit(model, train_dataloader=dl)
