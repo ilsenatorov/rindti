@@ -139,10 +139,17 @@ class BaseModel(LightningModule):
         Relies on initially saved hparams to contain learning rates, weight decays etc
         """
         optimiser = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
-        optimiser = optimiser(params=self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+        optimiser = optimiser(
+            params=self.parameters(),
+            lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
+        )
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
-                optimiser, factor=self.hparams.reduce_lr_factor, patience=self.hparams.reduce_lr_patience, verbose=True
+                optimiser,
+                factor=self.hparams.reduce_lr_factor,
+                patience=self.hparams.reduce_lr_patience,
+                verbose=True,
             ),
             "monitor": "val_loss",
         }

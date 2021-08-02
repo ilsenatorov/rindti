@@ -61,7 +61,13 @@ class Dataset(InMemoryDataset):
         pre_transform ([type], optional): Pre-transform function to apply to each datapoint. Defaults to None.
     """
 
-    def __init__(self, filename: str, split: Optional[str] = "train", transform=None, pre_transform=None):
+    def __init__(
+        self,
+        filename: str,
+        split: Optional[str] = "train",
+        transform=None,
+        pre_transform=None,
+    ):
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         root = os.path.join("data", basefilename)

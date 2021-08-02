@@ -87,7 +87,11 @@ class RegressionModel(BaseModel):
         output = self.forward(data)
         labels = data.label.unsqueeze(1).float()
         loss = F.mse_loss(output, labels)
-        return {"loss": loss, "mae": mean_absolute_error(output, labels), "expvar": explained_variance(output, labels)}
+        return {
+            "loss": loss,
+            "mae": mean_absolute_error(output, labels),
+            "expvar": explained_variance(output, labels),
+        }
 
     def configure_optimizers(self):
         """
@@ -116,7 +120,10 @@ class RegressionModel(BaseModel):
         )
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
-                optimiser, factor=self.hparams.reduce_lr_factor, patience=self.hparams.reduce_lr_patience, verbose=True
+                optimiser,
+                factor=self.hparams.reduce_lr_factor,
+                patience=self.hparams.reduce_lr_patience,
+                verbose=True,
             ),
             "monitor": "val_loss",
         }

@@ -17,19 +17,32 @@ class GINConvNet(BaseLayer):
     def __init__(self, input_dim, output_dim, hidden_dim=64, num_layers=3, **kwargs):
         super().__init__()
         self.inp = GINConv(
-            Sequential(Linear(input_dim, hidden_dim), ReLU(), Linear(hidden_dim, hidden_dim), BatchNorm1d(hidden_dim))
+            Sequential(
+                Linear(input_dim, hidden_dim),
+                ReLU(),
+                Linear(hidden_dim, hidden_dim),
+                BatchNorm1d(hidden_dim),
+            )
         )
         mid_layers = [
             GINConv(
                 Sequential(
-                    Linear(hidden_dim, hidden_dim), ReLU(), Linear(hidden_dim, hidden_dim), BatchNorm1d(hidden_dim)
+                    Linear(hidden_dim, hidden_dim),
+                    ReLU(),
+                    Linear(hidden_dim, hidden_dim),
+                    BatchNorm1d(hidden_dim),
                 )
             )
             for _ in range(num_layers - 2)
         ]
         self.mid_layers = ModuleList(mid_layers)
         self.out = GINConv(
-            Sequential(Linear(hidden_dim, hidden_dim), ReLU(), Linear(hidden_dim, output_dim), BatchNorm1d(output_dim))
+            Sequential(
+                Linear(hidden_dim, hidden_dim),
+                ReLU(),
+                Linear(hidden_dim, output_dim),
+                BatchNorm1d(output_dim),
+            )
         )
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor, *args, **kwargs):

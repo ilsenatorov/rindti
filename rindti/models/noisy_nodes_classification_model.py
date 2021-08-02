@@ -25,7 +25,12 @@ from ..layers import (
 from ..utils import combine_parameters, remove_arg_prefix
 from .base_model import BaseModel
 
-node_embedders = {"ginconv": GINConvNet, "chebconv": ChebConvNet, "gatconv": GatConvNet, "none": NoneNet}
+node_embedders = {
+    "ginconv": GINConvNet,
+    "chebconv": ChebConvNet,
+    "gatconv": GatConvNet,
+    "none": NoneNet,
+}
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
@@ -44,7 +49,10 @@ class NoisyNodesModel(BaseModel):
         return features, corrupt_idx
 
     def corrupt_data(
-        self, orig_data: Union[TwoGraphData, dict], prot_frac: float = 0.05, drug_frac: float = 0.05
+        self,
+        orig_data: Union[TwoGraphData, dict],
+        prot_frac: float = 0.05,
+        drug_frac: float = 0.05,
     ) -> TwoGraphData:
         # sourcery skip: extract-duplicate-method
         data = deepcopy(orig_data)
@@ -163,7 +171,12 @@ class NoisyNodesModel(BaseModel):
         drug.add_argument("alpha", default=0.1, type=float, help="Drug node loss factor")
         drug.add_argument("frac", default=0.05, type=float, help="Proportion of drug nodes to corrupt")
         drug.add_argument("node_embed", default="chebconv")
-        drug.add_argument("node_embed_dim", default=16, type=int, help="Size of atom element embedding")
+        drug.add_argument(
+            "node_embed_dim",
+            default=16,
+            type=int,
+            help="Size of atom element embedding",
+        )
         prot.add_argument("alpha", default=0.1, type=float, help="Prot node loss factor")
         prot.add_argument("frac", default=0.05, type=float, help="Proportion of prot nodes to corrupt")
         prot.add_argument("node_embed", default="chebconv")

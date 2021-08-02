@@ -38,7 +38,17 @@ from torch_geometric.utils import to_undirected
 #                     27: 23,
 #                     28: 'other'}
 
-atom_num_mapping = {0: "padding", 1: 6, 2: 8, 3: 7, 4: 16, 5: 9, 6: 17, 7: 35, 8: "other"}
+atom_num_mapping = {
+    0: "padding",
+    1: 6,
+    2: 8,
+    3: 7,
+    4: 16,
+    5: 9,
+    6: 17,
+    7: 35,
+    8: "other",
+}
 
 atom_num_mapping = {v: k for (k, v) in atom_num_mapping.items()}  # Reverse the mapping dict
 

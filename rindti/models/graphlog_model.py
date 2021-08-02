@@ -252,7 +252,12 @@ class GraphLogModel(BaseModel):
         return node_reps, node_modify_reps, graph_reps, graph_modify_reps
 
     def shared_step(self, batch: Data, proto: bool = True) -> dict:
-        node_reps_proj, node_modify_reps_proj, graph_reps_proj, graph_modify_reps_proj = self.forward(batch)
+        (
+            node_reps_proj,
+            node_modify_reps_proj,
+            graph_reps_proj,
+            graph_modify_reps_proj,
+        ) = self.forward(batch)
         NCE_intra_loss = self.intra_NCE_loss(node_reps_proj, node_modify_reps_proj, batch)
         NCE_inter_loss = self.inter_NCE_loss(graph_reps_proj, graph_modify_reps_proj)
         if proto:
@@ -304,10 +309,17 @@ class GraphLogModel(BaseModel):
         Configure the optimizer/s.
         Relies on initially saved hparams to contain learning rates, weight decays etc
         """
-        optimiser = Adam(params=self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+        optimiser = Adam(
+            params=self.parameters(),
+            lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
+        )
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
-                optimiser, factor=self.hparams.reduce_lr_factor, patience=self.hparams.reduce_lr_patience, verbose=True
+                optimiser,
+                factor=self.hparams.reduce_lr_factor,
+                patience=self.hparams.reduce_lr_patience,
+                verbose=True,
             ),
             "monitor": "train_loss",
         }

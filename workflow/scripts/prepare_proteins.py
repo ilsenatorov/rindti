@@ -352,7 +352,12 @@ def parse_sif(filename: str):
             node1 = {"chain": chain1, "resn": resn1, "resaa": resaa1}
             node2 = {"chain": chain2, "resn": resn2, "resaa": resaa2}
             edgetype1, edgetype2 = edgesplit
-            edge = {"resn1": resn1, "resn2": resn2, "type1": edgetype1, "type2": edgetype2}
+            edge = {
+                "resn1": resn1,
+                "resn2": resn2,
+                "type1": edgetype1,
+                "type2": edgetype2,
+            }
             nodes.append(node1)
             nodes.append(node2)
             edges.append(edge)
