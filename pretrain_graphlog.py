@@ -17,12 +17,7 @@ callbacks = [
     EarlyStopping(monitor="train_loss", patience=20, mode="min"),
 ]
 trainer = Trainer(
-    gpus=1,
-    callbacks=callbacks,
-    logger=logger,
-    gradient_clip_val=30,
-    max_epochs=11,
-    stochastic_weight_avg=True,
+    gpus=1, callbacks=callbacks, logger=logger, gradient_clip_val=30, max_epochs=11, stochastic_weight_avg=True,
 )
 model = GraphLogModel(
     feat_dim=dataset.info["feat_dim"],

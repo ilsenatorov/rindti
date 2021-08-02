@@ -68,12 +68,7 @@ class ClassificationModel(BaseModel):
         :returns: dict of accuracy metrics (has to contain 'loss')
         """
         output = self.forward(
-            data.prot_x,
-            data.drug_x,
-            data.prot_edge_index,
-            data.drug_edge_index,
-            data.prot_x_batch,
-            data.drug_x_batch,
+            data.prot_x, data.drug_x, data.prot_edge_index, data.drug_edge_index, data.prot_x_batch, data.drug_x_batch,
         )
         labels = data.label.unsqueeze(1)
         if self.hparams.weighted:
@@ -118,10 +113,7 @@ class ClassificationModel(BaseModel):
         prot.add_argument("node_embed_dim", default=16, type=int, help="Size of aminoacid embedding")
         drug.add_argument("node_embed", default="chebconv")
         drug.add_argument(
-            "node_embed_dim",
-            default=16,
-            type=int,
-            help="Size of atom element embedding",
+            "node_embed_dim", default=16, type=int, help="Size of atom element embedding",
         )
 
         prot_node_embed.add_arguments(prot)

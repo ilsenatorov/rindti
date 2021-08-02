@@ -62,11 +62,7 @@ class Dataset(InMemoryDataset):
     """
 
     def __init__(
-        self,
-        filename: str,
-        split: Optional[str] = "train",
-        transform=None,
-        pre_transform=None,
+        self, filename: str, split: Optional[str] = "train", transform=None, pre_transform=None,
     ):
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]

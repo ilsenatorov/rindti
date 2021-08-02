@@ -4,10 +4,7 @@ from sklearn.model_selection import train_test_split
 
 
 def split_groups(
-    inter: pd.DataFrame,
-    bin_size: int = 10,
-    train_frac: float = 0.7,
-    val_frac: float = 0.2,
+    inter: pd.DataFrame, bin_size: int = 10, train_frac: float = 0.7, val_frac: float = 0.2,
 ) -> pd.DataFrame:
     """Split data by protein (cold-target)
     Tries to ensure good size of all sets by sorting the proteins by number of interactions
@@ -79,9 +76,7 @@ if __name__ == "__main__":
 
     if snakemake.config["split"]["method"] == "coldtarget":
         inter = split_groups(
-            inter,
-            train_frac=snakemake.config["split"]["train"],
-            val_frac=snakemake.config["split"]["val"],
+            inter, train_frac=snakemake.config["split"]["train"], val_frac=snakemake.config["split"]["val"],
         )
     elif snakemake.config["split"]["method"] == "random":
         inter = split_random(inter)

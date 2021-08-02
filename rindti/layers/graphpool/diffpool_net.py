@@ -35,10 +35,7 @@ class DiffPoolNet(BaseLayer):
         self.max_nodes = max_nodes
         self.dropout = dropout
 
-        self.pool = {
-            "diffpool": dense_diff_pool,
-            "mincut": dense_mincut_pool,
-        }[pooling_method]
+        self.pool = {"diffpool": dense_diff_pool, "mincut": dense_mincut_pool,}[pooling_method]
 
         num_nodes = ceil(self.max_nodes * ratio)
         self.poolblock1 = DiffPoolBlock(input_dim, num_nodes)
