@@ -38,15 +38,7 @@ from torch_geometric.utils import to_undirected
 #                     27: 23,
 #                     28: 'other'}
 
-atom_num_mapping = {0: 'padding',
-                    1: 6,
-                    2: 8,
-                    3: 7,
-                    4: 16,
-                    5: 9,
-                    6: 17,
-                    7: 35,
-                    8: 'other'}
+atom_num_mapping = {0: "padding", 1: 6, 2: 8, 3: 7, 4: 16, 5: 9, 6: 17, 7: 35, 8: "other"}
 
 atom_num_mapping = {v: k for (k, v) in atom_num_mapping.items()}  # Reverse the mapping dict
 
@@ -68,7 +60,7 @@ def featurize(smiles: str) -> Data:
     for atom in mol.GetAtoms():
         atom_num = atom.GetAtomicNum()
         if atom_num not in atom_num_mapping.keys():
-            atom_features.append(atom_num_mapping['other'])
+            atom_features.append(atom_num_mapping["other"])
         else:
             atom_features.append(atom_num_mapping[atom_num])
 
@@ -80,9 +72,9 @@ def featurize(smiles: str) -> Data:
 
 if __name__ == "__main__":
 
-    ligs = pd.read_csv(snakemake.input.lig).drop_duplicates('InChI Key').set_index("InChI Key")
-    ligs['data'] = ligs['Canonical SMILES'].apply(featurize)
-    ligs = ligs[ligs['data'].notna()]
+    ligs = pd.read_csv(snakemake.input.lig).drop_duplicates("InChI Key").set_index("InChI Key")
+    ligs["data"] = ligs["Canonical SMILES"].apply(featurize)
+    ligs = ligs[ligs["data"].notna()]
 
-    with open(snakemake.output.drug_pickle, 'wb') as file:
+    with open(snakemake.output.drug_pickle, "wb") as file:
         pickle.dump(ligs, file)

@@ -16,8 +16,8 @@ class ChebConvNet(BaseLayer):
 
     @staticmethod
     def add_arguments(group):
-        group.add_argument('node_embed', default='chebconv', type=str)
-        group.add_argument('hidden_dim', default=32, type=int, help='Number of hidden dimensions')
-        group.add_argument('dropout', default=0.2, type=float, help='Dropout')
-        group.add_argument('K', default=1, type=int, help='K argument of chebconv')
+        group.add_argument("node_embed", default="chebconv", type=str)
+        group.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
+        group.add_argument("dropout", default=0.2, type=float, help="Dropout")
+        group.add_argument("K", default=1, type=int, help="K argument of chebconv")
         return group

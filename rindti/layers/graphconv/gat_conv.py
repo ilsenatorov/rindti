@@ -18,7 +18,7 @@ class GatConvNet(BaseLayer):
 
     @staticmethod
     def add_arguments(group):
-        group.add_argument('node_embed', default='gatconv', type=str)
-        group.add_argument('hidden_dim', default=32, type=int, help='Number of hidden dimensions')
-        group.add_argument('dropout', default=0.2, type=float, help='Dropout')
+        group.add_argument("node_embed", default="gatconv", type=str)
+        group.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
+        group.add_argument("dropout", default=0.2, type=float, help="Dropout")
         return group

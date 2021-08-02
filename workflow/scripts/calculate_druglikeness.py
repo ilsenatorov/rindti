@@ -12,6 +12,6 @@ def get_druglikeness(smiles):
         return 0
 
 
-lig = pd.read_csv(snakemake.input.lig, sep='\t')
-lig['druglikeness'] = lig['Canonical SMILES'].apply(get_druglikeness)
+lig = pd.read_csv(snakemake.input.lig, sep="\t")
+lig["druglikeness"] = lig["Canonical SMILES"].apply(get_druglikeness)
 lig.to_csv(snakemake.output.lig, index=False)

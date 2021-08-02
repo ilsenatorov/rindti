@@ -12,5 +12,5 @@ class MeanPool(BaseLayer):
 
     @staticmethod
     def add_arguments(parser):
-        parser.add_argument('pool', default='mean', type=str)
+        parser.add_argument("pool", default="mean", type=str)
         return parser
