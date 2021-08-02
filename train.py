@@ -78,16 +78,28 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
     parser.add_argument("--num_workers", type=int, default=4, help="number of workers for data loading")
     parser.add_argument(
-        "--early_stop_patience", type=int, default=60, help="epochs with no improvement before stop",
+        "--early_stop_patience",
+        type=int,
+        default=60,
+        help="epochs with no improvement before stop",
     )
     parser.add_argument(
-        "--feat_method", type=str, default="concatenate", help="How to combine drug and protein embeddings",
+        "--feat_method",
+        type=str,
+        default="concatenate",
+        help="How to combine drug and protein embeddings",
     )
     parser.add_argument(
-        "--prot_pretrained", type=str, default=None, help="Model of pretrained prot embedder",
+        "--prot_pretrained",
+        type=str,
+        default=None,
+        help="Model of pretrained prot embedder",
     )
     parser.add_argument(
-        "--model_name", type=str, default=None, help="Name under which to save the model",
+        "--model_name",
+        type=str,
+        default=None,
+        help="Name under which to save the model",
     )
 
     trainer = parser.add_argument_group("Trainer")
@@ -106,15 +118,24 @@ if __name__ == "__main__":
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
     optim.add_argument(
-        "--momentum", type=float, default=0.3, help="Optimisation momentum (where applicable)",
+        "--momentum",
+        type=float,
+        default=0.3,
+        help="Optimisation momentum (where applicable)",
     )
     optim.add_argument("--lr", type=float, default=0.001, help="mlp learning rate")
     optim.add_argument("--weight_decay", type=float, default=0.001, help="weight decay")
     optim.add_argument(
-        "--reduce_lr_patience", type=int, default=20, help="epoch with no improvement before lr is reduced",
+        "--reduce_lr_patience",
+        type=int,
+        default=20,
+        help="epoch with no improvement before lr is reduced",
     )
     optim.add_argument(
-        "--reduce_lr_factor", type=float, default=0.1, help="factor for lr reduction (new_lr = factor*lr)",
+        "--reduce_lr_factor",
+        type=float,
+        default=0.1,
+        help="factor for lr reduction (new_lr = factor*lr)",
     )
 
     transformer.add_argument("--transformer", type=str, default="none", help="Type of transformer to apply")
@@ -125,7 +146,10 @@ if __name__ == "__main__":
         help="Location of transform pickle",
     )
     transformer.add_argument(
-        "--max_num_mut", type=int, default=100, help="Max number of mutations per protein",
+        "--max_num_mut",
+        type=int,
+        default=100,
+        help="Max number of mutations per protein",
     )
 
     parser = NoisyNodesModel.add_arguments(parser)

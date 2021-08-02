@@ -17,7 +17,11 @@ class GnomadTransformer(object):
     """
 
     def __init__(
-        self, gnomad: dict, index_mapping: dict, encoded_residues: dict, max_num_mut: int = 50,
+        self,
+        gnomad: dict,
+        index_mapping: dict,
+        encoded_residues: dict,
+        max_num_mut: int = 50,
     ):
         self.gnomad = gnomad
         self.index_mapping = index_mapping
@@ -57,7 +61,10 @@ class GnomadTransformer(object):
         with open(filename, "rb") as file:
             all_data = pickle.load(file)
         return GnomadTransformer(
-            all_data["gnomad"], all_data["index_mapping"], all_data["encoded_residues"], max_num_mut=max_num_mut,
+            all_data["gnomad"],
+            all_data["index_mapping"],
+            all_data["encoded_residues"],
+            max_num_mut=max_num_mut,
         )
 
 

@@ -41,21 +41,49 @@ if __name__ == "__main__":
     )
 
     fig.add_trace(
-        go.Scatter(x=prot["nnodes"], y=prot["nedges"], mode="markers", name="prots", text=prot.index,), row=1, col=1,
+        go.Scatter(
+            x=prot["nnodes"],
+            y=prot["nedges"],
+            mode="markers",
+            name="prots",
+            text=prot.index,
+        ),
+        row=1,
+        col=1,
     )
 
     fig.add_trace(
-        go.Scatter(x=drug["nnodes"], y=drug["nedges"], mode="markers", name="drugs", text=drug.index,), row=1, col=2,
+        go.Scatter(
+            x=drug["nnodes"],
+            y=drug["nedges"],
+            mode="markers",
+            name="drugs",
+            text=drug.index,
+        ),
+        row=1,
+        col=2,
     )
 
     fig.add_trace(
-        go.Scatter(x=prot_agg["label"], y=prot_agg["count"], mode="markers", name="drugs", text=prot_agg.index,),
+        go.Scatter(
+            x=prot_agg["label"],
+            y=prot_agg["count"],
+            mode="markers",
+            name="drugs",
+            text=prot_agg.index,
+        ),
         row=2,
         col=1,
     )
 
     fig.add_trace(
-        go.Scatter(x=drug_agg["label"], y=drug_agg["count"], mode="markers", name="drugs", text=drug_agg.index,),
+        go.Scatter(
+            x=drug_agg["label"],
+            y=drug_agg["count"],
+            mode="markers",
+            name="drugs",
+            text=drug_agg.index,
+        ),
         row=2,
         col=2,
     )

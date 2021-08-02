@@ -30,7 +30,7 @@ class GMTNet(BaseLayer):
         num_heads=4,
         ln=False,
         cluster=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
 
@@ -45,7 +45,11 @@ class GMTNet(BaseLayer):
         extended_attention_mask = mask.unsqueeze(1)
         extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
         extended_attention_mask = (1.0 - extended_attention_mask) * -1e9
-        batch_x = self.gmpoolg(batch_x, attention_mask=extended_attention_mask, graph=(x, edge_index, batch),)
+        batch_x = self.gmpoolg(
+            batch_x,
+            attention_mask=extended_attention_mask,
+            graph=(x, edge_index, batch),
+        )
         batch_x = self.sab(batch_x)
         batch_x = self.gmpooli(batch_x)
         x = batch_x.squeeze(1)
@@ -109,13 +113,21 @@ class MAB(LightningModule):
         elif conv == "GIN":
             fc_k = GINConv(
                 nn.Sequential(
-                    nn.Linear(dim_K, dim_K), nn.ReLU(), nn.Linear(dim_K, dim_V), nn.ReLU(), nn.BatchNorm1d(dim_V),
+                    nn.Linear(dim_K, dim_K),
+                    nn.ReLU(),
+                    nn.Linear(dim_K, dim_V),
+                    nn.ReLU(),
+                    nn.BatchNorm1d(dim_V),
                 ),
                 train_eps=False,
             )
             fc_v = GINConv(
                 nn.Sequential(
-                    nn.Linear(dim_K, dim_K), nn.ReLU(), nn.Linear(dim_K, dim_V), nn.ReLU(), nn.BatchNorm1d(dim_V),
+                    nn.Linear(dim_K, dim_K),
+                    nn.ReLU(),
+                    nn.Linear(dim_K, dim_V),
+                    nn.ReLU(),
+                    nn.BatchNorm1d(dim_V),
                 ),
                 train_eps=False,
             )
@@ -137,7 +149,14 @@ class SAB(LightningModule):
 
 class ISAB(LightningModule):
     def __init__(
-        self, dim_in, dim_out, num_heads, num_inds, ln=False, cluster=False, mab_conv=None,
+        self,
+        dim_in,
+        dim_out,
+        num_heads,
+        num_inds,
+        ln=False,
+        cluster=False,
+        mab_conv=None,
     ):
         super(ISAB, self).__init__()
         self.I = nn.Parameter(torch.Tensor(1, num_inds, dim_out))

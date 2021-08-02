@@ -94,7 +94,11 @@ class SiameseModel(BaseModel):
         Relies on initially saved hparams to contain learning rates, weight decays etc
         """
         optimiser = {"adamw": AdamW, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
-        optimiser = AdamW(params=self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay,)
+        optimiser = AdamW(
+            params=self.parameters(),
+            lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
+        )
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
                 optimiser,
