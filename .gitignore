@@ -2,6 +2,7 @@
 !.gitattributes
 !.gitignore
 !.gitmodules
+!.pre-commit-config.yaml
 __*__/
 __pycache__/
 *.csv
