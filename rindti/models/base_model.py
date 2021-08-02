@@ -37,8 +37,8 @@ class BaseModel(LightningModule):
         feat_method = kwargs.pop("feat_method")
         drug_dim = kwargs["drug_hidden_dim"]
         prot_dim = kwargs["prot_hidden_dim"]
-        if feat_method == "concatenate":
-            self.merge_features = self._concatenate
+        if feat_method == "concat":
+            self.merge_features = self._concat
             self.embed_dim = drug_dim + prot_dim
         elif feat_method == "element_l2":
             assert drug_dim == prot_dim
@@ -55,7 +55,7 @@ class BaseModel(LightningModule):
         else:
             raise Exception("unsupported feature method")
 
-    def _concatenate(self, drug_embed, prot_embed):
+    def _concat(self, drug_embed, prot_embed):
         return torch.cat((drug_embed, prot_embed), dim=1)
 
     def _element_l2(self, drug_embedding, prot_embedding):

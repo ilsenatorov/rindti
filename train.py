@@ -86,7 +86,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--feat_method",
         type=str,
-        default="concatenate",
+        default="element_l1",
         help="How to combine drug and protein embeddings",
     )
     parser.add_argument(
