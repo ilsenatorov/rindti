@@ -1,12 +1,11 @@
 from argparse import ArgumentParser
 from logging import warning
-
-from torch.functional import Tensor
-from rindti.utils.data import TwoGraphData
 from typing import Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningModule
+from rindti.utils.data import TwoGraphData
+from torch.functional import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
