@@ -41,6 +41,14 @@ class TwoGraphData(Data):
         return self.__dict__[prefix + "x"].size(0)
 
     def nnodes(self, prefix: str) -> int:
+        """Number of nodes
+
+        Args:
+            prefix (str): prefix for which to count ('prot_', 'drug_')
+
+        Returns:
+            int: Number of nodes
+        """
         return self.__dict__[prefix + "x"].size(0)
 
     def numfeats(self, prefix: str) -> int:

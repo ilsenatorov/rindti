@@ -122,13 +122,14 @@ class DiffPoolNet(BaseLayer):
 
 
 class DiffPoolBlock(torch.nn.Module):
-    def __init__(self, in_channels: int, out_channels: int):
-        """Block of DiffPool
+    """Block of DiffPool
 
-        Args:
-            in_channels (int): Input size
-            out_channels (int): Output size
-        """
+    Args:
+        in_channels (int): Input size
+        out_channels (int): Output size
+    """
+
+    def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
 
         self.conv1 = DenseSAGEConv(in_channels, out_channels)

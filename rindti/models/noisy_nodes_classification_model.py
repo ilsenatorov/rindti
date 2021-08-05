@@ -26,6 +26,8 @@ poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
 class NoisyNodesModel(BaseModel):
+    """Model for DTI prediction as a classification problem"""
+
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()

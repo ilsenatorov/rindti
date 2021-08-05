@@ -19,6 +19,11 @@ from .base_model import BaseModel
 
 
 class GraphLogModel(BaseModel):
+    """Work in progress
+    https://github.com/DeepGraphLearning/GraphLoG
+    https://arxiv.org/pdf/2106.04113.pdf
+    """
+
     def __init__(
         self,
         decay_ratio: float = 0.5,
