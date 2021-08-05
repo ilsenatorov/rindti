@@ -6,7 +6,7 @@ import os
 import pickle
 from copy import deepcopy
 from math import ceil
-from typing import Optional, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
 import numpy as np
 import torch
@@ -22,9 +22,16 @@ class TwoGraphData(Data):
         super().__init__()
         self.__dict__.update(kwargs)
 
-    def __inc__(self, key, value):
-        """
-        Important function for batch creation
+    def __inc__(self, key: str, value: Any) -> dict:
+        """How to increment values during batching
+
+
+        Args:
+            key (str): [description]
+            value (Any): [description]
+
+        Returns:
+            dict: [description]
         """
         if not key.endswith("edge_index"):
             return super().__inc__(key, value)
@@ -33,10 +40,10 @@ class TwoGraphData(Data):
         prefix = key[:-lenedg]
         return self.__dict__[prefix + "x"].size(0)
 
-    def nnodes(self, prefix):
+    def nnodes(self, prefix: str) -> int:
         return self.__dict__[prefix + "x"].size(0)
 
-    def numfeats(self, prefix):
+    def numfeats(self, prefix: str) -> int:
         """
         Calculate the feature dimension of one of the graphs.
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
@@ -52,21 +59,21 @@ class TwoGraphData(Data):
 
 
 class Dataset(InMemoryDataset):
-    """Dataset class inherited from torch_geometric.data.InMemoryDataset
+    """Dataset class for proteins and drugs
 
     Args:
-        filename (str): Pickle file from RIN snakemake pipeline
-        split (Optional[str], optional): datasplit, can be 'train', 'val' or 'test'. Defaults to 'train'.
-        transform ([type], optional): Transform function to apply to each datapoint. Defaults to None.
-        pre_transform ([type], optional): Pre-transform function to apply to each datapoint. Defaults to None.
+        filename (str): Pickle file that stores the data
+        split (str, optional): Split type ('train', 'val', 'test). Defaults to "train".
+        transform (Callable, optional): transformer to apply on each access. Defaults to None.
+        pre_transform (Callable, optional): pre-transformer to apply once before. Defaults to None.
     """
 
     def __init__(
         self,
         filename: str,
-        split: Optional[str] = "train",
-        transform=None,
-        pre_transform=None,
+        split: str = "train",
+        transform: Callable = None,
+        pre_transform: Callable = None,
     ):
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
@@ -83,7 +90,12 @@ class Dataset(InMemoryDataset):
             raise ValueError("Unknown split!")
 
     @property
-    def processed_file_names(self):
+    def processed_file_names(self) -> Iterable[str]:
+        """Which files have to be in the dir to consider dataset processed
+
+        Returns:
+            Iterable[str]: list of files
+        """
         return ["train.pt", "val.pt", "test.pt"]
 
     def process_(self, data_list: list, s: int):
@@ -137,7 +149,16 @@ class Dataset(InMemoryDataset):
 
 
 class PreTrainDataset(InMemoryDataset):
-    def __init__(self, filename, transform=None, pre_transform=None):
+    """Dataset class for pre-training
+
+    Args:
+        filename (str): Pickle file that stores the data
+        split (str, optional): Split type ('train', 'val', 'test). Defaults to "train".
+        transform (Callable, optional): transformer to apply on each access. Defaults to None.
+        pre_transform (Callable, optional): pre-transformer to apply once before. Defaults to None.
+    """
+
+    def __init__(self, filename: str, transform: Callable = None, pre_transform: Callable = None):
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         root = os.path.join("data", basefilename)
@@ -146,10 +167,16 @@ class PreTrainDataset(InMemoryDataset):
         self.data, self.slices, self.info = torch.load(self.processed_paths[0])
 
     @property
-    def processed_file_names(self):
+    def processed_file_names(self) -> Iterable[str]:
+        """Which files have to be in the dir to consider dataset processed
+
+        Returns:
+            Iterable[str]: list of files
+        """
         return ["data.pt"]
 
     def process(self):
+        """If the dataset was not seen before, process everything"""
         info = {"max_nodes": 0, "feat_dim": 0}
         with open(self.filename, "rb") as file:
             df = pickle.load(file)

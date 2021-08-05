@@ -1,11 +1,20 @@
 import pickle
 
 import pandas as pd
+from pandas.core.frame import DataFrame
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def calculate_nnodes_nedges(df):
+def calculate_nnodes_nedges(df: DataFrame) -> DataFrame:
+    """Add columns for number of nodes and number of edges
+
+    Args:
+        df (DataFrame): [description]
+
+    Returns:
+        DataFrame: [description]
+    """
     df["nnodes"] = df["data"].apply(lambda x: x["x"].size(0))
     df["nedges"] = df["data"].apply(lambda x: x["edge_index"].size(1))
     return df

@@ -53,7 +53,15 @@ atom_num_mapping = {
 atom_num_mapping = {v: k for (k, v) in atom_num_mapping.items()}  # Reverse the mapping dict
 
 
-def featurize(smiles: str) -> Data:
+def featurize(smiles: str) -> dict:
+    """Generate drug Data from smiles
+
+    Args:
+        smiles (str): SMILES
+
+    Returns:
+        dict: dict with x, edge_index etc
+    """
     mol = Chem.MolFromSmiles(smiles)
     if not mol:  # when rdkit fails to read a molecule it returns None
         return np.nan

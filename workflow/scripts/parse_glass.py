@@ -10,14 +10,30 @@ targ = pd.read_csv(snakemake.input.targ, sep="\t")
 lig.drop_duplicates("InChI Key", inplace=True)
 
 
-def process_value(entry):
+def process_value(entry: str) -> float:
+    """Try to convert value to float
+
+    Args:
+        entry (str): string with float
+
+    Returns:
+        float: output (np.nan if fail)
+    """
     try:
         return float(entry)
     except Exception:
         return np.nan
 
 
-def get_numatoms(smiles):
+def get_numatoms(smiles: str) -> int:
+    """Count the atoms in the molecule
+
+    Args:
+        smiles (str): SMILES
+
+    Returns:
+        int: number of atoms
+    """
     mol = Chem.MolFromSmiles(smiles)
     return mol.GetNumAtoms()
 
@@ -25,7 +41,12 @@ def get_numatoms(smiles):
 counts = {"inter": {}, "lig": {}, "targ": {}}
 
 
-def update_counts(operation):
+def update_counts(operation: str):
+    """Update the counts dictionary based on the recent change in numbers
+
+    Args:
+        operation (str): Name of the operation
+    """
     counts["inter"][operation] = inter.shape[0]
     counts["lig"][operation] = len(inter["InChI Key"].unique())
     counts["targ"][operation] = len(inter["UniProt ID"].unique())

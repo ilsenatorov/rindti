@@ -3,7 +3,15 @@ from rdkit import Chem
 from rdkit.Chem.QED import default
 
 
-def get_druglikeness(smiles):
+def get_druglikeness(smiles: str) -> float:
+    """Calculate druglikeness for given molecule
+
+    Args:
+        smiles (str): SMILES
+
+    Returns:
+        float: Druglikeness
+    """
     try:
         mol = Chem.MolFromSmiles(smiles)
         return default(mol)

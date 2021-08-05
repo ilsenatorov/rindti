@@ -1,3 +1,4 @@
+from os import stat
 import pickle
 import random
 
@@ -6,7 +7,15 @@ import numpy as np
 from .data import TwoGraphData
 
 
-class GnomadTransformer(object):
+class BaseTransformer(object):
+    def __init__(self, **kwargs):
+        raise NotImplementedError()
+
+    def __call__(self, data: TwoGraphData) -> TwoGraphData:
+        raise NotImplementedError()
+
+
+class GnomadTransformer(BaseTransformer):
     """Transformer of TwoGraphData entries
 
     Args:
@@ -38,7 +47,7 @@ class GnomadTransformer(object):
             (TwoGraphData): entry with modified protein features
         """
         prot_id = data["prot_id"]
-        if data["prot_id"] not in self.gnomad:
+        if prot_id not in self.gnomad:
             return data
         x = data["prot_x"]
         mutations = self.gnomad[prot_id]
@@ -57,7 +66,16 @@ class GnomadTransformer(object):
         return data
 
     @staticmethod
-    def from_pickle(filename: str, max_num_mut=50):
+    def from_pickle(filename: str, max_num_mut=50) -> BaseTransformer:
+        """Load transformer from pickle
+
+        Args:
+            filename (str): Pickle file location
+            max_num_mut (int, optional): Maximal number of mutation to applyt. Defaults to 50.
+
+        Returns:
+            GnomadTransformer: Transformer
+        """
         with open(filename, "rb") as file:
             all_data = pickle.load(file)
         return GnomadTransformer(
@@ -68,7 +86,7 @@ class GnomadTransformer(object):
         )
 
 
-class RandomTransformer(object):
+class RandomTransformer(BaseTransformer):
     """Random Transformer of TwoGraphData entries
 
     Args:
@@ -99,7 +117,16 @@ class RandomTransformer(object):
         return data
 
     @staticmethod
-    def from_pickle(filename: str, max_num_mut=50):
+    def from_pickle(filename: str, max_num_mut=50) -> BaseTransformer:
+        """Load transformer from pickle
+
+        Args:
+            filename (str): Pickle file location
+            max_num_mut (int, optional): Maximal number of mutation to applyt. Defaults to 50.
+
+        Returns:
+            RandomTransformer: Transformer
+        """
         with open(filename, "rb") as file:
             all_data = pickle.load(file)
         return RandomTransformer(all_data["encoded_residues"], max_num_mut=max_num_mut)

@@ -1,33 +1,39 @@
+from argparse import ArgumentParser
 from math import ceil
 
 import torch
+from torch.functional import Tensor
 import torch.nn.functional as F
 import torch_geometric
 from torch.nn import Embedding
 from torch_geometric.nn import DenseSAGEConv, dense_diff_pool, dense_mincut_pool
+from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
 
 
 class DiffPoolNet(BaseLayer):
-    @staticmethod
-    def add_arguments(group):
-        group.add_argument("pool", default="gmt", type=str)
-        group.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
-        group.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
-        group.add_argument("dropout", default=0.25, type=float, help="Dropout ratio")
-        group.add_argument("pooling_method", default="mincut", type=str, help="Type of pooling")
-        return group
+    """Differential Pooling module
+
+    Args:
+        input_dim (int): Size of the input vector
+        output_dim (int): Size of the output vector
+        hidden_dim (int, optional): Size of the hidden vector. Defaults to 32.
+        max_nodes (int, optional): Maximal number of nodes in a graph. Defaults to 600.
+        dropout (float, optional): Dropout ratio. Defaults to 0.2.
+        ratio (float, optional): Pooling ratio. Defaults to 0.25.
+        pooling_method (str, optional): Type of pooling. Defaults to "mincut".
+    """
 
     def __init__(
         self,
-        input_dim,
-        output_dim,
-        max_nodes=600,
-        hidden_dim=128,
-        dropout=0.2,
-        ratio=0.25,
-        pooling_method="mincut",
+        input_dim: int,
+        output_dim: int,
+        hidden_dim: int = 128,
+        max_nodes: int = 600,
+        dropout: float = 0.2,
+        ratio: float = 0.25,
+        pooling_method: str = "mincut",
         **kwargs,
     ):
         super().__init__()
@@ -50,13 +56,16 @@ class DiffPoolNet(BaseLayer):
         self.embedblock3 = DiffPoolBlock(hidden_dim, hidden_dim)
         self.lin1 = torch.nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor, **kwargs):
-        """
-        Calculate the embedding
-        :param x: node_features of dimension (num_nodes_in_batch, feat_dim)
-        :param edge_index: sparse connectivity of dimension (num_edges_in_batch, 2)
-        :param batch: which batch each node belongs to of dimension (num_nodes_in_batch, 1)
-        :returns: embedding of the input graph
+    def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
+        """Forward pass of the module
+
+        Args:
+            x (Tensor): Node features
+            edge_index (Adj): Edge information
+            batch (Tensor): Batch information
+
+        Returns:
+            Tensor: Graph representation vector
         """
         if self.node_embed:
             x = self.node_embedding(x)
@@ -94,21 +103,48 @@ class DiffPoolNet(BaseLayer):
         x = F.dropout(x, p=self.dropout, training=self.training)
         return x
 
+    @staticmethod
+    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
+        """Generate arguments for this module
+
+        Args:
+            parser (ArgumentParser): Parent parser
+
+        Returns:
+            ArgumentParser: Updated parser
+        """
+        parser.add_argument("pool", default="gmt", type=str)
+        parser.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
+        parser.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
+        parser.add_argument("dropout", default=0.25, type=float, help="Dropout ratio")
+        parser.add_argument("pooling_method", default="mincut", type=str, help="Type of pooling")
+        return parser
+
 
 class DiffPoolBlock(torch.nn.Module):
-    """
-    A single block that for the DiffPool that either embeds or pools
-    :param in_channels: number of features for input
-    :param out_channels: number of features for output
-    """
+    def __init__(self, in_channels: int, out_channels: int):
+        """Block of DiffPool
 
-    def __init__(self, in_channels, out_channels):
+        Args:
+            in_channels (int): Input size
+            out_channels (int): Output size
+        """
         super().__init__()
 
         self.conv1 = DenseSAGEConv(in_channels, out_channels)
         self.bn1 = torch.nn.BatchNorm1d(out_channels)
 
-    def bn(self, i, x):
+    def bn(self, i: int, x: Tensor) -> Tensor:
+        """Apply batch normalisation
+
+        Args:
+            i (int): layer idx
+            x (Tensor): Node features
+
+        Returns:
+            Tensor: Updated node features
+        """
+
         batch_size, num_nodes, num_channels = x.size()
 
         x = x.view(-1, num_channels)
@@ -116,12 +152,15 @@ class DiffPoolBlock(torch.nn.Module):
         x = x.view(batch_size, num_nodes, num_channels)
         return x
 
-    def forward(self, x, adj):
-        """
-        Do a single pass on a batch
-        :param x: dense node features of dimension (batch_size, max_nodes, in_channels)
-        :param adj: dense adjacency matrix of dimension (batch_size, max_nodes, max_nodes)
-        :returns: new dense node features of dimension (batch_size, max_nodes, out_channels)
+    def forward(self, x: Tensor, adj: Adj) -> Tensor:
+        """Single pass on a batch
+
+        Args:
+            x (Tensor): Node features
+            adj (Adj): Adjacency matrix
+
+        Returns:
+            Tensor: Updated node features
         """
         x = self.bn(1, F.relu(self.conv1(x, adj)))
         return x

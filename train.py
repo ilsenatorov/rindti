@@ -11,6 +11,7 @@ from rindti.utils.transforms import GnomadTransformer, RandomTransformer
 
 
 def train(**kwargs):
+    """Train the whole model"""
     torch.manual_seed(kwargs["seed"])
     if kwargs["transformer"] != "none":
         transform = {"gnomad": GnomadTransformer, "random": RandomTransformer}[kwargs["transformer"]].from_pickle(

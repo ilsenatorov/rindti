@@ -6,22 +6,13 @@ from typing import Union
 import numpy as np
 import torch
 import torch.nn.functional as F
+from rindti.utils.data import TwoGraphData
+from torch.functional import Tensor
 from torch.nn import Embedding
+from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
-from rindti.utils.data import TwoGraphData
-
-from ..layers import (
-    MLP,
-    ChebConvNet,
-    DiffPoolNet,
-    GatConvNet,
-    GINConvNet,
-    GMTNet,
-    MeanPool,
-    NoneNet,
-    SequenceEmbedding,
-)
+from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils import combine_parameters, remove_arg_prefix
 from .base_model import BaseModel
 
@@ -35,37 +26,6 @@ poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
 class NoisyNodesModel(BaseModel):
-    def corrupt_features(self, features: torch.Tensor, frac: float) -> torch.Tensor:
-        num_feat = features.size(0)
-        num_node_types = int(features.max())
-        num_corrupt_nodes = ceil(num_feat * frac)
-        corrupt_idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-        corrupt_features = torch.tensor(
-            np.random.choice(range(num_node_types), num_corrupt_nodes, replace=True),
-            dtype=torch.long,
-            device=self.device,
-        )
-        features[corrupt_idx] = corrupt_features
-        return features, corrupt_idx
-
-    def corrupt_data(
-        self,
-        orig_data: Union[TwoGraphData, dict],
-        prot_frac: float = 0.05,
-        drug_frac: float = 0.05,
-    ) -> TwoGraphData:
-        # sourcery skip: extract-duplicate-method
-        data = deepcopy(orig_data)
-        if prot_frac > 0:
-            prot_feat, prot_idx = self.corrupt_features(data["prot_x"], prot_frac)
-            data["prot_x"] = prot_feat
-            data["prot_cor_idx"] = prot_idx
-        if drug_frac > 0:
-            drug_feat, drug_idx = self.corrupt_features(data["drug_x"], drug_frac)
-            data["drug_x"] = drug_feat
-            data["drug_cor_idx"] = drug_idx
-        return data
-
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
@@ -93,7 +53,79 @@ class NoisyNodesModel(BaseModel):
             drug_param["hidden_dim"], 30, num_layers=3, hidden_dim=32
         )
 
-    def forward(self, prot_x, drug_x, prot_edge_index, drug_edge_index, prot_batch, drug_batch, *args, **kwargs):
+    def corrupt_features(self, features: torch.Tensor, frac: float) -> torch.Tensor:
+        """Corrupt the features
+
+        Args:
+            features (torch.Tensor): Node features
+            frac (float): Fraction of nodes to corrupt
+
+        Returns:
+            torch.Tensor: New corrupt features
+        """
+        num_feat = features.size(0)
+        num_node_types = int(features.max())
+        num_corrupt_nodes = ceil(num_feat * frac)
+        corrupt_idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+        corrupt_features = torch.tensor(
+            np.random.choice(range(num_node_types), num_corrupt_nodes, replace=True),
+            dtype=torch.long,
+            device=self.device,
+        )
+        features[corrupt_idx] = corrupt_features
+        return features, corrupt_idx
+
+    def corrupt_data(
+        self,
+        orig_data: TwoGraphData,
+        prot_frac: float = 0.05,
+        drug_frac: float = 0.05,
+    ) -> TwoGraphData:
+        """Corrupt a TwoGraphData entry
+
+        Args:
+            orig_data (TwoGraphData): Original data
+            prot_frac (float, optional): Fraction of nodes to corrupt for proteins. Defaults to 0.05.
+            drug_frac (float, optional): Fraction of nodes to corrupt for drugs. Defaults to 0.05.
+
+        Returns:
+            TwoGraphData: Corrupted data
+        """
+        # sourcery skip: extract-duplicate-method
+        data = deepcopy(orig_data)
+        if prot_frac > 0:
+            prot_feat, prot_idx = self.corrupt_features(data["prot_x"], prot_frac)
+            data["prot_x"] = prot_feat
+            data["prot_cor_idx"] = prot_idx
+        if drug_frac > 0:
+            drug_feat, drug_idx = self.corrupt_features(data["drug_x"], drug_frac)
+            data["drug_x"] = drug_feat
+            data["drug_cor_idx"] = drug_idx
+        return data
+
+    def forward(
+        self,
+        prot_x: Tensor,
+        drug_x: Tensor,
+        prot_edge_index: Adj,
+        drug_edge_index: Adj,
+        prot_batch: Tensor,
+        drug_batch: Tensor,
+        *args,
+    ) -> Tensor:
+        """Forward pass of the model
+
+        Args:
+            prot_x (Tensor): Protein node features
+            drug_x (Tensor): Drug node features
+            prot_edge_index (Adj): Protein edge info
+            drug_edge_index (Adj): Drug edge info
+            prot_batch (Tensor): Protein batch
+            drug_batch (Tensor): Drug batch
+
+        Returns:
+            (Tensor): Final prediction
+        """
         prot_x = self.prot_feat_embed(prot_x)
         drug_x = self.drug_feat_embed(drug_x)
         prot_x = self.prot_node_embed(prot_x, prot_edge_index)
@@ -107,11 +139,14 @@ class NoisyNodesModel(BaseModel):
         drug_pred = self.drug_pred(drug_x, drug_edge_index)
         return torch.sigmoid(logit), prot_pred, drug_pred
 
-    def shared_step(self, data):
-        """
-        This step is the same for train, val and test
-        :param data: ProteinData batch object
-        :returns: dict of accuracy metrics (has to contain 'loss')
+    def shared_step(self, data: TwoGraphData) -> dict:
+        """Step that is the same for train, validation and test
+
+        Args:
+            data (TwoGraphData): Input data
+
+        Returns:
+            dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         cor_data = self.corrupt_data(data, self.hparams.prot_frac, self.hparams.drug_frac)
         output, prot_pred, drug_pred = self.forward(
@@ -150,9 +185,14 @@ class NoisyNodesModel(BaseModel):
         }
 
     @staticmethod
-    def add_arguments(parser):
-        """
-        Add the arguments for the training
+    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
+        """Generate arguments for this module
+
+        Args:
+            parser (ArgumentParser): Parent parser
+
+        Returns:
+            ArgumentParser: Updated parser
         """
         # Hack to find which embedding are used and add their arguments
         tmp_parser = ArgumentParser(add_help=False)

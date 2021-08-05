@@ -18,15 +18,13 @@ from .base_model import BaseModel
 class GraphLogModel(BaseModel):
     def __init__(
         self,
-        decay_ratio=0.5,
-        mask_rate=0.3,
-        alpha=1,
-        beta=1,
-        gamma=0.1,
-        num_proto=8,
-        hierarchy=3,
-        batch_size=32,
-        num_workers=4,
+        decay_ratio:float=0.5,
+        mask_rate:float=0.3,
+        alpha:float=1.,
+        beta:float=1.,
+        gamma:float=0.1,
+        num_proto:int=8,
+        hierarchy:int=3,
         **kwargs,
     ):
         super().__init__()
@@ -38,8 +36,6 @@ class GraphLogModel(BaseModel):
         self.gamma = gamma
         self.num_proto = num_proto
         self.hierarchy = hierarchy
-        self.batch_size = batch_size
-        self.num_workers = num_workers
         self.embed_dim = 64
         self.feat_embed = Embedding(21, 64, padding_idx=20)
         self.node_embed = GINConvNet(64, 64, 64, num_layers=5)

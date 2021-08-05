@@ -2,9 +2,12 @@ from argparse import ArgumentParser
 
 import numpy as np
 import torch
+from torch.functional import Tensor
 import torch.nn.functional as F
 from torch.nn import Embedding
+from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
+from ..utils.data import TwoGraphData
 
 from ..layers import (
     MLP,
@@ -15,9 +18,8 @@ from ..layers import (
     GMTNet,
     MeanPool,
     NoneNet,
-    SequenceEmbedding,
 )
-from ..utils import combine_parameters, remove_arg_prefix
+from ..utils import remove_arg_prefix
 from .base_model import BaseModel
 
 node_embedders = {
@@ -30,6 +32,8 @@ poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
 class ClassificationModel(BaseModel):
+    """Model for DTI prediction as a classification problem"""
+
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
@@ -50,7 +54,29 @@ class ClassificationModel(BaseModel):
         mlp_param = remove_arg_prefix("mlp_", kwargs)
         self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
 
-    def forward(self, prot_x, drug_x, prot_edge_index, drug_edge_index, prot_batch, drug_batch, *args):
+    def forward(
+        self,
+        prot_x: Tensor,
+        drug_x: Tensor,
+        prot_edge_index: Adj,
+        drug_edge_index: Adj,
+        prot_batch: Tensor,
+        drug_batch: Tensor,
+        *args,
+    ) -> Tensor:
+        """Forward pass of the model
+
+        Args:
+            prot_x (Tensor): Protein node features
+            drug_x (Tensor): Drug node features
+            prot_edge_index (Adj): Protein edge info
+            drug_edge_index (Adj): Drug edge info
+            prot_batch (Tensor): Protein batch
+            drug_batch (Tensor): Drug batch
+
+        Returns:
+            (Tensor): Final prediction
+        """
         prot_x = self.prot_feat_embed(prot_x)
         drug_x = self.drug_feat_embed(drug_x)
         prot_x = self.prot_node_embed(prot_x, prot_edge_index, prot_batch)
@@ -61,11 +87,14 @@ class ClassificationModel(BaseModel):
         logit = self.mlp(joint_embedding)
         return torch.sigmoid(logit)
 
-    def shared_step(self, data):
-        """
-        This step is the same for train, val and test
-        :param data: ProteinData batch object
-        :returns: dict of accuracy metrics (has to contain 'loss')
+    def shared_step(self, data: TwoGraphData) -> dict:
+        """Step that is the same for train, validation and test
+
+        Args:
+            data (TwoGraphData): Input data
+
+        Returns:
+            dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         output = self.forward(
             data.prot_x,
@@ -96,9 +125,14 @@ class ClassificationModel(BaseModel):
         }
 
     @staticmethod
-    def add_arguments(parser):
-        """
-        Add the arguments for the training
+    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
+        """Generate arguments for this module
+
+        Args:
+            parser (ArgumentParser): Parent parser
+
+        Returns:
+            ArgumentParser: Updated parser
         """
         # Hack to find which embedding are used and add their arguments
         tmp_parser = ArgumentParser(add_help=False)

@@ -2,3 +2,20 @@
 line-length = 119
 target-version = ['py36', 'py37', 'py38']
 include = '\.pyi?$'
+
+
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = true
+ignore-private = true
+ignore-module = true
+fail-under = 80
+exclude = ["setup.py", "docs", "build"]
+ignore-regex = ["^get$", "^mock_.*", ".*Base*.*"]
+verbose = 0
+quiet = false
+whitelist-regex = []
+color = true

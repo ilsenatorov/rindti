@@ -68,9 +68,7 @@ def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float =
 
 if __name__ == "__main__":
     np.random.seed(snakemake.config["seed"])
-
     threshold = snakemake.config["prepare_all"]["threshold"]
-
     lig = pd.read_csv(snakemake.input.lig).set_index("InChI Key")
     inter = pd.read_csv(snakemake.input.inter)
 

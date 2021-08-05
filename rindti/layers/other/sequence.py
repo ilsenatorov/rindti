@@ -1,4 +1,5 @@
 import torch
+from torch.functional import Tensor
 import torch.nn.functional as F
 from torch import nn
 from torch_geometric.utils import to_dense_batch
@@ -7,23 +8,31 @@ from ..base_layer import BaseLayer
 
 
 class SequenceEmbedding(BaseLayer):
-    """
-    Embed a protein sequence with nn.Embedding and Conv1d
-    :param embed_dim: size of output embedding
-    :param feat_dim: number of features
+    """Embed the sequence data
+
+    Args:
+        input_dim (int): Size of the input vector
+        output_dim (int): Size of the output vector
+        hidden_dim (int, optional): Size of the hidden vector. Defaults to 32.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = 32, **kwargs):
         super().__init__()
-        seq_embed_dim = 25
+        # FIXME
         maxlen = 600
         out_dim = kwargs["embed_dim"]
-
-        self.embedding = nn.Embedding(25, seq_embed_dim)
         self.conv = nn.Conv1d(in_channels=maxlen, out_channels=16, kernel_size=8)
         self.fc = nn.Linear(16 * 18, out_dim)
 
-    def forward(self, **kwargs):
+    def forward(self, x: Tensor, **kwargs) -> Tensor:
+        """Forward pass of the module
+
+        Args:
+            x (Tensor): Input features
+
+        Returns:
+            Tensor: Updated features
+        """
         x = kwargs["x"]  # (batch_size, 600)
         batch_size = x.size(0)
         x = self.embedding(x)  # (batch_size, 600, 21)

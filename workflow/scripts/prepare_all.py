@@ -1,12 +1,20 @@
 import pickle
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
+from pandas.core.frame import DataFrame
 
 
-def process(row: pd.Series):
-    """
-    Process each interaction, drugs encoded as graphs
+def process(row: pd.Series) -> dict:
+    """Process each interaction, drugs encoded as graphs
+
+
+    Args:
+        row (pd.Series): Row of the DataFrame
+
+    Returns:
+        dict: dict with 'label', 'split', 'prot_id', 'drug_id'
     """
     split = row["split"]
     threshold = snakemake.config["prepare_all"]["threshold"]
@@ -22,11 +30,27 @@ def process(row: pd.Series):
     }
 
 
-def process_df(df):
+def process_df(df: DataFrame) -> Iterable[dict]:
+    """Apply process() function to each row of the DataFrame
+
+    Args:
+        df (DataFrame): input df
+
+    Returns:
+        Iterable[dict]: list of dicts (outputs of process)
+    """
     return [process(row) for (_, row) in df.iterrows()]
 
 
-def del_index_mapping(x):
+def del_index_mapping(x: dict) -> dict:
+    """Delete 'index_mapping' entry from the dict
+
+    Args:
+        x (dict): dict of values
+
+    Returns:
+        dict: dict without 'index_mapping'
+    """
     del x["index_mapping"]
     return x
 
