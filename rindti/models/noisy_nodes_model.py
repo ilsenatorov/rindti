@@ -14,7 +14,7 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils import remove_arg_prefix
-from .base_model import BaseModel
+from .classification_model import ClassificationModel
 
 node_embedders = {
     "ginconv": GINConvNet,
@@ -25,34 +25,16 @@ node_embedders = {
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
-class NoisyNodesModel(BaseModel):
+class NoisyNodesModel(ClassificationModel):
     """Model for DTI prediction as a classification problem"""
 
     def __init__(self, **kwargs):
-        super().__init__()
-        self.save_hyperparameters()
-        self._determine_feat_method(kwargs["feat_method"], kwargs["drug_hidden_dim"], kwargs["prot_hidden_dim"])
-        drug_param = remove_arg_prefix("drug_", kwargs)
-        prot_param = remove_arg_prefix("prot_", kwargs)
-        # TODO fix hardcoded values
-        self.prot_feat_embed = Embedding(20, kwargs["prot_node_embed_dim"])
-        self.drug_feat_embed = Embedding(30, kwargs["drug_node_embed_dim"])
-        self.prot_node_embed = node_embedders[prot_param["node_embed"]](
-            prot_param["node_embed_dim"], prot_param["hidden_dim"], **prot_param
+        super().__init__(**kwargs)
+        self.prot_pred = node_embedders[kwargs["prot_node_embed"]](
+            kwargs["prot_hidden_dim"], 20, num_layers=3, hidden_dim=32
         )
-        self.drug_node_embed = node_embedders[drug_param["node_embed"]](
-            drug_param["node_embed_dim"], drug_param["hidden_dim"], **drug_param
-        )
-        self.prot_pool = poolers[prot_param["pool"]](prot_param["hidden_dim"], prot_param["hidden_dim"], **prot_param)
-        self.drug_pool = poolers[drug_param["pool"]](drug_param["hidden_dim"], drug_param["hidden_dim"], **drug_param)
-        mlp_param = remove_arg_prefix("mlp_", kwargs)
-        self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
-
-        self.prot_pred = node_embedders[prot_param["node_embed"]](
-            prot_param["hidden_dim"], 20, num_layers=3, hidden_dim=32
-        )
-        self.drug_pred = node_embedders[drug_param["node_embed"]](
-            drug_param["hidden_dim"], 30, num_layers=3, hidden_dim=32
+        self.drug_pred = node_embedders[kwargs["drug_node_embed"]](
+            kwargs["drug_hidden_dim"], 30, num_layers=3, hidden_dim=32
         )
 
     def corrupt_features(self, features: torch.Tensor, frac: float) -> torch.Tensor:
