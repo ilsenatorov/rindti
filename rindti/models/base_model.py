@@ -70,7 +70,7 @@ class BaseModel(LightningModule):
         Returns:
             Tensor: combined tensor
         """
-        return torch.sqrt(((drug_embedding - prot_embedding) ** 2) + 1e-6).float()
+        return torch.sqrt(((drug_embed - prot_embed) ** 2) + 1e-6).float()
 
     def _element_l1(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
         """L1 distance
