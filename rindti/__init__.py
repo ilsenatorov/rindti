@@ -1,1 +1,1 @@
-from .models import BaseModel, ClassificationModel, RegressionModel, SiameseModel
+from .models import BaseModel, ClassificationModel

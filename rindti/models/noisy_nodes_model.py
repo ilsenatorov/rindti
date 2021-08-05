@@ -13,7 +13,7 @@ from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
-from ..utils import combine_parameters, remove_arg_prefix
+from ..utils import remove_arg_prefix
 from .base_model import BaseModel
 
 node_embedders = {
@@ -31,7 +31,7 @@ class NoisyNodesModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self._determine_feat_method(kwargs)
+        self._determine_feat_method(kwargs["feat_method"], kwargs["drug_hidden_dim"], kwargs["prot_hidden_dim"])
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)
         # TODO fix hardcoded values
@@ -130,15 +130,15 @@ class NoisyNodesModel(BaseModel):
         """
         prot_x = self.prot_feat_embed(prot_x)
         drug_x = self.drug_feat_embed(drug_x)
-        prot_x = self.prot_node_embed(prot_x, prot_edge_index)
-        drug_x = self.drug_node_embed(drug_x, drug_edge_index)
+        prot_x = self.prot_node_embed(prot_x, prot_edge_index, prot_batch)
+        drug_x = self.drug_node_embed(drug_x, drug_edge_index, drug_batch)
         prot_embed = self.prot_pool(prot_x, prot_edge_index, prot_batch)
         drug_embed = self.drug_pool(drug_x, drug_edge_index, drug_batch)
 
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         logit = self.mlp(joint_embedding)
-        prot_pred = self.prot_pred(prot_x, prot_edge_index)
-        drug_pred = self.drug_pred(drug_x, drug_edge_index)
+        prot_pred = self.prot_pred(prot_x, prot_edge_index, prot_batch)
+        drug_pred = self.drug_pred(drug_x, drug_edge_index, drug_batch)
         return torch.sigmoid(logit), prot_pred, drug_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:

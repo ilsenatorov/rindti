@@ -36,8 +36,9 @@ class ClassificationModel(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__()
+        print(kwargs)
         self.save_hyperparameters()
-        self._determine_feat_method(kwargs)
+        self._determine_feat_method(kwargs["feat_method"], kwargs["drug_hidden_dim"], kwargs["prot_hidden_dim"])
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)
         # TODO fix hardcoded values
