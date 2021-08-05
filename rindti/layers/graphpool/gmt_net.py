@@ -71,7 +71,7 @@ class MAB(LightningModule):
         self.fc_o = nn.Linear(dim_V, dim_V)
 
         self.softmax_dim = 2
-        if cluster == True:
+        if cluster:
             self.softmax_dim = 1
 
     def forward(self, Q, K, attention_mask=None, graph=None, return_attn=False):

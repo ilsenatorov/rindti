@@ -85,7 +85,7 @@ class ClassificationModel(BaseModel):
         acc = accuracy(t, labels)
         try:
             _auroc = auroc(t, labels)
-        except Exception as e:
+        except Exception:
             _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
         return {

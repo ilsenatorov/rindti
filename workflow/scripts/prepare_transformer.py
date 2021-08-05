@@ -3,7 +3,6 @@ import pickle
 import numpy as np
 import pandas as pd
 import torch
-
 from prepare_proteins import aa_encoding, encode_residue
 
 encoded_residues = {i: torch.tensor(encode_residue(i)) for i in aa_encoding.keys()}

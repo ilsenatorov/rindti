@@ -2,9 +2,6 @@ import pickle
 
 import numpy as np
 import pandas as pd
-import torch
-
-from prepare_proteins import aa_encoding, encode_residue
 
 
 def process(row: pd.Series):
@@ -35,7 +32,6 @@ def del_index_mapping(x):
 
 
 if __name__ == "__main__":
-    import torch
 
     threshold = snakemake.config["prepare_all"]["threshold"]
 

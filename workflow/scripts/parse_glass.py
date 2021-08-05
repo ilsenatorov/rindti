@@ -13,7 +13,7 @@ lig.drop_duplicates("InChI Key", inplace=True)
 def process_value(entry):
     try:
         return float(entry)
-    except Exception as e:
+    except Exception:
         return np.nan
 
 

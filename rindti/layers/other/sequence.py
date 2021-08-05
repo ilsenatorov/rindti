@@ -18,7 +18,6 @@ class SequenceEmbedding(BaseLayer):
         seq_embed_dim = 25
         maxlen = 600
         out_dim = kwargs["embed_dim"]
-        feat_dim = kwargs["feat_dim"]
 
         self.embedding = nn.Embedding(25, seq_embed_dim)
         self.conv = nn.Conv1d(in_channels=maxlen, out_channels=16, kernel_size=8)

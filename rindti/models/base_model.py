@@ -53,7 +53,7 @@ class BaseModel(LightningModule):
             self.merge_features = self._mult
             self.embed_dim = drug_dim
         else:
-            raise Exception("unsupported feature method")
+            raise ValueError("unsupported feature method")
 
     def _concat(self, drug_embed, prot_embed):
         return torch.cat((drug_embed, prot_embed), dim=1)
