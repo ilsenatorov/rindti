@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from pandas.core.frame import DataFrame
 import torch
 from sklearn.preprocessing import OneHotEncoder
 from torch_geometric.utils import to_undirected
@@ -320,7 +321,15 @@ contact_type1_encoding = {"cnt": 0, "combi": 1, "hbond": 2, "pept": 3, "ovl": 4}
 contact_type2_encoding = {"all_all": 0, "mc_mc": 1, "mc_sc": 2, "sc_sc": 3}
 
 
-def parse_sif(filename: str):
+def parse_sif(filename: str) -> Tuple[DataFrame, DataFrame]:
+    """Parse a single sif file
+
+    Args:
+        filename (str): SIF file location
+
+    Returns:
+        Tuple[DataFrame, DataFrame]: nodes, edges DataFrames
+    """
     nodes = []
     edges = []
     with open(filename, "r") as file:
@@ -434,7 +443,16 @@ def summary(filename: str) -> dict:
     return res
 
 
-def extract_name(protein_sif):
+def extract_name(protein_sif: str) -> str:
+    """Extract the protein name from the sif filename
+
+    Args:
+        protein_sif (str): filename
+
+    Returns:
+        str: Protein ID
+    """
+
     return protein_sif.split("/")[-1].split("_")[0]
 
 

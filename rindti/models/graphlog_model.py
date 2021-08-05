@@ -2,12 +2,15 @@ import random
 from copy import deepcopy
 from math import ceil
 from typing import Tuple
+from numpy import ndarray
 
 import torch
+from torch.functional import Tensor
 from torch.nn import Embedding
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import Data, DataLoader
+from torch_geometric.typing import Adj
 
 from ..layers import GINConvNet, GMTNet
 from .base_model import BaseModel
@@ -18,13 +21,13 @@ from .base_model import BaseModel
 class GraphLogModel(BaseModel):
     def __init__(
         self,
-        decay_ratio:float=0.5,
-        mask_rate:float=0.3,
-        alpha:float=1.,
-        beta:float=1.,
-        gamma:float=0.1,
-        num_proto:int=8,
-        hierarchy:int=3,
+        decay_ratio: float = 0.5,
+        mask_rate: float = 0.3,
+        alpha: float = 1.0,
+        beta: float = 1.0,
+        gamma: float = 0.1,
+        num_proto: int = 8,
+        hierarchy: int = 3,
         **kwargs,
     ):
         super().__init__()
@@ -42,13 +45,30 @@ class GraphLogModel(BaseModel):
         self.pool = GMTNet(64, 64, 64, ratio=0.15)
         self.proj = torch.nn.Sequential(torch.nn.Linear(64, 128), torch.nn.ReLU(), torch.nn.Linear(128, 64))
 
-    def predict(self, x, edge_index):
+    def predict(self, x: Tensor, edge_index: Adj) -> ndarray:
+        """Embed a single graph
+
+        Args:
+            x (Tensor): features
+            edge_index (Adj): connectivity
+
+        Returns:
+            ndarray: embedding
+        """
         x = self.feat_embed(x)
         x = self.node_embed(x, edge_index, batch=None)
         x = self.pool(x, edge_index, batch=None)
         return x.detach().numpy()
 
-    def mask_nodes(self, batch: Data):
+    def mask_nodes(self, batch: Data) -> Data:
+        """Mask the nodes according to self.mask_rate
+
+        Args:
+            batch (Data): Graph batch
+
+        Returns:
+            Data: Masked graph batch
+        """
         masked_node_indices = []
         # select indices of masked nodes
         for i in range(batch.batch[-1] + 1):
@@ -68,6 +88,7 @@ class GraphLogModel(BaseModel):
         return batch
 
     def intra_NCE_loss(self, node_reps, node_modify_reps, batch, tau=0.04, epsilon=1e-6):
+        """Loss between nodes"""
         node_reps_norm = torch.norm(node_reps, dim=1).unsqueeze(-1)
         node_modify_reps_norm = torch.norm(node_modify_reps, dim=1).unsqueeze(-1)
         sim = torch.mm(node_reps, node_modify_reps.t()) / (
@@ -84,6 +105,7 @@ class GraphLogModel(BaseModel):
         return -torch.log(positive_ratio).sum() / batch.masked_node_indices.shape[0]
 
     def inter_NCE_loss(self, graph_reps, graph_modify_reps, tau=0.04, epsilon=1e-6):
+        """Loss between graphs"""
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         graph_modify_reps_norm = torch.norm(graph_modify_reps, dim=1).unsqueeze(-1)
         sim = torch.mm(graph_reps, graph_modify_reps.t()) / (
@@ -101,6 +123,7 @@ class GraphLogModel(BaseModel):
     # NCE loss for global-local mutual information maximization
 
     def gl_NCE_loss(self, node_reps, graph_reps, batch, tau=0.04, epsilon=1e-6):
+        """Don't even know what it's for"""
         node_reps_norm = torch.norm(node_reps, dim=1).unsqueeze(-1)
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         sim = torch.mm(node_reps, graph_reps.t()) / (torch.mm(node_reps_norm, graph_reps_norm.t()) + epsilon)
@@ -114,6 +137,7 @@ class GraphLogModel(BaseModel):
         return -torch.log(positive_ratio + (1 - mask)).sum() / node_reps.shape[0]
 
     def proto_NCE_loss(self, graph_reps, tau=0.04, epsilon=1e-6):
+        """Prototype loss"""
         # similarity for original and modified graphs
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         exp_sim_list = []
@@ -166,6 +190,7 @@ class GraphLogModel(BaseModel):
         return NCE_loss
 
     def update_proto_lowest(self, graph_reps, decay_ratio=0.7, epsilon=1e-6):
+        """Update lowest prototypes"""
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         proto_norm = torch.norm(self.proto[0], dim=1).unsqueeze(-1)
         sim = torch.mm(graph_reps, self.proto[0].t()) / (torch.mm(graph_reps_norm, proto_norm.t()) + epsilon)
@@ -184,6 +209,7 @@ class GraphLogModel(BaseModel):
         ).detach()
 
     def init_proto_lowest(self, num_iter=5):
+        """Intitalise lowest prototypes"""
         self.eval()
         for _ in range(num_iter):
             for step, batch in enumerate(self.train_dataloader()):
@@ -202,6 +228,7 @@ class GraphLogModel(BaseModel):
         return torch.index_select(self.proto[0], 0, idx)
 
     def init_proto(self, index, num_iter=20):
+        """Initialise prototypes"""
         proto_connection = torch.zeros(self.proto[index - 1].shape[0], device=self.device)
 
         for iter in range(num_iter):
@@ -233,6 +260,7 @@ class GraphLogModel(BaseModel):
         return proto_selected, proto_connection
 
     def embed_batch(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Embed a single batch (normal or masked doesn't matter)"""
         feat_embed = self.feat_embed(batch.x)
         node_reps = self.node_embed(feat_embed, batch.edge_index, batch.batch)
         graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
@@ -241,6 +269,7 @@ class GraphLogModel(BaseModel):
         return node_reps, graph_reps
 
     def forward(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Calculate node and graph reps for normal and masked batch"""
         batch_modify = deepcopy(batch)
         batch_modify = self.mask_nodes(batch)
         node_reps, graph_reps = self.embed_batch(batch)
@@ -248,6 +277,7 @@ class GraphLogModel(BaseModel):
         return node_reps, node_modify_reps, graph_reps, graph_modify_reps
 
     def shared_step(self, batch: Data, proto: bool = True) -> dict:
+        """Calculate all the losses"""
         (
             node_reps_proj,
             node_modify_reps_proj,
@@ -268,22 +298,18 @@ class GraphLogModel(BaseModel):
             "NCE_proto_loss": NCE_proto_loss,
         }
 
-    def training_step(self, batch, batch_idx):
-        return self._do_step(batch, "train_")
-
-    def validation_step(self, batch, batch_idx):
-        return self._do_step(batch, "val_")
-
-    def _do_step(self, data: Data, step_type: str):
+    def training_step(self, data: Data):
+        """Training step"""
         if self.trainer.current_epoch == 0:
             ss = self.shared_step(data, proto=False)
         else:
             ss = self.shared_step(data, proto=True)
         for key, value in ss.items():
-            self.log(step_type + key, value)
+            self.log("train_" + key, value)
         return ss
 
-    def training_epoch_end(self, outputs):
+    def training_epoch_end(self, outputs: dict):
+        """Update prototypes and then do normal stuff"""
         if self.trainer.current_epoch == 0:
             self.proto = [
                 torch.rand((self.num_proto, self.embed_dim), device=self.device) for i in range(self.hierarchy)

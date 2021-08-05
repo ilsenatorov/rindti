@@ -1,5 +1,6 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, _ArgumentGroup
 from random import randint
+from typing import Iterable
 
 import torch
 
@@ -25,47 +26,51 @@ def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
     return new_kwargs
 
 
-def get_name(**kwargs):
-    """
-    Create name for run from kwargs
-    """
-    prot = "PROT={prot_embed}:{prot_embed_dim}:{prot_hidden_dim}:{prot_dropout}".format(**kwargs)
-    drug = "DRUG={drug_embed}:{drug_embed_dim}:{drug_hidden_dim}:{drug_dropout}".format(**kwargs)
-    mlp = "MLP={mlp_num_layers}:{mlp_hidden_dim}:{mlp_dropout}:{feat_method}".format(**kwargs)
-    return "_".join([prot, drug, mlp])
-
-
-def create_numeric_mapping(node_properties):
-    """
-    Create node feature map.
-    :param node_properties: List of features sorted.
-    :return : Feature numeric map.
-    """
-    return {value: i for i, value in enumerate(node_properties)}
-
-
 class MyArgParser(ArgumentParser):
-    def add_argument_group(self, *args, prefix="", **kwargs):
+    """Custom argument parser"""
+
+    def add_argument_group(self, *args, prefix="", **kwargs) -> _ArgumentGroup:
+        """Adds an ArgumentsGroup with every argument startin with the prefix
+
+        Args:
+            prefix (str, optional): Prefix to begin arguments from. Defaults to "".
+
+        Returns:
+            _ArgumentGroup: group
+        """
         group = _MyArgumentGroup(self, *args, prefix=prefix, conflict_handler="resolve", **kwargs)
         self._action_groups.append(group)
         return group
 
 
 class _MyArgumentGroup(_ArgumentGroup):
+    """Custom arguments group
+
+    Args:
+        prefix (str, optional): Prefix to begin arguments from. Defaults to "".
+
+    """
+
     def __init__(self, *args, prefix="", **kwargs):
         self.prefix = prefix
         super().__init__(*args, **kwargs)
 
-    def add_argument(self, name, **kwargs):
+    def add_argument(self, name: str, **kwargs):
+        """Add argument with prefix before it
+
+        Args:
+            name (str): [description]
+        """
         name = self.prefix + name
         super().add_argument(name, **kwargs)
 
 
-def combine_parameters(params):
-    return torch.cat([param.view(-1) for param in params])
+def fake_data() -> Iterable[torch.Tensor]:
+    """Create fake entry for forward function of DTI prediction models
 
-
-def fake_data():
+    Returns:
+        Iterable[torch.Tensor]: prot and drug features, edge indices and batches
+    """
     return [
         torch.randint(low=0, high=5, size=(15,)),
         torch.randint(low=0, high=5, size=(15,)),
