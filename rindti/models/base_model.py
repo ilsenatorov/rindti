@@ -4,10 +4,11 @@ from typing import Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningModule
-from rindti.utils.data import TwoGraphData
 from torch.functional import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+
+from rindti.utils.data import TwoGraphData
 
 
 class BaseModel(LightningModule):

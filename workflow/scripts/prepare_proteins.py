@@ -3,8 +3,8 @@ from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from pandas.core.frame import DataFrame
 import torch
+from pandas.core.frame import DataFrame
 from sklearn.preprocessing import OneHotEncoder
 from torch_geometric.utils import to_undirected
 

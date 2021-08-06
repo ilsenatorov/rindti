@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+
 from torch.functional import Tensor
 from torch_geometric.nn import global_mean_pool
 from torch_geometric.typing import Adj

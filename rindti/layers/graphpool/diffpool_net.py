@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 from math import ceil
 
 import torch
-from torch.functional import Tensor
 import torch.nn.functional as F
 import torch_geometric
+from torch.functional import Tensor
 from torch.nn import Embedding
 from torch_geometric.nn import DenseSAGEConv, dense_diff_pool, dense_mincut_pool
 from torch_geometric.typing import Adj

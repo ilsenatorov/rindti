@@ -1,8 +1,8 @@
 import pickle
 
 import pandas as pd
-from pandas.core.frame import DataFrame
 import plotly.graph_objects as go
+from pandas.core.frame import DataFrame
 from plotly.subplots import make_subplots
 
 

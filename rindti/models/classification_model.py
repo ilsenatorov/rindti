@@ -2,24 +2,15 @@ from argparse import ArgumentParser
 
 import numpy as np
 import torch
-from torch.functional import Tensor
 import torch.nn.functional as F
+from torch.functional import Tensor
 from torch.nn import Embedding
 from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
-from ..utils.data import TwoGraphData
 
-from ..layers import (
-    MLP,
-    ChebConvNet,
-    DiffPoolNet,
-    GatConvNet,
-    GINConvNet,
-    GMTNet,
-    MeanPool,
-    NoneNet,
-)
+from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils import remove_arg_prefix
+from ..utils.data import TwoGraphData
 from .base_model import BaseModel
 
 node_embedders = {

@@ -1,6 +1,6 @@
-from os import stat
 import pickle
 import random
+from os import stat
 
 import numpy as np
 

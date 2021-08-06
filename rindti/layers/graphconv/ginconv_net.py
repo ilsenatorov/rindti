@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+
 import torch
 from torch.functional import Tensor
 from torch.nn import BatchNorm1d, Linear, ModuleList, ReLU, Sequential

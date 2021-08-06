@@ -2,9 +2,9 @@ import random
 from copy import deepcopy
 from math import ceil
 from typing import Tuple
-from numpy import ndarray
 
 import torch
+from numpy import ndarray
 from torch.functional import Tensor
 from torch.nn import Embedding
 from torch.optim import Adam

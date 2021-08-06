@@ -1,9 +1,10 @@
+from argparse import ArgumentParser
+
 from torch.functional import Tensor
 from torch_geometric.nn import ChebConv
+from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
-from argparse import ArgumentParser
-from torch_geometric.typing import Adj
 
 
 class ChebConvNet(BaseLayer):

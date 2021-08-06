@@ -1,7 +1,7 @@
 import torch
-from torch.functional import Tensor
 import torch.nn.functional as F
 from torch import nn
+from torch.functional import Tensor
 from torch_geometric.utils import to_dense_batch
 
 from ..base_layer import BaseLayer
