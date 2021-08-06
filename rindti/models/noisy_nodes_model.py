@@ -11,7 +11,7 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from rindti.utils.data import TwoGraphData
 
-from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
+from ..layers import ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from .classification_model import ClassificationModel
 
 node_embedders = {
