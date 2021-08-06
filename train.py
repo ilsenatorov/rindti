@@ -4,7 +4,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data.dataloader import DataLoader
 
-from rindti.models import ClassificationModel, NoisyNodesModel
+from rindti.models import ClassificationModel, NoisyNodesModel, RegressionModel
 from rindti.utils import fake_data
 from rindti.utils.data import Dataset
 from rindti.utils.transforms import GnomadTransformer, RandomTransformer
@@ -48,6 +48,8 @@ def train(**kwargs):
     )
     if kwargs["model"] == "classification":
         model = ClassificationModel(**kwargs)
+    elif kwargs["model"] == "regression":
+        model = RegressionModel(**kwargs)
     elif kwargs["model"] == "noisynodes":
         model = NoisyNodesModel(**kwargs)
     else:

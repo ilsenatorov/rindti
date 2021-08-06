@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.typing import Adj
-from torchmetrics.functional import explained_variance, mean_square_error, pearson_corrcoef
+from torchmetrics.functional import explained_variance, mean_squared_error, pearson_corrcoef
 
 from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils.data import TwoGraphData
@@ -17,7 +17,7 @@ node_embedders = {
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
-class ClassificationModel(ClassificationModel):
+class RegressionModel(ClassificationModel):
     """Model for DTI prediction as a regression problem"""
 
     def forward(
@@ -70,13 +70,9 @@ class ClassificationModel(ClassificationModel):
             data.drug_x_batch,
         )
         labels = data.label.unsqueeze(1)
-        if self.hparams.weighted:
-            weight = 1 / torch.sqrt(data.prot_count * data.drug_count)
-            loss = F.mse_loss(output, labels.float(), weight=weight.unsqueeze(1))
-        else:
-            loss = F.mse_loss(output, labels.float())
+        loss = F.mse_loss(output, labels.float())
         corr = pearson_corrcoef(output, labels)
-        mse = mean_square_error(output, labels)
+        mse = mean_squared_error(output, labels)
         expvar = explained_variance(output, labels)
         return {
             "loss": loss,
