@@ -1,20 +1,17 @@
 from argparse import ArgumentParser
 from copy import deepcopy
 from math import ceil
-from typing import Union
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torch.nn import Embedding
 from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from rindti.utils.data import TwoGraphData
 
 from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
-from ..utils import remove_arg_prefix
 from .classification_model import ClassificationModel
 
 node_embedders = {

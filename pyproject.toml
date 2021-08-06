@@ -19,3 +19,8 @@ verbose = 0
 quiet = false
 whitelist-regex = []
 color = true
+
+
+[tool.isort]
+profile = "black"
+line_length = 119
