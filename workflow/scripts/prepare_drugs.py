@@ -50,6 +50,12 @@ atom_num_mapping = {
     8: "other",
 }
 
+bond_type_mapping = {
+    "SINGLE": 0,
+    "DOUBLE": 1,
+    "AROMATIC": 2,
+}
+
 atom_num_mapping = {v: k for (k, v) in atom_num_mapping.items()}  # Reverse the mapping dict
 
 
@@ -69,9 +75,14 @@ def featurize(smiles: str) -> dict:
     mol = rdmolops.RenumberAtoms(mol, new_order)
 
     edges = []
+    edge_features = []
     for bond in mol.GetBonds():
         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         edges.append([start, end])
+        btype = str(bond.GetBondType())
+        if btype not in bond_type_mapping.keys():
+            return np.nan
+        edge_features.append(bond_type_mapping[btype])
     if not edges:  # If no edges (bonds) were found, exit (single ion etc)
         return np.nan
     atom_features = []
@@ -84,8 +95,10 @@ def featurize(smiles: str) -> dict:
 
     x = torch.tensor(atom_features, dtype=torch.long)
     edge_index = torch.tensor(edges).t().contiguous()
+    edge_features = torch.tensor(edge_features, dtype=torch.long)
+    edge_index, edge_features = to_undirected(edge_index, edge_features)
 
-    return dict(x=x, edge_index=to_undirected(edge_index, num_nodes=x.size(0)))
+    return dict(x=x, edge_index=edge_index, edge_features=edge_features)
 
 
 if __name__ == "__main__":
