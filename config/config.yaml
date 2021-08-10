@@ -12,17 +12,10 @@ only_proteins: false
 seed: 42
 
 prepare_proteins:
-  # data can be graph or sequence
-  data: graph
-  # features can be label, onehot or custom (which is onehot plus some derived numbers)
-  features: label
-  graph:
-    edge_attr:
-      # - type1
-      # - type2
-  sequence:
-    maxlen: 600
-
+  # can be label or onehot
+  node_features: label
+  # can be label, onehot or none
+  edge_features: label
 
 split:
   # available methods: random, coldtarget

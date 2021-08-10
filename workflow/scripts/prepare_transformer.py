@@ -1,11 +1,7 @@
 import pickle
 
-import numpy as np
 import pandas as pd
-import torch
-from prepare_proteins import aa_encoding, encode_residue
-
-encoded_residues = {i: torch.tensor(encode_residue(i)) for i in aa_encoding.keys()}
+from prepare_proteins import aa_encoding
 
 with open(snakemake.input.prots, "rb") as file:
     prots = pickle.load(file)
@@ -22,7 +18,7 @@ gnomad = gnomad_dict
 final_data = {
     "index_mapping": index_mapping,
     "gnomad": gnomad,
-    "encoded_residues": encoded_residues,
+    "encoded_residues": aa_encoding,
 }
 
 with open(snakemake.output.transformer_pickle, "wb") as file:
