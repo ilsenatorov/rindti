@@ -73,7 +73,6 @@ def featurize(smiles: str) -> dict:
         return np.nan
     new_order = rdmolfiles.CanonicalRankAtoms(mol)
     mol = rdmolops.RenumberAtoms(mol, new_order)
-
     edges = []
     edge_features = []
     for bond in mol.GetBonds():
@@ -92,12 +91,10 @@ def featurize(smiles: str) -> dict:
             atom_features.append(atom_num_mapping["other"])
         else:
             atom_features.append(atom_num_mapping[atom_num])
-
     x = torch.tensor(atom_features, dtype=torch.long)
     edge_index = torch.tensor(edges).t().contiguous()
     edge_features = torch.tensor(edge_features, dtype=torch.long)
     edge_index, edge_features = to_undirected(edge_index, edge_features)
-
     return dict(x=x, edge_index=edge_index, edge_features=edge_features)
 
 
