@@ -3,6 +3,10 @@ line-length = 119
 target-version = ['py36', 'py37', 'py38']
 include = '\.pyi?$'
 
+[tool.snakefmt]
+line_length = 119
+include = '\.smk$|^Snakefile'
+
 
 
 [tool.interrogate]

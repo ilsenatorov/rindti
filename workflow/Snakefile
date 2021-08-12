@@ -3,7 +3,11 @@ import os.path as osp
 
 
 report: "report/workflow.rst"
+
+
 configfile: "config/config.yaml"
+
+
 targets = [x.split(".")[0] for x in os.listdir("resources/structures")]
 
 if config["rinerator"] == "whole":
@@ -14,27 +18,30 @@ else:
 ### DEFINE OUTPUTS ###
 
 protein_output = "results/prepare_proteins/protein_data_{rinerator}_{node_features}_{edge_features}.pkl".format(
-            rinerator="whole" if config['rinerator'] == 'whole' else 'bsite{x}'.format(x=config['bsite']['radius']),
-            node_features=config["prepare_proteins"]["node_features"],
-            edge_features=config["prepare_proteins"]["edge_features"],)
+    rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
+    node_features=config["prepare_proteins"]["node_features"],
+    edge_features=config["prepare_proteins"]["edge_features"],
+)
 
 split_data = "results/split_data/{split}_{filtering}_split.csv".format(
-            split=config["split"]["method"],
-            filtering= config['parse_glass']['filtering'])
+    split=config["split"]["method"], filtering=config["parse_glass"]["filtering"]
+)
 
-transformer_output = 'results/prepare_transformer/{node_features}_transformer.pkl'.format(node_features=config["prepare_proteins"]["node_features"])
+transformer_output = "results/prepare_transformer/{node_features}_transformer.pkl".format(
+    node_features=config["prepare_proteins"]["node_features"]
+)
 
 final_output = "results/prepare_all/{split}_{rinerator}_{node_features}_{edge_features}_{filtering}_{type}.pkl".format(
     split=config["split"]["method"],
-    rinerator="whole" if config['rinerator'] == 'whole' else 'bsite{x}'.format(x=config['bsite']['radius']),
+    rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
     node_features=config["prepare_proteins"]["node_features"],
     edge_features=config["prepare_proteins"]["edge_features"],
-    filtering= config['parse_glass']['filtering'],
+    filtering=config["parse_glass"]["filtering"],
     type="class" if config["prepare_all"]["threshold"] else "regress",
 )
 
-plot_output = final_output.split('/')[-1].split(".")[0]
-plot_output = 'report/plot_summary/{out}.html'.format(out=plot_output)
+plot_output = final_output.split("/")[-1].split(".")[0]
+plot_output = "report/plot_summary/{out}.html".format(out=plot_output)
 
 
 prepare_proteins_rin_input = expand(osp.join(rinerator_dir, "{protein}", "{protein}_h.sif"), protein=targets)
@@ -44,30 +51,31 @@ output = [final_output, plot_output]
 
 ### CHECK IF FILES ARE PRESENT ###
 
-if osp.isdir('resources/templates'):
-    templates = expand("resources/templates/{template}", template=os.listdir('resources/templates'))
+if osp.isdir("resources/templates"):
+    templates = expand("resources/templates/{template}", template=os.listdir("resources/templates"))
 else:
-    if not config['only_proteins'] and config['rinerator'] == 'bsite':
+    if not config["only_proteins"] and config["rinerator"] == "bsite":
         raise ValueError("No templates available, can't run binding site calculation")
     templates = []
 
-if osp.isfile('resources/gnomad.csv'):
-    gnomad = 'resources/gnomad.csv'
+if osp.isfile("resources/gnomad.csv"):
+    gnomad = "resources/gnomad.csv"
     output.append(transformer_output)
 else:
-    if not config['only_proteins']:
+    if not config["only_proteins"]:
         raise ValueError("No gnomad available, can't create gnomad transformer")
     gnomad = []
 
-if osp.isdir('resources/drugs'):
-    drugs = {x:'resources/drugs/{x}.tsv'.format(x=x) for x in ['inter', 'ligands', 'targets']}
+if osp.isdir("resources/drugs"):
+    drugs = {x: "resources/drugs/{x}.tsv".format(x=x) for x in ["inter", "ligands", "targets"]}
 else:
-    if not config['only_proteins']:
+    if not config["only_proteins"]:
         raise ValueError("No drug interaction data available, can't calculate final data!")
-    drugs = {x:[] for x in ['inter', 'ligands', 'targets']}
+    drugs = {x: [] for x in ["inter", "ligands", "targets"]}
 
-if config['only_proteins']: # Only calculate the data for the proteins
+if config["only_proteins"]:  # Only calculate the data for the proteins
     output = [protein_output]
+
 
 rule all:
     input:
@@ -83,7 +91,6 @@ rule create_protein_list:
         "results/logs/create_protein_list.log",
     script:
         "scripts/create_protein_list.py"
-
 
 
 rule pymol_script:
@@ -106,9 +113,12 @@ rule run_pymol:
         script="results/pymol_scripts/{protein}.pml",
     output:
         rinhelpers="results/run_pymol/{protein}_rinhelper.txt",
-    log: "results/logs/run_pymol/{protein}.log",
-    conda: "envs/pymol.yml"
-    message: "Running PyMOL script for {wildcards.protein}, logs are in {log}"
+    log:
+        "results/logs/run_pymol/{protein}.log",
+    conda:
+        "envs/pymol.yml"
+    message:
+        "Running PyMOL script for {wildcards.protein}, logs are in {log}"
     shell:
         """
         pymol -k -y -c {input.script} > {log} 2>&1
@@ -133,21 +143,22 @@ rule rinerator_bsite:
 
 rule rinerator_whole:
     input:
-        pdb = osp.join("resources/structures", "{protein}.pdb"),
+        pdb=osp.join("resources/structures", "{protein}.pdb"),
     output:
-        sif = osp.join("results/rinerator_whole", "{protein}", "{protein}_h.sif"),
+        sif=osp.join("results/rinerator_whole", "{protein}", "{protein}_h.sif"),
     log:
         "results/logs/rinerator_whole/{protein}.log",
     message:
-        'Running RINerator for the whole {wildcards.protein}, logs are in {log}'
+        "Running RINerator for the whole {wildcards.protein}, logs are in {log}"
     shadow:
-        'shallow'
+        "shallow"
     shell:
         """rinerator {input.pdb} results/rinerator_whole/{wildcards.protein} > {log} 2>&1"""
 
+
 rule calculate_druglikeness:
     input:
-        lig = drugs['ligands']
+        lig=drugs["ligands"],
     output:
         lig="results/calculate_druglikeness/ligands.csv",
     message:
@@ -159,22 +170,19 @@ rule calculate_druglikeness:
 rule parse_glass:
     input:
         lig=rules.calculate_druglikeness.output.lig,
-        inter=drugs['inter'],
-        targ=drugs['targets'],
+        inter=drugs["inter"],
+        targ=drugs["targets"],
     output:
         lig="results/parse_glass/{filtering}_lig.csv".format(
-            filtering= config['parse_glass']['filtering'],
+            filtering=config["parse_glass"]["filtering"],
         ),
         inter="results/parse_glass/{filtering}_inter.csv".format(
-            filtering= config['parse_glass']['filtering'],
+            filtering=config["parse_glass"]["filtering"],
         ),
         targ="results/parse_glass/{filtering}_targ.csv".format(
-            filtering= config['parse_glass']['filtering'],
+            filtering=config["parse_glass"]["filtering"],
         ),
-        log="results/parse_glass/log.pkl", # report_html = 'report/parse_glass.html',
-         # report_png = report('report/parse_glass.png',
-         #         caption='report/parse_glass.rst',
-         #         category='GLASS dataset'),
+        log="results/parse_glass/log.pkl",
     message:
         """Parsing the GLASS database"""
     script:
@@ -183,11 +191,9 @@ rule parse_glass:
 
 rule prepare_proteins:
     input:
-        rins = prepare_proteins_rin_input,
-        # fingerprints=prepare_proteins_fingerprint_input,
-        # targ=rules.parse_glass.output.targ,
+        rins=prepare_proteins_rin_input,
     output:
-        protein_pickle = protein_output
+        protein_pickle=protein_output,
     message:
         """
         Creating protein data.
@@ -207,8 +213,7 @@ rule split_data:
     output:
         split_data="results/split_data/{split}_{filtering}_split.csv".format(
             split=config["split"]["method"],
-            filtering= config['parse_glass']['filtering'],
-
+            filtering=config["parse_glass"]["filtering"],
         ),
     message:
         "Splitting the dataset with {config[split][method]} method"
@@ -226,13 +231,14 @@ rule prepare_drugs:
     script:
         "scripts/prepare_drugs.py"
 
+
 rule prepare_all:
     input:
         drugs=rules.prepare_drugs.output.drug_pickle,
         proteins=rules.prepare_proteins.output.protein_pickle,
         inter=rules.split_data.output.split_data,
     output:
-        combined_pickle = final_output,
+        combined_pickle=final_output,
     message:
         """
         Combining the final dataset.
@@ -241,19 +247,21 @@ rule prepare_all:
     script:
         "scripts/prepare_all.py"
 
+
 rule prepare_transformer:
     input:
-        gnomad = gnomad,
-        prots = rules.prepare_proteins.output.protein_pickle,
+        gnomad=gnomad,
+        prots=rules.prepare_proteins.output.protein_pickle,
     output:
-        transformer_pickle = transformer_output
+        transformer_pickle=transformer_output,
     script:
         "scripts/prepare_transformer.py"
 
+
 rule plot_summary:
     input:
-        pickle = rules.prepare_all.output.combined_pickle
+        pickle=rules.prepare_all.output.combined_pickle,
     output:
-        html = plot_output
+        html=plot_output,
     script:
-        'scripts/plot_summary.py'
+        "scripts/plot_summary.py"
