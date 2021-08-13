@@ -40,7 +40,7 @@ class TwoGraphData(Data):
         prefix = key[:-lenedg]
         return self.__dict__[prefix + "x"].size(0)
 
-    def nnodes(self, prefix: str) -> int:
+    def num_nodes(self, prefix: str) -> int:
         """Number of nodes
 
         Args:
@@ -51,18 +51,31 @@ class TwoGraphData(Data):
         """
         return self.__dict__[prefix + "x"].size(0)
 
-    def numfeats(self, prefix: str) -> int:
-        """
-        Calculate the feature dimension of one of the graphs.
+    def num_edges(self, prefix: str) -> int:
+        """Returns number of edges for graph with prefix"""
+        return self.__dict[prefix + "edge_index"].size(1)
+
+    def num_node_feats(self, prefix: str) -> int:
+        """Calculate the feature dimension of one of the graphs.
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
         then return the max. Otherwise return size(1)
-        :param prefix: str for prefix "drug_", "prot_" or else
         """
         x = self.__dict__[prefix + "x"]
         if len(x.size()) == 1:
             return x.max().item() + 1
         if len(x.size()) == 2:
             return x.size(1)
+        raise ValueError("Too many dimensions in input features")
+
+    def num_edge_feats(self, prefix: str) -> int:
+        """Returns number of different edges for graph with prefix"""
+        if prefix + "edge_features" not in self.__dict__:
+            return 0
+        edge_features = self.__dict__[prefix + "edge_features"]
+        if len(edge_features.size()) == 1:
+            return edge_features.max().item() + 1
+        if len(edge_features.size()) == 2:
+            return edge_features.size(1)
         raise ValueError("Too many dimensions in input features")
 
 
@@ -122,9 +135,14 @@ class Dataset(InMemoryDataset):
         data, slices = self.collate(data_list)
         torch.save((data, slices, self.info), self.processed_paths[s])
 
+    def _update_info(self, key: str, value: int):
+        self.info[key] = max(self.info[key], value)
+
     def process(self):
         """If the dataset was not seen before, process everything"""
-        self.info = dict(prot_max_nodes=0, drug_max_nodes=0, prot_feat_dim=0, drug_feat_dim=0)
+        self.info = dict(
+            prot_max_nodes=0, drug_max_nodes=0, prot_feat_dim=0, drug_feat_dim=0, prot_edge_dim=0, drug_edge_dim=0
+        )
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
             for s, split in enumerate(["train", "val", "test"]):
@@ -146,13 +164,13 @@ class Dataset(InMemoryDataset):
                     new_i.update({"prot_" + k: v for (k, v) in prot_data.items()})
                     new_i.update({"drug_" + k: v for (k, v) in drug_data.items()})
                     two_graph_data = TwoGraphData(**new_i)
-                    self.info["prot_max_nodes"] = max(two_graph_data.nnodes("prot_"), self.info["prot_max_nodes"])
-                    self.info["drug_max_nodes"] = max(two_graph_data.nnodes("drug_"), self.info["drug_max_nodes"])
-                    self.info["prot_feat_dim"] = max(int(two_graph_data.prot_x.max()), self.info["prot_feat_dim"])
-                    self.info["drug_feat_dim"] = max(int(two_graph_data.drug_x.max()), self.info["drug_feat_dim"])
+                    self._update_info("prot_max_nodes", two_graph_data.num_nodes("prot_"))
+                    self._update_info("drug_max_nodes", two_graph_data.num_nodes("drug_"))
+                    self._update_info("prot_feat_dim", two_graph_data.num_node_feats("prot_"))
+                    self._update_info("drug_feat_dim", two_graph_data.num_node_feats("drug_"))
+                    self._update_info("prot_edge_dim", two_graph_data.num_edge_feats("prot_"))
+                    self._update_info("drug_edge_dim", two_graph_data.num_edge_feats("drug_"))
                     data_list.append(two_graph_data)
-                self.info["prot_feat_dim"] = data_list[0].numfeats("prot_")
-                self.info["drug_feat_dim"] = data_list[0].numfeats("drug_")
                 self.process_(data_list, s)
 
 

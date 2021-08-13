@@ -31,9 +31,8 @@ class ClassificationModel(BaseModel):
         self._determine_feat_method(kwargs["feat_method"], kwargs["drug_hidden_dim"], kwargs["prot_hidden_dim"])
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)
-        # TODO fix hardcoded values
-        self.prot_feat_embed = Embedding(20, kwargs["prot_node_embed_dim"])
-        self.drug_feat_embed = Embedding(30, kwargs["drug_node_embed_dim"])
+        self.prot_feat_embed = Embedding(prot_param["feat_dim"], prot_param["node_embed_dim"])
+        self.drug_feat_embed = Embedding(drug_param["feat_dim"], drug_param["node_embed_dim"])
         self.prot_node_embed = node_embedders[prot_param["node_embed"]](
             prot_param["node_embed_dim"], prot_param["hidden_dim"], **prot_param
         )

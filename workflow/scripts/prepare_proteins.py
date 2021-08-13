@@ -145,7 +145,7 @@ class ProteinEncoder:
         return node_attr
 
     def encode_edges(self, edges: pd.DataFrame) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Given dataframe of edges, create edge index and edge attributes
+        """Given dataframe of edges, create edge index and edge features
 
         Args:
             edges (pd.DataFrame): edges dataframe from parse_sif
@@ -181,8 +181,10 @@ class ProteinEncoder:
         """
         nodes, edges = self.parse_sif(protein_sif)
         node_attr = self.encode_nodes(nodes)
-        edge_index, edge_attr = self.encode_edges(edges)
-        return dict(x=node_attr, edge_index=edge_index, edge_attr=edge_attr, index_mapping=nodes["index"].to_dict())
+        edge_index, edge_features = self.encode_edges(edges)
+        return dict(
+            x=node_attr, edge_index=edge_index, edge_features=edge_features, index_mapping=nodes["index"].to_dict()
+        )
 
 
 def extract_name(protein_sif: str) -> str:

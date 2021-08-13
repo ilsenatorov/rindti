@@ -23,14 +23,7 @@ def train(**kwargs):
     val = Dataset(kwargs["data"], split="val")
     test = Dataset(kwargs["data"], split="test")
 
-    kwargs.update(
-        dict(
-            prot_max_nodes=train.info["prot_max_nodes"],
-            drug_max_nodes=train.info["drug_max_nodes"],
-            prot_feat_dim=train.info["prot_feat_dim"],
-            drug_feat_dim=train.info["drug_feat_dim"],
-        )
-    )
+    kwargs.update(train.info)
     model_name = kwargs["model_name"]
     if not model_name:
         model_name = kwargs["model"]
