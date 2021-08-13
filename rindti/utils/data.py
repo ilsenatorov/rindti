@@ -93,12 +93,15 @@ class Dataset(InMemoryDataset):
         split: str = "train",
         transform: Callable = None,
         pre_transform: Callable = None,
+        pre_filter: Callable = None,
     ):
+        pre_transform_tag = "" if pre_transform is None else str(pre_transform)
+        pre_filter_tag = "" if pre_transform is None else str(pre_filter)
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
-        root = os.path.join("data", basefilename)
+        root = os.path.join("data", basefilename + pre_transform_tag + pre_filter_tag)
         self.filename = filename
-        super().__init__(root, transform, pre_transform)
+        super().__init__(root, transform, pre_transform, pre_filter)
         if split == "train":
             self.data, self.slices, self.info = torch.load(self.processed_paths[0])
         elif split == "val":
@@ -110,11 +113,7 @@ class Dataset(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> Iterable[str]:
-        """Which files have to be in the dir to consider dataset processed
-
-        Returns:
-            Iterable[str]: list of files
-        """
+        """Files that are created"""
         return ["train.pt", "val.pt", "test.pt"]
 
     def process_(self, data_list: list, s: int):

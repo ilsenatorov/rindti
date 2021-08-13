@@ -105,6 +105,8 @@ if __name__ == "__main__":
 
     model.add_argument("--mlp_hidden_dim", default=64, type=int, help="MLP hidden dims")
     model.add_argument("--mlp_dropout", default=0.2, type=float, help="MLP dropout")
+    model.add_argument("--prot_edge_features", default=1, type=bool, help="Whether to use edge features for prot")
+    model.add_argument("--drug_edge_features", default=1, type=bool, help="Whether to use edge features for drug")
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
     optim.add_argument("--momentum", type=float, default=0.3)

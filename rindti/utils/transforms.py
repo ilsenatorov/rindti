@@ -1,8 +1,8 @@
 import pickle
 import random
-from os import stat
 
 import numpy as np
+import torch
 
 from .data import TwoGraphData
 
