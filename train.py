@@ -22,9 +22,6 @@ def train(**kwargs):
     val = Dataset(kwargs["data"], split="val")
     test = Dataset(kwargs["data"], split="test")
 
-    for k, v in train[0].__dict__.items():
-        print(k, v)
-
     kwargs.update(train.info)
     model_name = kwargs["model_name"]
     if not model_name:

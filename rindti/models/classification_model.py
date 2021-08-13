@@ -48,8 +48,8 @@ class ClassificationModel(BaseModel):
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
 
-        prot["x"] = self.prot_feat_embed(**prot)
-        drug["x"] = self.drug_feat_embed(**drug)
+        prot["x"] = self.prot_feat_embed(prot["x"])
+        drug["x"] = self.drug_feat_embed(drug["x"])
         prot["x"] = self.prot_node_embed(**prot)
         drug["x"] = self.drug_node_embed(**drug)
         prot_embed = self.prot_pool(**prot)
@@ -76,10 +76,9 @@ class ClassificationModel(BaseModel):
             loss = F.binary_cross_entropy(output, labels.float(), weight=weight.unsqueeze(1))
         else:
             loss = F.binary_cross_entropy(output, labels.float())
-        t = (output > 0.5).float()
-        acc = accuracy(t, labels)
+        acc = accuracy(output, labels)
         try:
-            _auroc = auroc(t, labels)
+            _auroc = auroc(output, labels)
         except Exception:
             _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
