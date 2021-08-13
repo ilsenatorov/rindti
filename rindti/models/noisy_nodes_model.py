@@ -6,12 +6,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from rindti.utils.data import TwoGraphData
 
 from ..layers import ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
+from ..utils import remove_arg_prefix
 from .classification_model import ClassificationModel
 
 node_embedders = {
@@ -85,40 +85,19 @@ class NoisyNodesModel(ClassificationModel):
             data["drug_cor_idx"] = drug_idx
         return data
 
-    def forward(
-        self,
-        prot_x: Tensor,
-        drug_x: Tensor,
-        prot_edge_index: Adj,
-        drug_edge_index: Adj,
-        prot_batch: Tensor,
-        drug_batch: Tensor,
-        *args,
-    ) -> Tensor:
-        """Forward pass of the model
+    def forward(self, prot: dict, drug: dict) -> Tensor:
+        """Forward pass of the model"""
 
-        Args:
-            prot_x (Tensor): Protein node features
-            drug_x (Tensor): Drug node features
-            prot_edge_index (Adj): Protein edge info
-            drug_edge_index (Adj): Drug edge info
-            prot_batch (Tensor): Protein batch
-            drug_batch (Tensor): Drug batch
-
-        Returns:
-            (Tensor): Final prediction
-        """
-        prot_x = self.prot_feat_embed(prot_x)
-        drug_x = self.drug_feat_embed(drug_x)
-        prot_x = self.prot_node_embed(prot_x, prot_edge_index, prot_batch)
-        drug_x = self.drug_node_embed(drug_x, drug_edge_index, drug_batch)
-        prot_embed = self.prot_pool(prot_x, prot_edge_index, prot_batch)
-        drug_embed = self.drug_pool(drug_x, drug_edge_index, drug_batch)
-
+        prot["x"] = self.prot_feat_embed(prot["x"])
+        drug["x"] = self.drug_feat_embed(drug["x"])
+        prot["x"] = self.prot_node_embed(**prot)
+        drug["x"] = self.drug_node_embed(**drug)
+        prot_embed = self.prot_pool(**prot)
+        drug_embed = self.drug_pool(**drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         logit = self.mlp(joint_embedding)
-        prot_pred = self.prot_pred(prot_x, prot_edge_index, prot_batch)
-        drug_pred = self.drug_pred(drug_x, drug_edge_index, drug_batch)
+        prot_pred = self.prot_pred(**prot)
+        drug_pred = self.drug_pred(**drug)
         return torch.sigmoid(logit), prot_pred, drug_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
@@ -131,14 +110,9 @@ class NoisyNodesModel(ClassificationModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         cor_data = self.corrupt_data(data, self.hparams.prot_frac, self.hparams.drug_frac)
-        output, prot_pred, drug_pred = self.forward(
-            cor_data["prot_x"],
-            cor_data["drug_x"],
-            cor_data["prot_edge_index"],
-            cor_data["drug_edge_index"],
-            cor_data["prot_x_batch"],
-            cor_data["drug_x_batch"],
-        )
+        prot = remove_arg_prefix("prot_", data)
+        drug = remove_arg_prefix("drug_", data)
+        output, prot_pred, drug_pred = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         if self.hparams.weighted:
             weight = 1 / torch.sqrt(data.prot_count * data.drug_count)
