@@ -174,12 +174,10 @@ class ProteinEncoder:
         edge_features = edges["type"].apply(lambda x: edge_type_encoding[x])
         if self.edge_features == "label":
             edge_features = torch.tensor(edge_features, dtype=torch.long)
-            edge_index, edge_features = to_undirected(edge_index, edge_features)
             return edge_index, edge_features
         elif self.edge_features == "onehot":
             edge_features = edge_features.apply(onehot_encode, count=len(edge_type_encoding))
             edge_features = torch.tensor(edge_features, dtype=torch.float)
-            edge_index, edge_features = to_undirected(edge_index, edge_features)
             return edge_index, edge_features
 
     def __call__(self, protein_sif: str) -> dict:
