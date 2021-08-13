@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterable
 
 import torch
 from torch_geometric.data import Data, InMemoryDataset
+from torch_geometric.utils import degree
 
 
 class TwoGraphData(Data):
@@ -128,6 +129,13 @@ class Dataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
+        self.info["prot_deg"] = torch.zeros(100, dtype=torch.long)
+        self.info["drug_deg"] = torch.zeros(10, dtype=torch.long)
+        for data in data_list:
+            d = degree(data["prot_edge_index"][1], num_nodes=data.n_nodes("prot_"), dtype=torch.long)
+            self.info["prot_deg"] += torch.bincount(d, minlength=self.info["prot_deg"].numel())
+            d = degree(data["drug_edge_index"][1], num_nodes=data.n_nodes("drug_"), dtype=torch.long)
+            self.info["drug_deg"] += torch.bincount(d, minlength=self.info["drug_deg"].numel())
 
         data, slices = self.collate(data_list)
         torch.save((data, slices, self.info), self.processed_paths[s])

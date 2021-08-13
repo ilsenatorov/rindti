@@ -13,7 +13,18 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from rindti.layers.base_layer import BaseLayer
 
-from ..layers import MLP, ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
+from ..layers import (
+    MLP,
+    ChebConvNet,
+    DiffPoolNet,
+    FilmConvNet,
+    GatConvNet,
+    GINConvNet,
+    GMTNet,
+    MeanPool,
+    NoneNet,
+    PNAConvNet,
+)
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
 from .base_model import BaseModel
@@ -23,6 +34,7 @@ node_embedders = {
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
     "filmconv": FilmConvNet,
+    "pnaconv": PNAConvNet,
     "none": NoneNet,
 }
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
