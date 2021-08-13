@@ -1,4 +1,5 @@
 import math
+from argparse import ArgumentParser
 from math import ceil
 
 import torch
@@ -12,20 +13,24 @@ from ..base_layer import BaseLayer
 
 
 class GMTNet(BaseLayer):
+    """Graph Multiset Pooling
+    https://github.com/JinheonBaek/GMT/"""
+
     @staticmethod
-    def add_arguments(group):
-        group.add_argument("pool", default="gmt", type=str)
-        group.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
-        group.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
-        group.add_argument("num_heads", default=4, type=int, help="Number of heads for attention")
-        return group
+    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
+        """Generate arguments for this module"""
+        parser.add_argument("pool", default="gmt", type=str)
+        parser.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
+        parser.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
+        parser.add_argument("pooling_method", default="mincut", type=str, help="Type of pooling")
+        return parser
 
     def __init__(
         self,
         input_dim,
         output_dim,
         hidden_dim=128,
-        ratio=0.5,
+        ratio=0.25,
         max_nodes=600,
         num_heads=4,
         ln=False,
@@ -33,14 +38,13 @@ class GMTNet(BaseLayer):
         **kwargs,
     ):
         super().__init__()
-
         num_nodes = ceil(ratio * max_nodes)
         self.gmpoolg = PMA(input_dim, num_heads, num_nodes, ln=ln, cluster=cluster, mab_conv="GIN")
-        num_nodes = ceil(ratio * num_nodes)
-        self.sab = SAB(hidden_dim, hidden_dim, num_heads, ln=ln, cluster=cluster)
+        self.sab = SAB(input_dim, output_dim, num_heads, ln=ln, cluster=cluster)
         self.gmpooli = PMA(output_dim, num_heads, 1, ln=ln, cluster=cluster, mab_conv=None)
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor, **kwargs):
+        """Forward pass"""
         batch_x, mask = to_dense_batch(x, batch)
         extended_attention_mask = mask.unsqueeze(1)
         extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
@@ -52,11 +56,15 @@ class GMTNet(BaseLayer):
         )
         batch_x = self.sab(batch_x)
         batch_x = self.gmpooli(batch_x)
+        print(batch_x.size())
         x = batch_x.squeeze(1)
+        print(batch_x.size())
         return x
 
 
 class MAB(LightningModule):
+    """Multiset Attention"""
+
     def __init__(self, dim_Q, dim_K, dim_V, num_heads, ln=False, cluster=False, conv=None):
         super(MAB, self).__init__()
         self.dim_V = dim_V
@@ -75,6 +83,7 @@ class MAB(LightningModule):
             self.softmax_dim = 1
 
     def forward(self, Q, K, attention_mask=None, graph=None, return_attn=False):
+        """Forward pass"""
         Q = self.fc_q(Q)
 
         # Adj: Exist (graph is not None), or Identity (else)
@@ -107,6 +116,7 @@ class MAB(LightningModule):
             return O
 
     def get_fc_kv(self, dim_K, dim_V, conv):
+        """Get attention values"""
         if conv == "GCN":
             fc_k = GCNConv(dim_K, dim_V)
             fc_v = GCNConv(dim_K, dim_V)
@@ -138,6 +148,8 @@ class MAB(LightningModule):
 
 
 class SAB(LightningModule):
+    """Self-attention module"""
+
     def __init__(self, dim_in, dim_out, num_heads, ln=False, cluster=False, mab_conv=None):
         super(SAB, self).__init__()
 
@@ -148,6 +160,8 @@ class SAB(LightningModule):
 
 
 class ISAB(LightningModule):
+    """I think it's not used ATM"""
+
     def __init__(
         self,
         dim_in,
@@ -166,11 +180,14 @@ class ISAB(LightningModule):
         self.mab1 = MAB(dim_in, dim_out, dim_out, num_heads, ln=ln, cluster=cluster, conv=mab_conv)
 
     def forward(self, X, attention_mask=None, graph=None):
+        """Forward pass"""
         H = self.mab0(self.I.repeat(X.size(0), 1, 1), X, attention_mask, graph)
         return self.mab1(X, H)
 
 
 class PMA(LightningModule):
+    """Need to figure this out"""
+
     def __init__(self, dim, num_heads, num_seeds, ln=False, cluster=False, mab_conv=None):
         super(PMA, self).__init__()
         self.S = nn.Parameter(torch.Tensor(1, num_seeds, dim))
@@ -179,4 +196,5 @@ class PMA(LightningModule):
         self.mab = MAB(dim, dim, dim, num_heads, ln=ln, cluster=cluster, conv=mab_conv)
 
     def forward(self, X, attention_mask=None, graph=None, return_attn=False):
+        """Forward pass"""
         return self.mab(self.S.repeat(X.size(0), 1, 1), X, attention_mask, graph, return_attn)
