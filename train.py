@@ -108,8 +108,8 @@ if __name__ == "__main__":
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
     optim.add_argument("--momentum", type=float, default=0.3)
-    optim.add_argument("--lr", type=float, default=0.001, help="mlp learning rate")
-    optim.add_argument("--weight_decay", type=float, default=0.001, help="weight decay")
+    optim.add_argument("--lr", type=float, default=0.0005, help="mlp learning rate")
+    optim.add_argument("--weight_decay", type=float, default=0.01, help="weight decay")
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
 
