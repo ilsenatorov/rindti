@@ -8,7 +8,6 @@ line_length = 119
 include = '\.smk$|^Snakefile'
 
 
-
 [tool.interrogate]
 ignore-init-method = true
 ignore-init-module = false
