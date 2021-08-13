@@ -1,13 +1,14 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, _ArgumentGroup
 from random import randint
-from typing import Iterable
+from typing import Iterable, Union
 
 import torch
 
+from rindti.utils.data import TwoGraphData
 
-def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
+
+def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
     """Removes the prefix from all the args
-
     Args:
         prefix (str): prefix to remove (`drug_`, `prot_` or `mlp_` usually)
         kwargs (dict): dict of arguments
@@ -16,6 +17,8 @@ def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
         dict: Sub-dict of arguments
     """
     new_kwargs = {}
+    if not isinstance(kwargs, dict):
+        kwargs = kwargs.__dict__
     prefix_len = len(prefix)
     for key, value in kwargs.items():
         if key.startswith(prefix):
@@ -63,19 +66,3 @@ class _MyArgumentGroup(_ArgumentGroup):
         """
         name = self.prefix + name
         super().add_argument(name, **kwargs)
-
-
-def fake_data() -> Iterable[torch.Tensor]:
-    """Create fake entry for forward function of DTI prediction models
-
-    Returns:
-        Iterable[torch.Tensor]: prot and drug features, edge indices and batches
-    """
-    return [
-        torch.randint(low=0, high=5, size=(15,)),
-        torch.randint(low=0, high=5, size=(15,)),
-        torch.randint(low=0, high=5, size=(2, 10)),
-        torch.randint(low=0, high=5, size=(2, 10)),
-        torch.zeros((15,), dtype=torch.long),
-        torch.zeros((15,), dtype=torch.long),
-    ]

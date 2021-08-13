@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 from torch.nn import Embedding
+from torch_geometric.data.data import Data
 from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
@@ -44,35 +45,15 @@ class ClassificationModel(BaseModel):
         mlp_param = remove_arg_prefix("mlp_", kwargs)
         self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
 
-    def forward(
-        self,
-        prot_x: Tensor,
-        drug_x: Tensor,
-        prot_edge_index: Adj,
-        drug_edge_index: Adj,
-        prot_batch: Tensor,
-        drug_batch: Tensor,
-        *args,
-    ) -> Tensor:
-        """Forward pass of the model
+    def forward(self, prot: dict, drug: dict) -> Tensor:
+        """Forward pass of the model"""
 
-        Args:
-            prot_x (Tensor): Protein node features
-            drug_x (Tensor): Drug node features
-            prot_edge_index (Adj): Protein edge info
-            drug_edge_index (Adj): Drug edge info
-            prot_batch (Tensor): Protein batch
-            drug_batch (Tensor): Drug batch
-
-        Returns:
-            (Tensor): Final prediction
-        """
-        prot_x = self.prot_feat_embed(prot_x)
-        drug_x = self.drug_feat_embed(drug_x)
-        prot_x = self.prot_node_embed(prot_x, prot_edge_index, prot_batch)
-        drug_x = self.drug_node_embed(drug_x, drug_edge_index, drug_batch)
-        prot_embed = self.prot_pool(prot_x, prot_edge_index, prot_batch)
-        drug_embed = self.drug_pool(drug_x, drug_edge_index, drug_batch)
+        prot["x"] = self.prot_feat_embed(**prot)
+        drug["x"] = self.drug_feat_embed(**drug)
+        prot["x"] = self.prot_node_embed(**prot)
+        drug["x"] = self.drug_node_embed(**drug)
+        prot_embed = self.prot_pool(**prot)
+        drug_embed = self.drug_pool(**drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         logit = self.mlp(joint_embedding)
         return torch.sigmoid(logit)
@@ -86,17 +67,12 @@ class ClassificationModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        output = self.forward(
-            data.prot_x,
-            data.drug_x,
-            data.prot_edge_index,
-            data.drug_edge_index,
-            data.prot_x_batch,
-            data.drug_x_batch,
-        )
+        prot = remove_arg_prefix("prot_", data)
+        drug = remove_arg_prefix("drug_", data)
+        output = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         if self.hparams.weighted:
-            weight = 1 / torch.sqrt(data.prot_count * data.drug_count)
+            weight = 1 / torch.sqrt(prot["count"] * drug["count"])
             loss = F.binary_cross_entropy(output, labels.float(), weight=weight.unsqueeze(1))
         else:
             loss = F.binary_cross_entropy(output, labels.float())

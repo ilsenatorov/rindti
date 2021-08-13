@@ -4,11 +4,8 @@ Just a collection of different useful functions, data structures and helpers.
 
 import os
 import pickle
-from copy import deepcopy
-from math import ceil
-from typing import Any, Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable
 
-import numpy as np
 import torch
 from torch_geometric.data import Data, InMemoryDataset
 
@@ -40,7 +37,7 @@ class TwoGraphData(Data):
         prefix = key[:-lenedg]
         return self.__dict__[prefix + "x"].size(0)
 
-    def num_nodes(self, prefix: str) -> int:
+    def n_nodes(self, prefix: str) -> int:
         """Number of nodes
 
         Args:
@@ -51,11 +48,11 @@ class TwoGraphData(Data):
         """
         return self.__dict__[prefix + "x"].size(0)
 
-    def num_edges(self, prefix: str) -> int:
+    def n_edges(self, prefix: str) -> int:
         """Returns number of edges for graph with prefix"""
         return self.__dict[prefix + "edge_index"].size(1)
 
-    def num_node_feats(self, prefix: str) -> int:
+    def n_node_feats(self, prefix: str) -> int:
         """Calculate the feature dimension of one of the graphs.
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
         then return the max. Otherwise return size(1)
@@ -67,7 +64,7 @@ class TwoGraphData(Data):
             return x.size(1)
         raise ValueError("Too many dimensions in input features")
 
-    def num_edge_feats(self, prefix: str) -> int:
+    def n_edge_feats(self, prefix: str) -> int:
         """Returns number of different edges for graph with prefix"""
         if prefix + "edge_features" not in self.__dict__:
             return 0
@@ -164,12 +161,12 @@ class Dataset(InMemoryDataset):
                     new_i.update({"prot_" + k: v for (k, v) in prot_data.items()})
                     new_i.update({"drug_" + k: v for (k, v) in drug_data.items()})
                     two_graph_data = TwoGraphData(**new_i)
-                    self._update_info("prot_max_nodes", two_graph_data.num_nodes("prot_"))
-                    self._update_info("drug_max_nodes", two_graph_data.num_nodes("drug_"))
-                    self._update_info("prot_feat_dim", two_graph_data.num_node_feats("prot_"))
-                    self._update_info("drug_feat_dim", two_graph_data.num_node_feats("drug_"))
-                    self._update_info("prot_edge_dim", two_graph_data.num_edge_feats("prot_"))
-                    self._update_info("drug_edge_dim", two_graph_data.num_edge_feats("drug_"))
+                    self._update_info("prot_max_nodes", two_graph_data.n_nodes("prot_"))
+                    self._update_info("drug_max_nodes", two_graph_data.n_nodes("drug_"))
+                    self._update_info("prot_feat_dim", two_graph_data.n_node_feats("prot_"))
+                    self._update_info("drug_feat_dim", two_graph_data.n_node_feats("drug_"))
+                    self._update_info("prot_edge_dim", two_graph_data.n_edge_feats("prot_"))
+                    self._update_info("drug_edge_dim", two_graph_data.n_edge_feats("drug_"))
                     data_list.append(two_graph_data)
                 self.process_(data_list, s)
 

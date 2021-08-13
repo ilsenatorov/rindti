@@ -5,7 +5,6 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data.dataloader import DataLoader
 
 from rindti.models import ClassificationModel, NoisyNodesModel, RegressionModel
-from rindti.utils import fake_data
 from rindti.utils.data import Dataset
 from rindti.utils.transforms import GnomadTransformer, RandomTransformer
 
@@ -22,6 +21,9 @@ def train(**kwargs):
     train = Dataset(kwargs["data"], split="train", transform=transform)
     val = Dataset(kwargs["data"], split="val")
     test = Dataset(kwargs["data"], split="test")
+
+    for k, v in train[0].__dict__.items():
+        print(k, v)
 
     kwargs.update(train.info)
     model_name = kwargs["model_name"]
@@ -52,9 +54,6 @@ def train(**kwargs):
     train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True)
     val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
     test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
-
-    logger.experiment.add_graph(model, fake_data())
-
     trainer.fit(model, train_dataloader, val_dataloader)
     trainer.test(model, test_dataloader)
 
