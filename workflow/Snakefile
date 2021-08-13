@@ -31,13 +31,12 @@ transformer_output = "results/prepare_transformer/{node_feats}_transformer.pkl".
     node_feats=config["prepare_proteins"]["node_feats"]
 )
 
-final_output = "results/prepare_all/{split}_{rinerator}_{node_feats}_{edge_feats}_{filtering}_{type}.pkl".format(
+final_output = "results/prepare_all/{split}_{rinerator}_{node_feats}_{edge_feats}_{filtering}.pkl".format(
     split=config["split"]["method"],
     rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
     node_feats=config["prepare_proteins"]["node_feats"],
     edge_feats=config["prepare_proteins"]["edge_feats"],
     filtering=config["parse_glass"]["filtering"],
-    type="class" if config["prepare_all"]["threshold"] else "regress",
 )
 
 plot_output = final_output.split("/")[-1].split(".")[0]

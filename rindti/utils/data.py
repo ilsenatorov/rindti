@@ -69,6 +69,8 @@ class TwoGraphData(Data):
         """Returns number of different edges for graph with prefix"""
         if prefix + "edge_feats" not in self.__dict__:
             return 1
+        if self.__dict__[prefix + "edge_feats"] is None:
+            return 1
         edge_feats = self.__dict__[prefix + "edge_feats"]
         if len(edge_feats.size()) == 1:
             return edge_feats.max().item() + 1

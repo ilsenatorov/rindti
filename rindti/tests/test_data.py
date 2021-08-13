@@ -31,3 +31,13 @@ class TestTwoGraphData:
         """Tests .n_edge_feats if data is torch.float32 (onehot)"""
         tgd = TwoGraphData(a_edge_feats=torch.tensor([[0, 1, 0, 0], [1, 0, 0, 0]]), dtype=torch.long)
         assert tgd.n_edge_feats("a_") == 4
+
+    def test_n_edge_feats_none(self):
+        """Tests .n_edge_feats if data is None"""
+        tgd = TwoGraphData(a_edge_feats=None)
+        assert tgd.n_edge_feats("a_") == 1
+
+    def test_n_edge_feats_gone(self):
+        """Tests .n_edge_feats if data is gone"""
+        tgd = TwoGraphData()
+        assert tgd.n_edge_feats("a_") == 1

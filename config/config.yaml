@@ -15,7 +15,7 @@ prepare_proteins:
   # can be label or onehot
   node_feats: label
   # can be label, onehot or none
-  edge_feats: label
+  edge_feats: none
 
 split:
   # available methods: random, coldtarget
@@ -25,7 +25,6 @@ split:
   # test is created as a remainder of train and val
 
 prepare_all:
-  # if threshold==0, the model is treated as regression
   threshold: 1000
 
 parse_glass:
