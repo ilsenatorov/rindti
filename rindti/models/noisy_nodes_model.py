@@ -29,10 +29,10 @@ class NoisyNodesModel(ClassificationModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.prot_pred = node_embedders[kwargs["prot_node_embed"]](
-            kwargs["prot_hidden_dim"], 20, num_layers=3, hidden_dim=32
+            kwargs["prot_hidden_dim"], kwargs["prot_feat_dim"], num_layers=3, hidden_dim=32
         )
         self.drug_pred = node_embedders[kwargs["drug_node_embed"]](
-            kwargs["drug_hidden_dim"], 30, num_layers=3, hidden_dim=32
+            kwargs["drug_hidden_dim"], kwargs["drug_feat_dim"], num_layers=3, hidden_dim=32
         )
 
     def corrupt_features(self, features: torch.Tensor, frac: float) -> torch.Tensor:
