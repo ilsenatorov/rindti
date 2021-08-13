@@ -67,36 +67,19 @@ class DiffPoolNet(BaseLayer):
         Returns:
             Tensor: Graph representation vector
         """
-        if self.node_embed:
-            x = self.node_embedding(x)
 
-        # Need adjacency for diffpool
         x, _ = torch_geometric.utils.to_dense_batch(x, batch, max_num_nodes=self.max_nodes)
         adj = torch_geometric.utils.to_dense_adj(edge_index, batch, max_num_nodes=self.max_nodes)
 
-        # x = (256, 140, 30)
-        # adj = (256, 140, 140)
-        # xs = []
-
         s = self.poolblock1(x, adj)  # (256, 140, 75)
         x = self.embedblock1(x, adj)  # (256, 140, 96)
-        # xs.append(x)
         x, adj, lp_loss1, e_loss1 = self.pool(x, adj, s)
-        # x = (256, 70, 96)
-        # adj = (256, 70, 70)
 
         s = self.poolblock2(x, adj)  # (256, 70, 35)
         x = self.embedblock2(x, adj)  # (256, 70, 96)
-        # xs.append(x)
         x, adj, lp_loss2, e_loss2 = self.pool(x, adj, s)
-        # x = (256, 35, 96)
-        # adj = (256, 35, 35)
 
         x = self.embedblock3(x, adj)  # (256, 35, 96)
-        # xs.append(x)
-        # x = self.att(x, batch)
-
-        # x = self.jump([x.mean(dim=1) for x in xs])  # (256, 96)
         x = F.relu(x)
         x = x.mean(dim=1)
         x = self.lin1(x)

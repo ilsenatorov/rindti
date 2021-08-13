@@ -49,21 +49,21 @@ default_config = {
     "drug_alpha": 1,
 }
 
+fake_data = {
+    "prot_x": torch.randint(low=0, high=5, size=(15,)),
+    "drug_x": torch.randint(low=0, high=5, size=(15,)),
+    "prot_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
+    "drug_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
+    "prot_edge_feats": torch.randint(low=0, high=5, size=(10,)),
+    "drug_edge_feats": torch.randint(low=0, high=5, size=(10,)),
+    "prot_x_batch": torch.zeros((15,), dtype=torch.long),
+    "drug_x_batch": torch.zeros((15,), dtype=torch.long),
+    "label": torch.tensor([1]),
+}
+
 
 class BaseTestModel:
     """Abstract class for model testing"""
-
-    fake_data = {
-        "prot_x": torch.randint(low=0, high=5, size=(15,)),
-        "drug_x": torch.randint(low=0, high=5, size=(15,)),
-        "prot_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-        "drug_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-        "prot_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-        "drug_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-        "prot_x_batch": torch.zeros((15,), dtype=torch.long),
-        "drug_x_batch": torch.zeros((15,), dtype=torch.long),
-        "label": torch.tensor([1]),
-    }
 
     def test_init(self):
         """Test .__init__"""
@@ -72,7 +72,7 @@ class BaseTestModel:
     def test_shared_step(self):
         """Test .__shared_step"""
         model = self.model(**default_config)
-        model.shared_step(TwoGraphData(**self.fake_data))
+        model.shared_step(TwoGraphData(**fake_data))
 
 
 class TestClassModel(BaseTestModel):
