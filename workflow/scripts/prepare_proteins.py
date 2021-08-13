@@ -47,27 +47,27 @@ def onehot_encode(position: int, count: Optional[int] = 20):
 
 
 class ProteinEncoder:
-    def __init__(self, node_feats: str, edge_feats: str):
-        self.node_feats = node_feats
-        self.edge_feats = edge_feats
+    def __init__(self, node_features: str, edge_features: str):
+        self.node_features = node_features
+        self.edge_features = edge_features
 
     def encode_residue(self, residue: str) -> np.array:
-        """Fully encode residue - one-hot and node_feats
+        """Fully encode residue - one-hot and node_features
 
         Args:
             residue (str): One-letter residue name
 
         Returns:
-            np.array: Concatenated node_feats and one-hot encoding of residue name
+            np.array: Concatenated node_features and one-hot encoding of residue name
         """
         if residue.lower() not in aa_encoding:
             return None
-        elif self.node_feats == "label":
+        elif self.node_features == "label":
             return aa_encoding[residue.lower()]
-        elif self.node_feats == "onehot":
+        elif self.node_features == "onehot":
             return onehot_encode(aa_encoding[residue.lower()])
         else:
-            raise ValueError("Unknown node_feats type!")
+            raise ValueError("Unknown node_features type!")
 
     def parse_sif(self, filename: str) -> Tuple[DataFrame, DataFrame]:
         """Parse a single sif file
@@ -136,26 +136,26 @@ class ProteinEncoder:
         return nodes, edges
 
     def encode_nodes(self, nodes: pd.DataFrame) -> torch.Tensor:
-        """Given dataframe of nodes create node node_feats
+        """Given dataframe of nodes create node node_features
 
         Args:
             nodes (pd.DataFrame): nodes dataframe from parse_sif
 
         Returns:
-            torch.Tensor: Tensor of node node_feats [n_nodes, *]
+            torch.Tensor: Tensor of node node_features [n_nodes, *]
         """
         nodes.drop_duplicates(inplace=True)
         node_attr = [self.encode_residue(x) for x in nodes["resaa"]]
         node_attr = [x for x in node_attr if x is not None]
         node_attr = np.asarray(node_attr)
-        if self.node_feats == "label":
+        if self.node_features == "label":
             node_attr = torch.tensor(node_attr, dtype=torch.long)
         else:
             node_attr = torch.tensor(node_attr, dtype=torch.float32)
         return node_attr
 
     def encode_edges(self, edges: pd.DataFrame) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Given dataframe of edges, create edge index and edge node_feats
+        """Given dataframe of edges, create edge index and edge node_features
 
         Args:
             edges (pd.DataFrame): edges dataframe from parse_sif
@@ -163,24 +163,24 @@ class ProteinEncoder:
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: edge index [2,n_edges], edge attributes [n_edges, *]
         """
-        if self.edge_feats == "none":
+        if self.edge_features == "none":
             edges.drop("type", axis=1, inplace=True)
         edges.drop_duplicates(inplace=True)
         edge_index = edges[["node1", "node2"]].astype(int).values
         edge_index = torch.tensor(edge_index, dtype=torch.long)
         edge_index = edge_index.t().contiguous()
-        if self.edge_feats == "none":
+        if self.edge_features == "none":
             return edge_index, None
-        edge_feats = edges["type"].apply(lambda x: edge_type_encoding[x])
-        if self.edge_feats == "label":
-            edge_feats = torch.tensor(edge_feats, dtype=torch.long)
-            edge_index, edge_feats = to_undirected(edge_index, edge_feats)
-            return edge_index, edge_feats
-        elif self.edge_feats == "onehot":
-            edge_feats = edge_feats.apply(onehot_encode, count=len(edge_type_encoding))
-            edge_feats = torch.tensor(edge_feats, dtype=torch.float)
-            edge_index, edge_feats = to_undirected(edge_index, edge_feats)
-            return edge_index, edge_feats
+        edge_features = edges["type"].apply(lambda x: edge_type_encoding[x])
+        if self.edge_features == "label":
+            edge_features = torch.tensor(edge_features, dtype=torch.long)
+            edge_index, edge_features = to_undirected(edge_index, edge_features)
+            return edge_index, edge_features
+        elif self.edge_features == "onehot":
+            edge_features = edge_features.apply(onehot_encode, count=len(edge_type_encoding))
+            edge_features = torch.tensor(edge_features, dtype=torch.float)
+            edge_index, edge_features = to_undirected(edge_index, edge_features)
+            return edge_index, edge_features
 
     def __call__(self, protein_sif: str) -> dict:
         """Fully process the protein
@@ -189,12 +189,14 @@ class ProteinEncoder:
             protein_sif (str): File location for sif file
 
         Returns:
-            dict: standard format with x for node node_feats, edge_index for edges etc
+            dict: standard format with x for node node_features, edge_index for edges etc
         """
         nodes, edges = self.parse_sif(protein_sif)
         node_attr = self.encode_nodes(nodes)
-        edge_index, edge_feats = self.encode_edges(edges)
-        return dict(x=node_attr, edge_index=edge_index, edge_feats=edge_feats, index_mapping=nodes["index"].to_dict())
+        edge_index, edge_features = self.encode_edges(edges)
+        return dict(
+            x=node_attr, edge_index=edge_index, edge_features=edge_features, index_mapping=nodes["index"].to_dict()
+        )
 
 
 def extract_name(protein_sif: str) -> str:
@@ -208,7 +210,7 @@ if __name__ == "__main__":
     proteins["ID"] = proteins["sif"].apply(extract_name)
     proteins.set_index("ID", inplace=True)
     prot_encoder = ProteinEncoder(
-        snakemake.config["prepare_proteins"]["node_feats"], snakemake.config["prepare_proteins"]["edge_feats"]
+        snakemake.config["prepare_proteins"]["node_features"], snakemake.config["prepare_proteins"]["edge_features"]
     )
     proteins["data"] = proteins["sif"].apply(prot_encoder)
     with open(snakemake.output.protein_pickle, "wb") as file:
