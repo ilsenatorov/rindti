@@ -123,10 +123,9 @@ class NoisyNodesModel(ClassificationModel):
         drug_idx = cor_data.drug_cor_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
-        t = (output > 0.5).float()
-        acc = accuracy(t, labels)
+        acc = accuracy(output, labels)
         try:
-            _auroc = auroc(t, labels)
+            _auroc = auroc(output, labels, pos_label=1)
         except Exception:
             _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)

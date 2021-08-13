@@ -45,6 +45,7 @@ class ClassificationModel(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__()
+        pprint(kwargs)
         self.save_hyperparameters()
         self._determine_feat_method(**kwargs)
         drug_param = remove_arg_prefix("drug_", kwargs)
@@ -98,7 +99,7 @@ class ClassificationModel(BaseModel):
             loss = F.binary_cross_entropy(output, labels.float())
         acc = accuracy(output, labels)
         try:
-            _auroc = auroc(output, labels)
+            _auroc = auroc(output, labels, pos_label=1)
         except Exception:
             _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
