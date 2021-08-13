@@ -107,42 +107,21 @@ if __name__ == "__main__":
     model.add_argument("--mlp_dropout", default=0.2, type=float, help="MLP dropout")
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
-    optim.add_argument(
-        "--momentum",
-        type=float,
-        default=0.3,
-        help="Optimisation momentum (where applicable)",
-    )
+    optim.add_argument("--momentum", type=float, default=0.3)
     optim.add_argument("--lr", type=float, default=0.001, help="mlp learning rate")
     optim.add_argument("--weight_decay", type=float, default=0.001, help="weight decay")
-    optim.add_argument(
-        "--reduce_lr_patience",
-        type=int,
-        default=20,
-        help="epoch with no improvement before lr is reduced",
-    )
-    optim.add_argument(
-        "--reduce_lr_factor",
-        type=float,
-        default=0.1,
-        help="factor for lr reduction (new_lr = factor*lr)",
-    )
+    optim.add_argument("--reduce_lr_patience", type=int, default=20)
+    optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
 
     transformer.add_argument("--transformer", type=str, default="none", help="Type of transformer to apply")
     transformer.add_argument(
         "--transformer_pickle",
         type=str,
         default="../rins/results/prepare_transformer/onehot_simple_transformer.pkl",
-        help="Location of transform pickle",
     )
-    transformer.add_argument(
-        "--max_num_mut",
-        type=int,
-        default=100,
-        help="Max number of mutations per protein",
-    )
+    transformer.add_argument("--max_num_mut", type=int, default=100)
 
-    parser = NoisyNodesModel.add_arguments(parser)
+    parser = ClassificationModel.add_arguments(parser)
 
     args = parser.parse_args()
     argvars = vars(args)

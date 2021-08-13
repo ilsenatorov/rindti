@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from pprint import pprint
 
 import numpy as np
 import torch
@@ -6,10 +7,13 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torch.nn import Embedding
 from torch_geometric.data.data import Data
+from torch_geometric.nn import pool
 from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
-from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
+from rindti.layers.base_layer import BaseLayer
+
+from ..layers import MLP, ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
 from .base_model import BaseModel
@@ -18,6 +22,7 @@ node_embedders = {
     "ginconv": GINConvNet,
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
+    "filmconv": FilmConvNet,
     "none": NoneNet,
 }
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
@@ -29,25 +34,32 @@ class ClassificationModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self._determine_feat_method(kwargs["feat_method"], kwargs["drug_hidden_dim"], kwargs["prot_hidden_dim"])
+        self._determine_feat_method(**kwargs)
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)
-        self.prot_feat_embed = Embedding(prot_param["feat_dim"], prot_param["node_embed_dim"])
-        self.drug_feat_embed = Embedding(drug_param["feat_dim"], drug_param["node_embed_dim"])
-        self.prot_node_embed = node_embedders[prot_param["node_embed"]](
-            prot_param["node_embed_dim"], prot_param["hidden_dim"], **prot_param
-        )
-        self.drug_node_embed = node_embedders[drug_param["node_embed"]](
-            drug_param["node_embed_dim"], drug_param["hidden_dim"], **drug_param
-        )
-        self.prot_pool = poolers[prot_param["pool"]](prot_param["hidden_dim"], prot_param["hidden_dim"], **prot_param)
-        self.drug_pool = poolers[drug_param["pool"]](drug_param["hidden_dim"], drug_param["hidden_dim"], **drug_param)
         mlp_param = remove_arg_prefix("mlp_", kwargs)
-        self.mlp = MLP(**mlp_param, input_dim=self.embed_dim, out_dim=1)
+        self.prot_feat_embed = self._get_feat_embed(prot_param)
+        self.drug_feat_embed = self._get_feat_embed(drug_param)
+        self.prot_node_embed = self._get_node_embed(prot_param)
+        self.drug_node_embed = self._get_node_embed(drug_param)
+        self.prot_pool = self._get_pooler(prot_param)
+        self.drug_pool = self._get_pooler(drug_param)
+        self.mlp = self._get_mlp(mlp_param)
+
+    def _get_feat_embed(self, params: dict) -> Embedding:
+        return Embedding(params["feat_dim"], params["feat_embed_dim"])
+
+    def _get_node_embed(self, params: dict) -> BaseLayer:
+        return node_embedders[params["node_embed"]](params["feat_embed_dim"], params["hidden_dim"], **params)
+
+    def _get_pooler(self, params: dict) -> BaseLayer:
+        return poolers[params["pool"]](params["hidden_dim"], params["hidden_dim"], **params)
+
+    def _get_mlp(self, params: dict) -> MLP:
+        return MLP(**params, input_dim=self.embed_dim, out_dim=1)
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
-
         prot["x"] = self.prot_feat_embed(prot["x"])
         drug["x"] = self.drug_feat_embed(drug["x"])
         prot["x"] = self.prot_node_embed(**prot)
@@ -60,10 +72,6 @@ class ClassificationModel(BaseModel):
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
-
-        Args:
-            data (TwoGraphData): Input data
-
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
@@ -91,18 +99,11 @@ class ClassificationModel(BaseModel):
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module
-
-        Args:
-            parser (ArgumentParser): Parent parser
-
-        Returns:
-            ArgumentParser: Updated parser
-        """
+        """Generate arguments for this module"""
         # Hack to find which embedding are used and add their arguments
         tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--drug_node_embed", type=str, default="chebconv")
-        tmp_parser.add_argument("--prot_node_embed", type=str, default="chebconv")
+        tmp_parser.add_argument("--drug_node_embed", type=str, default="ginconv")
+        tmp_parser.add_argument("--prot_node_embed", type=str, default="ginconv")
         tmp_parser.add_argument("--prot_pool", type=str, default="gmt")
         tmp_parser.add_argument("--drug_pool", type=str, default="gmt")
 
@@ -113,15 +114,8 @@ class ClassificationModel(BaseModel):
         drug_pool = poolers[args.drug_pool]
         prot = parser.add_argument_group("Prot", prefix="--prot_")
         drug = parser.add_argument_group("Drug", prefix="--drug_")
-        prot.add_argument("node_embed", default="chebconv")
-        prot.add_argument("node_embed_dim", default=16, type=int, help="Size of aminoacid embedding")
-        drug.add_argument("node_embed", default="chebconv")
-        drug.add_argument(
-            "node_embed_dim",
-            default=16,
-            type=int,
-            help="Size of atom element embedding",
-        )
+        prot.add_argument("feat_embed_dim", default=32, type=int)
+        drug.add_argument("feat_embed_dim", default=32, type=int)
 
         prot_node_embed.add_arguments(prot)
         drug_node_embed.add_arguments(drug)

@@ -66,13 +66,13 @@ class TwoGraphData(Data):
 
     def n_edge_feats(self, prefix: str) -> int:
         """Returns number of different edges for graph with prefix"""
-        if prefix + "edge_features" not in self.__dict__:
+        if prefix + "edge_feats" not in self.__dict__:
             return 0
-        edge_features = self.__dict__[prefix + "edge_features"]
-        if len(edge_features.size()) == 1:
-            return edge_features.max().item() + 1
-        if len(edge_features.size()) == 2:
-            return edge_features.size(1)
+        edge_feats = self.__dict__[prefix + "edge_feats"]
+        if len(edge_feats.size()) == 1:
+            return edge_feats.max().item() + 1
+        if len(edge_feats.size()) == 2:
+            return edge_feats.size(1)
         raise ValueError("Too many dimensions in input features")
 
 

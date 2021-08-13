@@ -17,10 +17,10 @@ else:
 
 ### DEFINE OUTPUTS ###
 
-protein_output = "results/prepare_proteins/protein_data_{rinerator}_{node_features}_{edge_features}.pkl".format(
+protein_output = "results/prepare_proteins/protein_data_{rinerator}_{node_features}_{edge_feats}.pkl".format(
     rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
     node_features=config["prepare_proteins"]["node_features"],
-    edge_features=config["prepare_proteins"]["edge_features"],
+    edge_feats=config["prepare_proteins"]["edge_feats"],
 )
 
 split_data = "results/split_data/{split}_{filtering}_split.csv".format(
@@ -31,11 +31,11 @@ transformer_output = "results/prepare_transformer/{node_features}_transformer.pk
     node_features=config["prepare_proteins"]["node_features"]
 )
 
-final_output = "results/prepare_all/{split}_{rinerator}_{node_features}_{edge_features}_{filtering}_{type}.pkl".format(
+final_output = "results/prepare_all/{split}_{rinerator}_{node_features}_{edge_feats}_{filtering}_{type}.pkl".format(
     split=config["split"]["method"],
     rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
     node_features=config["prepare_proteins"]["node_features"],
-    edge_features=config["prepare_proteins"]["edge_features"],
+    edge_feats=config["prepare_proteins"]["edge_feats"],
     filtering=config["parse_glass"]["filtering"],
     type="class" if config["prepare_all"]["threshold"] else "regress",
 )
@@ -200,7 +200,7 @@ rule prepare_proteins:
         Coverage parameter is {config[rinerator]}.
         Species parameter is {config[parse_glass][species]}.
         Node feature type is {config[prepare_proteins][node_features]}.
-        Edge feature type is {config[prepare_proteins][edge_features]}.
+        Edge feature type is {config[prepare_proteins][edge_feats]}.
         """
     script:
         "scripts/prepare_proteins.py"

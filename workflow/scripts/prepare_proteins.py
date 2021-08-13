@@ -49,7 +49,7 @@ def onehot_encode(position: int, count: Optional[int] = 20):
 class ProteinEncoder:
     def __init__(self, config: dict):
         self.features = config["prepare_proteins"]["node_features"]
-        self.edge_features = config["prepare_proteins"]["edge_features"]
+        self.edge_feats = config["prepare_proteins"]["edge_feats"]
 
     def encode_residue(self, residue: str) -> np.array:
         """Fully encode residue - one-hot and features
@@ -157,18 +157,18 @@ class ProteinEncoder:
         edge_index = edges[["node1", "node2"]].astype(int).values
         edge_index = torch.tensor(edge_index, dtype=torch.long)
         edge_index = edge_index.t().contiguous()
-        if self.edge_features == "none":
+        if self.edge_feats == "none":
             return edge_index, None
-        edge_features = edges["type"].apply(lambda x: edge_type_encoding[x])
-        if self.edge_features == "label":
-            edge_features = torch.tensor(edge_features, dtype=torch.long)
-            edge_index, edge_features = to_undirected(edge_index, edge_features)
-            return edge_index, edge_features
-        elif self.edge_features == "onehot":
-            edge_features = edge_features.apply(onehot_encode, count=len(edge_type_encoding))
-            edge_features = torch.tensor(edge_features, dtype=torch.float)
-            edge_index, edge_features = to_undirected(edge_index, edge_features)
-            return edge_index, edge_features
+        edge_feats = edges["type"].apply(lambda x: edge_type_encoding[x])
+        if self.edge_feats == "label":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+            edge_index, edge_feats = to_undirected(edge_index, edge_feats)
+            return edge_index, edge_feats
+        elif self.edge_feats == "onehot":
+            edge_feats = edge_feats.apply(onehot_encode, count=len(edge_type_encoding))
+            edge_feats = torch.tensor(edge_feats, dtype=torch.float)
+            edge_index, edge_feats = to_undirected(edge_index, edge_feats)
+            return edge_index, edge_feats
 
     def __call__(self, protein_sif: str) -> dict:
         """Fully process the protein
@@ -181,10 +181,8 @@ class ProteinEncoder:
         """
         nodes, edges = self.parse_sif(protein_sif)
         node_attr = self.encode_nodes(nodes)
-        edge_index, edge_features = self.encode_edges(edges)
-        return dict(
-            x=node_attr, edge_index=edge_index, edge_features=edge_features, index_mapping=nodes["index"].to_dict()
-        )
+        edge_index, edge_feats = self.encode_edges(edges)
+        return dict(x=node_attr, edge_index=edge_index, edge_feats=edge_feats, index_mapping=nodes["index"].to_dict())
 
 
 def extract_name(protein_sif: str) -> str:

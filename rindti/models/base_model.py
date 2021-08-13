@@ -19,32 +19,32 @@ class BaseModel(LightningModule):
     def __init__(self):
         super().__init__()
 
-    def _determine_feat_method(self, feat_method: str, drug_dim: int, prot_dim: int):
+    def _determine_feat_method(self, feat_method: str, drug_hidden_dim: int, prot_hidden_dim: int, **kwargs):
         """[summary]
 
         Args:
             feat_method (str): how to concatenate drugs
-            drug_dim (int): [description]
-            prot_dim (int): [description]
+            drug_hidden_dim (int): [description]
+            prot_hidden_dim (int): [description]
 
         Raises:
             ValueError: [description]
         """
         if feat_method == "concat":
             self.merge_features = self._concat
-            self.embed_dim = drug_dim + prot_dim
+            self.embed_dim = drug_hidden_dim + prot_hidden_dim
         elif feat_method == "element_l2":
-            assert drug_dim == prot_dim
+            assert drug_hidden_dim == prot_hidden_dim
             self.merge_features = self._element_l2
-            self.embed_dim = drug_dim
+            self.embed_dim = drug_hidden_dim
         elif feat_method == "element_l1":
-            assert drug_dim == prot_dim
+            assert drug_hidden_dim == prot_hidden_dim
             self.merge_features = self._element_l1
-            self.embed_dim = drug_dim
+            self.embed_dim = drug_hidden_dim
         elif feat_method == "mult":
-            assert drug_dim == prot_dim
+            assert drug_hidden_dim == prot_hidden_dim
             self.merge_features = self._mult
-            self.embed_dim = drug_dim
+            self.embed_dim = drug_hidden_dim
         else:
             raise ValueError("unsupported feature method")
 

@@ -15,7 +15,7 @@ prepare_proteins:
   # can be label or onehot
   node_features: label
   # can be label, onehot or none
-  edge_features: label
+  edge_feats: label
 
 split:
   # available methods: random, coldtarget

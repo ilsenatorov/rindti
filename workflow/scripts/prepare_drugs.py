@@ -74,14 +74,14 @@ def featurize(smiles: str) -> dict:
     new_order = rdmolfiles.CanonicalRankAtoms(mol)
     mol = rdmolops.RenumberAtoms(mol, new_order)
     edges = []
-    edge_features = []
+    edge_feats = []
     for bond in mol.GetBonds():
         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         edges.append([start, end])
         btype = str(bond.GetBondType())
         if btype not in bond_type_mapping.keys():
             return np.nan
-        edge_features.append(bond_type_mapping[btype])
+        edge_feats.append(bond_type_mapping[btype])
     if not edges:  # If no edges (bonds) were found, exit (single ion etc)
         return np.nan
     atom_features = []
@@ -93,9 +93,9 @@ def featurize(smiles: str) -> dict:
             atom_features.append(atom_num_mapping[atom_num])
     x = torch.tensor(atom_features, dtype=torch.long)
     edge_index = torch.tensor(edges).t().contiguous()
-    edge_features = torch.tensor(edge_features, dtype=torch.long)
-    edge_index, edge_features = to_undirected(edge_index, edge_features)
-    return dict(x=x, edge_index=edge_index, edge_features=edge_features)
+    edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+    edge_index, edge_feats = to_undirected(edge_index, edge_feats)
+    return dict(x=x, edge_index=edge_index, edge_feats=edge_feats)
 
 
 if __name__ == "__main__":
