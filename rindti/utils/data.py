@@ -51,7 +51,7 @@ class TwoGraphData(Data):
 
     def n_edges(self, prefix: str) -> int:
         """Returns number of edges for graph with prefix"""
-        return self.__dict[prefix + "edge_index"].size(1)
+        return self.__dict__[prefix + "edge_index"].size(1)
 
     def n_node_feats(self, prefix: str) -> int:
         """Calculate the feature dimension of one of the graphs.
