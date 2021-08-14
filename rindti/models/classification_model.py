@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from pprint import pprint
 
 import numpy as np
 import torch
@@ -45,7 +44,6 @@ class ClassificationModel(BaseModel):
 
     def __init__(self, **kwargs):
         super().__init__()
-        pprint(kwargs)
         self.save_hyperparameters()
         self._determine_feat_method(**kwargs)
         drug_param = remove_arg_prefix("drug_", kwargs)

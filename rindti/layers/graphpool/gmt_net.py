@@ -56,9 +56,7 @@ class GMTNet(BaseLayer):
         )
         batch_x = self.sab(batch_x)
         batch_x = self.gmpooli(batch_x)
-        print(batch_x.size())
         x = batch_x.squeeze(1)
-        print(batch_x.size())
         return x
 
 
