@@ -33,6 +33,6 @@ jobs:
         run: |
           pip install flake8
           flake8 .
-      - name: Test conda env
-        run: |
-          $CONDA/bin/conda env create -f workflow/envs/main.yml
+      # - name: Test conda env
+      #   run: |
+      #     $CONDA/bin/conda env create -f workflow/envs/main.yml
