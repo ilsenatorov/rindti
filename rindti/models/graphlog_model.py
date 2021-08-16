@@ -303,7 +303,7 @@ class GraphLogModel(BaseModel):
             "NCE_proto_loss": NCE_proto_loss,
         }
 
-    def training_step(self, data: Data):
+    def training_step(self, data: Data, data_idx: int):
         """Training step"""
         if self.trainer.current_epoch == 0:
             ss = self.shared_step(data, proto=False)

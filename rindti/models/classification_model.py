@@ -57,18 +57,6 @@ class ClassificationModel(BaseModel):
         self.drug_pool = self._get_pooler(drug_param)
         self.mlp = self._get_mlp(mlp_param)
 
-    def _get_feat_embed(self, params: dict) -> Embedding:
-        return Embedding(params["feat_dim"], params["feat_embed_dim"])
-
-    def _get_node_embed(self, params: dict) -> BaseLayer:
-        return node_embedders[params["node_embed"]](params["feat_embed_dim"], params["hidden_dim"], **params)
-
-    def _get_pooler(self, params: dict) -> BaseLayer:
-        return poolers[params["pool"]](params["hidden_dim"], params["hidden_dim"], **params)
-
-    def _get_mlp(self, params: dict) -> MLP:
-        return MLP(**params, input_dim=self.embed_dim, out_dim=1)
-
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
         prot["x"] = self.prot_feat_embed(prot["x"])
