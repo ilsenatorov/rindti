@@ -32,7 +32,7 @@ if snakemake.config["clustalo"]["sequence_source"] == "csv":
     df = pd.read_csv(snakemake.input.targ)
     with open(snakemake.output.sequences, "w") as file:
         for name, row in df.iterrows():
-            result += ">{name}\n{sequence}\n".format(name=row["UniProt ID"], sequence=row["FASTA Sequence"])
+            result += ">{name}\n{sequence}\n".format(name=row["Target_ID"], sequence=row["FASTA Sequence"])
 elif snakemake.config["clustalo"]["sequence_source"] == "structures":
     parser = PDB.PDBParser()
     for struct in snakemake.input.targ:

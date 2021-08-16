@@ -9,8 +9,8 @@ index_mapping = {i: row["data"]["index_mapping"] for i, row in prots.iterrows()}
 
 gnomad = pd.read_csv(snakemake.input.gnomad)
 gnomad_dict = {}
-for prot in gnomad["UniProt ID"].unique():
-    subset = gnomad[gnomad["UniProt ID"] == prot]
+for prot in gnomad["Target_ID"].unique():
+    subset = gnomad[gnomad["Target_ID"] == prot]
     subset = subset[subset["mut_pos"].isin(index_mapping[prot].keys())]
     gnomad_dict[prot] = subset
 gnomad = gnomad_dict

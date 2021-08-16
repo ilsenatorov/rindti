@@ -22,7 +22,7 @@ def split_groups(
     Returns:
         pd.DataFrame: DataFrame with a new 'split' column
     """
-    sorted_index = [x for x in inter["UniProt ID"].value_counts().index]
+    sorted_index = [x for x in inter["Target_ID"].value_counts().index]
     train_prop = int(bin_size * train_frac)
     val_prop = int(bin_size * val_frac)
     train = []
@@ -37,9 +37,9 @@ def split_groups(
         val += val_bin
         subset = [x for x in subset if x not in val_bin]
         test += subset
-    train_idx = inter[inter["UniProt ID"].isin(train)].index
-    val_idx = inter[inter["UniProt ID"].isin(val)].index
-    test_idx = inter[inter["UniProt ID"].isin(test)].index
+    train_idx = inter[inter["Target_ID"].isin(train)].index
+    val_idx = inter[inter["Target_ID"].isin(val)].index
+    test_idx = inter[inter["Target_ID"].isin(test)].index
     inter.loc[train_idx, "split"] = "train"
     inter.loc[val_idx, "split"] = "val"
     inter.loc[test_idx, "split"] = "test"
@@ -68,12 +68,10 @@ def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float =
 
 if __name__ == "__main__":
     np.random.seed(snakemake.config["seed"])
-    threshold = snakemake.config["prepare_all"]["threshold"]
-    lig = pd.read_csv(snakemake.input.lig).set_index("InChI Key")
-    inter = pd.read_csv(snakemake.input.inter)
+    lig = pd.read_csv(snakemake.input.lig, sep="\t").set_index("Drug_ID")
+    inter = pd.read_csv(snakemake.input.inter, sep="\t")
 
-    inter["y"] = inter["Value"].apply(lambda x: int(x < threshold))
-    inter["Canonical SMILES"] = inter["InChI Key"].apply(lambda x: lig.loc[x, "Canonical SMILES"])
+    inter["Canonical SMILES"] = inter["Drug_ID"].apply(lambda x: lig.loc[x, "Canonical SMILES"])
 
     if snakemake.config["split"]["method"] == "coldtarget":
         inter = split_groups(
@@ -85,4 +83,4 @@ if __name__ == "__main__":
         inter = split_random(inter)
     else:
         raise NotImplementedError("Unknown split type!")
-    inter.to_csv(snakemake.output.split_data)
+    inter.to_csv(snakemake.output.split_data, sep="\t")

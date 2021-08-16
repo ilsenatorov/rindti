@@ -24,16 +24,8 @@ split:
   val: 0.2
   # test is created as a remainder of train and val
 
-prepare_all:
-  threshold: 1000
-
-parse_glass:
-  species: human
-  druglikeness: 0.1
-  max_atoms: 150
+parse_dataset:
   # filtering can be posneg, balanced or none
-  filtering: posneg
+  filtering: none
   # valmax and valmin are boundaries for outlier activity values
-  valmax: 1000000
-  valmin: 0.01
-  mininter: 5 # Lowest allowed number of interactions per protein
+  threshold: 1000
