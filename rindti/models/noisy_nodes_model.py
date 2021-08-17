@@ -9,6 +9,7 @@ from torch.functional import Tensor
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from rindti.utils.data import TwoGraphData
+from rindti.utils.utils import MyArgParser
 
 from ..layers import ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils import remove_arg_prefix
@@ -140,7 +141,7 @@ class NoisyNodesModel(ClassificationModel):
         }
 
     @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
+    def add_arguments(parser: MyArgParser) -> MyArgParser:
         """Generate arguments for this module
 
         Args:
@@ -149,36 +150,11 @@ class NoisyNodesModel(ClassificationModel):
         Returns:
             ArgumentParser: Updated parser
         """
-        # Hack to find which embedding are used and add their arguments
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--drug_node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--prot_node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--prot_pool", type=str, default="gmt")
-        tmp_parser.add_argument("--drug_pool", type=str, default="gmt")
-
-        args = tmp_parser.parse_known_args()[0]
-        prot_node_embed = node_embedders[args.prot_node_embed]
-        drug_node_embed = node_embedders[args.drug_node_embed]
-        prot_pool = poolers[args.prot_pool]
-        drug_pool = poolers[args.drug_pool]
-        prot = parser.add_argument_group("Prot", prefix="--prot_")
-        drug = parser.add_argument_group("Drug", prefix="--drug_")
-        drug.add_argument("alpha", default=0.1, type=float, help="Drug node loss factor")
-        drug.add_argument("frac", default=0.05, type=float, help="Proportion of drug nodes to corrupt")
-        drug.add_argument("node_embed", default="chebconv")
-        drug.add_argument(
-            "node_embed_dim",
-            default=16,
-            type=int,
-            help="Size of atom element embedding",
-        )
+        parser = ClassificationModel.add_arguments(parser)
+        drug = parser.get_arg_group("Drug")
+        prot = parser.get_arg_group("Prot")
         prot.add_argument("alpha", default=0.1, type=float, help="Prot node loss factor")
+        drug.add_argument("alpha", default=0.1, type=float, help="Drug node loss factor")
         prot.add_argument("frac", default=0.05, type=float, help="Proportion of prot nodes to corrupt")
-        prot.add_argument("node_embed", default="chebconv")
-        prot.add_argument("node_embed_dim", default=16, type=int, help="Size of aminoacid embedding")
-
-        prot_node_embed.add_arguments(prot)
-        drug_node_embed.add_arguments(drug)
-        prot_pool.add_arguments(prot)
-        drug_pool.add_arguments(drug)
+        drug.add_argument("frac", default=0.05, type=float, help="Proportion of drug nodes to corrupt")
         return parser

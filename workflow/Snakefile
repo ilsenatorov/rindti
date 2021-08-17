@@ -61,8 +61,7 @@ if osp.isfile("resources/gnomad.csv"):
     gnomad = "resources/gnomad.csv"
     output.append(transformer_output)
 else:
-    if not config["only_proteins"]:
-        raise ValueError("No gnomad available, can't create gnomad transformer")
+    print("No gnomad available, can't create gnomad transformer")
     gnomad = []
 
 if osp.isdir("resources/drugs"):

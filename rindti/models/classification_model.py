@@ -4,13 +4,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torch.nn import Embedding
-from torch_geometric.data.data import Data
-from torch_geometric.nn import pool
-from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
-
-from rindti.layers.base_layer import BaseLayer
 
 from ..layers import (
     MLP,
@@ -105,8 +99,8 @@ class ClassificationModel(BaseModel):
         tmp_parser.add_argument("--prot_node_embed", type=str, default="ginconv")
         tmp_parser.add_argument("--prot_pool", type=str, default="gmt")
         tmp_parser.add_argument("--drug_pool", type=str, default="gmt")
-
         args = tmp_parser.parse_known_args()[0]
+
         prot_node_embed = node_embedders[args.prot_node_embed]
         drug_node_embed = node_embedders[args.drug_node_embed]
         prot_pool = poolers[args.prot_pool]
@@ -115,7 +109,7 @@ class ClassificationModel(BaseModel):
         drug = parser.add_argument_group("Drug", prefix="--drug_")
         prot.add_argument("feat_embed_dim", default=32, type=int)
         drug.add_argument("feat_embed_dim", default=32, type=int)
-
+        ## Add module-specific embeddings
         prot_node_embed.add_arguments(prot)
         drug_node_embed.add_arguments(drug)
         prot_pool.add_arguments(prot)

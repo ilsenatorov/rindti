@@ -29,23 +29,6 @@ def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
     return new_kwargs
 
 
-class MyArgParser(ArgumentParser):
-    """Custom argument parser"""
-
-    def add_argument_group(self, *args, prefix="", **kwargs) -> _ArgumentGroup:
-        """Adds an ArgumentsGroup with every argument startin with the prefix
-
-        Args:
-            prefix (str, optional): Prefix to begin arguments from. Defaults to "".
-
-        Returns:
-            _ArgumentGroup: group
-        """
-        group = _MyArgumentGroup(self, *args, prefix=prefix, conflict_handler="resolve", **kwargs)
-        self._action_groups.append(group)
-        return group
-
-
 class _MyArgumentGroup(_ArgumentGroup):
     """Custom arguments group
 
@@ -66,3 +49,26 @@ class _MyArgumentGroup(_ArgumentGroup):
         """
         name = self.prefix + name
         super().add_argument(name, **kwargs)
+
+
+class MyArgParser(ArgumentParser):
+    """Custom argument parser"""
+
+    def add_argument_group(self, *args, prefix="", **kwargs) -> _MyArgumentGroup:
+        """Adds an ArgumentsGroup with every argument starting with the prefix
+
+        Args:
+            prefix (str, optional): Prefix to begin arguments from. Defaults to "".
+
+        Returns:
+            _MyArgumentGroup: group
+        """
+        group = _MyArgumentGroup(self, *args, prefix=prefix, conflict_handler="resolve", **kwargs)
+        self._action_groups.append(group)
+        return group
+
+    def get_arg_group(self, group_title: str) -> _MyArgumentGroup:
+        """Get arg group under this title"""
+        for group in self._action_groups:
+            if group.title == group_title:
+                return group

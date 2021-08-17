@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
@@ -23,10 +25,7 @@ def train(**kwargs):
     test = Dataset(kwargs["data"], split="test")
 
     kwargs.update(train.info)
-    model_name = kwargs["model_name"]
-    if not model_name:
-        model_name = kwargs["model"]
-    logger = TensorBoardLogger("tb_logs", name=model_name, default_hp_metric=False)
+    logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
@@ -61,36 +60,19 @@ if __name__ == "__main__":
 
     from rindti.utils import MyArgParser
 
+    tmp_parser = ArgumentParser(add_help=False)
+    tmp_parser.add_argument("--model", type=str, default="classification")
+    args = tmp_parser.parse_known_args()[0]
+    model_type = args.model
+
     parser = MyArgParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("data", type=str)
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
     parser.add_argument("--num_workers", type=int, default=4, help="number of workers for data loading")
-    parser.add_argument(
-        "--early_stop_patience",
-        type=int,
-        default=60,
-        help="epochs with no improvement before stop",
-    )
-    parser.add_argument(
-        "--feat_method",
-        type=str,
-        default="element_l1",
-        help="How to combine drug and protein embeddings",
-    )
-    parser.add_argument(
-        "--prot_pretrained",
-        type=str,
-        default=None,
-        help="Model of pretrained prot embedder",
-    )
-    parser.add_argument(
-        "--model_name",
-        type=str,
-        default=None,
-        help="Name under which to save the model",
-    )
+    parser.add_argument("--early_stop_patience", type=int, default=60, help="epochs with no improvement before stop")
+    parser.add_argument("--feat_method", type=str, default="element_l1", help="How to combine embeddings")
 
     trainer = parser.add_argument_group("Trainer")
     model = parser.add_argument_group("Model")
@@ -105,8 +87,6 @@ if __name__ == "__main__":
 
     model.add_argument("--mlp_hidden_dim", default=64, type=int, help="MLP hidden dims")
     model.add_argument("--mlp_dropout", default=0.2, type=float, help="MLP dropout")
-    model.add_argument("--prot_edge_features", default=1, type=bool, help="Whether to use edge features for prot")
-    model.add_argument("--drug_edge_features", default=1, type=bool, help="Whether to use edge features for drug")
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
     optim.add_argument("--momentum", type=float, default=0.3)
@@ -123,7 +103,9 @@ if __name__ == "__main__":
     )
     transformer.add_argument("--max_num_mut", type=int, default=100)
 
-    parser = ClassificationModel.add_arguments(parser)
+    parser = {"classification": ClassificationModel, "regression": RegressionModel, "noisynodes": NoisyNodesModel}[
+        model_type
+    ].add_arguments(parser)
 
     args = parser.parse_args()
     argvars = vars(args)

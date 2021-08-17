@@ -120,12 +120,15 @@ class BaseModel(LightningModule):
             val = torch.stack([x[i] for x in outputs]).mean()
             self.logger.experiment.add_scalar("train_epoch_" + i, val, self.current_epoch)
 
-    def validation_epoch_end(self, outputs):
-        """What to do at the end of a validation epoch. Logs everything"""
+    def validation_epoch_end(self, outputs: dict):
+        """What to do at the end of a validation epoch. Logs everything, saves hyperparameters"""
         entries = outputs[0].keys()
+        metrics = {}
         for i in entries:
             val = torch.stack([x[i] for x in outputs]).mean()
             self.logger.experiment.add_scalar("val_epoch_" + i, val, self.current_epoch)
+            metrics["test_" + i] = val
+        self.logger.log_hyperparams(self.hparams, metrics)
 
     def test_epoch_end(self, outputs: dict):
         """What to do at the end of a test epoch. Logs everything, saves hyperparameters"""
