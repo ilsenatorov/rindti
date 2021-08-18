@@ -32,6 +32,7 @@ def pretrain(**kwargs):
         gradient_clip_val=30,
         max_epochs=kwargs["max_epochs"],
         stochastic_weight_avg=True,
+        num_sanity_val_steps=0,
     )
     model = models[kwargs["model"]](**kwargs)
     train_dl = DataLoader(train, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)

@@ -27,6 +27,7 @@ class GraphLogModel(BaseModel):
         self.feat_embed = self._get_feat_embed(kwargs)
         self.node_embed = self._get_node_embed(kwargs)
         self.pool = self._get_pooler(kwargs)
+        self.proto = []
         self.proj = torch.nn.Sequential(
             torch.nn.Linear(kwargs["hidden_dim"], 128), torch.nn.ReLU(), torch.nn.Linear(128, kwargs["hidden_dim"])
         )
@@ -165,7 +166,7 @@ class GraphLogModel(BaseModel):
             positive_ratio = positive.sum(1) / (positive.sum(1) + negative.sum(1) + epsilon)
             NCE_loss += -torch.log(positive_ratio).mean()
 
-        return NCE_loss
+        return torch.tensor(NCE_loss, device=self.device, dtype=torch.float32)
 
     def update_proto_lowest(self, graph_reps, decay_ratio=0.7, epsilon=1e-6):
         """Update lowest prototypes"""
@@ -192,8 +193,9 @@ class GraphLogModel(BaseModel):
         for _ in range(num_iter):
             for step, batch in enumerate(self.train_dataloader()):
                 # get node and graph representations
+                batch = batch.to(self.device)
                 feat_reps = self.feat_embed(batch.x)
-                node_reps = self.node_embed(feat_reps, batch.edge_index, batch.batch)
+                node_reps = self.node_embed(feat_reps, batch.edge_index)
                 graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
 
                 # feature projection
@@ -217,16 +219,16 @@ class GraphLogModel(BaseModel):
                 if iter == (num_iter - 1):
                     self.proto_state[index][idx] = 1
                 proto_connection[i] = idx
-                self.proto[index][idx, :] = self.proto[index][idx, :] * self.decay_ratio + self.proto[index - 1][
-                    i, :
-                ] * (1 - self.decay_ratio)
+                self.proto[index][idx, :] = self.proto[index][idx, :] * self.hparams.decay_ratio + self.proto[
+                    index - 1
+                ][i, :] * (1 - self.hparams.decay_ratio)
 
                 # penalize rivalndarray
                 sim[idx] = 0
                 rival_idx = torch.argmax(sim)
                 self.proto[index][rival_idx, :] = self.proto[index][rival_idx, :] * (
-                    2 - self.decay_ratio
-                ) - self.proto[index - 1][i, :] * (1 - self.decay_ratio)
+                    2 - self.hparams.decay_ratio
+                ) - self.proto[index - 1][i, :] * (1 - self.hparams.decay_ratio)
 
         indices = torch.nonzero(self.proto_state[index]).squeeze(-1)
         proto_selected = torch.index_select(self.proto[index], 0, indices)
@@ -275,9 +277,9 @@ class GraphLogModel(BaseModel):
         )
         return {
             "loss": NCE_loss,
-            "NCE_intra_loss": NCE_intra_loss,
-            "NCE_inter_loss": NCE_inter_loss,
-            "NCE_proto_loss": NCE_proto_loss,
+            "NCE_intra_loss": NCE_intra_loss.detach(),
+            "NCE_inter_loss": NCE_inter_loss.detach(),
+            "NCE_proto_loss": NCE_proto_loss.detach(),
         }
 
     def training_step(self, data: Data, data_idx: int):
@@ -309,7 +311,7 @@ class GraphLogModel(BaseModel):
                 self.proto[i] = tmp_proto
                 self.proto_connection.append(tmp_proto_connection)
 
-        return super().training_epoch_end(outputs)
+        super().training_epoch_end(outputs)
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:
