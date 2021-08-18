@@ -15,6 +15,7 @@ models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel}
 
 
 def pretrain(**kwargs):
+    """Run pretraining pipeline"""
     dataset = PreTrainDataset(kwargs["data"])
     kwargs.update(dataset.info)
     pprint(kwargs)
@@ -47,7 +48,13 @@ if __name__ == "__main__":
     tmp_parser.add_argument("--model", type=str, default="graphlog")
     args = tmp_parser.parse_known_args()[0]
     model_type = args.model
-    parser = MyArgParser()
+    parser = MyArgParser(
+        prog="Model Trainer",
+        usage="""
+Run with python train.py <data pickle file>
+To get help for different models run with python pretrain.py --help --model <model name>
+To get help for different modules run with python pretrain.py --help --prot_node_embed <module name> """,
+    )
 
     parser.add_argument("data", type=str)
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
