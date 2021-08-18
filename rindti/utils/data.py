@@ -128,6 +128,8 @@ class Dataset(InMemoryDataset):
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
             self.config = all_data["config"]
+            self.config["prot_max_nodes"] = 0
+            self.config["drug_max_nodes"] = 0
             for s, split in enumerate(["train", "val", "test"]):
                 data_list = []
                 for i in all_data["data"]:
@@ -147,6 +149,8 @@ class Dataset(InMemoryDataset):
                     new_i.update({"prot_" + k: v for (k, v) in prot_data.items()})
                     new_i.update({"drug_" + k: v for (k, v) in drug_data.items()})
                     two_graph_data = TwoGraphData(**new_i)
+                    self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
+                    self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
                     data_list.append(two_graph_data)
                 self.process_(data_list, s)
 
@@ -169,9 +173,6 @@ class PreTrainDataset(InMemoryDataset):
         super().__init__(root, transform, pre_transform)
         self.data, self.slices, self.config = torch.load(self.processed_paths[0])
 
-    def _update_info(self, key: str, value: int):
-        self.config[key] = max(self.config[key], value)
-
     @property
     def processed_file_names(self) -> Iterable[str]:
         """Which files have to be in the dir to consider dataset processed
@@ -183,15 +184,13 @@ class PreTrainDataset(InMemoryDataset):
 
     def process(self):
         """If the dataset was not seen before, process everything"""
-        config = {"max_nodes": 0, "feat_dim": 0}
+        config = dict(max_nodes=0)
         with open(self.filename, "rb") as file:
             df = pickle.load(file)
             data_list = []
             for x in df["data"]:
-                config["max_nodes"] = self._update_info("max_nodes", x.n_nodes)
-                config["feat_dim"] = self._update_info("feat_dim", x.n_node_feats)
-                config["edge_dim"] = self._update_info("edge_dim", x.n_edge_feats)
                 del x["index_mapping"]
+                config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
                 data_list.append(Data(**x))
 
             if self.pre_filter is not None:

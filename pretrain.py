@@ -17,7 +17,7 @@ models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel}
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
     dataset = PreTrainDataset(kwargs["data"])
-    kwargs.update(dataset.info)
+    kwargs.update(dataset.config)
     pprint(kwargs)
     kwargs["feat_dim"] = 20
     train, val = split_random(dataset)

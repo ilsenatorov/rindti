@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from pprint import pprint
 
 import torch
 from pytorch_lightning import Trainer
@@ -37,6 +38,7 @@ def train(**kwargs):
         gradient_clip_val=kwargs["gradient_clip_val"],
         stochastic_weight_avg=True,
     )
+    pprint(kwargs)
     if kwargs["model"] == "classification":
         model = ClassificationModel(**kwargs)
     elif kwargs["model"] == "regression":

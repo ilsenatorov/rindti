@@ -19,12 +19,10 @@ class NoisyNodesModel(ClassificationModel):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.prot_pred = node_embedders[kwargs["prot_node_embed"]](
-            kwargs["prot_hidden_dim"], kwargs["prot_feat_dim"], num_layers=3, hidden_dim=32
-        )
-        self.drug_pred = node_embedders[kwargs["drug_node_embed"]](
-            kwargs["drug_hidden_dim"], kwargs["drug_feat_dim"], num_layers=3, hidden_dim=32
-        )
+        prot_param = remove_arg_prefix("prot_", kwargs)
+        drug_param = remove_arg_prefix("drug_", kwargs)
+        self.prot_node_pred = self._get_node_embed(prot_param, out_dim=prot_param["feat_dim"])
+        self.drug_node_pred = self._get_node_embed(drug_param, out_dim=drug_param["feat_dim"])
 
     def corrupt_features(self, features: torch.Tensor, frac: float) -> torch.Tensor:
         """Corrupt the features
@@ -87,8 +85,8 @@ class NoisyNodesModel(ClassificationModel):
         drug_embed = self.drug_pool(**drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         logit = self.mlp(joint_embedding)
-        prot_pred = self.prot_pred(**prot)
-        drug_pred = self.drug_pred(**drug)
+        prot_pred = self.prot_node_pred(**prot)
+        drug_pred = self.drug_node_pred(**drug)
         return torch.sigmoid(logit), prot_pred, drug_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
@@ -122,9 +120,9 @@ class NoisyNodesModel(ClassificationModel):
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
         return {
             "loss": loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,
-            "prot_loss": prot_loss,
-            "drug_loss": drug_loss,
-            "pred_loss": loss,
+            "prot_loss": prot_loss.detach(),
+            "drug_loss": drug_loss.detach(),
+            "pred_loss": loss.detach(),
             "acc": acc,
             "auroc": _auroc,
             "matthews": _mc,
