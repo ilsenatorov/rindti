@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import torch
 from torch.functional import Tensor
 from torch.nn import BatchNorm1d, Linear, ModuleList, ReLU, Sequential
-from torch_geometric.nn import GINConv, GraphSizeNorm
+from torch_geometric.nn import GINConv
 from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
@@ -50,17 +50,8 @@ class GINConvNet(BaseLayer):
             )
         )
 
-    def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """Forward pass of the module
-
-        Args:
-            x (Tensor): Node features
-            edge_index (Adj): Edge information
-            batch (Tensor): Batch information
-
-        Returns:
-            Tensor: Updated node features
-        """
+    def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
+        """Forward pass of the module"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)
@@ -69,14 +60,7 @@ class GINConvNet(BaseLayer):
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module
-
-        Args:
-            parser (ArgumentParser): Parent parser
-
-        Returns:
-            ArgumentParser: Updated parser
-        """
+        """Generate arguments for this module"""
         parser.add_argument("node_embed", default="ginconv", type=str)
         parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
         parser.add_argument("dropout", default=0.2, type=float, help="Dropout")

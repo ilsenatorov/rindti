@@ -5,7 +5,6 @@ import torch
 import torch.nn.functional as F
 import torch_geometric
 from torch.functional import Tensor
-from torch.nn import Embedding
 from torch_geometric.nn import DenseSAGEConv, dense_diff_pool, dense_mincut_pool
 from torch_geometric.typing import Adj
 
@@ -57,16 +56,7 @@ class DiffPoolNet(BaseLayer):
         self.lin1 = torch.nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """Forward pass of the module
-
-        Args:
-            x (Tensor): Node features
-            edge_index (Adj): Edge information
-            batch (Tensor): Batch information
-
-        Returns:
-            Tensor: Graph representation vector
-        """
+        """Forward pass of the module"""
 
         x, _ = torch_geometric.utils.to_dense_batch(x, batch, max_num_nodes=self.max_nodes)
         adj = torch_geometric.utils.to_dense_adj(edge_index, batch, max_num_nodes=self.max_nodes)
@@ -88,15 +78,8 @@ class DiffPoolNet(BaseLayer):
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module
-
-        Args:
-            parser (ArgumentParser): Parent parser
-
-        Returns:
-            ArgumentParser: Updated parser
-        """
-        parser.add_argument("pool", default="gmt", type=str)
+        """Generate arguments for this module"""
+        parser.add_argument("pool", default="diffpool", type=str)
         parser.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
         parser.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
         parser.add_argument("dropout", default=0.25, type=float, help="Dropout ratio")
@@ -105,12 +88,7 @@ class DiffPoolNet(BaseLayer):
 
 
 class DiffPoolBlock(torch.nn.Module):
-    """Block of DiffPool
-
-    Args:
-        in_channels (int): Input size
-        out_channels (int): Output size
-    """
+    """Block of DiffPool"""
 
     def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
@@ -137,14 +115,6 @@ class DiffPoolBlock(torch.nn.Module):
         return x
 
     def forward(self, x: Tensor, adj: Adj) -> Tensor:
-        """Single pass on a batch
-
-        Args:
-            x (Tensor): Node features
-            adj (Adj): Adjacency matrix
-
-        Returns:
-            Tensor: Updated node features
-        """
+        """Forward pass of the module"""
         x = self.bn(1, F.relu(self.conv1(x, adj)))
         return x

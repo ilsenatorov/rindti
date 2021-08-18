@@ -7,7 +7,6 @@ from torch.functional import Tensor
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from ..layers import (
-    MLP,
     ChebConvNet,
     DiffPoolNet,
     FilmConvNet,

@@ -42,14 +42,7 @@ class PNAConvNet(BaseLayer):
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module
-
-        Args:
-            parser (ArgumentParser): Parent parser
-
-        Returns:
-            ArgumentParser: Updated parser
-        """
+        """Generate arguments for this module"""
         parser.add_argument("node_embed", default="pnaconv", type=str)
         parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
         return parser

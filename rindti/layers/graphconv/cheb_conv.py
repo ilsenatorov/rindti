@@ -22,31 +22,15 @@ class ChebConvNet(BaseLayer):
         self.conv1 = ChebConv(input_dim, hidden_dim, K)
         self.conv2 = ChebConv(hidden_dim, output_dim, K)
 
-    def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """Forward pass of the module
-
-        Args:
-            x (Tensor): Node features
-            edge_index (Adj): Edge information
-            batch (Tensor): Batch information
-
-        Returns:
-            Tensor: Updated node features
-        """
+    def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
+        """Forward pass of the module"""
         x = self.conv1(x, edge_index)
         x = self.conv2(x, edge_index)
         return x
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module
-
-        Args:
-            parser (ArgumentParser): Parent parser
-
-        Returns:
-            ArgumentParser: Updated parser
-        """
+        """Generate arguments for this module"""
         parser.add_argument("node_embed", default="chebconv", type=str)
         parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
         parser.add_argument("dropout", default=0.2, type=float, help="Dropout")

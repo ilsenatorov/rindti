@@ -46,7 +46,7 @@ class GMTNet(BaseLayer):
         self.gmpooli = PMA(output_dim, num_heads, 1, mab_conv=None)
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor, **kwargs):
-        """Forward pass"""
+        """Forward pass of the module"""
         batch_x, mask = to_dense_batch(x, batch)
         extended_attention_mask = mask.unsqueeze(1)
         extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype)
