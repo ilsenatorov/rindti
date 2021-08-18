@@ -1,19 +1,16 @@
 import random
+from argparse import ArgumentParser
 from copy import deepcopy
 from math import ceil
 from typing import Tuple
 
 import torch
-from numpy import ndarray
 from torch.functional import Tensor
-from torch.nn import Embedding
-from torch.optim import Adam
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch_geometric.data import Data, DataLoader
+from torch_geometric.data import Data
 from torch_geometric.typing import Adj
 
-from ..layers import GINConvNet, GMTNet
-from .base_model import BaseModel
+from ..utils import MyArgParser
+from .base_model import BaseModel, node_embedders, poolers
 
 # NCE loss between graphs and prototypes
 
@@ -24,42 +21,18 @@ class GraphLogModel(BaseModel):
     https://arxiv.org/pdf/2106.04113.pdf
     """
 
-    def __init__(
-        self,
-        decay_ratio: float = 0.5,
-        mask_rate: float = 0.3,
-        alpha: float = 1.0,
-        beta: float = 1.0,
-        gamma: float = 0.1,
-        num_proto: int = 8,
-        hierarchy: int = 3,
-        **kwargs,
-    ):
+    def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.decay_ratio = decay_ratio
-        self.mask_rate = mask_rate
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
-        self.num_proto = num_proto
-        self.hierarchy = hierarchy
-        self.embed_dim = 64
-        self.feat_embed = Embedding(21, 64, padding_idx=20)
-        self.node_embed = GINConvNet(64, 64, 64, num_layers=5)
-        self.pool = GMTNet(64, 64, 64, ratio=0.15)
-        self.proj = torch.nn.Sequential(torch.nn.Linear(64, 128), torch.nn.ReLU(), torch.nn.Linear(128, 64))
+        self.feat_embed = self._get_feat_embed(kwargs)
+        self.node_embed = self._get_node_embed(kwargs)
+        self.pool = self._get_pooler(kwargs)
+        self.proj = torch.nn.Sequential(
+            torch.nn.Linear(kwargs["hidden_dim"], 128), torch.nn.ReLU(), torch.nn.Linear(128, kwargs["hidden_dim"])
+        )
 
-    def predict(self, x: Tensor, edge_index: Adj) -> ndarray:
-        """Embed a single graph
-
-        Args:
-            x (Tensor): features
-            edge_index (Adj): connectivity
-
-        Returns:
-            ndarray: embedding
-        """
+    def predict(self, x: Tensor, edge_index: Adj):
+        """Embed a single graph"""
         x = self.feat_embed(x)
         x = self.node_embed(x, edge_index, batch=None)
         x = self.pool(x, edge_index, batch=None)
@@ -79,7 +52,7 @@ class GraphLogModel(BaseModel):
         for i in range(batch.batch[-1] + 1):
             idx = torch.nonzero((batch.batch == i).float()).squeeze(-1)
             num_node = idx.shape[0]
-            sample_size = ceil(num_node * self.mask_rate)
+            sample_size = ceil(num_node * self.hparams.mask_rate)
             masked_node_idx = random.sample(idx.tolist(), sample_size)
             masked_node_idx.sort()
             masked_node_indices += masked_node_idx
@@ -248,7 +221,7 @@ class GraphLogModel(BaseModel):
                     i, :
                 ] * (1 - self.decay_ratio)
 
-                # penalize rival
+                # penalize rivalndarray
                 sim[idx] = 0
                 rival_idx = torch.argmax(sim)
                 self.proto[index][rival_idx, :] = self.proto[index][rival_idx, :] * (
@@ -267,7 +240,7 @@ class GraphLogModel(BaseModel):
     def embed_batch(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
         """Embed a single batch (normal or masked doesn't matter)"""
         feat_embed = self.feat_embed(batch.x)
-        node_reps = self.node_embed(feat_embed, batch.edge_index, batch.batch)
+        node_reps = self.node_embed(feat_embed, batch.edge_index)
         graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
         node_reps = self.proj(node_reps)
         graph_reps = self.proj(graph_reps)
@@ -295,7 +268,11 @@ class GraphLogModel(BaseModel):
             NCE_proto_loss = self.proto_NCE_loss(graph_reps_proj)
         else:
             NCE_proto_loss = torch.tensor(10, dtype=float)
-        NCE_loss = self.alpha * NCE_intra_loss + self.beta * NCE_inter_loss + self.gamma * NCE_proto_loss
+        NCE_loss = (
+            self.hparams.alpha * NCE_intra_loss
+            + self.hparams.beta * NCE_inter_loss
+            + self.hparams.gamma * NCE_proto_loss
+        )
         return {
             "loss": NCE_loss,
             "NCE_intra_loss": NCE_intra_loss,
@@ -317,13 +294,16 @@ class GraphLogModel(BaseModel):
         """Update prototypes and then do normal stuff"""
         if self.trainer.current_epoch == 0:
             self.proto = [
-                torch.rand((self.num_proto, self.embed_dim), device=self.device) for i in range(self.hierarchy)
+                torch.rand((self.hparams.num_proto, self.hparams.hidden_dim), device=self.device)
+                for i in range(self.hparams.hierarchy)
             ]
-            self.proto_state = [torch.zeros(self.num_proto, device=self.device) for i in range(self.hierarchy)]
+            self.proto_state = [
+                torch.zeros(self.hparams.num_proto, device=self.device) for i in range(self.hparams.hierarchy)
+            ]
             self.proto_connection = []
             tmp_proto = self.init_proto_lowest()
             self.proto[0] = tmp_proto
-            for i in range(1, self.hierarchy):
+            for i in range(1, self.hparams.hierarchy):
                 print("Initialize prototypes: layer ", i + 1)
                 tmp_proto, tmp_proto_connection = self.init_proto(i)
                 self.proto[i] = tmp_proto
@@ -331,23 +311,27 @@ class GraphLogModel(BaseModel):
 
         return super().training_epoch_end(outputs)
 
-    def configure_optimizers(self):
-        """
-        Configure the optimizer/s.
-        Relies on initially saved hparams to contain learning rates, weight decays etc
-        """
-        optimiser = Adam(
-            params=self.parameters(),
-            lr=self.hparams.lr,
-            weight_decay=self.hparams.weight_decay,
-        )
-        lr_scheduler = {
-            "scheduler": ReduceLROnPlateau(
-                optimiser,
-                factor=self.hparams.reduce_lr_factor,
-                patience=self.hparams.reduce_lr_patience,
-                verbose=True,
-            ),
-            "monitor": "train_loss",
-        }
-        return [optimiser], [lr_scheduler]
+    @staticmethod
+    def add_arguments(parser: MyArgParser) -> MyArgParser:
+        """Generate arguments for this module"""
+        # Hack to find which embedding are used and add their arguments
+        tmp_parser = ArgumentParser(add_help=False)
+        tmp_parser.add_argument("--node_embed", type=str, default="ginconv")
+        tmp_parser.add_argument("--pool", type=str, default="gmt")
+        args = tmp_parser.parse_known_args()[0]
+
+        node_embed = node_embedders[args.node_embed]
+        pool = poolers[args.pool]
+        parser.add_argument("--feat_embed_dim", default=32, type=int)
+        parser.add_argument("--decay_ratio", default=0.5, type=float)
+        parser.add_argument("--mask_rate", default=0.3, type=float)
+        parser.add_argument("--alpha", default=1.0, type=float)
+        parser.add_argument("--beta", default=1.0, type=float)
+        parser.add_argument("--gamma", default=0.1, type=float)
+        parser.add_argument("--num_proto", default=8, type=int)
+        parser.add_argument("--hierarchy", default=3, type=int)
+        pooler_args = parser.add_argument_group("Pool", prefix="--")
+        node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
+        node_embed.add_arguments(node_embed_args)
+        pool.add_arguments(pooler_args)
+        return parser

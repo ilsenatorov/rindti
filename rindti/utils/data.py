@@ -1,12 +1,10 @@
-"""
-Just a collection of different useful functions, data structures and helpers.
-"""
-
 import os
 import pickle
+from math import ceil
 from typing import Any, Callable, Iterable
 
 import torch
+from torch.utils.data import random_split
 from torch_geometric.data import Data, InMemoryDataset
 from torch_geometric.utils import degree
 
@@ -21,16 +19,7 @@ class TwoGraphData(Data):
         self.__dict__.update(kwargs)
 
     def __inc__(self, key: str, value: Any) -> dict:
-        """How to increment values during batching
-
-
-        Args:
-            key (str): [description]
-            value (Any): [description]
-
-        Returns:
-            dict: [description]
-        """
+        """How to increment values during batching"""
         if not key.endswith("edge_index"):
             return super().__inc__(key, value)
 
@@ -39,14 +28,7 @@ class TwoGraphData(Data):
         return self.__dict__[prefix + "x"].size(0)
 
     def n_nodes(self, prefix: str) -> int:
-        """Number of nodes
-
-        Args:
-            prefix (str): prefix for which to count ('prot_', 'drug_')
-
-        Returns:
-            int: Number of nodes
-        """
+        """Number of nodes for graph with prefix"""
         return self.__dict__[prefix + "x"].size(0)
 
     def n_edges(self, prefix: str) -> int:
@@ -180,6 +162,49 @@ class Dataset(InMemoryDataset):
                 self.process_(data_list, s)
 
 
+class Data(Data):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.__dict__.update(kwargs)
+
+    @property
+    def n_nodes(self) -> int:
+        """Number of nodes"""
+        return self.x.size(0)
+
+    @property
+    def n_edges(self) -> int:
+        """Number of edges"""
+        return self.edge_index.size(1)
+
+    @property
+    def n_node_feats(self) -> int:
+        """Calculate the feature dimension of the grahs
+        If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
+        then return the max. Otherwise return size(1)
+        """
+        x = self.x
+        if len(x.size()) == 1:
+            return x.max().item() + 1
+        if len(x.size()) == 2:
+            return x.size(1)
+        raise ValueError("Too many dimensions in input features")
+
+    @property
+    def n_edge_feats(self) -> int:
+        """Returns number of different edges"""
+        if "edge_feats" not in self.__dict__:
+            return 1
+        if self.edge_feats is None:
+            return 1
+        edge_feats = self.edge_feats
+        if len(edge_feats.size()) == 1:
+            return edge_feats.max().item() + 1
+        if len(edge_feats.size()) == 2:
+            return edge_feats.size(1)
+        raise ValueError("Too many dimensions in input features")
+
+
 class PreTrainDataset(InMemoryDataset):
     """Dataset class for pre-training
 
@@ -198,6 +223,9 @@ class PreTrainDataset(InMemoryDataset):
         super().__init__(root, transform, pre_transform)
         self.data, self.slices, self.info = torch.load(self.processed_paths[0])
 
+    def _update_info(self, key: str, value: int):
+        self.info[key] = max(self.info[key], value)
+
     @property
     def processed_file_names(self) -> Iterable[str]:
         """Which files have to be in the dir to consider dataset processed
@@ -214,8 +242,9 @@ class PreTrainDataset(InMemoryDataset):
             df = pickle.load(file)
             data_list = []
             for x in df["data"]:
-                info["max_nodes"] = max(info["max_nodes"], x["x"].size(0))
-                info["feat_dim"] = max(info["feat_dim"], int(x["x"].max()))
+                info["max_nodes"] = self._update_info("max_nodes", x.n_nodes)
+                info["feat_dim"] = self._update_info("feat_dim", x.n_node_feats)
+                info["edge_dim"] = self._update_info("edge_dim", x.n_edge_feats)
                 del x["index_mapping"]
                 data_list.append(Data(**x))
 
@@ -227,3 +256,16 @@ class PreTrainDataset(InMemoryDataset):
 
             data, slices = self.collate(data_list)
             torch.save((data, slices, info), self.processed_paths[0])
+
+
+def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: float = 0.2):
+    """Randomly split dataset. If train + val == 1 return 2 splits, else remaining goes into test"""
+    assert train_frac + val_frac <= 1, "train_frac + val_frac > 1!"
+    tot = len(dataset)
+    train = int(tot * train_frac)
+    if train_frac + val_frac == 1:
+        val = tot - train
+        return random_split(dataset, [train, val])
+    val = int(tot * val_frac)
+    test = tot - train - val
+    return random_split(dataset, [train, val, test])

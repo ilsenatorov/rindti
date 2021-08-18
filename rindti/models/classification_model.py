@@ -6,30 +6,9 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
-from ..layers import (
-    ChebConvNet,
-    DiffPoolNet,
-    FilmConvNet,
-    GatConvNet,
-    GINConvNet,
-    GMTNet,
-    MeanPool,
-    NoneNet,
-    PNAConvNet,
-)
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
-from .base_model import BaseModel
-
-node_embedders = {
-    "ginconv": GINConvNet,
-    "chebconv": ChebConvNet,
-    "gatconv": GatConvNet,
-    "filmconv": FilmConvNet,
-    "pnaconv": PNAConvNet,
-    "none": NoneNet,
-}
-poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
+from .base_model import BaseModel, node_embedders, poolers
 
 
 class ClassificationModel(BaseModel):

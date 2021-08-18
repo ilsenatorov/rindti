@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from copy import deepcopy
 from math import ceil
 
@@ -11,17 +10,8 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 from rindti.utils.data import TwoGraphData
 from rindti.utils.utils import MyArgParser
 
-from ..layers import ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, NoneNet
 from ..utils import remove_arg_prefix
-from .classification_model import ClassificationModel
-
-node_embedders = {
-    "ginconv": GINConvNet,
-    "chebconv": ChebConvNet,
-    "gatconv": GatConvNet,
-    "none": NoneNet,
-}
-poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
+from .classification_model import ClassificationModel, node_embedders, poolers
 
 
 class NoisyNodesModel(ClassificationModel):

@@ -8,6 +8,11 @@ from ..base_layer import BaseLayer
 from .mlp import MLP
 
 
+def shifted_softplus(input):
+    """Shifted softplus function."""
+    return F.softplus(input) - F.softplus(torch.zeros(1, device=input.device))
+
+
 class MutualInformation(BaseLayer):
     def __init__(self, input_dim: int, hidden_dim: int):
         """Estimate MI between two entries. Uses MLP
@@ -32,4 +37,4 @@ class MutualInformation(BaseLayer):
         positive[index] = 1
         negative = ~positive
 
-        return -F.shifted_softplus(-score[positive]).mean() - F.shifted_softplus(score[negative]).mean()
+        return -shifted_softplus(-score[positive]).mean() - shifted_softplus(score[negative]).mean()
