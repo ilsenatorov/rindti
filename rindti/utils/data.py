@@ -87,11 +87,11 @@ class Dataset(InMemoryDataset):
         self.filename = filename
         super().__init__(root, transform, pre_transform, pre_filter)
         if split == "train":
-            self.data, self.slices, self.info = torch.load(self.processed_paths[0])
+            self.data, self.slices, self.config = torch.load(self.processed_paths[0])
         elif split == "val":
-            self.data, self.slices, self.info = torch.load(self.processed_paths[1])
+            self.data, self.slices, self.config = torch.load(self.processed_paths[1])
         elif split == "test":
-            self.data, self.slices, self.info = torch.load(self.processed_paths[2])
+            self.data, self.slices, self.config = torch.load(self.processed_paths[2])
         else:
             raise ValueError("Unknown split!")
 
@@ -112,27 +112,22 @@ class Dataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
-        self.info["prot_deg"] = torch.zeros(100, dtype=torch.long)
-        self.info["drug_deg"] = torch.zeros(10, dtype=torch.long)
+        self.config["prot_deg"] = torch.zeros(100, dtype=torch.long)
+        self.config["drug_deg"] = torch.zeros(10, dtype=torch.long)
         for data in data_list:
             d = degree(data["prot_edge_index"][1], num_nodes=data.n_nodes("prot_"), dtype=torch.long)
-            self.info["prot_deg"] += torch.bincount(d, minlength=self.info["prot_deg"].numel())
+            self.config["prot_deg"] += torch.bincount(d, minlength=self.config["prot_deg"].numel())
             d = degree(data["drug_edge_index"][1], num_nodes=data.n_nodes("drug_"), dtype=torch.long)
-            self.info["drug_deg"] += torch.bincount(d, minlength=self.info["drug_deg"].numel())
+            self.config["drug_deg"] += torch.bincount(d, minlength=self.config["drug_deg"].numel())
 
         data, slices = self.collate(data_list)
-        torch.save((data, slices, self.info), self.processed_paths[s])
-
-    def _update_info(self, key: str, value: int):
-        self.info[key] = max(self.info[key], value)
+        torch.save((data, slices, self.config), self.processed_paths[s])
 
     def process(self):
         """If the dataset was not seen before, process everything"""
-        self.info = dict(
-            prot_max_nodes=0, drug_max_nodes=0, prot_feat_dim=0, drug_feat_dim=0, prot_edge_dim=0, drug_edge_dim=0
-        )
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
+            self.config = all_data["config"]
             for s, split in enumerate(["train", "val", "test"]):
                 data_list = []
                 for i in all_data["data"]:
@@ -152,57 +147,8 @@ class Dataset(InMemoryDataset):
                     new_i.update({"prot_" + k: v for (k, v) in prot_data.items()})
                     new_i.update({"drug_" + k: v for (k, v) in drug_data.items()})
                     two_graph_data = TwoGraphData(**new_i)
-                    self._update_info("prot_max_nodes", two_graph_data.n_nodes("prot_"))
-                    self._update_info("drug_max_nodes", two_graph_data.n_nodes("drug_"))
-                    self._update_info("prot_feat_dim", two_graph_data.n_node_feats("prot_"))
-                    self._update_info("drug_feat_dim", two_graph_data.n_node_feats("drug_"))
-                    self._update_info("prot_edge_dim", two_graph_data.n_edge_feats("prot_"))
-                    self._update_info("drug_edge_dim", two_graph_data.n_edge_feats("drug_"))
                     data_list.append(two_graph_data)
                 self.process_(data_list, s)
-
-
-class Data(Data):
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.__dict__.update(kwargs)
-
-    @property
-    def n_nodes(self) -> int:
-        """Number of nodes"""
-        return self.x.size(0)
-
-    @property
-    def n_edges(self) -> int:
-        """Number of edges"""
-        return self.edge_index.size(1)
-
-    @property
-    def n_node_feats(self) -> int:
-        """Calculate the feature dimension of the grahs
-        If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
-        then return the max. Otherwise return size(1)
-        """
-        x = self.x
-        if len(x.size()) == 1:
-            return x.max().item() + 1
-        if len(x.size()) == 2:
-            return x.size(1)
-        raise ValueError("Too many dimensions in input features")
-
-    @property
-    def n_edge_feats(self) -> int:
-        """Returns number of different edges"""
-        if "edge_feats" not in self.__dict__:
-            return 1
-        if self.edge_feats is None:
-            return 1
-        edge_feats = self.edge_feats
-        if len(edge_feats.size()) == 1:
-            return edge_feats.max().item() + 1
-        if len(edge_feats.size()) == 2:
-            return edge_feats.size(1)
-        raise ValueError("Too many dimensions in input features")
 
 
 class PreTrainDataset(InMemoryDataset):
@@ -221,10 +167,10 @@ class PreTrainDataset(InMemoryDataset):
         root = os.path.join("data", basefilename)
         self.filename = filename
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices, self.info = torch.load(self.processed_paths[0])
+        self.data, self.slices, self.config = torch.load(self.processed_paths[0])
 
     def _update_info(self, key: str, value: int):
-        self.info[key] = max(self.info[key], value)
+        self.config[key] = max(self.config[key], value)
 
     @property
     def processed_file_names(self) -> Iterable[str]:
@@ -237,14 +183,14 @@ class PreTrainDataset(InMemoryDataset):
 
     def process(self):
         """If the dataset was not seen before, process everything"""
-        info = {"max_nodes": 0, "feat_dim": 0}
+        config = {"max_nodes": 0, "feat_dim": 0}
         with open(self.filename, "rb") as file:
             df = pickle.load(file)
             data_list = []
             for x in df["data"]:
-                info["max_nodes"] = self._update_info("max_nodes", x.n_nodes)
-                info["feat_dim"] = self._update_info("feat_dim", x.n_node_feats)
-                info["edge_dim"] = self._update_info("edge_dim", x.n_edge_feats)
+                config["max_nodes"] = self._update_info("max_nodes", x.n_nodes)
+                config["feat_dim"] = self._update_info("feat_dim", x.n_node_feats)
+                config["edge_dim"] = self._update_info("edge_dim", x.n_edge_feats)
                 del x["index_mapping"]
                 data_list.append(Data(**x))
 
@@ -255,7 +201,7 @@ class PreTrainDataset(InMemoryDataset):
                 data_list = [self.pre_transform(data) for data in data_list]
 
             data, slices = self.collate(data_list)
-            torch.save((data, slices, info), self.processed_paths[0])
+            torch.save((data, slices, config), self.processed_paths[0])
 
 
 def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: float = 0.2):

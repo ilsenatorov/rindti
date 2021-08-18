@@ -23,7 +23,7 @@ def pretrain(**kwargs):
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", patience=20, mode="min"),
+        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
     ]
     trainer = Trainer(
         gpus=kwargs["gpus"],

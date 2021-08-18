@@ -1,9 +1,12 @@
 import pickle
 from typing import Iterable
 
-import numpy as np
 import pandas as pd
 from pandas.core.frame import DataFrame
+from prepare_drugs import edge_encoding as drug_edge_encoding
+from prepare_drugs import node_encoding as drug_node_encoding
+from prepare_proteins import edge_encoding as prot_edge_encoding
+from prepare_proteins import node_encoding as prot_node_encoding
 
 
 def process(row: pd.Series) -> dict:
@@ -28,6 +31,18 @@ def del_index_mapping(x: dict) -> dict:
     return x
 
 
+def update_config(config: dict) -> dict:
+    """Updates config with dims of everything"""
+    config["prot_feat_dim"] = len(prot_node_encoding)
+    config["drug_feat_dim"] = len(drug_node_encoding)
+    if config["prepare_proteins"]["edge_feats"] == "label":
+        config["prot_edge_dim"] = len(prot_edge_encoding)
+    else:
+        config["prot_edge_dim"] = 1
+    config["drug_edge_dim"] = len(drug_edge_encoding)
+    return config
+
+
 if __name__ == "__main__":
 
     interactions = pd.read_csv(snakemake.input.inter, sep="\t")
@@ -47,10 +62,11 @@ if __name__ == "__main__":
     prots = prots[prots.index.isin(interactions["Target_ID"])]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
     full_data = process_df(interactions)
+    config = update_config(snakemake.config)
 
     final_data = {
         "data": full_data,
-        "config": snakemake.config,
+        "config": config,
         "prots": prots[["data", "count"]],
         "drugs": drugs[["data", "count"]],
     }

@@ -8,7 +8,7 @@ from rdkit.Chem import rdmolfiles, rdmolops
 from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
 
-# atom_num_mapping = {0: 'padding',
+# node_encoding = {0: 'padding',
 #                     1: 6,
 #                     2: 8,
 #                     3: 7,
@@ -38,7 +38,7 @@ from torch_geometric.utils import to_undirected
 #                     27: 23,
 #                     28: 'other'}
 
-atom_num_mapping = {
+node_encoding = {
     0: "padding",
     1: 6,
     2: 8,
@@ -50,13 +50,13 @@ atom_num_mapping = {
     8: "other",
 }
 
-bond_type_mapping = {
+edge_encoding = {
     "SINGLE": 0,
     "DOUBLE": 1,
     "AROMATIC": 2,
 }
 
-atom_num_mapping = {v: k for (k, v) in atom_num_mapping.items()}  # Reverse the mapping dict
+node_encoding = {v: k for (k, v) in node_encoding.items()}  # Reverse the mapping dict
 
 
 def featurize(smiles: str) -> dict:
@@ -79,18 +79,18 @@ def featurize(smiles: str) -> dict:
         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         edges.append([start, end])
         btype = str(bond.GetBondType())
-        if btype not in bond_type_mapping.keys():
+        if btype not in edge_encoding.keys():
             return np.nan
-        edge_feats.append(bond_type_mapping[btype])
+        edge_feats.append(edge_encoding[btype])
     if not edges:  # If no edges (bonds) were found, exit (single ion etc)
         return np.nan
     atom_features = []
     for atom in mol.GetAtoms():
         atom_num = atom.GetAtomicNum()
-        if atom_num not in atom_num_mapping.keys():
-            atom_features.append(atom_num_mapping["other"])
+        if atom_num not in node_encoding.keys():
+            atom_features.append(node_encoding["other"])
         else:
-            atom_features.append(atom_num_mapping[atom_num])
+            atom_features.append(node_encoding[atom_num])
     x = torch.tensor(atom_features, dtype=torch.long)
     edge_index = torch.tensor(edges).t().contiguous()
     edge_feats = torch.tensor(edge_feats, dtype=torch.long)

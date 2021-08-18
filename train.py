@@ -24,7 +24,7 @@ def train(**kwargs):
     val = Dataset(kwargs["data"], split="val")
     test = Dataset(kwargs["data"], split="test")
 
-    kwargs.update(train.info)
+    kwargs.update(train.config)
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),

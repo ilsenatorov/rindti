@@ -7,7 +7,7 @@ import torch
 from pandas.core.frame import DataFrame
 from torch_geometric.utils import to_undirected
 
-aa_encoding = {
+node_encoding = {
     "ala": 0,
     "arg": 1,
     "asn": 2,
@@ -30,7 +30,7 @@ aa_encoding = {
     "val": 19,
 }
 
-edge_type_encoding = {"cnt": 0, "combi": 1, "hbond": 2, "pept": 3, "ovl": 4}
+edge_encoding = {"cnt": 0, "combi": 1, "hbond": 2, "pept": 3, "ovl": 4}
 
 
 def onehot_encode(position: int, count: Optional[int] = 20):
@@ -60,12 +60,12 @@ class ProteinEncoder:
         Returns:
             np.array: Concatenated node_feats and one-hot encoding of residue name
         """
-        if residue.lower() not in aa_encoding:
+        if residue.lower() not in node_encoding:
             return None
         elif self.node_feats == "label":
-            return aa_encoding[residue.lower()]
+            return node_encoding[residue.lower()]
         elif self.node_feats == "onehot":
-            return onehot_encode(aa_encoding[residue.lower()])
+            return onehot_encode(node_encoding[residue.lower()])
         else:
             raise ValueError("Unknown node_feats type!")
 
@@ -97,7 +97,7 @@ class ProteinEncoder:
                 chain2, resn2, x2, resaa2 = node2split
                 if x1 != "_" or x2 != "_":
                     continue
-                if resaa1.lower() not in aa_encoding or resaa2.lower() not in aa_encoding:
+                if resaa1.lower() not in node_encoding or resaa2.lower() not in node_encoding:
                     continue
                 resn1 = int(resn1)
                 resn2 = int(resn2)
@@ -171,12 +171,12 @@ class ProteinEncoder:
         edge_index = edge_index.t().contiguous()
         if self.edge_feats == "none":
             return edge_index, None
-        edge_feats = edges["type"].apply(lambda x: edge_type_encoding[x])
+        edge_feats = edges["type"].apply(lambda x: edge_encoding[x])
         if self.edge_feats == "label":
             edge_feats = torch.tensor(edge_feats, dtype=torch.long)
             return edge_index, edge_feats
         elif self.edge_feats == "onehot":
-            edge_feats = edge_feats.apply(onehot_encode, count=len(edge_type_encoding))
+            edge_feats = edge_feats.apply(onehot_encode, count=len(edge_encoding))
             edge_feats = torch.tensor(edge_feats, dtype=torch.float)
             return edge_index, edge_feats
 
