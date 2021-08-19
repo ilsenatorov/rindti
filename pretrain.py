@@ -1,22 +1,27 @@
 import sys
 from pprint import pprint
 
-import torch
+import pandas as pd
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data import DataLoader
 
-from rindti.models import GraphLogModel, InfoGraphModel
+from rindti.models import GraphLogModel, InfoGraphModel, PfamModel
 from rindti.utils.data import PreTrainDataset, split_random
+from rindti.utils.transforms import PfamTransformer
 from rindti.utils.utils import MyArgParser
 
-models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel}
+models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel}
 
 
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
-    dataset = PreTrainDataset(kwargs["data"])
+    if kwargs["model"] == "pfam":
+        transformer = PfamTransformer.from_pickle(kwargs["data"])
+    else:
+        transformer = None
+    dataset = PreTrainDataset(kwargs["data"], transform=transformer)
     kwargs.update(dataset.config)
     pprint(kwargs)
     kwargs["feat_dim"] = 20
@@ -36,8 +41,17 @@ def pretrain(**kwargs):
         num_sanity_val_steps=0,
     )
     model = models[kwargs["model"]](**kwargs)
-    train_dl = DataLoader(train, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
-    val_dl = DataLoader(val, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"])
+    follow_batch = ["a_x", "b_x"] if kwargs["model"] == "pfam" else []
+    train_dl = DataLoader(
+        train,
+        batch_size=kwargs["batch_size"],
+        num_workers=kwargs["num_workers"],
+        follow_batch=follow_batch,
+        shuffle=True,
+    )
+    val_dl = DataLoader(
+        val, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], follow_batch=follow_batch
+    )
     trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
 
 
@@ -80,7 +94,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
 
-    parser = {"graphlog": GraphLogModel, "infograph": InfoGraphModel}[model_type].add_arguments(parser)
+    parser = models[model_type].add_arguments(parser)
 
     args = parser.parse_args()
     argvars = vars(args)

@@ -29,6 +29,21 @@ def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
     return new_kwargs
 
 
+def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
+    """Adds the prefix to all the args. Removes None values and 'index_mapping'
+
+    Args:
+        prefix (str): prefix to add (`drug_`, `prot_` or `mlp_` usually)
+        kwargs (dict): dict of arguments
+
+    Returns:
+        dict: Sub-dict of arguments
+    """
+    if not isinstance(kwargs, dict):
+        kwargs = kwargs.__dict__
+    return {prefix + k: v for (k, v) in kwargs.items() if k != "index_mapping" and v is not None}
+
+
 class _MyArgumentGroup(_ArgumentGroup):
     """Custom arguments group
 

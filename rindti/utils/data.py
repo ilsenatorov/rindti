@@ -189,9 +189,10 @@ class PreTrainDataset(InMemoryDataset):
         with open(self.filename, "rb") as file:
             df = pickle.load(file)
             data_list = []
-            for x in df["data"]:
+            for id, x in df["data"].to_dict().items():
                 del x["index_mapping"]
                 config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
+                x["id"] = id
                 data_list.append(Data(**x))
 
             if self.pre_filter is not None:

@@ -7,6 +7,7 @@ import torch
 from torch_geometric.data import Data
 
 from .data import TwoGraphData
+from .utils import add_arg_prefix
 
 
 class BaseTransformer(object):
@@ -208,6 +209,11 @@ class PfamTransformer(BaseTransformer):
     def _filter(self, data: Data) -> bool:
         """Returns True if graph in self.merged_df else False"""
         return data.id in self.merged_df.index
+
+    @staticmethod
+    def from_pickle(filename: str):
+        merged_df = pd.read_pickle(filename)
+        return PfamTransformer(merged_df)
 
 
 class SizeFilter(object):

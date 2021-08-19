@@ -1,13 +1,12 @@
-from typing import Tuple
+from argparse import ArgumentParser
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torch.optim.adamw import AdamW
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch_geometric.typing import Adj
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
+
+from rindti.utils.utils import MyArgParser
 
 from ..layers import MLP
 from ..utils import remove_arg_prefix
@@ -53,10 +52,9 @@ class PfamModel(BaseModel):
         output = self.forward(a, b)
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
-        t = (output > 0.5).float()
-        acc = accuracy(t, labels)
+        acc = accuracy(output, labels)
         try:
-            _auroc = auroc(t, labels)
+            _auroc = auroc(output, labels)
         except Exception:
             _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
@@ -66,3 +64,22 @@ class PfamModel(BaseModel):
             "auroc": _auroc,
             "matthews": _mc,
         }
+
+    @staticmethod
+    def add_arguments(parser: MyArgParser) -> MyArgParser:
+        """Generate arguments for this module"""
+        # Hack to find which embedding are used and add their arguments
+        tmp_parser = ArgumentParser(add_help=False)
+        tmp_parser.add_argument("--node_embed", type=str, default="ginconv")
+        tmp_parser.add_argument("--pool", type=str, default="gmt")
+        args = tmp_parser.parse_known_args()[0]
+
+        node_embed = node_embedders[args.node_embed]
+        pool = poolers[args.pool]
+        parser.add_argument("--feat_embed_dim", default=32, type=int)
+        parser.add_argument("--feat_method", default="element_l1", type=str)
+        pooler_args = parser.add_argument_group("Pool", prefix="--")
+        node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
+        node_embed.add_arguments(node_embed_args)
+        pool.add_arguments(pooler_args)
+        return parser
