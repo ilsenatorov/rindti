@@ -17,6 +17,7 @@ models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamMo
 
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
+    pprint(kwargs)
     if kwargs["model"] == "pfam":
         transformer = PfamTransformer.from_pickle(kwargs["data"])
     else:

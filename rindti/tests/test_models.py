@@ -1,8 +1,6 @@
 import torch
 
-from rindti.models.noisy_nodes_model import NoisyNodesModel
-
-from ..models import ClassificationModel
+from ..models import ClassificationModel, NoisyNodesModel
 from ..utils.data import TwoGraphData
 
 default_config = {

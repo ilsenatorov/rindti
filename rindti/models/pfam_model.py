@@ -54,7 +54,7 @@ class PfamModel(BaseModel):
         loss = F.binary_cross_entropy(output, labels.float())
         acc = accuracy(output, labels)
         try:
-            _auroc = auroc(output, labels)
+            _auroc = auroc(output, labels, pos_label=1)
         except Exception:
             _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
