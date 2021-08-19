@@ -30,8 +30,8 @@ node_embedders = {
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
     "filmconv": FilmConvNet,
-    "pnaconv": PNAConvNet,
-    "none": NoneNet,
+    # "pnaconv": PNAConvNet,
+    # "none": NoneNet,
 }
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 

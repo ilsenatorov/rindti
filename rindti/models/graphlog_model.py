@@ -50,19 +50,19 @@ class GraphLogModel(BaseModel):
         """
         masked_node_indices = []
         # select indices of masked nodes
-        for i in range(batch.batch[-1] + 1):
-            idx = torch.nonzero((batch.batch == i).float()).squeeze(-1)
+        for i in range(batch["batch"][-1] + 1):
+            idx = torch.nonzero((batch["batch"] == i).float()).squeeze(-1)
             num_node = idx.shape[0]
             sample_size = ceil(num_node * self.hparams.mask_rate)
             masked_node_idx = random.sample(idx.tolist(), sample_size)
             masked_node_idx.sort()
             masked_node_indices += masked_node_idx
 
-        batch.masked_node_indices = torch.tensor(masked_node_indices, device=self.device)
+        batch["masked_node_indices"] = torch.tensor(masked_node_indices, device=self.device)
 
         # mask nodes' features
         for node_idx in masked_node_indices:
-            batch.x[node_idx] = torch.zeros_like(batch.x[node_idx])
+            batch["x"][node_idx] = torch.zeros_like(batch["x"][node_idx])
 
         return batch
 
@@ -242,8 +242,8 @@ class GraphLogModel(BaseModel):
     def embed_batch(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
         """Embed a single batch (normal or masked doesn't matter)"""
         feat_embed = self.feat_embed(batch.x)
-        node_reps = self.node_embed(feat_embed, batch.edge_index)
-        graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
+        node_reps = self.node_embed(feat_embed, batch.edge_index, edge_feats=batch.edge_feats)
+        graph_reps = self.pool(node_reps, batch=batch.batch, edge_index=batch.edge_index)
         node_reps = self.proj(node_reps)
         graph_reps = self.proj(graph_reps)
         return node_reps, graph_reps
@@ -252,6 +252,7 @@ class GraphLogModel(BaseModel):
         """Calculate node and graph reps for normal and masked batch"""
         batch_modify = deepcopy(batch)
         batch_modify = self.mask_nodes(batch)
+        print(batch_modify)
         node_reps, graph_reps = self.embed_batch(batch)
         node_modify_reps, graph_modify_reps = self.embed_batch(batch_modify)
         return node_reps, node_modify_reps, graph_reps, graph_modify_reps

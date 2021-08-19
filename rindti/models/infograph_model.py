@@ -4,10 +4,11 @@ from typing import Tuple
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
+from torch_geometric.data import Data
 
 from ..layers import MutualInformation
 from ..layers.graphconv import GINConvNet
-from ..utils.data import TwoGraphData, corrupt_features
+from ..utils.data import corrupt_features
 from .base_model import BaseModel, node_embedders, poolers
 
 
@@ -24,7 +25,7 @@ class InfoGraphModel(BaseModel):
         self.mi = MutualInformation(kwargs["hidden_dim"], kwargs["hidden_dim"])
         self.node_pred = GINConvNet(kwargs["hidden_dim"], kwargs["feat_dim"], kwargs["hidden_dim"])
 
-    def forward(self, data: TwoGraphData) -> Tuple[Tensor, Tensor]:
+    def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
         """Forward pass of the module"""
         data["x"] = self.feat_embed(data["x"])
         data["x"] = self.node_embed(**data)
@@ -35,7 +36,7 @@ class InfoGraphModel(BaseModel):
         node_pred = self.node_pred(**data)
         return mi, node_pred
 
-    def shared_step(self, data: TwoGraphData) -> dict:
+    def shared_step(self, data: Data) -> dict:
         """Shared step"""
         orig_x = data["x"].clone()
         cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac)
