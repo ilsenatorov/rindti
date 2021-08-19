@@ -3,8 +3,9 @@ from copy import deepcopy
 import pytest
 import torch
 
-from ..models import ClassificationModel, NoisyNodesModel
+from ..models import ClassificationModel, NoisyNodesModel, RegressionModel
 from ..models.base_model import node_embedders, poolers
+from ..utils import MyArgParser
 from ..utils.data import TwoGraphData
 
 # "drug_node_embed": list(node_embedders.keys()),
@@ -39,8 +40,10 @@ class BaseTestModel:
         "drug_frac": 0.05,
         "drug_hidden_dim": 32,
         "drug_max_nodes": 78,
+        "drug_node_embed": "ginconv",
         "drug_num_heads": 4,
         "drug_num_layers": 3,
+        "drug_pool": "gmt",
         "drug_pretrain": False,
         "drug_ratio": 0.25,
         "early_stop_patience": 60,
@@ -59,8 +62,10 @@ class BaseTestModel:
         "prot_frac": 0.05,
         "prot_hidden_dim": 32,
         "prot_max_nodes": 593,
+        "prot_node_embed": "ginconv",
         "prot_num_heads": 4,
         "prot_num_layers": 3,
+        "prot_pool": "gmt",
         "prot_pretrain": False,
         "prot_ratio": 0.25,
         "reduce_lr_factor": 0.1,
@@ -69,18 +74,6 @@ class BaseTestModel:
         "weight_decay": 0.01,
         "weighted": 0,
     }
-
-    @pytest.mark.parametrize("prot_node_embed", list(node_embedders.keys()))
-    @pytest.mark.parametrize("drug_node_embed", list(node_embedders.keys()))
-    @pytest.mark.parametrize("prot_pool", list(poolers.keys()))
-    @pytest.mark.parametrize("drug_pool", list(poolers.keys()))
-    def test_init(self, drug_node_embed, prot_node_embed, drug_pool, prot_pool):
-        """Test .__init__"""
-        self.default_config["prot_node_embed"] = prot_node_embed
-        self.default_config["prot_pool"] = prot_pool
-        self.default_config["drug_node_embed"] = drug_node_embed
-        self.default_config["drug_pool"] = drug_pool
-        self.model(**self.default_config)
 
     @pytest.mark.parametrize("prot_node_embed", list(node_embedders.keys()))
     @pytest.mark.parametrize("drug_node_embed", list(node_embedders.keys()))
@@ -96,14 +89,38 @@ class BaseTestModel:
         data = deepcopy(fake_data)
         model.shared_step(TwoGraphData(**data))
 
+    def test_arg_parser(self):
+        parser = MyArgParser()
+        self.model.add_arguments(parser)
+
 
 class TestClassModel(BaseTestModel):
     """Classification Model"""
 
     model = ClassificationModel
 
+    @pytest.mark.parametrize("feat_method", ["element_l1", "element_l2", "mult", "concat"])
+    def test_feat_methods(self, feat_method: str):
+        """Test feature concatenation"""
+        self.default_config["feat_method"] = feat_method
+        model = self.model(**self.default_config)
+        prot = torch.rand((32, 64), dtype=torch.float32)
+        drug = torch.rand((32, 64), dtype=torch.float32)
+        combined = model.merge_features(drug, prot)
+        assert combined.size(0) == 32
+        if feat_method == "concat":
+            assert combined.size(1) == 128
+        else:
+            assert combined.size(1) == 64
+
 
 class TestNoisyNodesModel(BaseTestModel):
     """Noisy Nodes"""
 
     model = NoisyNodesModel
+
+
+class TestRegressionModel(BaseTestModel):
+    """Regression Model"""
+
+    model = RegressionModel

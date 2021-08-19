@@ -229,7 +229,7 @@ def corrupt_features(features: torch.Tensor, frac: float, device=None) -> torch.
         torch.Tensor: New corrupt features
     """
     num_feat = features.size(0)
-    num_node_types = int(features.max())
+    num_node_types = int(features.max() + 1)
     num_corrupt_nodes = ceil(num_feat * frac)
     corrupt_idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
     corrupt_features = torch.tensor(

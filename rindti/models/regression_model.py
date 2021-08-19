@@ -31,7 +31,7 @@ class RegressionModel(ClassificationModel):
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
         output = self.forward(prot, drug)
-        labels = data.label.unsqueeze(1)
+        labels = data.label.unsqueeze(1).float()
         loss = F.mse_loss(output, labels.float())
         corr = pearson_corrcoef(output, labels)
         mse = mean_squared_error(output, labels)
