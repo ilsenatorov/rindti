@@ -3,6 +3,7 @@ import pickle
 from math import ceil
 from typing import Any, Callable, Iterable
 
+import numpy as np
 import torch
 from torch.utils.data import random_split
 from torch_geometric.data import Data, InMemoryDataset
@@ -214,3 +215,26 @@ def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: fl
     val = int(tot * val_frac)
     test = tot - train - val
     return random_split(dataset, [train, val, test])
+
+
+def corrupt_features(features: torch.Tensor, frac: float, device=None) -> torch.Tensor:
+    """Corrupt the features
+
+    Args:
+        features (torch.Tensor): Node features
+        frac (float): Fraction of nodes to corrupt
+
+    Returns:
+        torch.Tensor: New corrupt features
+    """
+    num_feat = features.size(0)
+    num_node_types = int(features.max())
+    num_corrupt_nodes = ceil(num_feat * frac)
+    corrupt_idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    corrupt_features = torch.tensor(
+        np.random.choice(range(num_node_types), num_corrupt_nodes, replace=True),
+        dtype=torch.long,
+        device=device,
+    )
+    features[corrupt_idx] = corrupt_features
+    return features, corrupt_idx

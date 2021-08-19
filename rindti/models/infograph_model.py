@@ -5,20 +5,18 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
-from rindti.models.base_model import BaseModel
-
 from ..layers import MutualInformation
 from ..layers.graphconv import GINConvNet
-from ..utils.data import TwoGraphData
-from .noisy_nodes_model import NoisyNodesModel, node_embedders, poolers
+from ..utils.data import TwoGraphData, corrupt_features
+from .base_model import BaseModel, node_embedders, poolers
 
 
-class InfoGraphModel(NoisyNodesModel):
+class InfoGraphModel(BaseModel):
     """Maximise mutual information between node and graph representations
     https://arxiv.org/pdf/1808.06670.pdf"""
 
     def __init__(self, **kwargs):
-        super(BaseModel, self).__init__()
+        super().__init__()
         self.save_hyperparameters()
         self.feat_embed = self._get_feat_embed(kwargs)
         self.node_embed = self._get_node_embed(kwargs)
@@ -40,7 +38,7 @@ class InfoGraphModel(NoisyNodesModel):
     def shared_step(self, data: TwoGraphData) -> dict:
         """Shared step"""
         orig_x = data["x"].clone()
-        cor_x, cor_idx = self.corrupt_features(data["x"], self.hparams.frac)
+        cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac)
         data["x"] = cor_x
         mi, node_pred = self.forward(data.__dict__)
         node_loss = F.cross_entropy(node_pred[cor_idx], orig_x[cor_idx])

@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from logging import warning
 from pprint import pprint
-from typing import Optional, Tuple, Union
+from typing import Iterable, Optional, Tuple, Union
 
 import torch
 from pytorch_lightning import LightningModule

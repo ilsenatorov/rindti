@@ -11,7 +11,8 @@ from rindti.utils.data import TwoGraphData
 from rindti.utils.utils import MyArgParser
 
 from ..utils import remove_arg_prefix
-from .classification_model import ClassificationModel, node_embedders, poolers
+from ..utils.data import corrupt_features
+from .classification_model import ClassificationModel
 
 
 class NoisyNodesModel(ClassificationModel):
@@ -23,28 +24,6 @@ class NoisyNodesModel(ClassificationModel):
         drug_param = remove_arg_prefix("drug_", kwargs)
         self.prot_node_pred = self._get_node_embed(prot_param, out_dim=prot_param["feat_dim"])
         self.drug_node_pred = self._get_node_embed(drug_param, out_dim=drug_param["feat_dim"])
-
-    def corrupt_features(self, features: torch.Tensor, frac: float) -> torch.Tensor:
-        """Corrupt the features
-
-        Args:
-            features (torch.Tensor): Node features
-            frac (float): Fraction of nodes to corrupt
-
-        Returns:
-            torch.Tensor: New corrupt features
-        """
-        num_feat = features.size(0)
-        num_node_types = int(features.max())
-        num_corrupt_nodes = ceil(num_feat * frac)
-        corrupt_idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-        corrupt_features = torch.tensor(
-            np.random.choice(range(num_node_types), num_corrupt_nodes, replace=True),
-            dtype=torch.long,
-            device=self.device,
-        )
-        features[corrupt_idx] = corrupt_features
-        return features, corrupt_idx
 
     def corrupt_data(
         self,
@@ -65,11 +44,11 @@ class NoisyNodesModel(ClassificationModel):
         # sourcery skip: extract-duplicate-method
         data = deepcopy(orig_data)
         if prot_frac > 0:
-            prot_feat, prot_idx = self.corrupt_features(data["prot_x"], prot_frac)
+            prot_feat, prot_idx = corrupt_features(data["prot_x"], prot_frac, self.device)
             data["prot_x"] = prot_feat
             data["prot_cor_idx"] = prot_idx
         if drug_frac > 0:
-            drug_feat, drug_idx = self.corrupt_features(data["drug_x"], drug_frac)
+            drug_feat, drug_idx = self.corrupt_features(data["drug_x"], drug_frac, self.device)
             data["drug_x"] = drug_feat
             data["drug_cor_idx"] = drug_idx
         return data

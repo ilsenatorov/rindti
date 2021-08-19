@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from typing import Iterable
 
 import numpy as np
 import torch
@@ -6,9 +7,12 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
+from ..layers.base_layer import BaseLayer
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
 from .base_model import BaseModel, node_embedders, poolers
+from .graphlog_model import GraphLogModel
+from .infograph_model import InfoGraphModel
 
 
 class ClassificationModel(BaseModel):
@@ -21,13 +25,37 @@ class ClassificationModel(BaseModel):
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)
         mlp_param = remove_arg_prefix("mlp_", kwargs)
-        self.prot_feat_embed = self._get_feat_embed(prot_param)
-        self.drug_feat_embed = self._get_feat_embed(drug_param)
-        self.prot_node_embed = self._get_node_embed(prot_param)
-        self.drug_node_embed = self._get_node_embed(drug_param)
-        self.prot_pool = self._get_pooler(prot_param)
-        self.drug_pool = self._get_pooler(drug_param)
+        if prot_param["pretrain"]:
+            self.prot_feat_embed, self.prot_node_embed, self.prot_pool = self._load_pretrained(prot_param["pretrain"])
+        else:
+            self.prot_feat_embed = self._get_feat_embed(prot_param)
+            self.prot_node_embed = self._get_node_embed(prot_param)
+            self.prot_pool = self._get_pooler(prot_param)
+        if drug_param["pretrain"]:
+            self.drug_feat_embed, self.drug_node_embed, self.drug_pool = self._load_pretrained(drug_param["pretrain"])
+        else:
+            self.drug_feat_embed = self._get_feat_embed(drug_param)
+            self.drug_node_embed = self._get_node_embed(drug_param)
+            self.drug_pool = self._get_pooler(drug_param)
         self.mlp = self._get_mlp(mlp_param)
+
+    def _load_pretrained(self, checkpoint_path: str) -> Iterable[BaseLayer]:
+        """Load pretrained model
+
+        Args:
+            checkpoint_path (str): Path to checkpoint file.
+            Has to contain 'infograph' or 'graphlog', which will point to the type of model.
+
+        Returns:
+            Iterable[BaseLayer]: feat_embed, node_embed, pool of the pretrained model
+        """
+        if "infograph" in checkpoint_path:
+            model = InfoGraphModel.load_from_checkpoint(checkpoint_path)
+        elif "graphlog" in checkpoint_path:
+            model = GraphLogModel.load_from_checkpoint(checkpoint_path)
+        else:
+            raise ValueError("Unknown model type!")
+        return model.feat_embed, model.node_embed, model.pool
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
@@ -87,6 +115,8 @@ class ClassificationModel(BaseModel):
         drug = parser.add_argument_group("Drug", prefix="--drug_")
         prot.add_argument("feat_embed_dim", default=32, type=int)
         drug.add_argument("feat_embed_dim", default=32, type=int)
+        prot.add_argument("pretrain", default=None, type=str)
+        drug.add_argument("pretrain", default=None, type=str)
         ## Add module-specific embeddings
         prot_node_embed.add_arguments(prot)
         drug_node_embed.add_arguments(drug)
