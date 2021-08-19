@@ -3,7 +3,7 @@ bsite:
   radius: 5
 # rinerator parameter decides whether only calculate RINs of bsites, or of whole protein (bsite/whole)
 # templates folder must be present for bsite to work
-rinerator: bsite
+rinerator: whole
 
 # If set to true, only computes the proteins data (useful for pretraining)
 only_proteins: false
