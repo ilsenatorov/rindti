@@ -47,6 +47,8 @@ default_config = {
     "drug_frac": 0.05,
     "prot_alpha": 1,
     "drug_alpha": 1,
+    "prot_pretrain": False,
+    "drug_pretrain": False,
 }
 
 fake_data = {

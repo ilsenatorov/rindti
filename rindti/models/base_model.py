@@ -115,32 +115,30 @@ class BaseModel(LightningModule):
         for name, param in self.named_parameters():
             self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
-    def training_epoch_end(self, outputs):
+    def shared_epoch_end(self, outputs: dict, prefix: str, log_hparams=False):
+        """Things that are the same foor train, test and val"""
+        entries = outputs[0].keys()
+        metrics = {}
+        for i in entries:
+            val = torch.stack([x[i] for x in outputs])
+            val = val[~val.isnan()].mean()
+            self.logger.experiment.add_scalar(prefix + i, val, self.current_epoch)
+            metrics[prefix + i] = val
+        if log_hparams:
+            self.logger.log_hyperparams(self.hparams, metrics)
+
+    def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything"""
         self.log_histograms()
-        entries = outputs[0].keys()
-        for i in entries:
-            val = torch.stack([x[i] for x in outputs]).mean()
-            self.logger.experiment.add_scalar("train_epoch_" + i, val, self.current_epoch)
+        self.shared_epoch_end(outputs, "train_epoch_")
 
     def validation_epoch_end(self, outputs: dict):
         """What to do at the end of a validation epoch. Logs everything, saves hyperparameters"""
-        entries = outputs[0].keys()
-        metrics = {}
-        for i in entries:
-            val = torch.stack([x[i] for x in outputs]).mean()
-            self.logger.experiment.add_scalar("val_epoch_" + i, val, self.current_epoch)
-            metrics["test_" + i] = val
-        self.logger.log_hyperparams(self.hparams, metrics)
+        self.shared_epoch_end(outputs, "val_epoch_", log_hparams=True)
 
     def test_epoch_end(self, outputs: dict):
         """What to do at the end of a test epoch. Logs everything, saves hyperparameters"""
-        entries = outputs[0].keys()
-        metrics = {}
-        for i in entries:
-            val = torch.stack([x[i] for x in outputs]).mean()
-            metrics["test_" + i] = val
-        self.logger.log_hyperparams(self.hparams, metrics)
+        self.shared_epoch_end(outputs, "test_epoch_", log_hparams=True)
 
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimiser and/or lr schedulers"""

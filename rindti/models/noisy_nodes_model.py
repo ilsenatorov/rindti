@@ -48,7 +48,7 @@ class NoisyNodesModel(ClassificationModel):
             data["prot_x"] = prot_feat
             data["prot_cor_idx"] = prot_idx
         if drug_frac > 0:
-            drug_feat, drug_idx = self.corrupt_features(data["drug_x"], drug_frac, self.device)
+            drug_feat, drug_idx = corrupt_features(data["drug_x"], drug_frac, self.device)
             data["drug_x"] = drug_feat
             data["drug_cor_idx"] = drug_idx
         return data
