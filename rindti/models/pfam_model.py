@@ -27,23 +27,14 @@ class PfamModel(BaseModel):
         self.pool = self._get_pooler(kwargs)
         self.mlp = MLP(kwargs["hidden_dim"], 1, **kwargs)
 
-    def forward(
-        self,
-        a_x: Tensor,
-        b_x: Tensor,
-        a_edge_index: Adj,
-        b_edge_index: Adj,
-        a_batch: Tensor,
-        b_batch: Tensor,
-        *args,
-    ) -> Tensor:
-
-        a_x = self.feat_embed(a_x)
-        b_x = self.feat_embed(b_x)
-        a_x = self.node_embed(a_x, a_edge_index, a_batch)
-        b_x = self.node_embed(b_x, b_edge_index, b_batch)
-        a_embed = self.pool(a_x, a_edge_index, a_batch)
-        b_embed = self.pool(b_x, b_edge_index, b_batch)
+    def forward(self, a: dict, b: dict) -> Tensor:
+        """Forward pass of the model"""
+        a["x"] = self.feat_embed(a["x"])
+        b["x"] = self.feat_embed(b["x"])
+        a["x"] = self.node_embed(**a)
+        b["x"] = self.node_embed(**b)
+        a_embed = self.pool(**a)
+        b_embed = self.pool(**b)
         joint_embedding = self.merge_features(a_embed, b_embed)
         logit = self.mlp(joint_embedding)
         return torch.sigmoid(logit)
@@ -57,14 +48,9 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        output = self.forward(
-            data.a_x,
-            data.b_x,
-            data.a_edge_index,
-            data.b_edge_index,
-            data.a_x_batch,
-            data.b_x_batch,
-        )
+        a = remove_arg_prefix("a_", data)
+        b = remove_arg_prefix("b_", data)
+        output = self.forward(a, b)
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
         t = (output > 0.5).float()
@@ -80,42 +66,3 @@ class PfamModel(BaseModel):
             "auroc": _auroc,
             "matthews": _mc,
         }
-
-    def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
-        """What to do during training step. Also logs the values for various callbacks.
-
-        Args:
-            data (TwoGraphData): Input data
-            data_idx (int): Number of the batch
-
-        Returns:
-            dict: dictionary with all losses and accuracies
-        """
-        ss = self.shared_step(data)
-        # val_loss has to be logged for early stopping and reduce_lr
-        for key, value in ss.items():
-            self.log("train_" + key, value)
-        return ss
-
-    def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
-        """Configure the optimiser and/or lr schedulers
-
-        Returns:
-            Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
-            tuple of optimiser list and lr_scheduler list
-        """
-        optimiser = AdamW(
-            params=self.parameters(),
-            lr=self.hparams.lr,
-            weight_decay=self.hparams.weight_decay,
-        )
-        lr_scheduler = {
-            "scheduler": ReduceLROnPlateau(
-                optimiser,
-                factor=self.hparams.reduce_lr_factor,
-                patience=self.hparams.reduce_lr_patience,
-                verbose=True,
-            ),
-            "monitor": "train_loss",
-        }
-        return [optimiser], [lr_scheduler]
