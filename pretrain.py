@@ -1,8 +1,4 @@
-import sys
-from pprint import pprint
-
-import pandas as pd
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data import DataLoader
@@ -17,14 +13,13 @@ models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamMo
 
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
-    pprint(kwargs)
+    seed_everything(kwargs["seed"])
     if kwargs["model"] == "pfam":
         transformer = PfamTransformer.from_pickle(kwargs["data"])
     else:
         transformer = None
     dataset = PreTrainDataset(kwargs["data"], transform=transformer)
     kwargs.update(dataset.config)
-    pprint(kwargs)
     kwargs["feat_dim"] = 20
     train, val = split_random(dataset)
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
@@ -40,6 +35,8 @@ def pretrain(**kwargs):
         max_epochs=kwargs["max_epochs"],
         stochastic_weight_avg=True,
         num_sanity_val_steps=0,
+        deterministic=True,
+        profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
     follow_batch = ["a_x", "b_x"] if kwargs["model"] == "pfam" else []
@@ -87,6 +84,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     trainer.add_argument("--weighted", type=bool, default=1, help="Whether to weight the data points")
     trainer.add_argument("--gradient_clip_val", type=float, default=10, help="Gradient clipping")
     trainer.add_argument("--model", type=str, default="graphlog", help="Type of model")
+    trainer.add_argument("--profiler", type=str, default=None)
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
     optim.add_argument("--momentum", type=float, default=0.3)

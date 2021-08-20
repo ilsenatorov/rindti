@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pprint import pprint
 
 import torch
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, profiler, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data.dataloader import DataLoader
@@ -14,7 +14,7 @@ from rindti.utils.transforms import GnomadTransformer, RandomTransformer
 
 def train(**kwargs):
     """Train the whole model"""
-    torch.manual_seed(kwargs["seed"])
+    seed_everything(kwargs["seed"])
     if kwargs["transformer"] != "none":
         transform = {"gnomad": GnomadTransformer, "random": RandomTransformer}[kwargs["transformer"]].from_pickle(
             kwargs["transformer_pickle"], max_num_mut=kwargs["max_num_mut"]
@@ -38,6 +38,8 @@ def train(**kwargs):
         callbacks=callbacks,
         logger=logger,
         gradient_clip_val=kwargs["gradient_clip_val"],
+        deterministic=True,
+        profiler=kwargs["profiler"],
     )
     pprint(kwargs)
     if kwargs["model"] == "classification":
@@ -87,6 +89,7 @@ if __name__ == "__main__":
     trainer.add_argument("--model", type=str, default="classification", help="Type of model")
     trainer.add_argument("--weighted", type=bool, default=1, help="Whether to weight the data points")
     trainer.add_argument("--gradient_clip_val", type=float, default=30, help="Gradient clipping")
+    trainer.add_argument("--profiler", type=str, default=None)
 
     model.add_argument("--mlp_hidden_dim", default=64, type=int, help="MLP hidden dims")
     model.add_argument("--mlp_dropout", default=0.2, type=float, help="MLP dropout")
