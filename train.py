@@ -26,7 +26,9 @@ def train(**kwargs):
     test = Dataset(kwargs["data"], split="test")
 
     kwargs.update(train.config)
-    logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
+    logger = TensorBoardLogger(
+        "tb_logs", name=kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
+    )
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
@@ -36,7 +38,6 @@ def train(**kwargs):
         callbacks=callbacks,
         logger=logger,
         gradient_clip_val=kwargs["gradient_clip_val"],
-        stochastic_weight_avg=True,
     )
     pprint(kwargs)
     if kwargs["model"] == "classification":
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     trainer.add_argument("--max_epochs", type=int, default=1000, help="Max number of epochs")
     trainer.add_argument("--model", type=str, default="classification", help="Type of model")
     trainer.add_argument("--weighted", type=bool, default=1, help="Whether to weight the data points")
-    trainer.add_argument("--gradient_clip_val", type=float, default=10, help="Gradient clipping")
+    trainer.add_argument("--gradient_clip_val", type=float, default=30, help="Gradient clipping")
 
     model.add_argument("--mlp_hidden_dim", default=64, type=int, help="MLP hidden dims")
     model.add_argument("--mlp_dropout", default=0.2, type=float, help="MLP dropout")

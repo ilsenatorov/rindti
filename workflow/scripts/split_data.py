@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 
 def split_groups(
     inter: pd.DataFrame,
+    col_name: str = col_name,
     bin_size: int = 10,
     train_frac: float = 0.7,
     val_frac: float = 0.2,
@@ -15,6 +16,7 @@ def split_groups(
 
     Args:
         inter (pd.DataFrame): interaction DataFrame
+        col_name (str): Which column to split on (col_name or 'Drug_ID' usually)
         bin_size (int, optional): Size of the bins to perform individual splits in. Defaults to 10.
         train_frac (float, optional): value from 0 to 1, how much of the data goes into train
         val_frac (float, optional): value from 0 to 1, how much of the data goes into validation
@@ -22,7 +24,7 @@ def split_groups(
     Returns:
         pd.DataFrame: DataFrame with a new 'split' column
     """
-    sorted_index = [x for x in inter["Target_ID"].value_counts().index]
+    sorted_index = [x for x in inter[col_name].value_counts().index]
     train_prop = int(bin_size * train_frac)
     val_prop = int(bin_size * val_frac)
     train = []
@@ -37,9 +39,9 @@ def split_groups(
         val += val_bin
         subset = [x for x in subset if x not in val_bin]
         test += subset
-    train_idx = inter[inter["Target_ID"].isin(train)].index
-    val_idx = inter[inter["Target_ID"].isin(val)].index
-    test_idx = inter[inter["Target_ID"].isin(test)].index
+    train_idx = inter[inter[col_name].isin(train)].index
+    val_idx = inter[inter[col_name].isin(val)].index
+    test_idx = inter[inter[col_name].isin(test)].index
     inter.loc[train_idx, "split"] = "train"
     inter.loc[val_idx, "split"] = "val"
     inter.loc[test_idx, "split"] = "test"
@@ -71,11 +73,17 @@ if __name__ == "__main__":
     lig = pd.read_csv(snakemake.input.lig, sep="\t").set_index("Drug_ID")
     inter = pd.read_csv(snakemake.input.inter, sep="\t")
 
-    inter["Canonical SMILES"] = inter["Drug_ID"].apply(lambda x: lig.loc[x, "Canonical SMILES"])
-
     if snakemake.config["split"]["method"] == "coldtarget":
         inter = split_groups(
             inter,
+            col_name="Target_ID",
+            train_frac=snakemake.config["split"]["train"],
+            val_frac=snakemake.config["split"]["val"],
+        )
+    elif snakemake.config["split"]["method"] == "colddrug":
+        inter = split_groups(
+            inter,
+            col_name="Drug_ID",
             train_frac=snakemake.config["split"]["train"],
             val_frac=snakemake.config["split"]["val"],
         )

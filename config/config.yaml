@@ -3,7 +3,7 @@ bsite:
   radius: 5
 # rinerator parameter decides whether only calculate RINs of bsites, or of whole protein (bsite/whole)
 # templates folder must be present for bsite to work
-rinerator: whole
+rinerator: bsite
 
 # If set to true, only computes the proteins data (useful for pretraining)
 only_proteins: false
@@ -15,17 +15,17 @@ prepare_proteins:
   # can be label or onehot
   node_feats: label
   # can be label, onehot or none
-  edge_feats: label
+  edge_feats: none
 
 split:
-  # available methods: random, coldtarget
-  method: coldtarget
+  # available methods: random, coldtarget, colddrug
+  method: random
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
 
 parse_dataset:
   # filtering can be posneg, balanced or none
-  filtering: posneg
+  filtering: none
   # valmax and valmin are boundaries for outlier activity values
   threshold: 1000

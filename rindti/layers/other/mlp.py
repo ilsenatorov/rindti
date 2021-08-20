@@ -1,5 +1,3 @@
-from os import stat
-
 from torch import nn
 from torch.functional import Tensor
 
@@ -18,7 +16,13 @@ class MLP(BaseLayer):
     """
 
     def __init__(
-        self, input_dim: int, out_dim: int, hidden_dim: int = 64, num_layers: int = 2, dropout: float = 0.2, **kwargs
+        self,
+        input_dim: int,
+        out_dim: int,
+        hidden_dim: int = 64,
+        num_layers: int = 2,
+        dropout: float = 0.2,
+        **kwargs,
     ):
         super().__init__()
 
@@ -31,12 +35,5 @@ class MLP(BaseLayer):
         self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))
 
     def forward(self, x: Tensor) -> Tensor:
-        """Forward pass of the module
-
-        Args:
-            x (Tensor): Input vector
-
-        Returns:
-            Tensor: Output vector
-        """
+        """Forward pass of the module"""
         return self.mlp(x)

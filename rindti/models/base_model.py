@@ -123,7 +123,7 @@ class BaseModel(LightningModule):
             val = torch.stack([x[i] for x in outputs])
             val = val[~val.isnan()].mean()
             self.logger.experiment.add_scalar(prefix + i, val, self.current_epoch)
-            metrics[prefix + i] = val
+            metrics[i] = val
         if log_hparams:
             self.logger.log_hyperparams(self.hparams, metrics)
 
