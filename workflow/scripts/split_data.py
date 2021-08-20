@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 def split_groups(
     inter: pd.DataFrame,
-    col_name: str = col_name,
+    col_name: str = "Target_ID",
     bin_size: int = 10,
     train_frac: float = 0.7,
     val_frac: float = 0.2,

@@ -26,6 +26,6 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or none
-  filtering: none
+  filtering: posneg
   # valmax and valmin are boundaries for outlier activity values
   threshold: 1000

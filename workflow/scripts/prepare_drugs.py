@@ -39,24 +39,28 @@ from torch_geometric.utils import to_undirected
 #                     28: 'other'}
 
 node_encoding = {
-    0: "padding",
-    1: 6,
-    2: 8,
-    3: 7,
-    4: 16,
-    5: 9,
-    6: 17,
-    7: 35,
-    8: "other",
+    "other": 0,
+    6: 1,
+    7: 2,
+    8: 3,
+    9: 4,
+    16: 5,
+    17: 6,
+    35: 7,
+    15: 8,
+    53: 9,
+    5: 10,
+    11: 11,
+    14: 12,
+    34: 13,
 }
+
 
 edge_encoding = {
     "SINGLE": 0,
     "DOUBLE": 1,
     "AROMATIC": 2,
 }
-
-node_encoding = {v: k for (k, v) in node_encoding.items()}  # Reverse the mapping dict
 
 
 def featurize(smiles: str) -> dict:
@@ -79,10 +83,11 @@ def featurize(smiles: str) -> dict:
         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         edges.append([start, end])
         btype = str(bond.GetBondType())
+        # If bond type is unknown, remove molecule
         if btype not in edge_encoding.keys():
             return np.nan
         edge_feats.append(edge_encoding[btype])
-    if not edges:  # If no edges (bonds) were found, exit (single ion etc)
+    if not edges:  # If no edges (bonds) were found, remove molecule
         return np.nan
     atom_features = []
     for atom in mol.GetAtoms():
@@ -101,7 +106,7 @@ def featurize(smiles: str) -> dict:
 if __name__ == "__main__":
 
     ligs = pd.read_csv(snakemake.input.lig, sep="\t").drop_duplicates("Drug_ID").set_index("Drug_ID")
-    ligs["data"] = ligs["Canonical SMILES"].apply(featurize)
+    ligs["data"] = ligs["Drug"].apply(featurize)
     ligs = ligs[ligs["data"].notna()]
 
     with open(snakemake.output.drug_pickle, "wb") as file:
