@@ -182,7 +182,7 @@ rule prepare_proteins:
         """
         Creating protein data.
 
-        Structure config is {config[structure]}
+        Structures config is {config[structures]}
         Node feature type is {config[prepare_proteins][node_feats]}.
         Edge feature type is {config[prepare_proteins][edge_feats]}.
         """
