@@ -33,5 +33,5 @@ parse_dataset:
   task: classification
   # threshold values for classification problem
   threshold: 1000
-  # Whether to apply logarithm with base of 10 to values (for regression, doesn't affect threshold)
+  # Whether to apply logarithm with base of 10 to values (for regression, doesn't affect threshold  )
   log: false
