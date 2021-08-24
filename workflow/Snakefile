@@ -13,6 +13,7 @@ targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.ends
 if config["structures"] == "whole":
     rinerator_input = "resources/structures/{protein}.pdb"
     rinerator_output = "results/rinerator_whole/{protein}/{protein}_h.sif"
+    script_output = ""
 elif config["structures"] == "template":
     rinerator_input = "results/parsed_structures_template/{protein}.pdb"
     rinerator_output = "results/rinerator_template/{protein}/{protein}_h.sif"
