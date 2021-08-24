@@ -5,7 +5,7 @@ from torchmetrics.functional import explained_variance, mean_squared_error, pear
 
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
-from .classification_model import ClassificationModel
+from .classification import ClassificationModel
 
 
 class RegressionModel(ClassificationModel):
@@ -32,7 +32,7 @@ class RegressionModel(ClassificationModel):
         drug = remove_arg_prefix("drug_", data)
         output = self.forward(prot, drug)
         labels = data.label.unsqueeze(1).float()
-        loss = F.mse_loss(output, labels.float())
+        loss = F.mse_loss(output, labels)
         corr = pearson_corrcoef(output, labels)
         mse = mean_squared_error(output, labels)
         expvar = explained_variance(output, labels)

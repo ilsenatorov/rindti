@@ -4,10 +4,9 @@ import pytest
 import torch
 from torch_geometric.data import Data
 
-from rindti.utils.data import TwoGraphData
-
 from ..models import GraphLogModel, InfoGraphModel, PfamModel
 from ..models.base_model import node_embedders, poolers
+from ..utils.data import TwoGraphData
 
 default_config = {
     "alpha": 1.0,

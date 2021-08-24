@@ -1,8 +1,7 @@
 import torch
 
-from rindti.utils.utils import MyArgParser
-
 from ..layers import DiffPoolNet, GMTNet, MeanPool
+from ..utils import MyArgParser
 
 default_config = {
     "K": 1,

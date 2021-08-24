@@ -1,3 +1,3 @@
-from .diffpool_net import DiffPoolNet
-from .gmt_net import GMTNet
-from .mean_pool import MeanPool
+from .diffpool import DiffPoolNet
+from .gmt import GMTNet
+from .mean import MeanPool

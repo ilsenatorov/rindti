@@ -3,7 +3,7 @@ from copy import deepcopy
 import pytest
 import torch
 
-from ..models import ClassificationModel, NoisyNodesModel, RegressionModel
+from ..models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from ..models.base_model import node_embedders, poolers
 from ..utils import MyArgParser
 from ..utils.data import TwoGraphData
@@ -114,10 +114,16 @@ class TestClassModel(BaseTestModel):
             assert combined.size(1) == 64
 
 
-class TestNoisyNodesModel(BaseTestModel):
+class TestNoisyNodesClassModel(BaseTestModel):
     """Noisy Nodes"""
 
-    model = NoisyNodesModel
+    model = NoisyNodesClassModel
+
+
+class TestNoisyNodesRegModel(BaseTestModel):
+    """Noisy Nodes"""
+
+    model = NoisyNodesRegModel
 
 
 class TestRegressionModel(BaseTestModel):

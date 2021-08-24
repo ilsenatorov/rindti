@@ -10,18 +10,7 @@ from torch.nn.modules.sparse import Embedding
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-from ..layers import (
-    MLP,
-    ChebConvNet,
-    DiffPoolNet,
-    FilmConvNet,
-    GatConvNet,
-    GINConvNet,
-    GMTNet,
-    MeanPool,
-    NoneNet,
-    PNAConvNet,
-)
+from ..layers import MLP, ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool
 from ..layers.base_layer import BaseLayer
 from ..utils.data import TwoGraphData
 
@@ -30,8 +19,6 @@ node_embedders = {
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
     "filmconv": FilmConvNet,
-    # "pnaconv": PNAConvNet,
-    # "none": NoneNet,
 }
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 

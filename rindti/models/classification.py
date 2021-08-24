@@ -11,8 +11,8 @@ from ..layers.base_layer import BaseLayer
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
 from .base_model import BaseModel, node_embedders, poolers
-from .graphlog_model import GraphLogModel
-from .infograph_model import InfoGraphModel
+from .graphlog import GraphLogModel
+from .infograph import InfoGraphModel
 
 
 class ClassificationModel(BaseModel):

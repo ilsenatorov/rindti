@@ -12,7 +12,7 @@ from rindti.utils.utils import MyArgParser
 
 from ..utils import remove_arg_prefix
 from ..utils.data import corrupt_features
-from .classification_model import ClassificationModel
+from .classification import ClassificationModel
 
 
 class NoisyNodesClassModel(ClassificationModel):
@@ -78,8 +78,8 @@ class NoisyNodesClassModel(ClassificationModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         cor_data = self.corrupt_data(data, self.hparams.prot_frac, self.hparams.drug_frac)
-        prot = remove_arg_prefix("prot_", data)
-        drug = remove_arg_prefix("drug_", data)
+        prot = remove_arg_prefix("prot_", cor_data)
+        drug = remove_arg_prefix("drug_", cor_data)
         output, prot_pred, drug_pred = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         if self.hparams.weighted:

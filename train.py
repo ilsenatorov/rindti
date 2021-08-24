@@ -1,15 +1,21 @@
 from argparse import ArgumentParser
 from pprint import pprint
 
-import torch
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data.dataloader import DataLoader
 
-from rindti.models import ClassificationModel, NoisyNodesModel, RegressionModel
+from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from rindti.utils.data import Dataset
 from rindti.utils.transforms import GnomadTransformer, RandomTransformer
+
+models = {
+    "classification": ClassificationModel,
+    "regression": RegressionModel,
+    "noisyclass": NoisyNodesClassModel,
+    "noisyreg": NoisyNodesRegModel,
+}
 
 
 def train(**kwargs):
@@ -41,15 +47,7 @@ def train(**kwargs):
         deterministic=True,
         profiler=kwargs["profiler"],
     )
-    pprint(kwargs)
-    if kwargs["model"] == "classification":
-        model = ClassificationModel(**kwargs)
-    elif kwargs["model"] == "regression":
-        model = RegressionModel(**kwargs)
-    elif kwargs["model"] == "noisynodes":
-        model = NoisyNodesModel(**kwargs)
-    else:
-        raise ValueError("Unknown model type")
+    model = models[kwargs["model"]](**kwargs)
     dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ["batch_size", "num_workers"]}
     dataloader_kwargs.update({"follow_batch": ["prot_x", "drug_x"]})
     train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True)
@@ -109,9 +107,7 @@ if __name__ == "__main__":
     )
     transformer.add_argument("--max_num_mut", type=int, default=100)
 
-    parser = {"classification": ClassificationModel, "regression": RegressionModel, "noisynodes": NoisyNodesModel}[
-        model_type
-    ].add_arguments(parser)
+    parser = models[model_type].add_arguments(parser)
 
     args = parser.parse_args()
     argvars = vars(args)
