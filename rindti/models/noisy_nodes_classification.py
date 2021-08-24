@@ -15,7 +15,7 @@ from ..utils.data import corrupt_features
 from .classification_model import ClassificationModel
 
 
-class NoisyNodesModel(ClassificationModel):
+class NoisyNodesClassModel(ClassificationModel):
     """Model for DTI prediction as a classification problem"""
 
     def __init__(self, **kwargs):
