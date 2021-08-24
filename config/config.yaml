@@ -29,5 +29,9 @@ split:
 parse_dataset:
   # filtering can be posneg, balanced or none
   filtering: posneg
-  # valmax and valmin are boundaries for outlier activity values
+  # classification or regression
+  task: classification
+  # threshold values for classification problem
   threshold: 1000
+  # Whether to apply logarithm with base of 10 to values (for regression, doesn't affect threshold)
+  log: false
