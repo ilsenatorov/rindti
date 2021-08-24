@@ -162,7 +162,7 @@ rule parse_dataset:
         lig="results/parse_dataset/{filtering}_lig.csv".format(filtering=config["parse_dataset"]["filtering"]),
         inter="results/parse_dataset/{filtering}_inter.csv".format(filtering=config["parse_dataset"]["filtering"]),
     message:
-        """Parsing the GLASS database"""
+        """Parsing the dataset"""
     script:
         "scripts/parse_dataset.py"
 
