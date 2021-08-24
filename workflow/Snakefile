@@ -8,17 +8,25 @@ report: "report/workflow.rst"
 configfile: "config/config.yaml"
 
 
-targets = [x.split(".")[0] for x in os.listdir("resources/structures")]
+targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.endswith(".pdb")]
 
-if config["rinerator"] == "whole":
-    rinerator_dir = "results/rinerator_whole"
+if config["structures"] == "whole":
+    rinerator_input = "resources/structures/{protein}.pdb"
+    rinerator_output = "results/rinerator_whole/{protein}/{protein}_h.sif"
+elif config["structures"] == "template":
+    rinerator_input = "results/parsed_structures_template/{protein}.pdb"
+    rinerator_output = "results/rinerator_template/{protein}/{protein}_h.sif"
+    script_output = "results/pymol_template/{protein}.pml"
+elif config["structures"] == "bsite":
+    rinerator_input = "results/parsed_structures_bsite/{protein}.pdb"
+    rinerator_output = "results/rinerator_bsite/{protein}/{protein}_h.sif"
+    script_output = "results/pymol_bsite/{protein}.pml"
 else:
-    rinerator_dir = "results/rinerator_bsite"
+    raise ValueError("Unknown structure argument!")
 
-### DEFINE OUTPUTS ###
 
-protein_output = "results/prepare_proteins/protein_data_{rinerator}_{node_feats}_{edge_feats}.pkl".format(
-    rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
+protein_output = "results/prepare_proteins/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
+    structures=config["structures"],
     node_feats=config["prepare_proteins"]["node_feats"],
     edge_feats=config["prepare_proteins"]["edge_feats"],
 )
@@ -31,9 +39,9 @@ transformer_output = "results/prepare_transformer/{node_feats}_transformer.pkl".
     node_feats=config["prepare_proteins"]["node_feats"]
 )
 
-final_output = "results/prepare_all/{split}_{rinerator}_{node_feats}_{edge_feats}_{filtering}.pkl".format(
+final_output = "results/prepare_all/{split}_{structures}_{node_feats}_{edge_feats}_{filtering}.pkl".format(
     split=config["split"]["method"],
-    rinerator="whole" if config["rinerator"] == "whole" else "bsite{x}".format(x=config["bsite"]["radius"]),
+    structures=config["structures"],
     node_feats=config["prepare_proteins"]["node_feats"],
     edge_feats=config["prepare_proteins"]["edge_feats"],
     filtering=config["parse_dataset"]["filtering"],
@@ -43,9 +51,6 @@ plot_output = final_output.split("/")[-1].split(".")[0]
 plot_output = "report/plot_summary/{out}.html".format(out=plot_output)
 
 
-prepare_proteins_rin_input = expand(osp.join(rinerator_dir, "{protein}", "{protein}_h.sif"), protein=targets)
-
-
 output = [final_output, plot_output]
 
 ### CHECK IF FILES ARE PRESENT ###
@@ -53,8 +58,8 @@ output = [final_output, plot_output]
 if osp.isdir("resources/templates"):
     templates = expand("resources/templates/{template}", template=os.listdir("resources/templates"))
 else:
-    if not config["only_proteins"] and config["rinerator"] == "bsite":
-        raise ValueError("No templates available, can't run binding site calculation")
+    if not config["only_proteins"] and config["rinerator"] != "whole":
+        raise ValueError("No templates available")
     templates = []
 
 if osp.isfile("resources/gnomad.csv"):
@@ -80,37 +85,42 @@ rule all:
         output,
 
 
-rule create_protein_list:
-    input:
-        ancient(expand("resources/structures/{protein}.pdb", protein=targets)),
-    output:
-        protein_list="results/protein_list.txt",
-    log:
-        "results/logs/create_protein_list.log",
-    script:
-        "scripts/create_protein_list.py"
-
-
-rule pymol_script:
+rule create_scripts_bsite:
     input:
         expand("resources/structures/{protein}.pdb", protein=targets),
     output:
-        script=expand(osp.join("results/pymol_scripts", "{protein}.pml"), protein=targets),
+        scripts=expand("results/pymol_bsite/{protein}.pml", protein=targets),
     log:
-        "results/logs/pymol_script.log",
+        "results/logs/pymol_bsite.log",
     params:
         radius=config["bsite"]["radius"],
     message:
-        "Creating PyMOL scripts for all protein, logs are in {log}"
+        "Creating bsite PyMOL scripts for all protein, logs are in {log}"
     script:
-        "scripts/pymol_script.py"
+        "scripts/create_scripts_bsite.py"
+
+
+rule create_scripts_template:
+    input:
+        expand("resources/structures/{protein}.pdb", protein=targets),
+    output:
+        scripts=expand("results/pymol_template/{protein}.pml", protein=targets),
+    log:
+        "results/logs/pymol_template.log",
+    params:
+        radius=config["template"]["radius"],
+    message:
+        "Creating template PyMOL scripts for all protein, logs are in {log}"
+    script:
+        "scripts/create_scripts_template.py"
 
 
 rule run_pymol:
     input:
-        script="results/pymol_scripts/{protein}.pml",
+        script=script_output,
+        struct="resources/structures/{protein}.pdb",
     output:
-        rinhelpers="results/run_pymol/{protein}_rinhelper.txt",
+        structures=rinerator_input,
     log:
         "results/logs/run_pymol/{protein}.log",
     conda:
@@ -123,35 +133,21 @@ rule run_pymol:
         """
 
 
-rule rinerator_bsite:
+rule rinerator:
     input:
-        pockets=rules.run_pymol.output.rinhelpers,
-        pdb=osp.join("resources/structures", "{protein}.pdb"),
+        pdb=rinerator_input,
     output:
-        sif=osp.join("results/rinerator_bsite", "{protein}", "{protein}_h.sif"),
+        sif=rinerator_output,
     log:
-        "results/logs/rinerator_bsite/{protein}.log",
-    message:
-        "Running RINerator for bsite of {wildcards.protein}, logs are in {log}"
-    shadow:
-        "shallow"
-    shell:
-        """rinerator {input.pdb} results/rinerator_bsite/{wildcards.protein} --segments-file {input.pockets} > {log} 2>&1"""
-
-
-rule rinerator_whole:
-    input:
-        pdb=osp.join("resources/structures", "{protein}.pdb"),
-    output:
-        sif=osp.join("results/rinerator_whole", "{protein}", "{protein}_h.sif"),
-    log:
-        "results/logs/rinerator_whole/{protein}.log",
+        "results/logs/rinerator/{protein}.log",
+    params:
+        dir="results/rinerator_{structures}".format(structures=config["structures"]),
     message:
         "Running RINerator for the whole {wildcards.protein}, logs are in {log}"
     shadow:
         "shallow"
     shell:
-        """rinerator {input.pdb} results/rinerator_whole/{wildcards.protein} > {log} 2>&1"""
+        """rinerator {input.pdb} {params.dir}/{wildcards.protein} > {log} 2>&1"""
 
 
 rule parse_dataset:
@@ -169,13 +165,12 @@ rule parse_dataset:
 
 rule prepare_proteins:
     input:
-        rins=prepare_proteins_rin_input,
+        rins=expand(rinerator_output, protein=targets),
     output:
         protein_pickle=protein_output,
     message:
         """
         Creating protein data.
-        Coverage parameter is {config[rinerator]}.
         Node feature type is {config[prepare_proteins][node_feats]}.
         Edge feature type is {config[prepare_proteins][edge_feats]}.
         """
