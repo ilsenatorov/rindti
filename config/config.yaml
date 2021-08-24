@@ -27,8 +27,8 @@ split:
   # test is created as a remainder of train and val
 
 parse_dataset:
-  # filtering can be posneg, balanced or none
-  filtering: posneg
+  # filtering can be posneg, balanced or all
+  filtering: all
   # classification or regression
   task: classification
   # threshold values for classification problem

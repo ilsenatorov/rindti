@@ -32,17 +32,20 @@ protein_output = "results/prepare_proteins/protein_data_{structures}_{node_feats
     edge_feats=config["prepare_proteins"]["edge_feats"],
 )
 
-split_data = "results/split_data/{split}_{filtering}_split.csv".format(
-    split=config["split"]["method"], filtering=config["parse_dataset"]["filtering"]
+split_data = "results/split_data/{split}_{filtering}_{task}_split.csv".format(
+    split=config["split"]["method"],
+    filtering=config["parse_dataset"]["filtering"],
+    task=config["parse_dataset"]["task"],
 )
 
 transformer_output = "results/prepare_transformer/{node_feats}_transformer.pkl".format(
     node_feats=config["prepare_proteins"]["node_feats"]
 )
 
-final_output = "results/prepare_all/{split}_{structures}_{node_feats}_{edge_feats}_{filtering}.pkl".format(
+final_output = "results/prepare_all/{split}_{filtering}_{task}_{structures}_{node_feats}_{edge_feats}.pkl".format(
     split=config["split"]["method"],
     structures=config["structures"],
+    task=config["parse_dataset"]["task"],
     node_feats=config["prepare_proteins"]["node_feats"],
     edge_feats=config["prepare_proteins"]["edge_feats"],
     filtering=config["parse_dataset"]["filtering"],
@@ -144,7 +147,7 @@ rule rinerator:
     params:
         dir="results/rinerator_{structures}".format(structures=config["structures"]),
     message:
-        "Running RINerator for the whole {wildcards.protein}, logs are in {log}"
+        "Running RINerator for {wildcards.protein}, logs are in {log}"
     shadow:
         "shallow"
     shell:
@@ -159,7 +162,13 @@ rule parse_dataset:
         lig="results/parse_dataset/{filtering}_lig.csv".format(filtering=config["parse_dataset"]["filtering"]),
         inter="results/parse_dataset/{filtering}_inter.csv".format(filtering=config["parse_dataset"]["filtering"]),
     message:
-        """Parsing the dataset"""
+        """Parsing the dataset
+
+        Filtering is {config[parse_dataset][filtering]}
+        Task is {config[parse_dataset][task]}
+        Log is {config[parse_dataset][log]}
+        Threshold is {config[parse_dataset][threshold]}
+        """
     script:
         "scripts/parse_dataset.py"
 
@@ -172,6 +181,8 @@ rule prepare_proteins:
     message:
         """
         Creating protein data.
+
+        Structure config is {config[structure]}
         Node feature type is {config[prepare_proteins][node_feats]}.
         Edge feature type is {config[prepare_proteins][edge_feats]}.
         """

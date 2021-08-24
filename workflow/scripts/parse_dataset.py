@@ -17,7 +17,7 @@ elif config["task"] == "regression":
 else:
     raise ValueError("Unknown task!")
 
-if config["filtering"] != "none" and config["task"] == "regression":
+if config["filtering"] != "all" and config["task"] == "regression":
     raise ValueError(
         "Can't use filtering {filter} with task {task}!".format(filter=config["filtering"], task=config["task"])
     )
@@ -39,7 +39,7 @@ elif config["filtering"] == "posneg":
     neg = inter[inter["Y"] == 0]["Drug_ID"].unique()
     both = set(pos).intersection(set(neg))
     inter = inter[inter["Drug_ID"].isin(both)]
-elif config["filtering"] != "none":
+elif config["filtering"] != "all":
     raise ValueError("No such type of filtering!")
 
 inter.to_csv(snakemake.output.inter, index=False, sep="\t")
