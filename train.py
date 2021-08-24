@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pprint import pprint
 
 import torch
-from pytorch_lightning import Trainer, profiler, seed_everything
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data.dataloader import DataLoader

@@ -1,8 +1,7 @@
 import torch
 
-from rindti.layers.graphconv import ginconv_net
-
 from ..layers import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, PNAConvNet
+from ..utils import MyArgParser
 
 default_config = {
     "K": 1,
@@ -25,16 +24,17 @@ fake_data = {
 
 
 class BaseTestGraphConv:
-    def test_init(self):
-        """Tests .__init__()"""
-        self.module(**default_config)
-
     def test_forward(self):
         """Tests .forward()"""
         module = self.module(**default_config)
         output = module.forward(**fake_data)
         assert output.size(0) == 13
         assert output.size(1) == 32
+
+    def test_args(self):
+        """Test static method of adding args"""
+        parser = MyArgParser()
+        self.module.add_arguments(parser)
 
 
 class TestGINConv(BaseTestGraphConv):

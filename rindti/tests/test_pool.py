@@ -1,5 +1,7 @@
 import torch
 
+from rindti.utils.utils import MyArgParser
+
 from ..layers import DiffPoolNet, GMTNet, MeanPool
 
 default_config = {
@@ -33,6 +35,10 @@ class BaseTestGraphPool:
         output = module.forward(**fake_data)
         assert output.size(0) == 1
         assert output.size(1) == 32
+
+    def test_args(self):
+        parser = MyArgParser()
+        self.module.add_arguments(parser)
 
 
 class TestGMTNet(BaseTestGraphPool):
