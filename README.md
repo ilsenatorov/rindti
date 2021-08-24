@@ -21,7 +21,7 @@ The result of the pipeline is a single pickle file, containing all the necessary
 
 The GNN model is shipped as a package, located in the `rindti` directory.
 
-Additionally, scripts that give an example of model training are provided (`train.py` and `pretrain_graphlog.py`), which can be used as plug-and-play, or as inspiration to create custom training approaches.
+Additionally, scripts that give an example of model training are provided (`train.py` and `pretrain.py`), which can be used as plug-and-play, or as inspiration to create custom training approaches.
 
 ## Installation
 
@@ -33,8 +33,6 @@ Additionally, scripts that give an example of model training are provided (`trai
 1. activate the environment with `conda activate rindti`
 1. clone rinerator repository into your home dir with `git clone --branch perf https://wibi-git.helmholtz-hzi.de/ske18/rinerator/ ~/rinerator`
 1. install rinerator with `pip install ~/rinerator`
-
-## Usage
 
 ### Pipeline
 
@@ -48,6 +46,14 @@ Configuration file in `config/config.yml` can be used to change the parameters o
 
 A model can be trained with a simple `train.py results/prepare_all/<pickled_data>.pkl`, assuming pipeline has been ran in advance.
 
+Three types of models are currently available - classification, regression and noisy nodes model.
+
+Both classification and noisy nodes require the final label to be a bool value (0 or 1), however noisy nodes introduces corruption of nodes and auxiliary loss of predicting the original labels of such nodes.
+
 ### Pretraining
 
-In order to pretrain the model using the GraphLoG approach, one can run the
+In order to pretrain the model one can use the `pretrain.py` script, which has three types of self-supervised pretraining models available
+
+[GraphLog](https://arxiv.org/pdf/2106.04113.pdf) and [Infograph](https://arxiv.org/pdf/1808.06670.pdf) can be used directly with the result of `prepare_proteins` step of the workflow (located in the `results/prepare_proteins` directory).
+
+Pfam siamese network will require adding the information on the protein family to that dataframe in order to function.
