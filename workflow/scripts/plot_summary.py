@@ -43,7 +43,7 @@ if __name__ == "__main__":
         cols=2,
         subplot_titles=(
             "Prot nodes/edge distribution",
-            "Drug node/edge distribution",
+            "Drug node distribution",
             "Prot label/count distribution",
             "Drug label/count distribution",
         ),
@@ -62,12 +62,10 @@ if __name__ == "__main__":
     )
 
     fig.add_trace(
-        go.Scatter(
+        go.Histogram(
             x=drug["nnodes"],
-            y=drug["nedges"],
-            mode="markers",
-            name="drugs",
-            text=drug.index,
+            name="drugs_hist",
+            # text=drug.index,
         ),
         row=1,
         col=2,
@@ -86,12 +84,12 @@ if __name__ == "__main__":
     )
 
     fig.add_trace(
-        go.Scatter(
+        go.Histogram2dContour(
             x=drug_agg["label"],
             y=drug_agg["count"],
-            mode="markers",
             name="drugs",
-            text=drug_agg.index,
+            nbinsx=10,
+            nbinsy=10,
         ),
         row=2,
         col=2,
@@ -99,8 +97,8 @@ if __name__ == "__main__":
 
     fig["layout"]["xaxis"]["title"] = "Number of nodes"
     fig["layout"]["yaxis"]["title"] = "Number of edges"
-    fig["layout"]["xaxis2"]["title"] = "Number of nodes"
-    fig["layout"]["yaxis2"]["title"] = "Number of edges"
+    # fig["layout"]["xaxis2"]["title"] = "Number of nodes"
+    # fig["layout"]["yaxis2"]["title"] = "Number of edges"
     fig["layout"]["xaxis3"]["title"] = "Mean label"
     fig["layout"]["yaxis3"]["title"] = "Popularity"
     fig["layout"]["xaxis4"]["title"] = "Mean label"

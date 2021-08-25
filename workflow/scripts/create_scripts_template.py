@@ -7,7 +7,7 @@ from glob import glob
 lst = glob("resources/templates/*.pdb")
 for i in lst:cmd.load(i)
 extra_fit name CA, {protein}, tmalign
-select template, {protein} within {radius} of not {protein}
+select template, br. {protein} within {radius} of not {protein} and name CA
 save results/parsed_structures_template/{protein}.pdb, template
 """
 
