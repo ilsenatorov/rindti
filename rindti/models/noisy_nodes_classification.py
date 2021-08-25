@@ -91,21 +91,16 @@ class NoisyNodesClassModel(ClassificationModel):
         drug_idx = cor_data.drug_cor_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
-        acc = accuracy(output, labels)
-        try:
-            _auroc = auroc(output, labels, pos_label=1)
-        except Exception:
-            _auroc = torch.tensor(np.nan, device=self.device)
-        _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
-        return {
-            "loss": loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,
-            "prot_loss": prot_loss.detach(),
-            "drug_loss": drug_loss.detach(),
-            "pred_loss": loss.detach(),
-            "acc": acc,
-            "auroc": _auroc,
-            "matthews": _mc,
-        }
+        metrics = self._get_classification_metrics(output, labels)
+        metrics.update(
+            dict(
+                loss=loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,
+                prot_loss=prot_loss.detach(),
+                drug_loss=drug_loss.detach(),
+                pred_loss=loss.detach(),
+            )
+        )
+        return metrics
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:

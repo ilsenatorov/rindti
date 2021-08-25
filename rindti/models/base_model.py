@@ -1,14 +1,21 @@
 from argparse import ArgumentParser
-from logging import warning
-from pprint import pprint
-from typing import Iterable, Optional, Tuple, Union
+from typing import Tuple
 
+import numpy as np
 import torch
 from pytorch_lightning import LightningModule
-from torch.functional import Tensor
+from torch import LongTensor, Tensor
 from torch.nn.modules.sparse import Embedding
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torchmetrics.functional import (
+    accuracy,
+    auroc,
+    explained_variance,
+    matthews_corrcoef,
+    mean_absolute_error,
+    pearson_corrcoef,
+)
 
 from ..layers import MLP, ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool
 from ..layers.base_layer import BaseLayer
@@ -80,6 +87,33 @@ class BaseModel(LightningModule):
     def _mult(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
         """Multiplication"""
         return drug_embed * prot_embed
+
+    def _get_regression_metrics(self, output: Tensor, labels: Tensor) -> dict:
+        """Calculate metrics common for regression - corrcoef, MAE and explained variance
+        Returns dict of all"""
+        corr = pearson_corrcoef(output, labels)
+        mae = mean_absolute_error(output, labels)
+        expvar = explained_variance(output, labels)
+        return {
+            "corr": corr,
+            "mae": mae,
+            "expvar": expvar,
+        }
+
+    def _get_classification_metrics(self, output: Tensor, labels: LongTensor):
+        """Calculate metrics common for classification - accuracy, auroc and Matthews coefficient
+        Returns dict of all"""
+        acc = accuracy(output, labels)
+        try:
+            _auroc = auroc(output, labels, pos_label=1)
+        except Exception:
+            _auroc = torch.tensor(np.nan, device=self.device)
+        _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
+        return {
+            "acc": acc,
+            "auroc": _auroc,
+            "matthews": _mc,
+        }
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step"""

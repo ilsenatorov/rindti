@@ -1,6 +1,5 @@
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torchmetrics.functional import explained_variance, mean_squared_error, pearson_corrcoef
 
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
@@ -42,15 +41,13 @@ class NoisyNodesRegModel(NoisyNodesClassModel):
         drug_idx = cor_data.drug_cor_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
-        corr = pearson_corrcoef(output, labels)
-        mse = mean_squared_error(output, labels)
-        expvar = explained_variance(output, labels)
-        return {
-            "loss": loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,
-            "prot_loss": prot_loss.detach(),
-            "drug_loss": drug_loss.detach(),
-            "pred_loss": loss.detach(),
-            "corr": corr,
-            "mse": mse,
-            "expvar": expvar,
-        }
+        metrics = self._get_regression_metrics(output, labels)
+        metrics.update(
+            dict(
+                loss=loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,
+                prot_loss=prot_loss.detach(),
+                drug_loss=drug_loss.detach(),
+                pred_loss=loss.detach(),
+            )
+        )
+        return metrics

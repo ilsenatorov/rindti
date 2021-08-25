@@ -5,7 +5,6 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from ..layers.base_layer import BaseLayer
 from ..utils import remove_arg_prefix
@@ -83,18 +82,9 @@ class ClassificationModel(BaseModel):
             loss = F.binary_cross_entropy(output, labels.float(), weight=weight.unsqueeze(1))
         else:
             loss = F.binary_cross_entropy(output, labels.float())
-        acc = accuracy(output, labels)
-        try:
-            _auroc = auroc(output, labels, pos_label=1)
-        except Exception:
-            _auroc = torch.tensor(np.nan, device=self.device)
-        _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
-        return {
-            "loss": loss,
-            "acc": acc,
-            "auroc": _auroc,
-            "matthews": _mc,
-        }
+        metrics = self._get_classification_metrics(output, labels)
+        metrics.update(dict(loss=loss))
+        return metrics
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:

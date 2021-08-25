@@ -58,12 +58,11 @@ def train(**kwargs):
 
 
 if __name__ == "__main__":
-
     import argparse
 
     from rindti.utils import MyArgParser
 
-    tmp_parser = ArgumentParser(add_help=False)
+    tmp_parser = argparse.ArgumentParser(add_help=False)
     tmp_parser.add_argument("--model", type=str, default="classification")
     args = tmp_parser.parse_known_args()[0]
     model_type = args.model

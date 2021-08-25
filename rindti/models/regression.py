@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torchmetrics.functional import explained_variance, mean_squared_error, pearson_corrcoef
+from torchmetrics.functional import explained_variance, mean_absolute_error, pearson_corrcoef
 
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
@@ -33,12 +33,6 @@ class RegressionModel(ClassificationModel):
         output = self.forward(prot, drug)
         labels = data.label.unsqueeze(1).float()
         loss = F.mse_loss(output, labels)
-        corr = pearson_corrcoef(output, labels)
-        mse = mean_squared_error(output, labels)
-        expvar = explained_variance(output, labels)
-        return {
-            "loss": loss,
-            "corr": corr,
-            "mse": mse,
-            "expvar": expvar,
-        }
+        metrics = self._get_regression_metrics(output, labels)
+        metrics.update(dict(loss=loss))
+        return metrics
