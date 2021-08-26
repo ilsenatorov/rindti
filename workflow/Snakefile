@@ -70,7 +70,6 @@ if osp.isfile("resources/gnomad.csv"):
     gnomad = "resources/gnomad.csv"
     output.append(transformer_output)
 else:
-    print("No gnomad available, can't create gnomad transformer")
     gnomad = []
 
 if osp.isdir("resources/drugs"):
@@ -135,6 +134,15 @@ rule run_pymol:
         """
         pymol -k -y -c {input.script} > {log} 2>&1
         """
+
+
+rule save_structure_info:
+    input:
+        structs=expand(rinerator_input, protein=targets),
+    output:
+        tsv="results/structure_info/{type}_info.tsv".format(type=config["structures"]),
+    script:
+        "scripts/save_structure_info.py"
 
 
 rule rinerator:
@@ -244,6 +252,7 @@ rule prepare_transformer:
 rule plot_summary:
     input:
         pickle=rules.prepare_all.output.combined_pickle,
+        struct_info=rules.save_structure_info.output.tsv,
     output:
         html=plot_output,
     script:

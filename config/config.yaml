@@ -5,7 +5,7 @@ template:
   radius: 2
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`
 # resources/templates has to be present and contain valid structures for last 2 to work
-structures: template
+structures: whole
 
 # If set to true, only computes the proteins data (useful for pretraining)
 only_proteins: false

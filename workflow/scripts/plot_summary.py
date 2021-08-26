@@ -28,8 +28,10 @@ if __name__ == "__main__":
     prot = all_data["prots"]
     drug = all_data["drugs"]
     inter = pd.DataFrame(all_data["data"])
+    struct_info = pd.read_csv(snakemake.input.struct_info, sep="\t", squeeze=True, index_col=0)
 
     prot = calculate_nnodes_nedges(prot)
+    prot["plddt"] = struct_info
     drug = calculate_nnodes_nedges(drug)
 
     drug_agg = inter.groupby("drug_id").agg("mean")
@@ -47,6 +49,8 @@ if __name__ == "__main__":
             "Prot label/count distribution",
             "Drug label/count distribution",
         ),
+        vertical_spacing=0.1,
+        horizontal_spacing=0.1,
     )
 
     fig.add_trace(
@@ -55,7 +59,9 @@ if __name__ == "__main__":
             y=prot["nedges"],
             mode="markers",
             name="prots",
-            text=prot.index,
+            text=prot.index.to_series() + ", Mean pLDDT: " + prot["plddt"].round().astype(str),
+            marker_color=prot["plddt"],
+            marker=dict(colorbar=dict(title="mean pLDDT", len=0.45, y=0.8, x=0.45)),
         ),
         row=1,
         col=1,
@@ -84,12 +90,9 @@ if __name__ == "__main__":
     )
 
     fig.add_trace(
-        go.Histogram2dContour(
-            x=drug_agg["label"],
-            y=drug_agg["count"],
+        go.Histogram(
+            x=drug_agg["count"],
             name="drugs",
-            nbinsx=10,
-            nbinsy=10,
         ),
         row=2,
         col=2,
@@ -97,11 +100,28 @@ if __name__ == "__main__":
 
     fig["layout"]["xaxis"]["title"] = "Number of nodes"
     fig["layout"]["yaxis"]["title"] = "Number of edges"
-    # fig["layout"]["xaxis2"]["title"] = "Number of nodes"
-    # fig["layout"]["yaxis2"]["title"] = "Number of edges"
+    fig["layout"]["xaxis2"]["title"] = "Number of nodes"
+    fig["layout"]["yaxis2"]["title"] = "Count"
     fig["layout"]["xaxis3"]["title"] = "Mean label"
     fig["layout"]["yaxis3"]["title"] = "Popularity"
-    fig["layout"]["xaxis4"]["title"] = "Mean label"
-    fig["layout"]["yaxis4"]["title"] = "Popularity"
-    fig.update_layout(height=1080, width=1920, title_text="Data on", showlegend=False)
+    fig["layout"]["xaxis4"]["title"] = "Drug popularity"
+    fig["layout"]["yaxis4"]["title"] = "Count"
+    fig.update_layout(
+        height=1080,
+        width=1920,
+        title={
+            "text": "Data summary. Structure: {struct}. Filtering: {filt}.".format(
+                struct=snakemake.config["structures"], filt=snakemake.config["parse_dataset"]["filtering"]
+            ),
+            "y": 1,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+            "font": dict(
+                size=24,
+            ),
+        },
+        showlegend=False,
+        margin=dict(t=70, b=0, l=0, r=0),
+    )
     fig.write_html(snakemake.output.html)
