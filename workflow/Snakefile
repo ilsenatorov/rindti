@@ -88,11 +88,11 @@ rule all:
         output,
 
 
-rule create_scripts_bsite:
+rule create_pymol_scripts:
     input:
         expand("resources/structures/{protein}.pdb", protein=targets),
     output:
-        scripts=expand("results/pymol_bsite/{protein}.pml", protein=targets),
+        scripts=expand(script_output, protein=targets),
     log:
         "results/logs/pymol_bsite.log",
     params:
@@ -100,22 +100,7 @@ rule create_scripts_bsite:
     message:
         "Creating bsite PyMOL scripts for all protein, logs are in {log}"
     script:
-        "scripts/create_scripts_bsite.py"
-
-
-rule create_scripts_template:
-    input:
-        expand("resources/structures/{protein}.pdb", protein=targets),
-    output:
-        scripts=expand("results/pymol_template/{protein}.pml", protein=targets),
-    log:
-        "results/logs/pymol_template.log",
-    params:
-        radius=config["template"]["radius"],
-    message:
-        "Creating template PyMOL scripts for all protein, logs are in {log}"
-    script:
-        "scripts/create_scripts_template.py"
+        "scripts/create_pymol_scripts.py"
 
 
 rule run_pymol:

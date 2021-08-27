@@ -5,38 +5,7 @@ import pandas as pd
 import torch
 from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
-from torch_geometric.data import Data
 from torch_geometric.utils import to_undirected
-
-# node_encoding = {0: 'padding',
-#                     1: 6,
-#                     2: 8,
-#                     3: 7,
-#                     4: 16,
-#                     5: 9,
-#                     6: 17,
-#                     7: 35,
-#                     8: 15,
-#                     9: 53,
-#                     10: 11,
-#                     11: 14,
-#                     12: 5,
-#                     13: 19,
-#                     14: 34,
-#                     15: 33,
-#                     16: 30,
-#                     17: 51,
-#                     18: 3,
-#                     19: 13,
-#                     20: 20,
-#                     21: 12,
-#                     22: 52,
-#                     23: 47,
-#                     24: 56,
-#                     25: 1,
-#                     26: 38,
-#                     27: 23,
-#                     28: 'other'}
 
 node_encoding = {
     "other": 0,
@@ -63,7 +32,7 @@ edge_encoding = {
 }
 
 
-def featurize(smiles: str) -> dict:
+def featurize(smiles: str, max_num_atoms=150) -> dict:
     """Generate drug Data from smiles
 
     Args:
@@ -96,6 +65,8 @@ def featurize(smiles: str) -> dict:
             atom_features.append(node_encoding["other"])
         else:
             atom_features.append(node_encoding[atom_num])
+    if len(atom_features) > max_num_atoms:
+        return np.nan
     x = torch.tensor(atom_features, dtype=torch.long)
     edge_index = torch.tensor(edges).t().contiguous()
     edge_feats = torch.tensor(edge_feats, dtype=torch.long)
@@ -106,7 +77,7 @@ def featurize(smiles: str) -> dict:
 if __name__ == "__main__":
 
     ligs = pd.read_csv(snakemake.input.lig, sep="\t").drop_duplicates("Drug_ID").set_index("Drug_ID")
-    ligs["data"] = ligs["Drug"].apply(featurize)
+    ligs["data"] = ligs["Drug"].apply(featurize, max_num_atoms=snakemake.config["prepare_drugs"]["max_num_atoms"])
     ligs = ligs[ligs["data"].notna()]
 
     with open(snakemake.output.drug_pickle, "wb") as file:
