@@ -1,11 +1,9 @@
 from argparse import ArgumentParser
 from copy import deepcopy
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
-from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 from rindti.utils.utils import MyArgParser
 
@@ -26,7 +24,9 @@ class PfamModel(BaseModel):
         self.node_embed = self._get_node_embed(kwargs)
         self.pool = self._get_pooler(kwargs)
         self.mlp = MLP(kwargs["hidden_dim"], 1, **kwargs)
-        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
+        pred_kwargs = kwargs
+        pred_kwargs["num_layers"] = 3
+        self.node_pred = self._get_node_embed(pred_kwargs, out_dim=kwargs["feat_dim"])
 
     def corrupt_data(
         self,
