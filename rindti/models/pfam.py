@@ -23,7 +23,7 @@ class PfamModel(BaseModel):
         self.feat_embed = self._get_feat_embed(kwargs)
         self.node_embed = self._get_node_embed(kwargs)
         self.pool = self._get_pooler(kwargs)
-        self.mlp = MLP(kwargs["hidden_dim"], 1, **kwargs)
+        self.mlp = self._get_mlp(remove_arg_prefix("--mlp", kwargs))
         pred_kwargs = kwargs
         pred_kwargs["num_layers"] = 3
         self.node_pred = self._get_node_embed(pred_kwargs, out_dim=kwargs["feat_dim"])
@@ -112,6 +112,8 @@ class PfamModel(BaseModel):
         parser.add_argument("--alpha", default=0.1, type=float, help="Weight of noisy node loss")
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
+        mlp_args = parser.add_argument_group("MLP", prefix="--mlp_")
         node_embed.add_arguments(node_embed_args)
         pool.add_arguments(pooler_args)
+        MLP.add_arguments(mlp_args)
         return parser

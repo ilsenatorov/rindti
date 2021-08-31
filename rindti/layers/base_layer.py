@@ -12,5 +12,6 @@ class BaseLayer(LightningModule):
         raise NotImplementedError()
 
     @staticmethod
-    def add_arguments(group: Union[ArgumentParser, _ArgumentGroup]):
-        return group
+    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
+        """Generate arguments for this module"""
+        return parser
