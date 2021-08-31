@@ -109,7 +109,7 @@ class PfamModel(BaseModel):
         parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--feat_method", default="element_l1", type=str)
         parser.add_argument("--frac", default=0.2, type=float, help="Corruption percentage")
-        parser.add_argument("--alpha", default=1.0, type=float, help="Weight of noisy node loss")
+        parser.add_argument("--alpha", default=0.1, type=float, help="Weight of noisy node loss")
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
         node_embed.add_arguments(node_embed_args)
