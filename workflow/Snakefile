@@ -73,7 +73,7 @@ if osp.isdir("resources/drugs"):
 else:
     if not config["only_proteins"]:
         raise ValueError("No drug interaction data available, can't calculate final data!")
-    drugs = {x: [] for x in ["inter", "ligands", "targets"]}
+    drugs = {x: [] for x in ["inter", "lig"]}
 
 if config["only_proteins"]:  # Only calculate the data for the proteins
     output = [protein_output]
