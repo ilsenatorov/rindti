@@ -58,7 +58,7 @@ output = [final_output, plot_output]
 if osp.isdir("resources/templates"):
     templates = expand("resources/templates/{template}", template=os.listdir("resources/templates"))
 else:
-    if not config["only_proteins"] and config["structures"] != "whole":
+    if not config["only_proteins"] and config["structures"] not in ["whole", "plddt"]:
         raise ValueError("No templates available")
     templates = []
 
