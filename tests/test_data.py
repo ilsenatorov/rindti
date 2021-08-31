@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from ..utils.data import TwoGraphData
+from rindti.utils.data import TwoGraphData
 
 label_node = torch.tensor([0, 1, 2], dtype=torch.long)
 label_edge = torch.tensor(list(range(16)), dtype=torch.long)

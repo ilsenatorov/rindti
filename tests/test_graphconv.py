@@ -1,7 +1,7 @@
 import torch
 
-from ..layers import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, PNAConvNet
-from ..utils import MyArgParser
+from rindti.layers import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, PNAConvNet
+from rindti.utils import MyArgParser
 
 default_config = {
     "K": 1,

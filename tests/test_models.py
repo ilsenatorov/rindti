@@ -3,10 +3,10 @@ from copy import deepcopy
 import pytest
 import torch
 
-from ..models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
-from ..models.base_model import node_embedders, poolers
-from ..utils import MyArgParser
-from ..utils.data import TwoGraphData
+from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
+from rindti.models.base_model import node_embedders, poolers
+from rindti.utils import MyArgParser
+from rindti.utils.data import TwoGraphData
 
 # "drug_node_embed": list(node_embedders.keys()),
 # "prot_node_embed": list(node_embedders.keys()),
