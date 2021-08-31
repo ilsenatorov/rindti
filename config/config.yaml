@@ -31,7 +31,7 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: posneg
+  filtering: all
   # classification or regression
   task: classification
   # threshold values for classification problem

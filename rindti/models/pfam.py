@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from copy import deepcopy
 
 import numpy as np
 import torch
@@ -10,7 +11,7 @@ from rindti.utils.utils import MyArgParser
 
 from ..layers import MLP
 from ..utils import remove_arg_prefix
-from ..utils.data import TwoGraphData
+from ..utils.data import TwoGraphData, corrupt_features
 from .base_model import BaseModel, node_embedders, poolers
 
 
@@ -25,6 +26,30 @@ class PfamModel(BaseModel):
         self.node_embed = self._get_node_embed(kwargs)
         self.pool = self._get_pooler(kwargs)
         self.mlp = MLP(kwargs["hidden_dim"], 1, **kwargs)
+        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
+
+    def corrupt_data(
+        self,
+        orig_data: TwoGraphData,
+        frac: float = 0.05,
+    ) -> TwoGraphData:
+        """Corrupt a TwoGraphData entry
+
+        Args:
+            orig_data (TwoGraphData): Original data
+            frac (float, optional): Fraction of nodes to corrupt for. Defaults to 0.05.
+
+        Returns:
+            TwoGraphData: Corrupted data
+        """
+        # sourcery skip: extract-duplicate-method
+        data = deepcopy(orig_data)
+        if frac > 0:
+            for prefix in ["a", "b"]:
+                prot_feat, prot_idx = corrupt_features(data[f"{prefix}_x"], frac, self.device)
+                data[f"{prefix}_x"] = prot_feat
+                data[f"{prefix}_cor_idx"] = prot_idx
+        return data
 
     def forward(self, a: dict, b: dict) -> Tensor:
         """Forward pass of the model"""
@@ -34,9 +59,11 @@ class PfamModel(BaseModel):
         b["x"] = self.node_embed(**b)
         a_embed = self.pool(**a)
         b_embed = self.pool(**b)
+        a_pred = self.node_pred(**a)
+        b_pred = self.node_pred(**b)
         joint_embedding = self.merge_features(a_embed, b_embed)
         logit = self.mlp(joint_embedding)
-        return torch.sigmoid(logit)
+        return torch.sigmoid(logit), a_pred, b_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -47,23 +74,26 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        a = remove_arg_prefix("a_", data)
-        b = remove_arg_prefix("b_", data)
-        output = self.forward(a, b)
+        cor_data = self.corrupt_data(data, self.hparams.frac)
+        a = remove_arg_prefix("a_", cor_data)
+        b = remove_arg_prefix("b_", cor_data)
+        output, a_pred, b_pred = self.forward(a, b)
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
-        acc = accuracy(output, labels)
-        try:
-            _auroc = auroc(output, labels, pos_label=1)
-        except Exception:
-            _auroc = torch.tensor(np.nan, device=self.device)
-        _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
-        return {
-            "loss": loss,
-            "acc": acc,
-            "auroc": _auroc,
-            "matthews": _mc,
-        }
+        metrics = self._get_classification_metrics(output, labels)
+        a_idx = cor_data.a_cor_idx
+        b_idx = cor_data.b_cor_idx
+        a_loss = F.cross_entropy(a_pred[a_idx], data["a_x"][a_idx])
+        b_loss = F.cross_entropy(b_pred[b_idx], data["b_x"][b_idx])
+        metrics.update(
+            dict(
+                loss=loss + self.hparams.alpha * a_loss + self.hparams.alpha * b_loss,
+                prot_loss=a_loss.detach(),
+                drug_loss=b_loss.detach(),
+                pred_loss=loss.detach(),
+            )
+        )
+        return metrics
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:

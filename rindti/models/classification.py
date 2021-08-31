@@ -12,6 +12,7 @@ from ..utils.data import TwoGraphData
 from .base_model import BaseModel, node_embedders, poolers
 from .graphlog import GraphLogModel
 from .infograph import InfoGraphModel
+from .pfam import PfamModel
 
 
 class ClassificationModel(BaseModel):
@@ -30,12 +31,18 @@ class ClassificationModel(BaseModel):
             self.prot_feat_embed = self._get_feat_embed(prot_param)
             self.prot_node_embed = self._get_node_embed(prot_param)
             self.prot_pool = self._get_pooler(prot_param)
+            self.prot_feat_embed.requires_grad = False
+            self.prot_node_embed.requires_grad = False
+            self.prot_pool.requires_grad = False
         if drug_param["pretrain"]:
             self.drug_feat_embed, self.drug_node_embed, self.drug_pool = self._load_pretrained(drug_param["pretrain"])
         else:
             self.drug_feat_embed = self._get_feat_embed(drug_param)
             self.drug_node_embed = self._get_node_embed(drug_param)
             self.drug_pool = self._get_pooler(drug_param)
+            self.drug_feat_embed.requires_grad = False
+            self.drug_node_embed.requires_grad = False
+            self.drug_pool.requires_grad = False
         self.mlp = self._get_mlp(mlp_param)
 
     def _load_pretrained(self, checkpoint_path: str) -> Iterable[BaseLayer]:
@@ -52,8 +59,13 @@ class ClassificationModel(BaseModel):
             model = InfoGraphModel.load_from_checkpoint(checkpoint_path)
         elif "graphlog" in checkpoint_path:
             model = GraphLogModel.load_from_checkpoint(checkpoint_path)
+        elif "pfam" in checkpoint_path:
+            model = PfamModel.load_from_checkpoint(checkpoint_path)
         else:
-            raise ValueError("Unknown model type!")
+            raise ValueError(
+                """Unknown pretraining model type!
+                Please ensure 'pfam', 'graphlog' or 'infograph' are present in the model path"""
+            )
         return model.feat_embed, model.node_embed, model.pool
 
     def forward(self, prot: dict, drug: dict) -> Tensor:

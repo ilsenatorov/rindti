@@ -55,7 +55,6 @@ class NoisyNodesClassModel(ClassificationModel):
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
-
         prot["x"] = self.prot_feat_embed(prot["x"])
         drug["x"] = self.drug_feat_embed(drug["x"])
         prot["x"] = self.prot_node_embed(**prot)
