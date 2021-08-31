@@ -12,19 +12,15 @@ targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.ends
 
 if config["structures"] == "whole":
     rinerator_input = "resources/structures/{protein}.pdb"
-    rinerator_output = "results/rinerator_whole/{protein}/{protein}_h.sif"
     script_output = ""
-elif config["structures"] == "template":
-    rinerator_input = "results/parsed_structures_template/{protein}.pdb"
-    rinerator_output = "results/rinerator_template/{protein}/{protein}_h.sif"
-    script_output = "results/pymol_template/{protein}.pml"
-elif config["structures"] == "bsite":
-    rinerator_input = "results/parsed_structures_bsite/{protein}.pdb"
-    rinerator_output = "results/rinerator_bsite/{protein}/{protein}_h.sif"
-    script_output = "results/pymol_bsite/{protein}.pml"
 else:
-    raise ValueError("Unknown structure argument!")
+    rinerator_input = "results/parsed_structures_{structures}/{{protein}}.pdb".format(structures=config["structures"])
+    script_output = "results/pymol_{structures}/{{protein}}.pml".format(structures=config["structures"])
 
+
+rinerator_output = "results/rinerator_{structures}/{{protein}}/{{protein}}_h.sif".format(
+    structures=config["structures"]
+)
 
 protein_output = "results/prepare_proteins/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
     structures=config["structures"],
