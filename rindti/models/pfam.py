@@ -108,6 +108,7 @@ class PfamModel(BaseModel):
         pool = poolers[args.pool]
         parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--feat_method", default="element_l1", type=str)
+        parser.add_argument("--frac", default=0.2, type=float, help="Corruption percentage")
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
         node_embed.add_arguments(node_embed_args)
