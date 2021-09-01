@@ -88,8 +88,8 @@ class PfamModel(BaseModel):
         metrics.update(
             dict(
                 loss=loss + self.hparams.alpha * a_loss + self.hparams.alpha * b_loss,
-                prot_loss=a_loss.detach(),
-                drug_loss=b_loss.detach(),
+                a_loss=a_loss.detach(),
+                b_loss=b_loss.detach(),
                 pred_loss=loss.detach(),
             )
         )
