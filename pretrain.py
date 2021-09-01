@@ -50,7 +50,7 @@ def pretrain(**kwargs):
     val_dl = DataLoader(
         val, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], follow_batch=follow_batch
     )
-    trainer.fit(model, train_dataloaders=train_dl, val_dataloaders=val_dl)
+    trainer.fit(model, train_dl, val_dl)
 
 
 if __name__ == "__main__":
