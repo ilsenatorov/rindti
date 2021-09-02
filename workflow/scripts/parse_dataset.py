@@ -1,46 +1,81 @@
 import numpy as np
 import pandas as pd
 
-inter = pd.read_csv(snakemake.input.inter, sep="\t")
-lig = pd.read_csv(snakemake.input.lig, sep="\t")
-lig.drop_duplicates("Drug_ID", inplace=True)
 
-
-config = snakemake.config["parse_dataset"]
-# If duplicates, take median of entries
-inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
-if config["task"] == "classification":
-    inter["Y"] = inter["Y"].apply(lambda x: 1 if x < config["threshold"] else 0)
-elif config["task"] == "regression":
-    if config["log"]:
-        inter["Y"] = inter["Y"].apply(np.log10)
-else:
-    raise ValueError("Unknown task!")
-
-if config["filtering"] != "all" and config["task"] == "regression":
-    raise ValueError(
-        "Can't use filtering {filter} with task {task}!".format(filter=config["filtering"], task=config["task"])
-    )
-
-if config["filtering"] == "balanced":
-    num_pos = inter[inter["Y"] == 1]
-    num_neg = inter[inter["Y"] == 0]
-    vc = inter["Target_ID"].value_counts()
-    vc = pd.DataFrame(vc)
-    vc = vc.reset_index()
-    vc.columns = ["Target_ID", "count"]
-    inter = inter.merge(vc, left_on="Target_ID", right_on="Target_ID")
-    inter["weight"] = inter["count"].apply(lambda x: 1 / (x ** 2))
-    pos = inter[inter["y"] == 1].sample(min(num_pos, num_neg), weights="weight")
-    neg = inter[inter["y"] == 0].sample(min(num_pos, num_neg), weights="weight")
-    inter = pd.concat([pos, neg]).drop(["y", "weight", "count"], axis=1)
-elif config["filtering"] == "posneg":
+def posneg_filter(inter: pd.DataFrame) -> pd.DataFrame:
+    """Only keep drugs that have at least 1 positive and negative interaction"""
     pos = inter[inter["Y"] == 1]["Drug_ID"].unique()
     neg = inter[inter["Y"] == 0]["Drug_ID"].unique()
     both = set(pos).intersection(set(neg))
     inter = inter[inter["Drug_ID"].isin(both)]
-elif config["filtering"] != "all":
-    raise ValueError("No such type of filtering!")
+    return inter
 
-inter.to_csv(snakemake.output.inter, index=False, sep="\t")
-lig.to_csv(snakemake.output.lig, index=False, sep="\t")
+
+def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
+    """Sample the interactions dataset
+
+    Args:
+        inter (pd.DataFrame): whole data, has to be binary classification
+        how (str, optional): over or undersample.
+        Oversample adds fake negatives, undersample removed extra positives. Defaults to "under".
+    """
+    if how == "none":
+        return inter
+
+    total = []
+    pos = inter[inter["Y"] == 1]
+    neg = inter[inter["Y"] == 0]
+    for prot in inter["Target_ID"].unique():
+        possample = pos[pos["Target_ID"] == prot]
+        negsample = neg[neg["Target_ID"] == prot]
+        poscount = possample.shape[0]
+        negcount = negsample.shape[0]
+        if poscount == 0:
+            continue
+        if poscount >= negcount:
+            if how == "under":
+                total.append(possample.sample(negcount))
+                total.append(negsample)
+            elif how == "over":
+                total.append(possample)
+                total.append(negsample)
+                subsample = inter[inter["Target_ID"] != prot].sample(poscount - negcount)
+                subsample["Target_ID"] = prot
+                subsample["Y"] = 0
+                total.append(subsample)
+            else:
+                raise ValueError("Unknown sampling method!")
+        else:
+            total.append(possample)
+            total.append(negsample.sample(poscount))
+    return pd.concat(total)
+
+
+if __name__ == "__main__":
+
+    inter = pd.read_csv(snakemake.input.inter, sep="\t")
+
+    config = snakemake.config["parse_dataset"]
+    # If duplicates, take median of entries
+    inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
+    if config["task"] == "classification":
+        inter["Y"] = inter["Y"].apply(lambda x: int(x < config["threshold"]))
+    elif config["task"] == "regression":
+        if config["log"]:
+            inter["Y"] = inter["Y"].apply(np.log10)
+    else:
+        raise ValueError("Unknown task!")
+
+    if config["filtering"] != "all" and config["sampling"] != "none" and config["task"] == "regression":
+        raise ValueError(
+            "Can't use filtering {filter} with task {task}!".format(filter=config["filtering"], task=config["task"])
+        )
+
+    if config["filtering"] == "posneg":
+        inter = posneg_filter(inter)
+    elif config["filtering"] != "all":
+        raise ValueError("No such type of filtering!")
+
+    inter = sample(inter, how=config["sampling"])
+
+    inter.to_csv(snakemake.output.inter, index=False, sep="\t")

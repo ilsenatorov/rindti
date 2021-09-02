@@ -28,9 +28,10 @@ protein_output = "results/prepare_proteins/protein_data_{structures}_{node_feats
     edge_feats=config["prepare_proteins"]["edge_feats"],
 )
 
-split_data = "results/split_data/{split}_{filtering}_{task}_split.csv".format(
+split_data = "results/split_data/{split}_{filtering}_{sampling}_{task}_split.csv".format(
     split=config["split"]["method"],
     filtering=config["parse_dataset"]["filtering"],
+    sampling=config["parse_dataset"]["sampling"],
     task=config["parse_dataset"]["task"],
 )
 
@@ -38,13 +39,16 @@ transformer_output = "results/prepare_transformer/{node_feats}_transformer.pkl".
     node_feats=config["prepare_proteins"]["node_feats"]
 )
 
-final_output = "results/prepare_all/{split}_{filtering}_{task}_{structures}_{node_feats}_{edge_feats}.pkl".format(
-    split=config["split"]["method"],
-    structures=config["structures"],
-    task=config["parse_dataset"]["task"],
-    node_feats=config["prepare_proteins"]["node_feats"],
-    edge_feats=config["prepare_proteins"]["edge_feats"],
-    filtering=config["parse_dataset"]["filtering"],
+final_output = (
+    "results/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{node_feats}_{edge_feats}.pkl".format(
+        split=config["split"]["method"],
+        filtering=config["parse_dataset"]["filtering"],
+        sampling=config["parse_dataset"]["sampling"],
+        task=config["parse_dataset"]["task"],
+        structures=config["structures"],
+        node_feats=config["prepare_proteins"]["node_feats"],
+        edge_feats=config["prepare_proteins"]["edge_feats"],
+    )
 )
 
 plot_output = final_output.split("/")[-1].split(".")[0]
@@ -145,15 +149,16 @@ rule rinerator:
 
 rule parse_dataset:
     input:
-        lig=drugs["lig"],
         inter=drugs["inter"],
     output:
-        lig="results/parse_dataset/{filtering}_lig.csv".format(filtering=config["parse_dataset"]["filtering"]),
-        inter="results/parse_dataset/{filtering}_inter.csv".format(filtering=config["parse_dataset"]["filtering"]),
+        inter="results/parse_dataset/{filtering}_{sampling}_inter.csv".format(
+            filtering=config["parse_dataset"]["filtering"], sampling=config["parse_dataset"]["sampling"]
+        ),
     message:
         """Parsing the dataset
 
         Filtering is {config[parse_dataset][filtering]}
+        Sampling is {config[parse_dataset][sampling]}
         Task is {config[parse_dataset][task]}
         Log is {config[parse_dataset][log]}
         Threshold is {config[parse_dataset][threshold]}
@@ -182,11 +187,11 @@ rule prepare_proteins:
 rule split_data:
     input:
         inter=rules.parse_dataset.output.inter,
-        lig=rules.parse_dataset.output.lig,
     output:
-        split_data="results/split_data/{split}_{filtering}_split.csv".format(
+        split_data="results/split_data/{split}_{filtering}_{sampling}_split.csv".format(
             split=config["split"]["method"],
             filtering=config["parse_dataset"]["filtering"],
+            sampling=config["parse_dataset"]["sampling"],
         ),
     message:
         "Splitting the dataset with {config[split][method]} method"
@@ -196,7 +201,7 @@ rule split_data:
 
 rule prepare_drugs:
     input:
-        lig=rules.parse_dataset.output.lig,
+        lig=drugs["lig"],
     output:
         drug_pickle="results/prepare_drugs/drug_data.pkl",
     message:

@@ -72,7 +72,6 @@ if __name__ == "__main__":
     from pytorch_lightning import seed_everything
 
     seed_everything(snakemake.config["seed"])
-    lig = pd.read_csv(snakemake.input.lig, sep="\t").set_index("Drug_ID")
     inter = pd.read_csv(snakemake.input.inter, sep="\t")
 
     if snakemake.config["split"]["method"] == "coldtarget":
