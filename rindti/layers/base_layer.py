@@ -9,6 +9,7 @@ class BaseLayer(LightningModule):
         super().__init__()
 
     def forward(self, *args, **kwargs):
+        """Forward pass of the module"""
         raise NotImplementedError()
 
     @staticmethod
