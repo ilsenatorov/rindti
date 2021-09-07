@@ -89,11 +89,7 @@ class ClassificationModel(BaseModel):
         drug = remove_arg_prefix("drug_", data)
         output = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        if self.hparams.weighted:
-            weight = 1 / torch.sqrt(prot["count"] * drug["count"])
-            loss = F.binary_cross_entropy(output, labels.float(), weight=weight.unsqueeze(1))
-        else:
-            loss = F.binary_cross_entropy(output, labels.float())
+        loss = F.binary_cross_entropy(output, labels.float())
         metrics = self._get_classification_metrics(output, labels)
         metrics.update(dict(loss=loss))
         return metrics

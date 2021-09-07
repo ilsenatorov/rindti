@@ -81,11 +81,7 @@ class NoisyNodesClassModel(ClassificationModel):
         drug = remove_arg_prefix("drug_", cor_data)
         output, prot_pred, drug_pred = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        if self.hparams.weighted:
-            weight = 1 / torch.sqrt(data.prot_count * data.drug_count)
-            loss = F.binary_cross_entropy(output, labels.float(), weight=weight.unsqueeze(1))
-        else:
-            loss = F.binary_cross_entropy(output, labels.float())
+        loss = F.binary_cross_entropy(output, labels.float())
         prot_idx = cor_data.prot_cor_idx
         drug_idx = cor_data.drug_cor_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])

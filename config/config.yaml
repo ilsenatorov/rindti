@@ -10,7 +10,7 @@ plddt:
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
 # plddt works only for alphafold structures, since plddt is written in the b-factor there
-structures: template
+structures: bsite
 
 # If set to true, only computes the proteins data (useful for pretraining)
 only_proteins: false
@@ -36,13 +36,13 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: all
+  filtering: posneg
   # sampling
   # sampling can be over, under or none
   sampling: under
   # classification or regression
   task: classification
   # threshold values for classification problem
-  threshold: 1000
+  threshold: 100
   # Whether to apply logarithm with base of 10 to values (for regression, doesn't affect threshold  )
   log: false
