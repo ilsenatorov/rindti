@@ -1,32 +1,38 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
-    hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
-    -   id: check-merge-conflict
--   repo: https://github.com/timothycrosley/isort
-    rev: 5.9.3
-    hooks:
-    -   id: isort
--   repo: https://github.com/ambv/black
-    rev: 21.7b0
-    hooks:
-    - id: black
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
-    hooks:
-    - id: flake8
--   repo: https://github.com/econchick/interrogate
-    rev: 1.4.0
-    hooks:
-    - id: interrogate
-      args: [-vv]
--   repo: https://github.com/snakemake/snakefmt
-    rev: 0.4.2
-    hooks:
-    - id: snakefmt
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.0.1
+      hooks:
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+          - id: check-yaml
+          - id: check-added-large-files
+          - id: check-merge-conflict
+    - repo: https://github.com/timothycrosley/isort
+      rev: 5.9.3
+      hooks:
+          - id: isort
+    - repo: https://github.com/ambv/black
+      rev: 21.8b0
+      hooks:
+          - id: black
+    - repo: https://gitlab.com/pycqa/flake8
+      rev: 3.9.2
+      hooks:
+          - id: flake8
+    - repo: https://github.com/econchick/interrogate
+      rev: 1.4.0
+      hooks:
+          - id: interrogate
+            args: [-vv]
+    - repo: https://github.com/snakemake/snakefmt
+      rev: 0.4.3
+      hooks:
+          - id: snakefmt
+
+    - repo: https://github.com/ilsenatorov/pre-commit-jupyter
+      rev: v1.3.2
+      hooks:
+          - id: jupyter-notebook-cleanup
+            args: [--remove-cell-metadata, --remove-kernel-metadata]

@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule
 from torch import nn
-from torch_geometric.nn import GCNConv, GINConv
+from torch_geometric.nn import GINConv
 from torch_geometric.utils import to_dense_batch
 
 from ..base_layer import BaseLayer
@@ -110,10 +110,7 @@ class MAB(LightningModule):
 
     def get_fc_kv(self, dim_K, dim_V, conv):
         """Get attention values"""
-        if conv == "GCN":
-            fc_k = GCNConv(dim_K, dim_V)
-            fc_v = GCNConv(dim_K, dim_V)
-        elif conv == "GIN":
+        if conv == "GIN":
             fc_k = GINConv(
                 nn.Sequential(
                     nn.Linear(dim_K, dim_K),
@@ -145,10 +142,10 @@ class SAB(LightningModule):
 
     def __init__(self, dim_in, dim_out, num_heads, mab_conv=None):
         super(SAB, self).__init__()
-
         self.mab = MAB(dim_in, dim_in, dim_out, num_heads, conv=mab_conv)
 
     def forward(self, X, attention_mask=None, graph=None):
+        """Forward pass"""
         return self.mab(X, X, attention_mask, graph)
 
 

@@ -7,7 +7,6 @@
 __*__/
 __pycache__/
 *.csv
-*.ipynb
 *.pkl
 *.pyc
 data/
