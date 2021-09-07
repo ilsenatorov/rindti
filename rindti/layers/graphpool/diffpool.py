@@ -74,6 +74,7 @@ class DiffPoolNet(BaseLayer):
         x = x.mean(dim=1)
         x = self.lin1(x)
         x = F.dropout(x, p=self.dropout, training=self.training)
+        x = F.normalize(x, dim=1)
         return x
 
     @staticmethod

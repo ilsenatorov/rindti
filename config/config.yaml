@@ -29,7 +29,7 @@ prepare_drugs:
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: random
+  method: coldtarget
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val

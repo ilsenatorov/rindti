@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 
+import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.nn import global_mean_pool
-from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
 
@@ -15,7 +15,8 @@ class MeanPool(BaseLayer):
 
     def forward(self, x: Tensor, batch: Tensor, **kwargs) -> Tensor:
         """Forward pass of the module"""
-        return global_mean_pool(x, batch)
+        pool = global_mean_pool(x, batch)
+        return F.normalize(pool, dim=1)
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
