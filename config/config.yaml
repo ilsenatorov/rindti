@@ -29,20 +29,20 @@ prepare_drugs:
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: random
+  method: coldtarget
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: all
+  filtering: posneg
   # sampling
   # sampling can be over, under or none
   sampling: under
   # classification or regression
   task: classification
   # threshold values for classification problem
-  threshold: 1000
+  threshold: 100
   # Whether to apply logarithm with base of 10 to values (for regression, doesn't affect threshold  )
   log: false

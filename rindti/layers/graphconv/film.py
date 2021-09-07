@@ -17,7 +17,7 @@ class FilmConvNet(BaseLayer):
         self.conv1 = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
         self.conv2 = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor, **kwargs) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """Forward pass of the module"""
         x = self.conv1(x, edge_index, edge_feats)
         x = self.conv2(x, edge_index, edge_feats)

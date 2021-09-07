@@ -36,8 +36,17 @@ class BaseTestGraphPool:
         assert output.size(1) == 32
 
     def test_args(self):
+        """Test arguments parsing"""
         parser = MyArgParser()
         self.module.add_arguments(parser)
+
+    def test_norm(self):
+        """Pooling should return vector of length 1 for each graph"""
+        module = self.module(**default_config)
+        output = module.forward(**fake_data)
+        length = output.detach().norm(dim=1)
+        print(length)
+        assert ((length - 1.0).abs() < 1e-6).all()  # soft equal
 
 
 class TestGMTNet(BaseTestGraphPool):
