@@ -9,7 +9,7 @@ from rindti.utils.utils import MyArgParser
 
 from ..layers import MLP
 from ..utils import remove_arg_prefix
-from ..utils.data import TwoGraphData, corrupt_features
+from ..utils.data import TwoGraphData, corrupt_features, mask_features
 from .base_model import BaseModel, node_embedders, poolers
 
 
@@ -28,7 +28,7 @@ class PfamModel(BaseModel):
         pred_kwargs["num_layers"] = 3
         self.node_pred = self._get_node_embed(pred_kwargs, out_dim=kwargs["feat_dim"])
 
-    def corrupt_data(
+    def _corrupt_data(
         self,
         orig_data: TwoGraphData,
         frac: float = 0.05,
@@ -37,19 +37,56 @@ class PfamModel(BaseModel):
 
         Args:
             orig_data (TwoGraphData): Original data
-            frac (float, optional): Fraction of nodes to corrupt for. Defaults to 0.05.
+            frac (float, optional): Fraction of nodes to corrupt. Defaults to 0.05.
 
         Returns:
             TwoGraphData: Corrupted data
         """
-        # sourcery skip: extract-duplicate-method
         data = deepcopy(orig_data)
         if frac > 0:
-            for prefix in ["a", "b"]:
-                prot_feat, prot_idx = corrupt_features(data[f"{prefix}_x"], frac, self.device)
-                data[f"{prefix}_x"] = prot_feat
-                data[f"{prefix}_cor_idx"] = prot_idx
+            a_feat, a_idx = corrupt_features(data["a_x"], frac, self.device)
+            data["a_x"] = a_feat
+            data["a_cor_idx"] = a_idx
+            b_feat, b_idx = corrupt_features(data["b_x"], frac, self.device)
+            data["b_x"] = b_feat
+            data["b_cor_idx"] = b_idx
         return data
+
+    def _mask_data(
+        self,
+        orig_data: TwoGraphData,
+        frac: float = 0.05,
+    ) -> TwoGraphData:
+        """Corrupt a TwoGraphData entry
+
+        Args:
+            orig_data (TwoGraphData): Original data
+            frac (float, optional): Fraction of nodes to corrupt. Defaults to 0.05.
+
+        Returns:
+            TwoGraphData: Corrupted data
+        """
+        data = deepcopy(orig_data)
+        if frac > 0:
+            a_feat, a_idx = mask_features(data["a_x"], frac, self.device)
+            data["a_x"] = a_feat
+            data["a_cor_idx"] = a_idx
+            b_feat, b_idx = mask_features(data["b_x"], frac, self.device)
+            data["b_x"] = b_feat
+            data["b_cor_idx"] = b_idx
+        return data
+
+    def corrupt_data(
+        self,
+        orig_data: TwoGraphData,
+        frac: float = 0.05,
+    ) -> TwoGraphData:
+        if self.hparams.corruption == "mask":
+            return self._mask_data(orig_data, frac)
+        elif self.hparams.corruption == "corrupt":
+            return self._corrupt_data(orig_data, frac)
+        else:
+            raise ValueError("Unknown corruption parameter")
 
     def forward(self, a: dict, b: dict) -> Tensor:
         """Forward pass of the model"""
@@ -106,9 +143,10 @@ class PfamModel(BaseModel):
 
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
+        parser.add_argument("--corruption", default="corruption", type=str)
         parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--feat_method", default="element_l1", type=str)
-        parser.add_argument("--frac", default=0.2, type=float, help="Corruption percentage")
+        parser.add_argument("--frac", default=0.1, type=float, help="Corruption percentage")
         parser.add_argument("--alpha", default=0.1, type=float, help="Weight of noisy node loss")
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")

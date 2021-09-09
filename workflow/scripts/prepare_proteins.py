@@ -5,29 +5,29 @@ import numpy as np
 import pandas as pd
 import torch
 from pandas.core.frame import DataFrame
-from torch_geometric.utils import to_undirected
 
 node_encoding = {
-    "ala": 0,
-    "arg": 1,
-    "asn": 2,
-    "asp": 3,
-    "cys": 4,
-    "gln": 5,
-    "glu": 6,
-    "gly": 7,
-    "his": 8,
-    "ile": 9,
-    "leu": 10,
-    "lys": 11,
-    "met": 12,
-    "phe": 13,
-    "pro": 14,
-    "ser": 15,
-    "thr": 16,
-    "trp": 17,
-    "tyr": 18,
-    "val": 19,
+    "padding": 0,
+    "ala": 1,
+    "arg": 2,
+    "asn": 3,
+    "asp": 4,
+    "cys": 5,
+    "gln": 6,
+    "glu": 7,
+    "gly": 8,
+    "his": 9,
+    "ile": 10,
+    "leu": 11,
+    "lys": 12,
+    "met": 13,
+    "phe": 14,
+    "pro": 15,
+    "ser": 16,
+    "thr": 17,
+    "trp": 18,
+    "tyr": 19,
+    "val": 20,
 }
 
 edge_encoding = {"cnt": 0, "combi": 1, "hbond": 2, "pept": 3, "ovl": 4}
@@ -60,12 +60,13 @@ class ProteinEncoder:
         Returns:
             np.array: Concatenated node_feats and one-hot encoding of residue name
         """
-        if residue.lower() not in node_encoding:
-            return None
+        residue = residue.lower()
+        if residue not in node_encoding:
+            return node_encoding["padding"]
         elif self.node_feats == "label":
-            return node_encoding[residue.lower()]
+            return node_encoding[residue]
         elif self.node_feats == "onehot":
-            return onehot_encode(node_encoding[residue.lower()])
+            return onehot_encode(node_encoding[residue])
         else:
             raise ValueError("Unknown node_feats type!")
 
@@ -146,7 +147,6 @@ class ProteinEncoder:
         """
         nodes.drop_duplicates(inplace=True)
         node_attr = [self.encode_residue(x) for x in nodes["resaa"]]
-        node_attr = [x for x in node_attr if x is not None]
         node_attr = np.asarray(node_attr)
         if self.node_feats == "label":
             node_attr = torch.tensor(node_attr, dtype=torch.long)

@@ -1,7 +1,7 @@
 import os
 import pickle
 from math import ceil
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Tuple
 
 import numpy as np
 import torch
@@ -218,7 +218,7 @@ def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: fl
     return random_split(dataset, [train, val, test])
 
 
-def corrupt_features(features: torch.Tensor, frac: float, device=None) -> torch.Tensor:
+def corrupt_features(features: torch.Tensor, frac: float, device=None) -> Tuple[torch.Tensor, list]:
     """Corrupt the features
 
     Args:
@@ -226,16 +226,33 @@ def corrupt_features(features: torch.Tensor, frac: float, device=None) -> torch.
         frac (float): Fraction of nodes to corrupt
 
     Returns:
-        torch.Tensor: New corrupt features
+        torch.Tensor, list: New corrupt features, idx of masked nodes
     """
     num_feat = features.size(0)
     num_node_types = int(features.max() + 1)
     num_corrupt_nodes = ceil(num_feat * frac)
-    corrupt_idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
     corrupt_features = torch.tensor(
         np.random.choice(range(num_node_types), num_corrupt_nodes, replace=True),
         dtype=torch.long,
         device=device,
     )
-    features[corrupt_idx] = corrupt_features
-    return features, corrupt_idx
+    features[idx] = corrupt_features
+    return features, idx
+
+
+def mask_features(features: torch.Tensor, frac: float, device=None) -> Tuple[torch.Tensor, list]:
+    """Mask the features
+
+    Args:
+        features (torch.Tensor): Node features
+        frac (float): Fraction of nodes to mask
+
+    Returns:
+        torch.Tensor, list: New masked features, idx of masked nodes
+    """
+    num_feat = features.size(0)
+    num_corrupt_nodes = ceil(num_feat * frac)
+    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    features[idx] = torch.zeros_like(features[idx]) + 20
+    return features, idx
