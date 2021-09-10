@@ -61,12 +61,14 @@ class Encoder(BaseModel):
         super().__init__()
         self.feat_embed = self._get_feat_embed(kwargs)
         self.node_embed = self._get_node_embed(kwargs)
+        self.pool = self._get_pooler(kwargs)
 
-    def forward(self, x, edge_index, **kwargs):
+    def forward(self, x, edge_index, batch, **kwargs):
         """Forward pass"""
         x = self.feat_embed(x)
         x = self.node_embed(x, edge_index)
-        return x
+        embed = self.pool(x, edge_index, batch)
+        return embed, x
 
 
 def init_weights(m):
@@ -87,13 +89,20 @@ class BGRLModel(BaseModel):
         set_requires_grad(self.teacher_encoder, False)
         self.teacher_ema_updater = EMA(moving_average_decay, epochs)
         rep_dim = 32
-        self.student_predictor = nn.Sequential(
+        self.student_node_predictor = nn.Sequential(
             nn.Linear(rep_dim, 32),
             nn.BatchNorm1d(32, momentum=0.01),
             nn.PReLU(),
             nn.Linear(32, rep_dim),
         )
-        self.student_predictor.apply(init_weights)
+        self.student_graph_predictor = nn.Sequential(
+            nn.Linear(rep_dim, 32),
+            nn.BatchNorm1d(32, momentum=0.01),
+            nn.PReLU(),
+            nn.Linear(32, rep_dim),
+        )
+        self.student_node_predictor.apply(init_weights)
+        self.student_graph_predictor.apply(init_weights)
 
     def reset_moving_average(self):
         """"""
@@ -108,25 +117,33 @@ class BGRLModel(BaseModel):
     def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
         """Forward pass"""
 
-        student = self.student_encoder(**data)
-        pred = self.student_predictor(student)
+        graph_student, node_student = self.student_encoder(**data)
+        node_pred = self.student_node_predictor(node_student)
+        graph_pred = self.student_graph_predictor(graph_student)
         with torch.no_grad():
-            teacher = self.teacher_encoder(**data)
+            graph_teacher, node_teacher = self.teacher_encoder(**data)
 
-        return pred, teacher
+        return graph_teacher, graph_pred, node_teacher, node_pred
 
     def shared_step(self, data: Data):
         """Shared step"""
         a = mask_data(data, self.hparams.frac).__dict__
         b = mask_data(data, self.hparams.frac).__dict__
-        a_pred, a_teacher = self.forward(a)
-        b_pred, b_teacher = self.forward(b)
+        a_graph_teacher, a_graph_pred, a_node_teacher, a_node_pred = self.forward(a)
+        b_graph_teacher, b_graph_pred, b_node_teacher, b_node_pred = self.forward(b)
 
-        loss1 = loss_fn(a_pred, a_teacher.detach())
-        loss2 = loss_fn(b_pred, b_teacher.detach())
+        node_loss1 = loss_fn(a_node_pred, a_node_teacher.detach())
+        node_loss2 = loss_fn(b_node_pred, b_node_teacher.detach())
+        graph_loss1 = loss_fn(a_graph_pred, a_graph_teacher.detach())
+        graph_loss2 = loss_fn(b_graph_pred, b_graph_teacher.detach())
 
-        loss = loss1 + loss2
-        return {"loss": loss.mean()}
+        node_loss = (node_loss1 + node_loss2).mean()
+        graph_loss = (graph_loss1 + graph_loss2).mean()
+        return {
+            "loss": node_loss + self.hparams.alpha * graph_loss,
+            "node_loss": node_loss.detach(),
+            "graph_loss": graph_loss.detach(),
+        }
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:
@@ -140,6 +157,7 @@ class BGRLModel(BaseModel):
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
         parser.add_argument("--frac", default=0.1, type=float, help="Corruption percentage")
+        parser.add_argument("--alpha", default=0.1, type=float)
         parser.add_argument("--feat_embed_dim", default=32, type=int)
 
         pooler_args = parser.add_argument_group("Pool", prefix="--")

@@ -255,7 +255,7 @@ def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, li
     num_feat = features.size(0)
     num_corrupt_nodes = ceil(num_feat * frac)
     idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-    features[idx] = torch.zeros_like(features[idx]) + 20
+    features[idx] = torch.zeros_like(features[idx]) + 20  # FIXME
     return features, idx
 
 
