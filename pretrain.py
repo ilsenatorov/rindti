@@ -3,12 +3,12 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.data import DataLoader
 
-from rindti.models import GraphLogModel, InfoGraphModel, PfamModel
+from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.utils.data import PreTrainDataset, split_random
 from rindti.utils.transforms import PfamTransformer
 from rindti.utils.utils import MyArgParser
 
-models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel}
+models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel, "bgrl": BGRLModel}
 
 
 def pretrain(**kwargs):

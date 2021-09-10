@@ -1,5 +1,6 @@
 import os
 import pickle
+from copy import deepcopy
 from math import ceil
 from typing import Any, Callable, Iterable, Tuple
 
@@ -241,7 +242,7 @@ def corrupt_features(features: torch.Tensor, frac: float, device=None) -> Tuple[
     return features, idx
 
 
-def mask_features(features: torch.Tensor, frac: float, device=None) -> Tuple[torch.Tensor, list]:
+def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
     """Mask the features
 
     Args:
@@ -256,3 +257,11 @@ def mask_features(features: torch.Tensor, frac: float, device=None) -> Tuple[tor
     idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
     features[idx] = torch.zeros_like(features[idx]) + 20
     return features, idx
+
+
+def mask_data(orig_data: Data, frac: float) -> Data:
+    data = deepcopy(orig_data)
+    new_feat, idx = mask_features(data.x, frac)
+    data["x"] = new_feat
+    data["idx"] = idx
+    return data

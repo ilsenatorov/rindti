@@ -1,3 +1,4 @@
+from .bgrl import BGRLModel
 from .classification import ClassificationModel
 from .graphlog import GraphLogModel
 from .infograph import InfoGraphModel
