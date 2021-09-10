@@ -24,9 +24,7 @@ class PfamModel(BaseModel):
         self.node_embed = self._get_node_embed(kwargs)
         self.pool = self._get_pooler(kwargs)
         self.mlp = self._get_mlp(remove_arg_prefix("--mlp", kwargs))
-        pred_kwargs = kwargs
-        pred_kwargs["num_layers"] = 3
-        self.node_pred = self._get_node_embed(pred_kwargs, out_dim=kwargs["feat_dim"])
+        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
 
     def _corrupt_data(
         self,
@@ -98,9 +96,7 @@ class PfamModel(BaseModel):
         b_embed = self.pool(**b)
         a_pred = self.node_pred(**a)
         b_pred = self.node_pred(**b)
-        joint_embedding = self.merge_features(a_embed, b_embed)
-        logit = self.mlp(joint_embedding)
-        return torch.sigmoid(logit), a_pred, b_pred
+        return a_embed, b_embed, a_pred, b_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -114,10 +110,12 @@ class PfamModel(BaseModel):
         cor_data = self.corrupt_data(data, self.hparams.frac)
         a = remove_arg_prefix("a_", cor_data)
         b = remove_arg_prefix("b_", cor_data)
-        output, a_pred, b_pred = self.forward(a, b)
-        labels = data.label.unsqueeze(1)
-        loss = F.binary_cross_entropy(output, labels.float())
-        metrics = self._get_classification_metrics(output, labels)
+        a_embed, b_embed, a_pred, b_pred = self.forward(a, b)
+        labels = data.label
+        labels[labels == 0] = -1
+        loss = F.cosine_embedding_loss(a_embed, b_embed, labels.float())
+        metrics = {}
+        # metrics = self._get_classification_metrics(output, labels)
         a_idx = cor_data.a_cor_idx
         b_idx = cor_data.b_cor_idx
         a_loss = F.cross_entropy(a_pred[a_idx], data["a_x"][a_idx])
