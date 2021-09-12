@@ -39,7 +39,7 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _get_feat_embed(self, params: dict) -> Embedding:
-        return Embedding(params["feat_dim"] + 1, params["feat_embed_dim"], padding_idx=20)
+        return Embedding(params["feat_dim"] + 1, params["feat_embed_dim"])
 
     def _get_node_embed(self, params: dict, out_dim=None) -> BaseLayer:
         if out_dim:

@@ -22,7 +22,7 @@ class GMTNet(BaseLayer):
         parser.add_argument("pool", default="gmt", type=str)
         parser.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
         parser.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
-        parser.add_argument("pooling_method", default="mincut", type=str, help="Type of pooling")
+        parser.add_argument("num_heads", default=4, type=float, help="Number of attention heads")
         return parser
 
     def __init__(
@@ -44,6 +44,11 @@ class GMTNet(BaseLayer):
         self.gmpoolg2 = PMA(hidden_dim, num_heads, num_nodes, mab_conv=None)
         self.sab2 = SAB(hidden_dim, output_dim, num_heads)
         self.gmpooli = PMA(output_dim, num_heads, 1, mab_conv=None)
+        self.ln1 = nn.LayerNorm(hidden_dim)
+        self.ln2 = nn.LayerNorm(hidden_dim)
+        self.ln3 = nn.LayerNorm(hidden_dim)
+        self.ln4 = nn.LayerNorm(hidden_dim)
+        self.bn = nn.BatchNorm1d(hidden_dim)
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor, **kwargs):
         """Forward pass of the module"""
@@ -56,11 +61,16 @@ class GMTNet(BaseLayer):
             attention_mask=extended_attention_mask,
             graph=(x, edge_index, batch),
         )
+        # batch_x = self.ln1(batch_x)
         batch_x = self.sab1(batch_x)
+        # batch_x = self.ln2(batch_x)
         batch_x = self.gmpoolg2(batch_x)
+        # batch_x = self.ln3(batch_x)
         batch_x = self.sab2(batch_x)
+        # batch_x = self.ln4(batch_x)
         batch_x = self.gmpooli(batch_x)
         x = batch_x.squeeze(1)
+        x = self.bn(x)
         x = F.normalize(x, dim=1)
         return x
 

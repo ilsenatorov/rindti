@@ -31,7 +31,7 @@ def pretrain(**kwargs):
         gpus=kwargs["gpus"],
         callbacks=callbacks,
         logger=logger,
-        gradient_clip_val=30,
+        # gradient_clip_val=30,
         max_epochs=kwargs["max_epochs"],
         stochastic_weight_avg=True,
         num_sanity_val_steps=0,

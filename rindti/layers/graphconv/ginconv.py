@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import torch
 from torch.functional import Tensor
-from torch.nn import BatchNorm1d, Linear, ModuleList, ReLU, Sequential
+from torch.nn import BatchNorm1d, Linear, ModuleList, PReLU, ReLU, Sequential
 from torch_geometric.nn import GINConv
 from torch_geometric.typing import Adj
 
@@ -24,7 +24,7 @@ class GINConvNet(BaseLayer):
         self.inp = GINConv(
             Sequential(
                 Linear(input_dim, hidden_dim),
-                ReLU(),
+                PReLU(),
                 Linear(hidden_dim, hidden_dim),
                 BatchNorm1d(hidden_dim),
             )
@@ -33,7 +33,7 @@ class GINConvNet(BaseLayer):
             GINConv(
                 Sequential(
                     Linear(hidden_dim, hidden_dim),
-                    ReLU(),
+                    PReLU(),
                     Linear(hidden_dim, hidden_dim),
                     BatchNorm1d(hidden_dim),
                 )
@@ -44,7 +44,7 @@ class GINConvNet(BaseLayer):
         self.out = GINConv(
             Sequential(
                 Linear(hidden_dim, hidden_dim),
-                ReLU(),
+                PReLU(),
                 Linear(hidden_dim, output_dim),
                 BatchNorm1d(output_dim),
             )

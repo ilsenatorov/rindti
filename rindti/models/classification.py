@@ -6,6 +6,8 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
+from rindti.models.bgrl import BGRLModel
+
 from ..layers.base_layer import BaseLayer
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
@@ -27,22 +29,22 @@ class ClassificationModel(BaseModel):
         mlp_param = remove_arg_prefix("mlp_", kwargs)
         if prot_param["pretrain"]:
             self.prot_feat_embed, self.prot_node_embed, self.prot_pool = self._load_pretrained(prot_param["pretrain"])
+            self.prot_feat_embed.requires_grad = False
+            self.prot_node_embed.requires_grad = False
+            self.prot_pool.requires_grad = False
         else:
             self.prot_feat_embed = self._get_feat_embed(prot_param)
             self.prot_node_embed = self._get_node_embed(prot_param)
             self.prot_pool = self._get_pooler(prot_param)
-            self.prot_feat_embed.requires_grad = False
-            self.prot_node_embed.requires_grad = False
-            self.prot_pool.requires_grad = False
         if drug_param["pretrain"]:
             self.drug_feat_embed, self.drug_node_embed, self.drug_pool = self._load_pretrained(drug_param["pretrain"])
+            self.drug_feat_embed.requires_grad = False
+            self.drug_node_embed.requires_grad = False
+            self.drug_pool.requires_grad = False
         else:
             self.drug_feat_embed = self._get_feat_embed(drug_param)
             self.drug_node_embed = self._get_node_embed(drug_param)
             self.drug_pool = self._get_pooler(drug_param)
-            self.drug_feat_embed.requires_grad = False
-            self.drug_node_embed.requires_grad = False
-            self.drug_pool.requires_grad = False
         self.mlp = self._get_mlp(mlp_param)
 
     def _load_pretrained(self, checkpoint_path: str) -> Iterable[BaseLayer]:
@@ -61,10 +63,12 @@ class ClassificationModel(BaseModel):
             model = GraphLogModel.load_from_checkpoint(checkpoint_path)
         elif "pfam" in checkpoint_path:
             model = PfamModel.load_from_checkpoint(checkpoint_path)
+        elif "bgrl" in checkpoint_path:
+            model = BGRLModel.load_from_checkpoint(checkpoint_path).student_encoder
         else:
             raise ValueError(
                 """Unknown pretraining model type!
-                Please ensure 'pfam', 'graphlog' or 'infograph' are present in the model path"""
+                Please ensure 'pfam', 'graphlog', 'bgrl' or 'infograph' are present in the model path"""
             )
         return model.feat_embed, model.node_embed, model.pool
 

@@ -8,11 +8,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv
 
-from ..layers.base_layer import BaseLayer
 from ..utils import MyArgParser
-from ..utils.data import mask_data, mask_features
+from ..utils.data import TwoGraphData, mask_data
 from .base_model import BaseModel, node_embedders, poolers
 
 
@@ -88,18 +86,17 @@ class BGRLModel(BaseModel):
         self.teacher_encoder = deepcopy(self.student_encoder)
         set_requires_grad(self.teacher_encoder, False)
         self.teacher_ema_updater = EMA(moving_average_decay, epochs)
-        rep_dim = 32
         self.student_node_predictor = nn.Sequential(
-            nn.Linear(rep_dim, 32),
-            nn.BatchNorm1d(32, momentum=0.01),
+            nn.Linear(kwargs["hidden_dim"], kwargs["hidden_dim"]),
+            nn.BatchNorm1d(kwargs["hidden_dim"], momentum=0.01),
             nn.PReLU(),
-            nn.Linear(32, rep_dim),
+            nn.Linear(kwargs["hidden_dim"], kwargs["hidden_dim"]),
         )
         self.student_graph_predictor = nn.Sequential(
-            nn.Linear(rep_dim, 32),
-            nn.BatchNorm1d(32, momentum=0.01),
+            nn.Linear(kwargs["hidden_dim"], kwargs["hidden_dim"]),
+            nn.BatchNorm1d(kwargs["hidden_dim"], momentum=0.01),
             nn.PReLU(),
-            nn.Linear(32, rep_dim),
+            nn.Linear(kwargs["hidden_dim"], kwargs["hidden_dim"]),
         )
         self.student_node_predictor.apply(init_weights)
         self.student_graph_predictor.apply(init_weights)
@@ -139,6 +136,7 @@ class BGRLModel(BaseModel):
 
         node_loss = (node_loss1 + node_loss2).mean()
         graph_loss = (graph_loss1 + graph_loss2).mean()
+        self.update_moving_average()
         return {
             "loss": node_loss + self.hparams.alpha * graph_loss,
             "node_loss": node_loss.detach(),
@@ -157,7 +155,7 @@ class BGRLModel(BaseModel):
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
         parser.add_argument("--frac", default=0.1, type=float, help="Corruption percentage")
-        parser.add_argument("--alpha", default=0.1, type=float)
+        parser.add_argument("--alpha", default=1.0, type=float)
         parser.add_argument("--feat_embed_dim", default=32, type=int)
 
         pooler_args = parser.add_argument_group("Pool", prefix="--")
