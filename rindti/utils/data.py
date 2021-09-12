@@ -219,7 +219,7 @@ def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: fl
     return random_split(dataset, [train, val, test])
 
 
-def corrupt_features(features: torch.Tensor, frac: float, device=None) -> Tuple[torch.Tensor, list]:
+def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
     """Corrupt the features
 
     Args:
@@ -233,12 +233,7 @@ def corrupt_features(features: torch.Tensor, frac: float, device=None) -> Tuple[
     num_node_types = int(features.max() + 1)
     num_corrupt_nodes = ceil(num_feat * frac)
     idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-    corrupt_features = torch.tensor(
-        np.random.choice(range(num_node_types), num_corrupt_nodes, replace=True),
-        dtype=torch.long,
-        device=device,
-    )
-    features[idx] = corrupt_features
+    features[idx] = torch.randint_like(features[idx], low=1, high=num_node_types)
     return features, idx
 
 
@@ -255,7 +250,7 @@ def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, li
     num_feat = features.size(0)
     num_corrupt_nodes = ceil(num_feat * frac)
     idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-    features[idx] = torch.zeros_like(features[idx]) + 20  # FIXME
+    features[idx] = torch.zeros_like(features[idx])
     return features, idx
 
 

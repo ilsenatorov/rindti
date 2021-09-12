@@ -1,8 +1,9 @@
 from argparse import ArgumentParser
+
+import torch
+from rindti.models.encoder import Encoder
 from typing import Iterable
 
-import numpy as np
-import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
@@ -28,23 +29,15 @@ class ClassificationModel(BaseModel):
         prot_param = remove_arg_prefix("prot_", kwargs)
         mlp_param = remove_arg_prefix("mlp_", kwargs)
         if prot_param["pretrain"]:
-            self.prot_feat_embed, self.prot_node_embed, self.prot_pool = self._load_pretrained(prot_param["pretrain"])
-            self.prot_feat_embed.requires_grad = False
-            self.prot_node_embed.requires_grad = False
-            self.prot_pool.requires_grad = False
+            self.prot_encoder = self._load_pretrained(prot_param["pretrain"])
+            self.prot_encoder.requires_grad = False
         else:
-            self.prot_feat_embed = self._get_feat_embed(prot_param)
-            self.prot_node_embed = self._get_node_embed(prot_param)
-            self.prot_pool = self._get_pooler(prot_param)
+            self.prot_encoder = Encoder(**prot_param)
         if drug_param["pretrain"]:
-            self.drug_feat_embed, self.drug_node_embed, self.drug_pool = self._load_pretrained(drug_param["pretrain"])
-            self.drug_feat_embed.requires_grad = False
-            self.drug_node_embed.requires_grad = False
-            self.drug_pool.requires_grad = False
+            self.drug_encoder = self._load_pretrained(drug_param["pretrain"])
+            self.drug_encoder.requires_grad = False
         else:
-            self.drug_feat_embed = self._get_feat_embed(drug_param)
-            self.drug_node_embed = self._get_node_embed(drug_param)
-            self.drug_pool = self._get_pooler(drug_param)
+            self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
 
     def _load_pretrained(self, checkpoint_path: str) -> Iterable[BaseLayer]:
@@ -52,37 +45,32 @@ class ClassificationModel(BaseModel):
 
         Args:
             checkpoint_path (str): Path to checkpoint file.
-            Has to contain 'infograph' or 'graphlog', which will point to the type of model.
+            Has to contain 'infograph', 'graphlog', 'pfam' or 'bgrl', which will point to the type of model.
 
         Returns:
             Iterable[BaseLayer]: feat_embed, node_embed, pool of the pretrained model
         """
         if "infograph" in checkpoint_path:
-            model = InfoGraphModel.load_from_checkpoint(checkpoint_path)
+            return InfoGraphModel.load_from_checkpoint(checkpoint_path).encoder
         elif "graphlog" in checkpoint_path:
-            model = GraphLogModel.load_from_checkpoint(checkpoint_path)
+            return GraphLogModel.load_from_checkpoint(checkpoint_path).encoder
         elif "pfam" in checkpoint_path:
-            model = PfamModel.load_from_checkpoint(checkpoint_path)
+            return PfamModel.load_from_checkpoint(checkpoint_path).encoder
         elif "bgrl" in checkpoint_path:
-            model = BGRLModel.load_from_checkpoint(checkpoint_path).student_encoder
+            return BGRLModel.load_from_checkpoint(checkpoint_path).student_encoder
         else:
             raise ValueError(
                 """Unknown pretraining model type!
                 Please ensure 'pfam', 'graphlog', 'bgrl' or 'infograph' are present in the model path"""
             )
-        return model.feat_embed, model.node_embed, model.pool
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
-        prot["x"] = self.prot_feat_embed(prot["x"])
-        drug["x"] = self.drug_feat_embed(drug["x"])
-        prot["x"] = self.prot_node_embed(**prot)
-        drug["x"] = self.drug_node_embed(**drug)
-        prot_embed = self.prot_pool(**prot)
-        drug_embed = self.drug_pool(**drug)
+        prot_embed = self.prot_encoder(prot)
+        drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
-        logit = self.mlp(joint_embedding)
-        return torch.sigmoid(logit)
+        pred = self.mlp(joint_embedding)
+        return pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -91,7 +79,7 @@ class ClassificationModel(BaseModel):
         """
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
-        output = self.forward(prot, drug)
+        output = torch.sigmoid(self.forward(prot, drug))
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
         metrics = self._get_classification_metrics(output, labels)

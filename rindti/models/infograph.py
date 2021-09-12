@@ -39,7 +39,7 @@ class InfoGraphModel(BaseModel):
     def shared_step(self, data: Data) -> dict:
         """Shared step"""
         orig_x = data["x"].clone()
-        cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac, device=self.device)
+        cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac)
         data["x"] = cor_x
         mi, node_pred = self.forward(data.__dict__)
         node_loss = F.cross_entropy(node_pred[cor_idx], orig_x[cor_idx])

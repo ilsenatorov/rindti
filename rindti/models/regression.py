@@ -11,18 +11,6 @@ from .classification import ClassificationModel
 class RegressionModel(ClassificationModel):
     """Model for DTI prediction as a regression problem"""
 
-    def forward(self, prot: dict, drug: dict) -> Tensor:
-        """Forward pass of the model"""
-        prot["x"] = self.prot_feat_embed(prot["x"])
-        drug["x"] = self.drug_feat_embed(drug["x"])
-        prot["x"] = self.prot_node_embed(**prot)
-        drug["x"] = self.drug_node_embed(**drug)
-        prot_embed = self.prot_pool(**prot)
-        drug_embed = self.drug_pool(**drug)
-        joint_embedding = self.merge_features(drug_embed, prot_embed)
-        logit = self.mlp(joint_embedding)
-        return torch.sigmoid(logit)
-
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
         Returns:

@@ -44,11 +44,7 @@ class GMTNet(BaseLayer):
         self.gmpoolg2 = PMA(hidden_dim, num_heads, num_nodes, mab_conv=None)
         self.sab2 = SAB(hidden_dim, output_dim, num_heads)
         self.gmpooli = PMA(output_dim, num_heads, 1, mab_conv=None)
-        self.ln1 = nn.LayerNorm(hidden_dim)
-        self.ln2 = nn.LayerNorm(hidden_dim)
-        self.ln3 = nn.LayerNorm(hidden_dim)
-        self.ln4 = nn.LayerNorm(hidden_dim)
-        self.bn = nn.BatchNorm1d(hidden_dim)
+        self.bn = nn.BatchNorm1d(output_dim)
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor, batch: torch.Tensor, **kwargs):
         """Forward pass of the module"""

@@ -7,21 +7,6 @@ from .noisy_nodes_classification import NoisyNodesClassModel
 
 
 class NoisyNodesRegModel(NoisyNodesClassModel):
-    def forward(self, prot: dict, drug: dict) -> Tensor:
-        """Forward pass of the model"""
-
-        prot["x"] = self.prot_feat_embed(prot["x"])
-        drug["x"] = self.drug_feat_embed(drug["x"])
-        prot["x"] = self.prot_node_embed(**prot)
-        drug["x"] = self.drug_node_embed(**drug)
-        prot_embed = self.prot_pool(**prot)
-        drug_embed = self.drug_pool(**drug)
-        joint_embedding = self.merge_features(drug_embed, prot_embed)
-        logit = self.mlp(joint_embedding)
-        prot_pred = self.prot_node_pred(**prot)
-        drug_pred = self.drug_node_pred(**drug)
-        return logit, prot_pred, drug_pred
-
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
 

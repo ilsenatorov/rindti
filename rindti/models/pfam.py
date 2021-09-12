@@ -66,10 +66,10 @@ class PfamModel(BaseModel):
         """
         data = deepcopy(orig_data)
         if frac > 0:
-            a_feat, a_idx = mask_features(data["a_x"], frac, self.device)
+            a_feat, a_idx = mask_features(data["a_x"], frac)
             data["a_x"] = a_feat
             data["a_cor_idx"] = a_idx
-            b_feat, b_idx = mask_features(data["b_x"], frac, self.device)
+            b_feat, b_idx = mask_features(data["b_x"], frac)
             data["b_x"] = b_feat
             data["b_cor_idx"] = b_idx
         return data

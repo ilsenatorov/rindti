@@ -41,11 +41,11 @@ class NoisyNodesClassModel(ClassificationModel):
         # sourcery skip: extract-duplicate-method
         data = deepcopy(orig_data)
         if prot_frac > 0:
-            prot_feat, prot_idx = corrupt_features(data["prot_x"], prot_frac, self.device)
+            prot_feat, prot_idx = corrupt_features(data["prot_x"], prot_frac)
             data["prot_x"] = prot_feat
             data["prot_cor_idx"] = prot_idx
         if drug_frac > 0:
-            drug_feat, drug_idx = corrupt_features(data["drug_x"], drug_frac, self.device)
+            drug_feat, drug_idx = corrupt_features(data["drug_x"], drug_frac)
             data["drug_x"] = drug_feat
             data["drug_cor_idx"] = drug_idx
         return data
@@ -69,11 +69,11 @@ class NoisyNodesClassModel(ClassificationModel):
         # sourcery skip: extract-duplicate-method
         data = deepcopy(orig_data)
         if prot_frac > 0:
-            prot_feat, prot_idx = mask_features(data["prot_x"], prot_frac, self.device)
+            prot_feat, prot_idx = mask_features(data["prot_x"], prot_frac)
             data["prot_x"] = prot_feat
             data["prot_cor_idx"] = prot_idx
         if drug_frac > 0:
-            drug_feat, drug_idx = mask_features(data["drug_x"], drug_frac, self.device)
+            drug_feat, drug_idx = mask_features(data["drug_x"], drug_frac)
             data["drug_x"] = drug_feat
             data["drug_cor_idx"] = drug_idx
         return data
@@ -93,17 +93,15 @@ class NoisyNodesClassModel(ClassificationModel):
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
-        prot["x"] = self.prot_feat_embed(prot["x"])
-        drug["x"] = self.drug_feat_embed(drug["x"])
-        prot["x"] = self.prot_node_embed(**prot)
-        drug["x"] = self.drug_node_embed(**drug)
-        prot_embed = self.prot_pool(**prot)
-        drug_embed = self.drug_pool(**drug)
+        prot_embed, prot_pred = self.prot_encoder(prot, return_nodes=True)
+        drug_embed, drug_pred = self.drug_encoder(drug, return_nodes=True)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
-        logit = self.mlp(joint_embedding)
+        pred = self.mlp(joint_embedding)
+        prot["x"] = prot_pred
         prot_pred = self.prot_node_pred(**prot)
+        drug["x"] = drug_pred
         drug_pred = self.drug_node_pred(**drug)
-        return torch.sigmoid(logit), prot_pred, drug_pred
+        return pred, torch.softmax(prot_pred, dim=1), torch.softmax(drug_pred, dim=1)
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -118,6 +116,7 @@ class NoisyNodesClassModel(ClassificationModel):
         prot = remove_arg_prefix("prot_", cor_data)
         drug = remove_arg_prefix("drug_", cor_data)
         output, prot_pred, drug_pred = self.forward(prot, drug)
+        output = torch.sigmoid(output)
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
         prot_idx = cor_data.prot_cor_idx

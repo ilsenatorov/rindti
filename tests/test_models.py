@@ -1,4 +1,5 @@
 from copy import deepcopy
+from torch_geometric.data import DataLoader
 
 import pytest
 import torch
@@ -21,16 +22,18 @@ fake_data = {
     "drug_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
     "prot_edge_feats": torch.randint(low=0, high=5, size=(10,)),
     "drug_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-    "prot_x_batch": torch.zeros((15,), dtype=torch.long),
-    "drug_x_batch": torch.zeros((15,), dtype=torch.long),
     "label": torch.tensor([1]),
 }
+
+dl = DataLoader([TwoGraphData(**fake_data)] * 10, batch_size=5, num_workers=1, follow_batch=["prot_x", "drug_x"])
+fake_data = next(iter(dl))
 
 
 class BaseTestModel:
     """Abstract class for model testing"""
 
     default_config = {
+        "corruption": "mask",
         "drug_alpha": 1,
         "drug_deg": torch.zeros((100), dtype=torch.long),
         "drug_dropout": 0.2,
@@ -87,7 +90,7 @@ class BaseTestModel:
         self.default_config["drug_pool"] = drug_pool
         model = self.model(**self.default_config)
         data = deepcopy(fake_data)
-        model.shared_step(TwoGraphData(**data))
+        model.shared_step(data)
 
     def test_arg_parser(self):
         parser = MyArgParser()

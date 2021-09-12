@@ -27,3 +27,7 @@ color = true
 [tool.isort]
 profile = "black"
 line_length = 119
+
+[tool.mypy]
+ignore_missing_imports = true
+follow_imports = "silent"

@@ -1,8 +1,9 @@
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, _ArgumentGroup
-from random import randint
-from typing import Iterable, Union
+from argparse import ArgumentParser, _ArgumentGroup
 
-import torch
+from pytorch_lightning.core.lightning import LightningModule
+from typing import Union
+
+from torch.nn import Embedding
 
 from rindti.utils.data import TwoGraphData
 

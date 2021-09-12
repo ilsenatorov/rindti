@@ -62,7 +62,7 @@ class ProteinEncoder:
         """
         residue = residue.lower()
         if residue not in node_encoding:
-            return node_encoding["padding"]
+            None
         elif self.node_feats == "label":
             return node_encoding[residue]
         elif self.node_feats == "onehot":

@@ -10,8 +10,9 @@ from torch.functional import Tensor
 from torch_geometric.data import Data
 
 from ..utils import MyArgParser
-from ..utils.data import TwoGraphData, mask_data
-from .base_model import BaseModel, node_embedders, poolers
+from ..utils.data import mask_data
+from .encoder import Encoder
+from .base_model import BaseModel
 
 
 class EMA:
@@ -52,23 +53,6 @@ def set_requires_grad(model, val):
         p.requires_grad = val
 
 
-class Encoder(BaseModel):
-    """Encodes nodes in a graph"""
-
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.feat_embed = self._get_feat_embed(kwargs)
-        self.node_embed = self._get_node_embed(kwargs)
-        self.pool = self._get_pooler(kwargs)
-
-    def forward(self, x, edge_index, batch, **kwargs):
-        """Forward pass"""
-        x = self.feat_embed(x)
-        x = self.node_embed(x, edge_index)
-        embed = self.pool(x, edge_index, batch)
-        return embed, x
-
-
 def init_weights(m):
     """"""
     if type(m) == nn.Linear:
@@ -79,7 +63,7 @@ def init_weights(m):
 class BGRLModel(BaseModel):
     """Bootrstrape Graph Representational learning"""
 
-    def __init__(self, dropout=0.0, moving_average_decay=0.99, epochs=1000, **kwargs):
+    def __init__(self, dropout: float = 0.0, moving_average_decay: float = 0.99, epochs: int = 1000, **kwargs):
         super().__init__()
         self.save_hyperparameters()
         self.student_encoder = Encoder(dropout=dropout, **kwargs)
@@ -111,7 +95,7 @@ class BGRLModel(BaseModel):
         assert self.teacher_encoder is not None, "teacher encoder has not been created yet"
         update_moving_average(self.teacher_ema_updater, self.teacher_encoder, self.student_encoder)
 
-    def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
+    def forward(self, data: Data) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
         """Forward pass"""
 
         graph_student, node_student = self.student_encoder(**data)
@@ -122,7 +106,7 @@ class BGRLModel(BaseModel):
 
         return graph_teacher, graph_pred, node_teacher, node_pred
 
-    def shared_step(self, data: Data):
+    def shared_step(self, data: Data) -> dict:
         """Shared step"""
         a = mask_data(data, self.hparams.frac).__dict__
         b = mask_data(data, self.hparams.frac).__dict__
