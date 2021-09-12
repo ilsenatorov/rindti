@@ -12,7 +12,7 @@ from torch_geometric.data import Data
 from ..utils import MyArgParser
 from ..utils.data import mask_data
 from .encoder import Encoder
-from .base_model import BaseModel
+from .base_model import BaseModel, node_embedders, poolers
 
 
 class EMA:
@@ -61,12 +61,12 @@ def init_weights(m):
 
 
 class BGRLModel(BaseModel):
-    """Bootrstrape Graph Representational learning"""
+    """Bootrstrapped Graph Representational learning"""
 
-    def __init__(self, dropout: float = 0.0, moving_average_decay: float = 0.99, epochs: int = 1000, **kwargs):
+    def __init__(self, moving_average_decay: float = 0.99, epochs: int = 1000, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.student_encoder = Encoder(dropout=dropout, **kwargs)
+        self.student_encoder = Encoder(**kwargs)
         self.teacher_encoder = deepcopy(self.student_encoder)
         set_requires_grad(self.teacher_encoder, False)
         self.teacher_ema_updater = EMA(moving_average_decay, epochs)
@@ -97,12 +97,12 @@ class BGRLModel(BaseModel):
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
         """Forward pass"""
-
-        graph_student, node_student = self.student_encoder(**data)
+        teach_data = deepcopy(data)
+        graph_student, node_student = self.student_encoder(data, return_nodes=True)
         node_pred = self.student_node_predictor(node_student)
         graph_pred = self.student_graph_predictor(graph_student)
         with torch.no_grad():
-            graph_teacher, node_teacher = self.teacher_encoder(**data)
+            graph_teacher, node_teacher = self.teacher_encoder(teach_data, return_nodes=True)
 
         return graph_teacher, graph_pred, node_teacher, node_pred
 

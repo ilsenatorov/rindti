@@ -4,7 +4,7 @@ import pytest
 import torch
 from torch_geometric.data import Data, DataLoader
 
-from rindti.models import GraphLogModel, InfoGraphModel, PfamModel
+from rindti.models import GraphLogModel, InfoGraphModel, PfamModel, BGRLModel
 from rindti.models.base_model import node_embedders, poolers
 from rindti.utils.data import TwoGraphData
 
@@ -97,6 +97,11 @@ class TestInfoGraphModel(BaseTestModel):
     """InfoGraph"""
 
     model = InfoGraphModel
+
+class TestBGRLModel(BaseTestModel):
+    """BGRL"""
+
+    model = BGRLModel
 
 
 class TestPfamModel(BaseTestModel):

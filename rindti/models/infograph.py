@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from rindti.models.encoder import Encoder
 from typing import Tuple
 
 import torch
@@ -19,22 +20,18 @@ class InfoGraphModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.feat_embed = self._get_feat_embed(kwargs)
-        self.node_embed = self._get_node_embed(kwargs)
-        self.pool = self._get_pooler(kwargs)
+        self.encoder = Encoder(**kwargs)
         self.mi = MutualInformation(kwargs["hidden_dim"], kwargs["hidden_dim"])
         self.node_pred = GINConvNet(kwargs["hidden_dim"], kwargs["feat_dim"], kwargs["hidden_dim"])
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
         """Forward pass of the module"""
-        data["x"] = self.feat_embed(data["x"])
-        data["x"] = self.node_embed(**data)
-        graph_embed = self.pool(**data)
+        graph_embed, node_embed = self.encoder(data, return_nodes=True)
         node_index = torch.arange(data["x"].size(0), device=self.device)
         pair_index = torch.stack([data["batch"], node_index], dim=-1)
-        mi = self.mi(graph_embed, data["x"], pair_index)
+        mi = self.mi(graph_embed, node_embed, pair_index)
         node_pred = self.node_pred(**data)
-        return mi, node_pred
+        return mi, torch.softmax(node_pred, dim=1)
 
     def shared_step(self, data: Data) -> dict:
         """Shared step"""
