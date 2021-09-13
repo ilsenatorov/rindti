@@ -1,4 +1,4 @@
-import random
+from random import random
 
 import pytest
 import torch
@@ -43,7 +43,7 @@ def test_split(train_frac, val_frac):
     assert not set(val).intersection(set(test))
 
 
-@pytest.mark.parametrize("train_frac", [random.random() for _ in range(10)] + [0, 1])
+@pytest.mark.parametrize("train_frac", [random() for _ in range(10)] + [0, 1])
 def test_split_no_test(train_frac):
     """Test data splitting without test set"""
     val_frac = 1 - train_frac

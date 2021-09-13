@@ -1,14 +1,10 @@
 import os
 import pickle
-from copy import deepcopy
-from math import ceil
-from typing import Any, Callable, Dict, Iterable, Tuple, Union
+from typing import Any, Callable, Iterable
 
-import numpy as np
 import torch
 from torch.utils.data import random_split
 from torch_geometric.data import Data, InMemoryDataset
-from torch_geometric.utils import degree
 
 
 class TwoGraphData(Data):
@@ -114,13 +110,6 @@ class Dataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
-        self.config["prot_deg"] = torch.zeros(100, dtype=torch.long)
-        self.config["drug_deg"] = torch.zeros(10, dtype=torch.long)
-        for data in data_list:
-            d = degree(data["prot_edge_index"][1], num_nodes=data.n_nodes("prot_"), dtype=torch.long)
-            self.config["prot_deg"] += torch.bincount(d, minlength=self.config["prot_deg"].numel())
-            d = degree(data["drug_edge_index"][1], num_nodes=data.n_nodes("drug_"), dtype=torch.long)
-            self.config["drug_deg"] += torch.bincount(d, minlength=self.config["drug_deg"].numel())
 
         data, slices = self.collate(data_list)
         torch.save((data, slices, self.config), self.processed_paths[s])
@@ -154,7 +143,8 @@ class Dataset(InMemoryDataset):
                     self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
                     self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
                     data_list.append(two_graph_data)
-                self.process_(data_list, s)
+                if data_list:
+                    self.process_(data_list, s)
 
 
 class PreTrainDataset(InMemoryDataset):
@@ -191,7 +181,8 @@ class PreTrainDataset(InMemoryDataset):
             df = pickle.load(file)
             data_list = []
             for id, x in df["data"].to_dict().items():
-                del x["index_mapping"]
+                if "index_mapping" in x:
+                    del x["index_mapping"]
                 config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
                 x["id"] = id
                 data_list.append(Data(**x))
