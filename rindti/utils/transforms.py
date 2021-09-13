@@ -1,7 +1,7 @@
-from copy import deepcopy
-from math import ceil
 import pickle
 import random
+from copy import deepcopy
+from math import ceil
 from typing import Any, Callable, Dict, Tuple, Union
 
 import numpy as np
@@ -11,7 +11,6 @@ from torch_geometric.data import Data
 
 from .data import TwoGraphData
 from .utils import add_arg_prefix
-
 
 
 class GnomadTransformer:
@@ -162,13 +161,15 @@ class PfamTransformer:
 
     @staticmethod
     def from_pickle(filename: str):
+        """Load from pickled pfam data"""
         merged_df = pd.read_pickle(filename)
         return PfamTransformer(merged_df)
 
 
 class SizeFilter:
+    """Filters out graph that are too big/small"""
+
     def __init__(self, max_nnodes: int, min_nnodes: int = 0):
-        """Filters out graph that are too big/small"""
         self.max_nnodes = max_nnodes
         self.min_nnodes = min_nnodes
 
@@ -184,12 +185,13 @@ class DataCorruptor:
     Args:
         frac (Dict[str, float]): dict of which attributes to corrupt ({'x' : 0.05} or {'prot_x' : 0.1, 'drug_x' : 0.2})
         type (str, optional): 'corrupt' or 'mask'. Corrupt puts new values sampled from old, mask puts zeroes. Defaults to 'mask'.
-    """        
-    def __init__(self, frac:Dict[str, float], type:str='mask'):
+    """
+
+    def __init__(self, frac: Dict[str, float], type: str = "mask"):
         self.type = type
-        self.frac = {k:v for k,v in frac.items() if v > 0}
+        self.frac = {k: v for k, v in frac.items() if v > 0}
         self._set_corr_func()
-    
+
     def _set_corr_func(self):
         """Sets the necessary corruption function"""
         if self.type == "mask":
@@ -207,15 +209,15 @@ class DataCorruptor:
 
         Returns:
             TwoGraphData: Data with corrupted features
-        """        
+        """
         data = deepcopy(orig_data)
-        for k,v in self.frac.items():
+        for k, v in self.frac.items():
             new_feat, idx = self.corr_func(data[k], v)
             data[k] = new_feat
-            data[k[:-1] + 'idx'] = idx
+            data[k[:-1] + "idx"] = idx
         return data
 
-    
+
 def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
     """Corrupt the features
 

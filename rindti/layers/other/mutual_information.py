@@ -14,9 +14,10 @@ def shifted_softplus(input):
 
 
 class MutualInformation(BaseLayer):
+    """Estimate MI between two entries. Uses MLP
+    https://arxiv.org/pdf/1808.06670.pdf"""
+
     def __init__(self, input_dim: int, hidden_dim: int):
-        """Estimate MI between two entries. Uses MLP
-        https://arxiv.org/pdf/1808.06670.pdf"""
         super().__init__()
         self.x_mlp = MLP(input_dim, hidden_dim, hidden_dim)
         self.y_mlp = MLP(input_dim, hidden_dim, hidden_dim)

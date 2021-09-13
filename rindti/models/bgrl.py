@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 from copy import deepcopy
-from rindti.utils.transforms import DataCorruptor
 from typing import Tuple
 
 import numpy as np
@@ -10,9 +9,11 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
+from rindti.utils.transforms import DataCorruptor
+
 from ..utils import MyArgParser
-from .encoder import Encoder
 from .base_model import BaseModel, node_embedders, poolers
+from .encoder import Encoder
 
 
 class EMA:
@@ -54,7 +55,7 @@ def set_requires_grad(model, val):
 
 
 def init_weights(m):
-    """"""
+    """Initialize the weights"""
     if type(m) == nn.Linear:
         torch.nn.init.xavier_uniform_(m.weight)
         m.bias.data.fill_(0.01)
@@ -84,15 +85,15 @@ class BGRLModel(BaseModel):
         )
         self.student_node_predictor.apply(init_weights)
         self.student_graph_predictor.apply(init_weights)
-        self.corruptor = DataCorruptor(dict(x=kwargs['frac']), type=kwargs['corruption'])
+        self.corruptor = DataCorruptor(dict(x=kwargs["frac"]), type=kwargs["corruption"])
 
     def reset_moving_average(self):
-        """"""
+        """Reset moving avg"""
         del self.teacher_encoder
         self.teacher_encoder = None
 
     def update_moving_average(self):
-        """"""
+        """Update moving avg"""
         assert self.teacher_encoder is not None, "teacher encoder has not been created yet"
         update_moving_average(self.teacher_ema_updater, self.teacher_encoder, self.student_encoder)
 

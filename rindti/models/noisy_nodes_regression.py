@@ -6,6 +6,8 @@ from .noisy_nodes_classification import NoisyNodesClassModel
 
 
 class NoisyNodesRegModel(NoisyNodesClassModel):
+    """Regression model with noisy nodes"""
+
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
 
