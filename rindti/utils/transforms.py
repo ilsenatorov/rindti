@@ -228,10 +228,11 @@ def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor,
     Returns:
         torch.Tensor, list: New corrupt features, idx of masked nodes
     """
-    num_feat = features.size(0)
+    assert frac >= 0 and frac <= 1, "frac has to between 0 and 1!"
+    num_nodes = features.size(0)
     num_node_types = int(features.max() + 1)
-    num_corrupt_nodes = ceil(num_feat * frac)
-    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    num_corrupt_nodes = ceil(num_nodes * frac)
+    idx = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
     features[idx] = torch.randint_like(features[idx], low=1, high=num_node_types)
     return features, idx
 
@@ -246,8 +247,9 @@ def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, li
     Returns:
         torch.Tensor, list: New masked features, idx of masked nodes
     """
-    num_feat = features.size(0)
-    num_corrupt_nodes = ceil(num_feat * frac)
-    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    assert frac >= 0 and frac <= 1, "frac has to between 0 and 1!"
+    num_nodes = features.size(0)
+    num_corrupt_nodes = ceil(num_nodes * frac)
+    idx = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
     features[idx] = torch.zeros_like(features[idx])
     return features, idx
