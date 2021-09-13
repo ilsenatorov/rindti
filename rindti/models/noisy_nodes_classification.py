@@ -1,16 +1,11 @@
-from copy import deepcopy
-
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
-from rindti.utils.data import TwoGraphData
-from rindti.utils.utils import MyArgParser
-
-from ..utils import remove_arg_prefix
-from ..utils.data import corrupt_features, mask_features
+from ..utils import MyArgParser, remove_arg_prefix
+from ..utils.data import TwoGraphData
+from ..utils.transforms import DataCorruptor
 from .classification import ClassificationModel
-
 
 class NoisyNodesClassModel(ClassificationModel):
     """Model for DTI prediction as a classification problem"""
@@ -21,75 +16,7 @@ class NoisyNodesClassModel(ClassificationModel):
         drug_param = remove_arg_prefix("drug_", kwargs)
         self.prot_node_pred = self._get_node_embed(prot_param, out_dim=prot_param["feat_dim"])
         self.drug_node_pred = self._get_node_embed(drug_param, out_dim=drug_param["feat_dim"])
-
-    def _corrupt_data(
-        self,
-        orig_data: TwoGraphData,
-        prot_frac: float = 0.05,
-        drug_frac: float = 0.05,
-    ) -> TwoGraphData:
-        """Corrupt a TwoGraphData entry
-
-        Args:
-            orig_data (TwoGraphData): Original data
-            prot_frac (float, optional): Fraction of nodes to corrupt for proteins. Defaults to 0.05.
-            drug_frac (float, optional): Fraction of nodes to corrupt for drugs. Defaults to 0.05.
-
-        Returns:
-            TwoGraphData: Corrupted data
-        """
-        # sourcery skip: extract-duplicate-method
-        data = deepcopy(orig_data)
-        if prot_frac > 0:
-            prot_feat, prot_idx = corrupt_features(data["prot_x"], prot_frac)
-            data["prot_x"] = prot_feat
-            data["prot_cor_idx"] = prot_idx
-        if drug_frac > 0:
-            drug_feat, drug_idx = corrupt_features(data["drug_x"], drug_frac)
-            data["drug_x"] = drug_feat
-            data["drug_cor_idx"] = drug_idx
-        return data
-
-    def _mask_data(
-        self,
-        orig_data: TwoGraphData,
-        prot_frac: float = 0.05,
-        drug_frac: float = 0.05,
-    ) -> TwoGraphData:
-        """Corrupt a TwoGraphData entry
-
-        Args:
-            orig_data (TwoGraphData): Original data
-            prot_frac (float, optional): Fraction of nodes to mask for proteins. Defaults to 0.05.
-            drug_frac (float, optional): Fraction of nodes to mask for drugs. Defaults to 0.05.
-
-        Returns:
-            TwoGraphData: Masked data
-        """
-        # sourcery skip: extract-duplicate-method
-        data = deepcopy(orig_data)
-        if prot_frac > 0:
-            prot_feat, prot_idx = mask_features(data["prot_x"], prot_frac)
-            data["prot_x"] = prot_feat
-            data["prot_cor_idx"] = prot_idx
-        if drug_frac > 0:
-            drug_feat, drug_idx = mask_features(data["drug_x"], drug_frac)
-            data["drug_x"] = drug_feat
-            data["drug_cor_idx"] = drug_idx
-        return data
-
-    def corrupt_data(
-        self,
-        orig_data: TwoGraphData,
-        prot_frac: float = 0.05,
-        drug_frac: float = 0.05,
-    ) -> TwoGraphData:
-        if self.hparams.corruption == "mask":
-            return self._mask_data(orig_data, prot_frac, drug_frac)
-        elif self.hparams.corruption == "corrupt":
-            return self._corrupt_data(orig_data, prot_frac, drug_frac)
-        else:
-            raise ValueError("Unknown corruption parameter")
+        self.corruptor = DataCorruptor(dict(prot_x=prot_param['frac'], drug_x=drug_param['frac']), type=kwargs['corruption'])
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
@@ -112,15 +39,15 @@ class NoisyNodesClassModel(ClassificationModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        cor_data = self.corrupt_data(data, self.hparams.prot_frac, self.hparams.drug_frac)
+        cor_data = self.corruptor(data)
         prot = remove_arg_prefix("prot_", cor_data)
         drug = remove_arg_prefix("drug_", cor_data)
         output, prot_pred, drug_pred = self.forward(prot, drug)
         output = torch.sigmoid(output)
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
-        prot_idx = cor_data.prot_cor_idx
-        drug_idx = cor_data.drug_cor_idx
+        prot_idx = cor_data.prot_idx
+        drug_idx = cor_data.drug_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
         metrics = self._get_classification_metrics(output, labels)

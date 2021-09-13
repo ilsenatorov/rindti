@@ -1,15 +1,12 @@
 from argparse import ArgumentParser
-from copy import deepcopy
-
-import torch
-import torch.nn.functional as F
 from torch.functional import Tensor
 
-from rindti.utils.utils import MyArgParser
+import torch.nn.functional as F
 
 from ..layers import MLP
-from ..utils import remove_arg_prefix
-from ..utils.data import TwoGraphData, corrupt_features, mask_features
+from ..utils import MyArgParser, remove_arg_prefix
+from ..utils.data import TwoGraphData
+from ..utils.transforms import DataCorruptor
 from .base_model import BaseModel, node_embedders, poolers
 
 
@@ -25,66 +22,7 @@ class PfamModel(BaseModel):
         self.pool = self._get_pooler(kwargs)
         self.mlp = self._get_mlp(remove_arg_prefix("--mlp", kwargs))
         self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
-
-    def _corrupt_data(
-        self,
-        orig_data: TwoGraphData,
-        frac: float = 0.05,
-    ) -> TwoGraphData:
-        """Corrupt a TwoGraphData entry
-
-        Args:
-            orig_data (TwoGraphData): Original data
-            frac (float, optional): Fraction of nodes to corrupt. Defaults to 0.05.
-
-        Returns:
-            TwoGraphData: Corrupted data
-        """
-        data = deepcopy(orig_data)
-        if frac > 0:
-            a_feat, a_idx = corrupt_features(data["a_x"], frac, self.device)
-            data["a_x"] = a_feat
-            data["a_cor_idx"] = a_idx
-            b_feat, b_idx = corrupt_features(data["b_x"], frac, self.device)
-            data["b_x"] = b_feat
-            data["b_cor_idx"] = b_idx
-        return data
-
-    def _mask_data(
-        self,
-        orig_data: TwoGraphData,
-        frac: float = 0.05,
-    ) -> TwoGraphData:
-        """Corrupt a TwoGraphData entry
-
-        Args:
-            orig_data (TwoGraphData): Original data
-            frac (float, optional): Fraction of nodes to corrupt. Defaults to 0.05.
-
-        Returns:
-            TwoGraphData: Corrupted data
-        """
-        data = deepcopy(orig_data)
-        if frac > 0:
-            a_feat, a_idx = mask_features(data["a_x"], frac)
-            data["a_x"] = a_feat
-            data["a_cor_idx"] = a_idx
-            b_feat, b_idx = mask_features(data["b_x"], frac)
-            data["b_x"] = b_feat
-            data["b_cor_idx"] = b_idx
-        return data
-
-    def corrupt_data(
-        self,
-        orig_data: TwoGraphData,
-        frac: float = 0.05,
-    ) -> TwoGraphData:
-        if self.hparams.corruption == "mask":
-            return self._mask_data(orig_data, frac)
-        elif self.hparams.corruption == "corrupt":
-            return self._corrupt_data(orig_data, frac)
-        else:
-            raise ValueError("Unknown corruption parameter")
+        self.corruptor = DataCorruptor(dict(a_x=kwargs['frac'], b_x=kwargs['frac']), type="mask")
 
     def forward(self, a: dict, b: dict) -> Tensor:
         """Forward pass of the model"""
@@ -107,7 +45,7 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        cor_data = self.corrupt_data(data, self.hparams.frac)
+        cor_data = self.corruptor(data)
         a = remove_arg_prefix("a_", cor_data)
         b = remove_arg_prefix("b_", cor_data)
         a_embed, b_embed, a_pred, b_pred = self.forward(a, b)
@@ -116,8 +54,8 @@ class PfamModel(BaseModel):
         loss = F.cosine_embedding_loss(a_embed, b_embed, labels.float())
         metrics = {}
         # metrics = self._get_classification_metrics(output, labels)
-        a_idx = cor_data.a_cor_idx
-        b_idx = cor_data.b_cor_idx
+        a_idx = cor_data.a_idx
+        b_idx = cor_data.b_idx
         a_loss = F.cross_entropy(a_pred[a_idx], data["a_x"][a_idx])
         b_loss = F.cross_entropy(b_pred[b_idx], data["b_x"][b_idx])
         metrics.update(

@@ -1,5 +1,4 @@
 import torch.nn.functional as F
-from torch.functional import Tensor
 
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
@@ -16,14 +15,14 @@ class NoisyNodesRegModel(NoisyNodesClassModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        cor_data = self.corrupt_data(data, self.hparams.prot_frac, self.hparams.drug_frac)
+        cor_data = self.corruptor(data)
         prot = remove_arg_prefix("prot_", cor_data)
         drug = remove_arg_prefix("drug_", cor_data)
         output, prot_pred, drug_pred = self.forward(prot, drug)
         labels = data.label.unsqueeze(1).float()
         loss = F.mse_loss(output, labels)
-        prot_idx = cor_data.prot_cor_idx
-        drug_idx = cor_data.drug_cor_idx
+        prot_idx = cor_data.prot_idx
+        drug_idx = cor_data.drug_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
         metrics = self._get_regression_metrics(output, labels)

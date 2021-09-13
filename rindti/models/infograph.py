@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from rindti.models.encoder import Encoder
 from typing import Tuple
 
 import torch
@@ -9,8 +8,9 @@ from torch_geometric.data import Data
 
 from ..layers import MutualInformation
 from ..layers.graphconv import GINConvNet
-from ..utils.data import corrupt_features
+from ..utils.transforms import corrupt_features
 from .base_model import BaseModel, node_embedders, poolers
+from .encoder import Encoder
 
 
 class InfoGraphModel(BaseModel):
@@ -56,6 +56,7 @@ class InfoGraphModel(BaseModel):
         pool = poolers[args.pool]
         parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--frac", default=0.15, type=float, help="Fraction of nodes to corrupt")
+        parser.add_argument("--corruption", default="corrupt", type=float, help="Corruption type - 'mask' or 'corrupt'")
         parser.add_argument("--alpha", default=1.0, type=float)
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")

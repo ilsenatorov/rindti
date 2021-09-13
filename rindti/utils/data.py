@@ -2,7 +2,7 @@ import os
 import pickle
 from copy import deepcopy
 from math import ceil
-from typing import Any, Callable, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, Tuple, Union
 
 import numpy as np
 import torch
@@ -217,46 +217,3 @@ def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: fl
     val = int(tot * val_frac)
     test = tot - train - val
     return random_split(dataset, [train, val, test])
-
-
-def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
-    """Corrupt the features
-
-    Args:
-        features (torch.Tensor): Node features
-        frac (float): Fraction of nodes to corrupt
-
-    Returns:
-        torch.Tensor, list: New corrupt features, idx of masked nodes
-    """
-    num_feat = features.size(0)
-    num_node_types = int(features.max() + 1)
-    num_corrupt_nodes = ceil(num_feat * frac)
-    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-    features[idx] = torch.randint_like(features[idx], low=1, high=num_node_types)
-    return features, idx
-
-
-def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
-    """Mask the features
-
-    Args:
-        features (torch.Tensor): Node features
-        frac (float): Fraction of nodes to mask
-
-    Returns:
-        torch.Tensor, list: New masked features, idx of masked nodes
-    """
-    num_feat = features.size(0)
-    num_corrupt_nodes = ceil(num_feat * frac)
-    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
-    features[idx] = torch.zeros_like(features[idx])
-    return features, idx
-
-
-def mask_data(orig_data: Data, frac: float) -> Data:
-    data = deepcopy(orig_data)
-    new_feat, idx = mask_features(data.x, frac)
-    data["x"] = new_feat
-    data["idx"] = idx
-    return data

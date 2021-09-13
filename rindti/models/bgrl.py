@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from copy import deepcopy
+from rindti.utils.transforms import DataCorruptor
 from typing import Tuple
 
 import numpy as np
@@ -10,7 +11,6 @@ from torch.functional import Tensor
 from torch_geometric.data import Data
 
 from ..utils import MyArgParser
-from ..utils.data import mask_data
 from .encoder import Encoder
 from .base_model import BaseModel, node_embedders, poolers
 
@@ -84,6 +84,7 @@ class BGRLModel(BaseModel):
         )
         self.student_node_predictor.apply(init_weights)
         self.student_graph_predictor.apply(init_weights)
+        self.corruptor = DataCorruptor(dict(x=kwargs['frac']), type=kwargs['corruption'])
 
     def reset_moving_average(self):
         """"""
@@ -103,13 +104,12 @@ class BGRLModel(BaseModel):
         graph_pred = self.student_graph_predictor(graph_student)
         with torch.no_grad():
             graph_teacher, node_teacher = self.teacher_encoder(teach_data, return_nodes=True)
-
         return graph_teacher, graph_pred, node_teacher, node_pred
 
     def shared_step(self, data: Data) -> dict:
         """Shared step"""
-        a = mask_data(data, self.hparams.frac).__dict__
-        b = mask_data(data, self.hparams.frac).__dict__
+        a = self.corruptor(data).__dict__
+        b = self.corruptor(data).__dict__
         a_graph_teacher, a_graph_pred, a_node_teacher, a_node_pred = self.forward(a)
         b_graph_teacher, b_graph_pred, b_node_teacher, b_node_pred = self.forward(b)
 

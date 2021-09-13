@@ -1,5 +1,8 @@
+from copy import deepcopy
+from math import ceil
 import pickle
 import random
+from typing import Any, Callable, Dict, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -10,15 +13,8 @@ from .data import TwoGraphData
 from .utils import add_arg_prefix
 
 
-class BaseTransformer(object):
-    def __init__(self, **kwargs):
-        raise NotImplementedError()
 
-    def __call__(self, data: TwoGraphData) -> TwoGraphData:
-        raise NotImplementedError()
-
-
-class GnomadTransformer(BaseTransformer):
+class GnomadTransformer:
     """Transformer of TwoGraphData entries
 
     Args:
@@ -69,7 +65,7 @@ class GnomadTransformer(BaseTransformer):
         return data
 
     @staticmethod
-    def from_pickle(filename: str, max_num_mut=50) -> BaseTransformer:
+    def from_pickle(filename: str, max_num_mut=50):
         """Load transformer from pickle
 
         Args:
@@ -89,53 +85,7 @@ class GnomadTransformer(BaseTransformer):
         )
 
 
-class RandomTransformer(BaseTransformer):
-    """Random Transformer of TwoGraphData entries
-
-    Args:
-        encoded_residues (dict): Dict of encoded tensors for each residue
-        max_num_mut (int): Upper limit of number of mutations
-    """
-
-    def __init__(self, encoded_residues: dict, max_num_mut: int = 50):
-        self.encoded_residues = list(encoded_residues.values())
-        self.max_num_mut = max_num_mut
-
-    def __call__(self, data: TwoGraphData) -> TwoGraphData:
-        """Called within the Dataset class during loading the data
-
-        Args:
-            data (TwoGraphData): Prot + Drug entry
-
-        Returns:
-            (TwoGraphData): entry with modified protein features
-        """
-        x = data["prot_x"]
-        num_mut = min(np.random.randint(0, self.max_num_mut), x.size(1))
-        positions_to_mutate = np.random.choice(range(x.size(1)), size=num_mut, replace=False)
-        for pos in positions_to_mutate:
-            new_residue_feature = random.choice(self.encoded_residues)
-            x[pos, :] = new_residue_feature.detach().clone()
-        data["prot_x"] = x
-        return data
-
-    @staticmethod
-    def from_pickle(filename: str, max_num_mut=50) -> BaseTransformer:
-        """Load transformer from pickle
-
-        Args:
-            filename (str): Pickle file location
-            max_num_mut (int, optional): Maximal number of mutation to applyt. Defaults to 50.
-
-        Returns:
-            RandomTransformer: Transformer
-        """
-        with open(filename, "rb") as file:
-            all_data = pickle.load(file)
-        return RandomTransformer(all_data["encoded_residues"], max_num_mut=max_num_mut)
-
-
-class PfamTransformer(BaseTransformer):
+class PfamTransformer:
     """For given protein uniprot id, find a negative or positive match
 
     Args:
@@ -216,7 +166,7 @@ class PfamTransformer(BaseTransformer):
         return PfamTransformer(merged_df)
 
 
-class SizeFilter(object):
+class SizeFilter:
     def __init__(self, max_nnodes: int, min_nnodes: int = 0):
         """Filters out graph that are too big/small"""
         self.max_nnodes = max_nnodes
@@ -226,3 +176,76 @@ class SizeFilter(object):
         """Returns True if number of nodes in given graph is within required values else False"""
         nnodes = data.x.size(0)
         return nnodes > self.min_nnodes and nnodes < self.max_nnodes
+
+
+class DataCorruptor:
+    """Corrupt or mask the nodes in a graph (or graph pair)
+
+    Args:
+        frac (Dict[str, float]): dict of which attributes to corrupt ({'x' : 0.05} or {'prot_x' : 0.1, 'drug_x' : 0.2})
+        type (str, optional): 'corrupt' or 'mask'. Corrupt puts new values sampled from old, mask puts zeroes. Defaults to 'mask'.
+    """        
+    def __init__(self, frac:Dict[str, float], type:str='mask'):
+        self.type = type
+        self.frac = {k:v for k,v in frac.items() if v > 0}
+        self._set_corr_func()
+    
+    def _set_corr_func(self):
+        """Sets the necessary corruption function"""
+        if self.type == "mask":
+            self.corr_func = mask_features
+        elif self.type == "corrupt":
+            self.corr_func = corrupt_features
+        else:
+            raise ValueError("Unknown corruption function type, should be 'mask' or 'corrupt'!")
+
+    def __call__(self, orig_data: Union[Data, TwoGraphData]) -> TwoGraphData:
+        """Apply corruption
+
+        Args:
+            orig_data (Union[Data, TwoGraphData]): data, has to have attributes that match ones from self.frac
+
+        Returns:
+            TwoGraphData: Data with corrupted features
+        """        
+        data = deepcopy(orig_data)
+        for k,v in self.frac.items():
+            new_feat, idx = self.corr_func(data[k], v)
+            data[k] = new_feat
+            data[k[:-1] + 'idx'] = idx
+        return data
+
+    
+def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
+    """Corrupt the features
+
+    Args:
+        features (torch.Tensor): Node features
+        frac (float): Fraction of nodes to corrupt
+
+    Returns:
+        torch.Tensor, list: New corrupt features, idx of masked nodes
+    """
+    num_feat = features.size(0)
+    num_node_types = int(features.max() + 1)
+    num_corrupt_nodes = ceil(num_feat * frac)
+    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    features[idx] = torch.randint_like(features[idx], low=1, high=num_node_types)
+    return features, idx
+
+
+def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
+    """Mask the features
+
+    Args:
+        features (torch.Tensor): Node features
+        frac (float): Fraction of nodes to mask
+
+    Returns:
+        torch.Tensor, list: New masked features, idx of masked nodes
+    """
+    num_feat = features.size(0)
+    num_corrupt_nodes = ceil(num_feat * frac)
+    idx = np.random.choice(range(num_feat), num_corrupt_nodes, replace=False)
+    features[idx] = torch.zeros_like(features[idx])
+    return features, idx
