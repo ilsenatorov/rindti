@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from torch.functional import Tensor
 
 import torch.nn.functional as F
+from torch.functional import Tensor
 
 from ..layers import MLP
 from ..utils import MyArgParser, remove_arg_prefix
@@ -22,7 +22,7 @@ class PfamModel(BaseModel):
         self.pool = self._get_pooler(kwargs)
         self.mlp = self._get_mlp(remove_arg_prefix("--mlp", kwargs))
         self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
-        self.corruptor = DataCorruptor(dict(a_x=kwargs['frac'], b_x=kwargs['frac']), type="mask")
+        self.corruptor = DataCorruptor(dict(a_x=kwargs["frac"], b_x=kwargs["frac"]), type="mask")
 
     def forward(self, a: dict, b: dict) -> Tensor:
         """Forward pass of the model"""
@@ -79,7 +79,7 @@ class PfamModel(BaseModel):
 
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
-        parser.add_argument("--corruption", default="corruption", type=str)
+        parser.add_argument("--corruption", default="corrupt", type=str)
         parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--feat_method", default="element_l1", type=str)
         parser.add_argument("--frac", default=0.1, type=float, help="Corruption percentage")
