@@ -5,32 +5,35 @@ import numpy as np
 import pandas as pd
 import torch
 from pandas.core.frame import DataFrame
+from utils import list_to_dict
 
-node_encoding = {
-    "padding": 0,
-    "ala": 1,
-    "arg": 2,
-    "asn": 3,
-    "asp": 4,
-    "cys": 5,
-    "gln": 6,
-    "glu": 7,
-    "gly": 8,
-    "his": 9,
-    "ile": 10,
-    "leu": 11,
-    "lys": 12,
-    "met": 13,
-    "phe": 14,
-    "pro": 15,
-    "ser": 16,
-    "thr": 17,
-    "trp": 18,
-    "tyr": 19,
-    "val": 20,
-}
+node_encoding = list_to_dict(
+    [
+        "padding",
+        "ala",
+        "arg",
+        "asn",
+        "asp",
+        "cys",
+        "gln",
+        "glu",
+        "gly",
+        "his",
+        "ile",
+        "leu",
+        "lys",
+        "met",
+        "phe",
+        "pro",
+        "ser",
+        "thr",
+        "trp",
+        "tyr",
+        "val",
+    ]
+)
 
-edge_encoding = {"cnt": 0, "combi": 1, "hbond": 2, "pept": 3, "ovl": 4}
+edge_encoding = list_to_dict(["cnt", "combi", "hbond", "pept", "ovl"])
 
 
 def onehot_encode(position: int, count: Optional[int] = 20):

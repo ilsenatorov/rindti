@@ -6,30 +6,10 @@ import torch
 from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
 from torch_geometric.utils import to_undirected
+from utils import list_to_dict
 
-node_encoding = {
-    "other": 0,
-    6: 1,
-    7: 2,
-    8: 3,
-    9: 4,
-    16: 5,
-    17: 6,
-    35: 7,
-    15: 8,
-    53: 9,
-    5: 10,
-    11: 11,
-    14: 12,
-    34: 13,
-}
-
-
-edge_encoding = {
-    "SINGLE": 0,
-    "DOUBLE": 1,
-    "AROMATIC": 2,
-}
+node_encoding = list_to_dict(["other", 6, 7, 8, 9, 16, 17, 35, 15, 53, 5, 11, 14, 34])
+edge_encoding = list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"])
 
 
 def featurize(smiles: str, max_num_atoms=150) -> dict:
