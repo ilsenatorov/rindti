@@ -5,12 +5,11 @@ from math import ceil
 from typing import Tuple
 
 import torch
-from torch.functional import Tensor
 from torch_geometric.data import Data
-from torch_geometric.typing import Adj
 
 from ..utils import MyArgParser
 from .base_model import BaseModel, node_embedders, poolers
+from .encoder import Encoder
 
 # NCE loss between graphs and prototypes
 
@@ -24,20 +23,11 @@ class GraphLogModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.feat_embed = self._get_feat_embed(kwargs)
-        self.node_embed = self._get_node_embed(kwargs)
-        self.pool = self._get_pooler(kwargs)
+        self.encoder = Encoder(return_nodes=True, **kwargs)
         self.proto = []
         self.proj = torch.nn.Sequential(
             torch.nn.Linear(kwargs["hidden_dim"], 128), torch.nn.ReLU(), torch.nn.Linear(128, kwargs["hidden_dim"])
         )
-
-    def predict(self, x: Tensor, edge_index: Adj):
-        """Embed a single graph"""
-        x = self.feat_embed(x)
-        x = self.node_embed(x, edge_index, batch=None)
-        x = self.pool(x, edge_index, batch=None)
-        return x.detach().numpy()
 
     def mask_nodes(self, batch: Data) -> Data:
         """Mask the nodes according to self.mask_rate
@@ -194,9 +184,7 @@ class GraphLogModel(BaseModel):
             for step, batch in enumerate(self.train_dataloader()):
                 # get node and graph representations
                 batch = batch.to(self.device)
-                feat_reps = self.feat_embed(batch.x)
-                node_reps = self.node_embed(feat_reps, batch.edge_index)
-                graph_reps = self.pool(node_reps, batch.edge_index, batch.batch)
+                graph_reps, node_reps = self.encoder(batch)
 
                 # feature projection
                 graph_reps_proj = self.proj(graph_reps)
@@ -241,15 +229,14 @@ class GraphLogModel(BaseModel):
 
     def embed_batch(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
         """Embed a single batch (normal or masked doesn't matter)"""
-        feat_embed = self.feat_embed(batch.x)
-        node_reps = self.node_embed(feat_embed, batch.edge_index)
-        graph_reps = self.pool(node_reps, batch=batch.batch, edge_index=batch.edge_index)
+        graph_reps, node_reps = self.encoder(batch)
         node_reps = self.proj(node_reps)
         graph_reps = self.proj(graph_reps)
         return node_reps, graph_reps
 
     def forward(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Calculate node and graph reps for normal and masked batch"""
+        batch = deepcopy(batch)
         batch_modify = deepcopy(batch)
         batch_modify = self.mask_nodes(batch)
         node_reps, graph_reps = self.embed_batch(batch)

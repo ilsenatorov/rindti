@@ -7,28 +7,33 @@ from ..utils.data import TwoGraphData
 from ..utils.transforms import DataCorruptor
 from .classification import ClassificationModel
 
+
 class NoisyNodesClassModel(ClassificationModel):
     """Model for DTI prediction as a classification problem"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.prot_encoder.return_nodes = True
+        self.drug_encoder.return_nodes = True
         prot_param = remove_arg_prefix("prot_", kwargs)
         drug_param = remove_arg_prefix("drug_", kwargs)
         self.prot_node_pred = self._get_node_embed(prot_param, out_dim=prot_param["feat_dim"])
         self.drug_node_pred = self._get_node_embed(drug_param, out_dim=drug_param["feat_dim"])
-        self.corruptor = DataCorruptor(dict(prot_x=prot_param['frac'], drug_x=drug_param['frac']), type=kwargs['corruption'])
+        self.corruptor = DataCorruptor(
+            dict(prot_x=prot_param["frac"], drug_x=drug_param["frac"]), type=kwargs["corruption"]
+        )
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
-        prot_embed, prot_pred = self.prot_encoder(prot, return_nodes=True)
-        drug_embed, drug_pred = self.drug_encoder(drug, return_nodes=True)
+        prot_embed, prot_pred = self.prot_encoder(prot)
+        drug_embed, drug_pred = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         pred = self.mlp(joint_embedding)
         prot["x"] = prot_pred
         prot_pred = self.prot_node_pred(**prot)
         drug["x"] = drug_pred
         drug_pred = self.drug_node_pred(**drug)
-        return pred, torch.softmax(prot_pred, dim=1), torch.softmax(drug_pred, dim=1)
+        return pred, prot_pred, drug_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test

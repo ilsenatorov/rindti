@@ -20,18 +20,18 @@ class InfoGraphModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.encoder = Encoder(**kwargs)
+        self.encoder = Encoder(return_nodes=True, **kwargs)
         self.mi = MutualInformation(kwargs["hidden_dim"], kwargs["hidden_dim"])
-        self.node_pred = GINConvNet(kwargs["hidden_dim"], kwargs["feat_dim"], kwargs["hidden_dim"])
+        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
         """Forward pass of the module"""
-        graph_embed, node_embed = self.encoder(data, return_nodes=True)
         node_index = torch.arange(data["x"].size(0), device=self.device)
         pair_index = torch.stack([data["batch"], node_index], dim=-1)
+        graph_embed, node_embed = self.encoder(data)
         mi = self.mi(graph_embed, node_embed, pair_index)
         node_pred = self.node_pred(**data)
-        return mi, torch.softmax(node_pred, dim=1)
+        return mi, node_pred
 
     def shared_step(self, data: Data) -> dict:
         """Shared step"""
@@ -55,8 +55,8 @@ class InfoGraphModel(BaseModel):
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
         parser.add_argument("--feat_embed_dim", default=32, type=int)
-        parser.add_argument("--frac", default=0.15, type=float, help="Fraction of nodes to corrupt")
-        parser.add_argument("--corruption", default="corrupt", type=float, help="Corruption type - 'mask' or 'corrupt'")
+        parser.add_argument("--frac", default=0.15, type=float)
+        parser.add_argument("--corruption", default="corrupt", type=str)
         parser.add_argument("--alpha", default=1.0, type=float)
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
