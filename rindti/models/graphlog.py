@@ -227,8 +227,9 @@ class GraphLogModel(BaseModel):
 
         return proto_selected, proto_connection
 
-    def embed_batch(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
+    def embed_batch(self, orig_batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
         """Embed a single batch (normal or masked doesn't matter)"""
+        batch = deepcopy(orig_batch)
         graph_reps, node_reps = self.encoder(batch)
         node_reps = self.proj(node_reps)
         graph_reps = self.proj(graph_reps)
@@ -236,7 +237,6 @@ class GraphLogModel(BaseModel):
 
     def forward(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Calculate node and graph reps for normal and masked batch"""
-        batch = deepcopy(batch)
         batch_modify = deepcopy(batch)
         batch_modify = self.mask_nodes(batch)
         node_reps, graph_reps = self.embed_batch(batch)

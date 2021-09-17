@@ -29,10 +29,12 @@ class Encoder(BaseModel):
         Returns:
             Union[Tensor, Tuple[Tensor, Tensor]]: Either graph of graph+node embeddings
         """
+        if not isinstance(data, dict):
+            data = data.__dict__
         if self.feat_embed is not None:
-            x = self.feat_embed(data["x"])
-        data["x"] = self.node_embed(x, **{k: v for k, v in data.items() if k != "x"})
-        embed = self.pool(x, **{k: v for k, v in data.items() if k != "x"})
+            data["x"] = self.feat_embed(data["x"])
+        data["x"] = self.node_embed(**data)
+        embed = self.pool(**data)
         if self.return_nodes:
             return embed, data["x"]
         return embed
