@@ -45,10 +45,15 @@ def pretrain(**kwargs):
         batch_size=kwargs["batch_size"],
         num_workers=kwargs["num_workers"],
         follow_batch=follow_batch,
+        pin_memory=True,
         shuffle=True,
     )
     val_dl = DataLoader(
-        val, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], follow_batch=follow_batch
+        val,
+        batch_size=kwargs["batch_size"],
+        num_workers=kwargs["num_workers"],
+        follow_batch=follow_batch,
+        pin_memory=True,
     )
     trainer.fit(model, train_dl, val_dl)
 
@@ -71,7 +76,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     parser.add_argument("data", type=str)
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
-    parser.add_argument("--num_workers", type=int, default=4, help="number of workers for data loading")
+    parser.add_argument("--num_workers", type=int, default=16, help="number of workers for data loading")
     parser.add_argument("--early_stop_patience", type=int, default=60, help="epochs with no improvement before stop")
     parser.add_argument("--max_epochs", type=int, default=None, help="Max number of epochs to train for")
 
