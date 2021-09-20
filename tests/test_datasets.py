@@ -1,5 +1,4 @@
 import pickle
-from pprint import pprint
 from random import randint
 
 import pandas as pd

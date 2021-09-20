@@ -1,7 +1,7 @@
-from copy import deepcopy
 from typing import Tuple, Union
 
 from torch.functional import Tensor
+from torch_geometric.data import Data
 
 from .base_model import BaseModel
 
@@ -18,23 +18,22 @@ class Encoder(BaseModel):
 
     def forward(
         self,
-        data: dict,
+        data: Data,
         **kwargs,
     ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Encode a graph
 
         Args:
-            data (dict): Dict of all data - 'x', 'edge_index' etc
+            data (Data): torch_geometric - 'x', 'edge_index' etc
 
         Returns:
             Union[Tensor, Tuple[Tensor, Tensor]]: Either graph of graph+node embeddings
         """
-        if not isinstance(data, dict):
-            data = data.__dict__
+        x, edge_index, batch = data["x"], data["edge_index"], data["batch"]
         if self.feat_embed is not None:
-            data["x"] = self.feat_embed(data["x"])
-        data["x"] = self.node_embed(**data)
-        embed = self.pool(**data)
+            x = self.feat_embed(x)
+        x = self.node_embed(x, edge_index)
+        embed = self.pool(x, edge_index, batch)
         if self.return_nodes:
-            return embed, data["x"]
+            return embed, x
         return embed

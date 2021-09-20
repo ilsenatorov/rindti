@@ -4,7 +4,7 @@ from pprint import pprint
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch_geometric.data.dataloader import DataLoader
+from torch_geometric.loader import DataLoader
 
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from rindti.utils.data import Dataset
@@ -50,7 +50,7 @@ def train(**kwargs):
     model = models[kwargs["model"]](**kwargs)
     dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ["batch_size", "num_workers"]}
     dataloader_kwargs.update({"follow_batch": ["prot_x", "drug_x"]})
-    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=True)
+    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=False)
     val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
     test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
     trainer.fit(model, train_dataloader, val_dataloader)

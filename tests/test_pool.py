@@ -1,8 +1,9 @@
 import torch
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 from rindti.layers import DiffPoolNet, GMTNet, MeanPool
 from rindti.utils import MyArgParser
-from torch_geometric.data import Data, DataLoader
 
 default_config = {
     "K": 1,
@@ -33,7 +34,7 @@ class BaseTestGraphPool:
     def test_forward(self):
         """Tests .forward"""
         module = self.module(**default_config)
-        output = module.forward(**fake_data.__dict__)
+        output = module.forward(fake_data.x, fake_data.edge_index, fake_data.batch)
         assert output.size(0) == 5
         assert output.size(1) == 32
 
@@ -45,9 +46,8 @@ class BaseTestGraphPool:
     def test_norm(self):
         """Pooling should return vector of length 1 for each graph"""
         module = self.module(**default_config)
-        output = module.forward(**fake_data.__dict__)
+        output = module.forward(fake_data.x, fake_data.edge_index, fake_data.batch)
         length = output.detach().norm(dim=1)
-        print(length)
         assert ((length - 1.0).abs() < 1e-6).all()  # soft equal
 
 
@@ -71,6 +71,6 @@ class TestMeanPool(BaseTestGraphPool):
     def test_forward(self):
         """MeanPool always return same dim as input"""
         module = self.module(**default_config)
-        output = module.forward(**fake_data.__dict__)
+        output = module.forward(fake_data.x, fake_data.edge_index, fake_data.batch)
         assert output.size(0) == 5
         assert output.size(1) == 16

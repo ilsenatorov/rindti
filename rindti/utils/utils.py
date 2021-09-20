@@ -1,8 +1,7 @@
 from argparse import ArgumentParser, _ArgumentGroup
-
-from pytorch_lightning.core.lightning import LightningModule
 from typing import Union
 
+from pytorch_lightning.core.lightning import LightningModule
 from torch.nn import Embedding
 
 from rindti.utils.data import TwoGraphData
@@ -18,8 +17,6 @@ def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
         dict: Sub-dict of arguments
     """
     new_kwargs = {}
-    if not isinstance(kwargs, dict):
-        kwargs = kwargs.__dict__
     prefix_len = len(prefix)
     for key, value in kwargs.items():
         if key.startswith(prefix):

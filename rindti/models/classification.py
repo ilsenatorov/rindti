@@ -1,13 +1,12 @@
 from argparse import ArgumentParser
-
-import torch
-from rindti.models.encoder import Encoder
 from typing import Iterable
 
+import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
 from rindti.models.bgrl import BGRLModel
+from rindti.models.encoder import Encoder
 
 from ..layers.base_layer import BaseLayer
 from ..utils import remove_arg_prefix
@@ -69,8 +68,7 @@ class ClassificationModel(BaseModel):
         prot_embed = self.prot_encoder(prot)
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
-        pred = self.mlp(joint_embedding)
-        return pred
+        return self.mlp(joint_embedding)
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
