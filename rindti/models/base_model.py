@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from ..utils.data import TwoGraphData
 from typing import Tuple
 
 import numpy as np
@@ -18,7 +17,8 @@ from torchmetrics.functional import (
     pearson_corrcoef,
 )
 
-from ..layers import ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool, MLP
+from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool
+from ..utils.data import TwoGraphData
 
 node_embedders = {
     "ginconv": GINConvNet,
@@ -38,7 +38,6 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _get_feat_embed(self, params: dict) -> Embedding:
-        print(params["feat_dim"])
         return Embedding(params["feat_dim"] + 2, params["feat_embed_dim"], padding_idx=0)
 
     def _get_node_embed(self, params: dict, out_dim=None) -> LightningModule:

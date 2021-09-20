@@ -8,7 +8,7 @@ from torch_geometric.data.dataloader import DataLoader
 
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from rindti.utils.data import Dataset
-from rindti.utils.transforms import GnomadTransformer, RandomTransformer
+from rindti.utils.transforms import GnomadTransformer
 
 models = {
     "classification": ClassificationModel,
@@ -22,7 +22,7 @@ def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
     if kwargs["transformer"] != "none":
-        transform = {"gnomad": GnomadTransformer, "random": RandomTransformer}[kwargs["transformer"]].from_pickle(
+        transform = {"gnomad": GnomadTransformer}[kwargs["transformer"]].from_pickle(
             kwargs["transformer_pickle"], max_num_mut=kwargs["max_num_mut"]
         )
     else:
