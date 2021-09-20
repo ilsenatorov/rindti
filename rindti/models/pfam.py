@@ -78,8 +78,6 @@ class PfamModel(BaseModel):
         parser.add_argument("--alpha", default=0.1, type=float, help="Weight of noisy node loss")
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
-        mlp_args = parser.add_argument_group("MLP", prefix="--mlp_")
         node_embed.add_arguments(node_embed_args)
         pool.add_arguments(pooler_args)
-        MLP.add_arguments(mlp_args)
         return parser

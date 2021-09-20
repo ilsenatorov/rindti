@@ -140,7 +140,8 @@ class PfamTransformer:
         Returns:
             dict: data of protein from same family (can be the same protein!)
         """
-        sampled_row = self.merged_df[self.merged_df["fam"] == family].sample().iloc[0]
+        subset = self.merged_df[self.merged_df["fam"] == family]
+        sampled_row = subset.iloc[random.randint(0, len(subset) - 1)]
         return self._process_sampled_row(sampled_row)
 
     def _get_neg_sample(self, family: str) -> dict:
@@ -152,7 +153,8 @@ class PfamTransformer:
         Returns:
             dict: data of protein from another family
         """
-        sampled_row = self.merged_df[self.merged_df["fam"] != family].sample().iloc[0]
+        subset = self.merged_df[self.merged_df["fam"] != family]
+        sampled_row = subset.iloc[random.randint(0, len(subset) - 1)]
         return self._process_sampled_row(sampled_row)
 
     def _filter(self, data: Data) -> bool:
