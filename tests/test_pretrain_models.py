@@ -2,9 +2,10 @@ from copy import deepcopy
 
 import pytest
 import torch
-from torch_geometric.data import Data, DataLoader
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
-from rindti.models import GraphLogModel, InfoGraphModel, PfamModel, BGRLModel
+from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.models.base_model import node_embedders, poolers
 from rindti.utils.data import TwoGraphData
 
@@ -27,7 +28,10 @@ fake_pfam_data = {
 }
 
 fake_data = next(iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_workers=1)))
-fake_pfam_data = next(iter(DataLoader([TwoGraphData(**fake_pfam_data)] * 10, batch_size=5, num_workers=1, follow_batch=['a_x', 'b_x'])))
+fake_pfam_data = next(
+    iter(DataLoader([TwoGraphData(**fake_pfam_data)] * 10, batch_size=5, num_workers=1, follow_batch=["a_x", "b_x"]))
+)
+
 
 class BaseTestModel:
     """Abstract class for model testing"""
@@ -36,7 +40,7 @@ class BaseTestModel:
         "alpha": 1.0,
         "batch_size": 512,
         "beta": 1.0,
-        "corruption" : "mask",
+        "corruption": "mask",
         "data": "kek",
         "decay_ratio": 0.5,
         "dropout": 0.2,
@@ -97,6 +101,7 @@ class TestInfoGraphModel(BaseTestModel):
     """InfoGraph"""
 
     model = InfoGraphModel
+
 
 class TestBGRLModel(BaseTestModel):
     """BGRL"""

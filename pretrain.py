@@ -1,7 +1,7 @@
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.utils.data import PreTrainDataset, split_random

@@ -13,32 +13,30 @@ class TwoGraphData(Data):
     """
 
     def __init__(self, **kwargs):
-        super().__init__()
-        self.__dict__.update(kwargs)
+        super().__init__(**kwargs)
 
-    def __inc__(self, key: str, value: Any) -> dict:
+    def __inc__(self, key: str, value: Any, *args, **kwargs) -> dict:
         """How to increment values during batching"""
         if not key.endswith("edge_index"):
-            return super().__inc__(key, value)
-
+            return super().__inc__(key, value, *args, **kwargs)
         lenedg = len("edge_index")
         prefix = key[:-lenedg]
-        return self.__dict__[prefix + "x"].size(0)
+        return self._store[prefix + "x"].size(0)
 
     def n_nodes(self, prefix: str) -> int:
         """Number of nodes for graph with prefix"""
-        return self.__dict__[prefix + "x"].size(0)
+        return self._store[prefix + "x"].size(0)
 
     def n_edges(self, prefix: str) -> int:
         """Returns number of edges for graph with prefix"""
-        return self.__dict__[prefix + "edge_index"].size(1)
+        return self._store[prefix + "edge_index"].size(1)
 
     def n_node_feats(self, prefix: str) -> int:
         """Calculate the feature dimension of one of the graphs.
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
         then return the max. Otherwise return size(1)
         """
-        x = self.__dict__[prefix + "x"]
+        x = self._store[prefix + "x"]
         if len(x.size()) == 1:
             return x.max().item() + 1
         if len(x.size()) == 2:
@@ -47,11 +45,11 @@ class TwoGraphData(Data):
 
     def n_edge_feats(self, prefix: str) -> int:
         """Returns number of different edges for graph with prefix"""
-        if prefix + "edge_feats" not in self.__dict__:
+        if prefix + "edge_feats" not in self._store:
             return 1
-        if self.__dict__[prefix + "edge_feats"] is None:
+        if self._store[prefix + "edge_feats"] is None:
             return 1
-        edge_feats = self.__dict__[prefix + "edge_feats"]
+        edge_feats = self._store[prefix + "edge_feats"]
         if len(edge_feats.size()) == 1:
             return edge_feats.max().item() + 1
         if len(edge_feats.size()) == 2:
@@ -140,6 +138,7 @@ class Dataset(InMemoryDataset):
                     new_i.update({"prot_" + k: v for (k, v) in prot_data.items()})
                     new_i.update({"drug_" + k: v for (k, v) in drug_data.items()})
                     two_graph_data = TwoGraphData(**new_i)
+                    two_graph_data.num_nodes = 1  # supresses the warning
                     self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
                     self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
                     data_list.append(two_graph_data)

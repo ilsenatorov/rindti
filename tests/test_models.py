@@ -1,8 +1,8 @@
 from copy import deepcopy
-from torch_geometric.data import DataLoader
 
 import pytest
 import torch
+from torch_geometric.loader import DataLoader
 
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from rindti.models.base_model import node_embedders, poolers

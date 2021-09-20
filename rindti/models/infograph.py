@@ -22,7 +22,7 @@ class InfoGraphModel(BaseModel):
         self.save_hyperparameters()
         self.encoder = Encoder(return_nodes=True, **kwargs)
         self.mi = MutualInformation(kwargs["hidden_dim"], kwargs["hidden_dim"])
-        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
+        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"] + 1)
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
         """Forward pass of the module"""
@@ -30,7 +30,7 @@ class InfoGraphModel(BaseModel):
         pair_index = torch.stack([data["batch"], node_index], dim=-1)
         graph_embed, node_embed = self.encoder(data)
         mi = self.mi(graph_embed, node_embed, pair_index)
-        node_pred = self.node_pred(**data)
+        node_pred = self.node_pred(node_embed, data.edge_index)
         return mi, node_pred
 
     def shared_step(self, data: Data) -> dict:
@@ -38,7 +38,7 @@ class InfoGraphModel(BaseModel):
         orig_x = data["x"].clone()
         cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac)
         data["x"] = cor_x
-        mi, node_pred = self.forward(data.__dict__)
+        mi, node_pred = self.forward(data)
         node_loss = F.cross_entropy(node_pred[cor_idx], orig_x[cor_idx])
         loss = -mi + node_loss * self.hparams.alpha
         return {"loss": loss, "mi": mi.detach(), "node_loss": node_loss.detach()}

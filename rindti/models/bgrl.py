@@ -109,8 +109,8 @@ class BGRLModel(BaseModel):
 
     def shared_step(self, data: Data) -> dict:
         """Shared step"""
-        a = self.corruptor(data).__dict__
-        b = self.corruptor(data).__dict__
+        a = self.corruptor(data)
+        b = self.corruptor(data)
         a_graph_teacher, a_graph_pred, a_node_teacher, a_node_pred = self.forward(a)
         b_graph_teacher, b_graph_pred, b_node_teacher, b_node_pred = self.forward(b)
 

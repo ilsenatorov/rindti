@@ -10,10 +10,10 @@ plddt:
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
 # plddt works only for alphafold structures, since plddt is written in the b-factor there
-structures: bsite
+structures: template
 
 # If set to true, only computes the proteins data (useful for pretraining)
-only_proteins: true
+only_proteins: false
 
 # Seed for reproducibility of random processes
 seed: 42
