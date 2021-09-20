@@ -8,6 +8,7 @@ from ..utils import MyArgParser, remove_arg_prefix
 from ..utils.data import TwoGraphData
 from ..utils.transforms import DataCorruptor
 from .base_model import BaseModel, node_embedders, poolers
+from .encoder import Encoder
 
 
 class PfamModel(BaseModel):
@@ -17,23 +18,14 @@ class PfamModel(BaseModel):
         super().__init__()
         self.save_hyperparameters()
         self._determine_feat_method(kwargs["feat_method"], kwargs["hidden_dim"], kwargs["hidden_dim"])
-        self.feat_embed = self._get_feat_embed(kwargs)
-        self.node_embed = self._get_node_embed(kwargs)
-        self.pool = self._get_pooler(kwargs)
-        self.mlp = self._get_mlp(remove_arg_prefix("--mlp", kwargs))
-        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"])
+        self.encoder = Encoder(return_nodes=True, **kwargs)
+        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"] + 1)
         self.corruptor = DataCorruptor(dict(a_x=kwargs["frac"], b_x=kwargs["frac"]), type="mask")
 
     def forward(self, a: dict, b: dict) -> Tensor:
         """Forward pass of the model"""
-        a["x"] = self.feat_embed(a["x"])
-        b["x"] = self.feat_embed(b["x"])
-        a["x"] = self.node_embed(**a)
-        b["x"] = self.node_embed(**b)
-        a_embed = self.pool(**a)
-        b_embed = self.pool(**b)
-        a_pred = self.node_pred(**a)
-        b_pred = self.node_pred(**b)
+        a_embed, a_pred = self.encoder(a)
+        b_embed, b_pred = self.encoder(b)
         return a_embed, b_embed, a_pred, b_pred
 
     def shared_step(self, data: TwoGraphData) -> dict:
