@@ -46,9 +46,9 @@ Configuration file in `config/config.yml` can be used to change the parameters o
 
 A model can be trained with a simple `train.py results/prepare_all/<pickled_data>.pkl`, assuming pipeline has been ran in advance.
 
-Three types of models are currently available - classification, regression and noisy nodes model.
+Three types of models are currently available - class, reg and noisy nodes model.
 
-Both classification and noisy nodes require the final label to be a bool value (0 or 1), however noisy nodes introduces corruption of nodes and auxiliary loss of predicting the original labels of such nodes.
+Both class and noisy nodes require the final label to be a bool value (0 or 1), however noisy nodes introduces corruption of nodes and auxiliary loss of predicting the original labels of such nodes.
 
 ### Pretraining
 

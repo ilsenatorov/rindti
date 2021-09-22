@@ -15,7 +15,7 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
     """Sample the interactions dataset
 
     Args:
-        inter (pd.DataFrame): whole data, has to be binary classification
+        inter (pd.DataFrame): whole data, has to be binary class
         how (str, optional): over or undersample.
         Oversample adds fake negatives, undersample removed extra positives. Defaults to "under".
     """
@@ -58,15 +58,15 @@ if __name__ == "__main__":
     config = snakemake.config["parse_dataset"]
     # If duplicates, take median of entries
     inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
-    if config["task"] == "classification":
+    if config["task"] == "class":
         inter["Y"] = inter["Y"].apply(lambda x: int(x < config["threshold"]))
-    elif config["task"] == "regression":
+    elif config["task"] == "reg":
         if config["log"]:
             inter["Y"] = inter["Y"].apply(np.log10)
     else:
         raise ValueError("Unknown task!")
 
-    if config["filtering"] != "all" and config["sampling"] != "none" and config["task"] == "regression":
+    if config["filtering"] != "all" and config["sampling"] != "none" and config["task"] == "reg":
         raise ValueError(
             "Can't use filtering {filter} with task {task}!".format(filter=config["filtering"], task=config["task"])
         )

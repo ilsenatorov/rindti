@@ -2,7 +2,7 @@ import torch.nn.functional as F
 
 from ..utils import remove_arg_prefix
 from ..utils.data import TwoGraphData
-from .noisy_nodes_classification import NoisyNodesClassModel
+from .noisy_nodes_class import NoisyNodesClassModel
 
 
 class NoisyNodesRegModel(NoisyNodesClassModel):
@@ -27,7 +27,7 @@ class NoisyNodesRegModel(NoisyNodesClassModel):
         drug_idx = cor_data.drug_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
-        metrics = self._get_regression_metrics(output, labels)
+        metrics = self._get_reg_metrics(output, labels)
         metrics.update(
             dict(
                 loss=loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,

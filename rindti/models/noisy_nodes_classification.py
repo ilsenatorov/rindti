@@ -9,7 +9,7 @@ from .classification import ClassificationModel
 
 
 class NoisyNodesClassModel(ClassificationModel):
-    """Model for DTI prediction as a classification problem"""
+    """Model for DTI prediction as a class problem"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -55,7 +55,7 @@ class NoisyNodesClassModel(ClassificationModel):
         drug_idx = cor_data.drug_idx
         prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
         drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
-        metrics = self._get_classification_metrics(output, labels)
+        metrics = self._get_class_metrics(output, labels)
         metrics.update(
             dict(
                 loss=loss + self.hparams.prot_alpha * prot_loss + self.hparams.drug_alpha * drug_loss,
