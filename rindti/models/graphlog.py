@@ -293,7 +293,6 @@ class GraphLogModel(BaseModel):
             tmp_proto = self.init_proto_lowest()
             self.proto[0] = tmp_proto
             for i in range(1, self.hparams.hierarchy):
-                print("Initialize prototypes: layer ", i + 1)
                 tmp_proto, tmp_proto_connection = self.init_proto(i)
                 self.proto[i] = tmp_proto
                 self.proto_connection.append(tmp_proto_connection)

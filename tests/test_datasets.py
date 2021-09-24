@@ -47,7 +47,6 @@ def fake_dataset(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data").join("temp_data.pkl")
     with open(fn, "wb") as file:
         pickle.dump(fake_dataset, file)
-    # pprint(fake_dataset)
     return fn
 
 
