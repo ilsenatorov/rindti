@@ -11,8 +11,8 @@ from rindti.utils.data import Dataset
 from rindti.utils.transforms import GnomadTransformer
 
 models = {
-    "classification": ClassificationModel,
-    "regression": RegressionModel,
+    "class": ClassificationModel,
+    "reg": RegressionModel,
     "noisyclass": NoisyNodesClassModel,
     "noisyreg": NoisyNodesRegModel,
 }
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     from rindti.utils import MyArgParser
 
     tmp_parser = argparse.ArgumentParser(add_help=False)
-    tmp_parser.add_argument("--model", type=str, default="classification")
+    tmp_parser.add_argument("--model", type=str, default="class")
     args = tmp_parser.parse_known_args()[0]
     model_type = args.model
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     trainer.add_argument("--gpus", type=int, default=1, help="Number of GPUs to use")
     trainer.add_argument("--max_epochs", type=int, default=1000, help="Max number of epochs")
-    trainer.add_argument("--model", type=str, default="classification", help="Type of model")
+    trainer.add_argument("--model", type=str, default="class", help="Type of model")
     trainer.add_argument("--weighted", type=bool, default=1, help="Whether to weight the data points")
     trainer.add_argument("--gradient_clip_val", type=float, default=30, help="Gradient clipping")
     trainer.add_argument("--profiler", type=str, default=None)

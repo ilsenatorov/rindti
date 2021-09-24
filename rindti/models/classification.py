@@ -18,7 +18,7 @@ from .pfam import PfamModel
 
 
 class ClassificationModel(BaseModel):
-    """Model for DTI prediction as a classification problem"""
+    """Model for DTI prediction as a class problem"""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -80,7 +80,7 @@ class ClassificationModel(BaseModel):
         output = torch.sigmoid(self.forward(prot, drug))
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
-        metrics = self._get_classification_metrics(output, labels)
+        metrics = self._get_class_metrics(output, labels)
         metrics.update(dict(loss=loss))
         return metrics
 

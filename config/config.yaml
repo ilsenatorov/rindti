@@ -26,6 +26,8 @@ prepare_proteins:
 
 prepare_drugs:
   max_num_atoms: 150
+  node_feats: onehot
+  edge_feats: label
 
 split:
   # available methods: random, coldtarget, colddrug
@@ -40,9 +42,9 @@ parse_dataset:
   # sampling
   # sampling can be over, under or none
   sampling: under
-  # classification or regression
-  task: classification
-  # threshold values for classification problem
+  # class or reg
+  task: class
+  # threshold values for class problem
   threshold: 100
-  # Whether to apply logarithm with base of 10 to values (for regression, doesn't affect threshold  )
+  # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
   log: false

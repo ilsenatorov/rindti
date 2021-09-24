@@ -69,7 +69,7 @@ class GnomadTransformer:
 
         Args:
             filename (str): Pickle file location
-            max_num_mut (int, optional): Maximal number of mutation to applyt. Defaults to 50.
+            max_num_mut (int, optional): Maximal number of mutation to apply. Defaults to 50.
 
         Returns:
             GnomadTransformer: Transformer

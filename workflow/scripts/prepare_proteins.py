@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 from pandas.core.frame import DataFrame
-from utils import list_to_dict
+from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(
     [
@@ -36,19 +36,6 @@ node_encoding = list_to_dict(
 edge_encoding = list_to_dict(["cnt", "combi", "hbond", "pept", "ovl"])
 
 
-def onehot_encode(position: int, count: Optional[int] = 20):
-    """One-hot encode position
-    Args:
-        position (int): Which entry to set to 1
-        count (Optional[int], optional): Max number of entries. Defaults to 20.
-    Returns:
-        [type]: [description]
-    """
-    t = [0] * count
-    t[position] = 1
-    return t
-
-
 class ProteinEncoder:
     def __init__(self, node_feats: str, edge_feats: str):
         self.node_feats = node_feats
@@ -69,7 +56,7 @@ class ProteinEncoder:
         elif self.node_feats == "label":
             return node_encoding[residue]
         elif self.node_feats == "onehot":
-            return onehot_encode(node_encoding[residue])
+            return onehot_encode(node_encoding[residue], len(node_encoding))
         else:
             raise ValueError("Unknown node_feats type!")
 

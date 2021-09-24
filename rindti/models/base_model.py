@@ -87,8 +87,8 @@ class BaseModel(LightningModule):
         """Multiplication"""
         return drug_embed * prot_embed
 
-    def _get_regression_metrics(self, output: Tensor, labels: Tensor) -> dict:
-        """Calculate metrics common for regression - corrcoef, MAE and explained variance
+    def _get_reg_metrics(self, output: Tensor, labels: Tensor) -> dict:
+        """Calculate metrics common for reg - corrcoef, MAE and explained variance
         Returns dict of all"""
         corr = pearson_corrcoef(output, labels)
         mae = mean_absolute_error(output, labels)
@@ -99,8 +99,8 @@ class BaseModel(LightningModule):
             "expvar": expvar,
         }
 
-    def _get_classification_metrics(self, output: Tensor, labels: LongTensor):
-        """Calculate metrics common for classification - accuracy, auroc and Matthews coefficient
+    def _get_class_metrics(self, output: Tensor, labels: LongTensor):
+        """Calculate metrics common for class - accuracy, auroc and Matthews coefficient
         Returns dict of all"""
         acc = accuracy(output, labels)
         try:

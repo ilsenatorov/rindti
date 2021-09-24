@@ -45,7 +45,7 @@ class PfamModel(BaseModel):
         labels[labels == 0] = -1
         loss = F.cosine_embedding_loss(a_embed, b_embed, labels.float())
         metrics = {}
-        # metrics = self._get_classification_metrics(output, labels)
+        # metrics = self._get_class_metrics(output, labels)
         a_idx = cor_data.a_idx
         b_idx = cor_data.b_idx
         a_loss = F.cross_entropy(a_pred[a_idx], data["a_x"][a_idx])
