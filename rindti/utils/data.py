@@ -21,22 +21,23 @@ class TwoGraphData(Data):
             return super().__inc__(key, value, *args, **kwargs)
         lenedg = len("edge_index")
         prefix = key[:-lenedg]
-        return self._store[prefix + "x"].size(0)
+        print(prefix)
+        return self[prefix + "x"].size(0)
 
     def n_nodes(self, prefix: str) -> int:
         """Number of nodes for graph with prefix"""
-        return self._store[prefix + "x"].size(0)
+        return self[prefix + "x"].size(0)
 
     def n_edges(self, prefix: str) -> int:
         """Returns number of edges for graph with prefix"""
-        return self._store[prefix + "edge_index"].size(1)
+        return self[prefix + "edge_index"].size(1)
 
     def n_node_feats(self, prefix: str) -> int:
         """Calculate the feature dimension of one of the graphs.
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
         then return the max. Otherwise return size(1)
         """
-        x = self._store[prefix + "x"]
+        x = self[prefix + "x"]
         if len(x.size()) == 1:
             return x.max().item() + 1
         if len(x.size()) == 2:
@@ -47,7 +48,7 @@ class TwoGraphData(Data):
         """Returns number of different edges for graph with prefix"""
         if prefix + "edge_feats" not in self._store:
             return 1
-        if self._store[prefix + "edge_feats"] is None:
+        if self[prefix + "edge_feats"] is None:
             return 1
         edge_feats = self._store[prefix + "edge_feats"]
         if len(edge_feats.size()) == 1:

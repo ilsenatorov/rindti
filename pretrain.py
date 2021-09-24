@@ -45,7 +45,6 @@ def pretrain(**kwargs):
         batch_size=kwargs["batch_size"],
         num_workers=kwargs["num_workers"],
         follow_batch=follow_batch,
-        pin_memory=True,
         shuffle=True,
     )
     val_dl = DataLoader(
@@ -53,7 +52,6 @@ def pretrain(**kwargs):
         batch_size=kwargs["batch_size"],
         num_workers=kwargs["num_workers"],
         follow_batch=follow_batch,
-        pin_memory=True,
     )
     trainer.fit(model, train_dl, val_dl)
 

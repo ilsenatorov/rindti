@@ -37,8 +37,6 @@ def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
     Returns:
         dict: Sub-dict of arguments
     """
-    if not isinstance(kwargs, dict):
-        kwargs = kwargs.__dict__
     return {prefix + k: v for (k, v) in kwargs.items() if k != "index_mapping" and v is not None}
 
 

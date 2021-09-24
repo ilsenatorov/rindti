@@ -123,6 +123,7 @@ class PfamTransformer:
         else:
             new_data.update(add_arg_prefix("b_", self._get_neg_sample(family)))
         new_data["label"] = torch.tensor(label, dtype=torch.long)
+        print(TwoGraphData(**new_data))
         return TwoGraphData(**new_data)
 
     def _process_sampled_row(self, sampled_row: pd.Series) -> dict:
