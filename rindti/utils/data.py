@@ -1,5 +1,7 @@
 import os
 import pickle
+import random
+from collections import defaultdict
 from typing import Any, Callable, Iterable
 
 import torch
@@ -21,7 +23,6 @@ class TwoGraphData(Data):
             return super().__inc__(key, value, *args, **kwargs)
         lenedg = len("edge_index")
         prefix = key[:-lenedg]
-        print(prefix)
         return self[prefix + "x"].size(0)
 
     def n_nodes(self, prefix: str) -> int:
@@ -195,6 +196,18 @@ class PreTrainDataset(InMemoryDataset):
 
             data, slices = self.collate(data_list)
             torch.save((data, slices, config), self.processed_paths[0])
+
+    def get_pfams(self) -> dict:
+        """Return dictionary of members of each pfam family in the dataset
+
+        Returns:
+            dict: keys are pfam families, values are list of proteins that are in there. Not mutually exclusive!
+        """
+        pfams = defaultdict(list)
+        for i in self:
+            for fam in i["fam"].split(";"):
+                pfams[fam].append(i)
+        return pfams
 
 
 def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: float = 0.2):
