@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
+from copy import copy
 
 import torch.nn.functional as F
 from torch.functional import Tensor
 
-from ..layers import MLP
+from rindti.layers.graphconv.ginconv import GINConvNet
+
 from ..utils import MyArgParser, remove_arg_prefix
 from ..utils.data import TwoGraphData
 from ..utils.transforms import DataCorruptor
@@ -19,7 +21,7 @@ class PfamModel(BaseModel):
         self.save_hyperparameters()
         self._determine_feat_method(kwargs["feat_method"], kwargs["hidden_dim"], kwargs["hidden_dim"])
         self.encoder = Encoder(return_nodes=True, **kwargs)
-        self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"] + 1)
+        self.node_pred = GINConvNet(kwargs["feat_embed_dim"], kwargs["hidden_dim"], kwargs["hidden_dim"], 3)
         self.corruptor = DataCorruptor(dict(a_x=kwargs["frac"], b_x=kwargs["frac"]), type="mask")
 
     def forward(self, a: dict, b: dict) -> Tensor:
@@ -43,7 +45,7 @@ class PfamModel(BaseModel):
         a_embed, b_embed, a_pred, b_pred = self.forward(a, b)
         labels = data.label
         labels[labels == 0] = -1
-        loss = F.cosine_embedding_loss(a_embed, b_embed, labels.float())
+        loss = F.cosine_embedding_loss(a_embed, b_embed, labels.float(), margin=0.3)
         metrics = {}
         # metrics = self._get_class_metrics(output, labels)
         a_idx = cor_data.a_idx

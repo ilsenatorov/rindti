@@ -32,9 +32,7 @@ def pretrain(**kwargs):
         gpus=kwargs["gpus"],
         callbacks=callbacks,
         logger=logger,
-        # gradient_clip_val=30,
         max_epochs=kwargs["max_epochs"],
-        stochastic_weight_avg=True,
         num_sanity_val_steps=0,
         deterministic=True,
         profiler=kwargs["profiler"],
@@ -91,9 +89,9 @@ To get help for different modules run with python pretrain.py --help --prot_node
     trainer.add_argument("--profiler", type=str, default=None)
 
     optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
-    optim.add_argument("--momentum", type=float, default=0.3)
+    optim.add_argument("--momentum", type=float, default=0.001)
     optim.add_argument("--lr", type=float, default=0.0005, help="mlp learning rate")
-    optim.add_argument("--weight_decay", type=float, default=0.01, help="weight decay")
+    optim.add_argument("--weight_decay", type=float, default=0.001, help="weight decay")
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
 

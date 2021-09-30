@@ -91,12 +91,14 @@ class PfamTransformer:
     Args:
         pfams (dict): dictionary, which protein is in which pfam
         pos_balance (float, optional): How often to pick positive matches. Defaults to 0.5.
+        min_fam_count (int. optional): Lower threshold for family to pick positives
     """
 
-    def __init__(self, pfams: dict, pos_balance: float = 0.7):
+    def __init__(self, pfams: dict, pos_balance: float = 0.7, min_fam_count: int = 5):
         assert pos_balance >= 0 and pos_balance <= 1, "pos_balance not between 0 and 1!"
         self.pos_balance = pos_balance
         self.pfams = pfams
+        self.min_fam_count = min_fam_count
 
     def __call__(self, data: Data) -> TwoGraphData:
         """Find a matching graph pair for this protein
@@ -110,7 +112,7 @@ class PfamTransformer:
         fams = data["fam"].split(";")
         fam = random.choice(fams)
         new_data = add_arg_prefix("a_", data)
-        if len(self.pfams[fam]) <= 5:  # If from a small family only negative samples are allowed
+        if len(self.pfams[fam]) <= self.min_fam_count:  # If from a small family only negative samples are allowed
             label = 0
         else:
             label = np.random.choice([1, 0], size=1, p=[self.pos_balance, 1 - self.pos_balance])[0]
