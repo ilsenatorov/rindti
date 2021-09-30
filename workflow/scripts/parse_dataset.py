@@ -53,6 +53,10 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
 
 if __name__ == "__main__":
 
+    from pytorch_lightning import seed_everything
+
+    seed_everything(snakemake.config["seed"])
+
     inter = pd.read_csv(snakemake.input.inter, sep="\t")
 
     config = snakemake.config["parse_dataset"]
