@@ -167,7 +167,6 @@ class BaseModel(LightningModule):
         optimiser = optimiser(
             params=self.parameters(),
             lr=self.hparams.lr,
-            weight_decay=self.hparams.weight_decay,
         )
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
