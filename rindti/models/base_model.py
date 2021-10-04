@@ -164,10 +164,12 @@ class BaseModel(LightningModule):
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimiser and/or lr schedulers"""
         optimiser = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
-        optimiser = optimiser(
-            params=self.parameters(),
-            lr=self.hparams.lr,
-        )
+        params = [{"params": self.parameters()}]
+        if hasattr(self, "prot_encoder"):
+            params.append({"params": self.prot_encoder.parameters(), "lr": self.hparams.prot_lr})
+        if hasattr(self, "drug_encoder"):
+            {"params": self.drug_encoder.parameters(), "lr": self.hparams.drug_lr}
+        optimiser = optimiser(params=self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
                 optimiser,

@@ -109,13 +109,13 @@ class PfamTransformer:
         Returns:
             TwoGraphData: all features of original graph become 'a_<feature>', all features of the pair are 'b_<feature>'
         """
-        fams = data["fam"].split(";")
+        fams = data["fam"].rstrip(";").split(";")
         fam = random.choice(fams)
         new_data = add_arg_prefix("a_", data)
         if len(self.pfams[fam]) <= self.min_fam_count:  # If from a small family only negative samples are allowed
-            label = 0
+            label = -1
         else:
-            label = np.random.choice([1, 0], size=1, p=[self.pos_balance, 1 - self.pos_balance])[0]
+            label = np.random.choice([1, -1], size=1, p=[self.pos_balance, 1 - self.pos_balance])[0]
         if label == 1:
             new_data.update(add_arg_prefix("b_", self._get_pos_sample(data["id"], fam)))
         else:
