@@ -29,12 +29,12 @@ class ClassificationModel(BaseModel):
         mlp_param = remove_arg_prefix("mlp_", kwargs)
         if prot_param["pretrain"]:
             self.prot_encoder = self._load_pretrained(prot_param["pretrain"])
-            self.prot_encoder.requires_grad = False
+            self.hparams.prot_lr *= 0.001
         else:
             self.prot_encoder = Encoder(**prot_param)
         if drug_param["pretrain"]:
             self.drug_encoder = self._load_pretrained(drug_param["pretrain"])
-            self.drug_encoder.requires_grad = False
+            self.hparams.drug_lr *= 0.001
         else:
             self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
@@ -84,6 +84,24 @@ class ClassificationModel(BaseModel):
         metrics.update(dict(loss=loss))
         return metrics
 
+    def configure_optimizers(self):
+        """Configure the optimiser and/or lr schedulers"""
+        optimiser = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
+        optimiser = optimiser(
+            params=self.parameters(),
+            lr=self.hparams.lr,
+        )
+        lr_scheduler = {
+            "scheduler": ReduceLROnPlateau(
+                optimiser,
+                factor=self.hparams.reduce_lr_factor,
+                patience=self.hparams.reduce_lr_patience,
+                verbose=True,
+            ),
+            "monitor": "val_loss",
+        }
+        return [optimiser], [lr_scheduler]
+
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
         """Generate arguments for this module"""
@@ -105,6 +123,8 @@ class ClassificationModel(BaseModel):
         drug.add_argument("feat_embed_dim", default=32, type=int)
         prot.add_argument("pretrain", default=None, type=str)
         drug.add_argument("pretrain", default=None, type=str)
+        prot.add_argument("lr", type=float, default=0.0005)
+        drug.add_argument("lr", type=float, default=0.0005)
         ## Add module-specific embeddings
         prot_node_embed.add_arguments(prot)
         drug_node_embed.add_arguments(drug)
