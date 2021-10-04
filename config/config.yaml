@@ -26,7 +26,7 @@ prepare_proteins:
 
 prepare_drugs:
   max_num_atoms: 150
-  node_feats: onehot
+  node_feats: label
   edge_feats: label
 
 split:
