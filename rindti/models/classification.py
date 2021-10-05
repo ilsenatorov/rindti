@@ -23,6 +23,7 @@ class ClassificationModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
+        print(self.hparams)
         self._determine_feat_method(**kwargs)
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)

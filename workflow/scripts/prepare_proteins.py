@@ -4,8 +4,7 @@ from typing import Optional, Tuple
 import numpy as np
 import pandas as pd
 import torch
-
-from .utils import list_to_dict, onehot_encode
+from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(
     [
