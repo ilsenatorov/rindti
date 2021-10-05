@@ -169,7 +169,7 @@ class BaseModel(LightningModule):
             params.append({"params": self.prot_encoder.parameters(), "lr": self.hparams.prot_lr})
         if hasattr(self, "drug_encoder"):
             {"params": self.drug_encoder.parameters(), "lr": self.hparams.drug_lr}
-        optimiser = optimiser(params=self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.weight_decay)
+        optimiser = optimiser(params=self.parameters(), lr=self.hparams.lr)
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
                 optimiser,

@@ -23,6 +23,7 @@ class ClassificationModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
+        print(self.hparams)
         self._determine_feat_method(**kwargs)
         drug_param = remove_arg_prefix("drug_", kwargs)
         prot_param = remove_arg_prefix("prot_", kwargs)
@@ -83,24 +84,6 @@ class ClassificationModel(BaseModel):
         metrics = self._get_class_metrics(output, labels)
         metrics.update(dict(loss=loss))
         return metrics
-
-    def configure_optimizers(self):
-        """Configure the optimiser and/or lr schedulers"""
-        optimiser = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
-        optimiser = optimiser(
-            params=self.parameters(),
-            lr=self.hparams.lr,
-        )
-        lr_scheduler = {
-            "scheduler": ReduceLROnPlateau(
-                optimiser,
-                factor=self.hparams.reduce_lr_factor,
-                patience=self.hparams.reduce_lr_patience,
-                verbose=True,
-            ),
-            "monitor": "val_loss",
-        }
-        return [optimiser], [lr_scheduler]
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
