@@ -84,24 +84,6 @@ class ClassificationModel(BaseModel):
         metrics.update(dict(loss=loss))
         return metrics
 
-    def configure_optimizers(self):
-        """Configure the optimiser and/or lr schedulers"""
-        optimiser = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
-        optimiser = optimiser(
-            params=self.parameters(),
-            lr=self.hparams.lr,
-        )
-        lr_scheduler = {
-            "scheduler": ReduceLROnPlateau(
-                optimiser,
-                factor=self.hparams.reduce_lr_factor,
-                patience=self.hparams.reduce_lr_patience,
-                verbose=True,
-            ),
-            "monitor": "val_loss",
-        }
-        return [optimiser], [lr_scheduler]
-
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
         """Generate arguments for this module"""
