@@ -88,6 +88,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     trainer.add_argument("--profiler", type=str, default=None)
 
     optim.add_argument("--optimiser", type=str, default="adam", help="Optimisation algorithm")
+    optim.add_argument("--weight_decay", type=float, default=0.01)
     optim.add_argument("--lr", type=float, default=0.0001, help="learning rate")
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
