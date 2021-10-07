@@ -90,15 +90,18 @@ class PfamTransformer:
 
     Args:
         pfams (dict): dictionary, which protein is in which pfam
+        data (dict): dictionary of all protein data
         pos_balance (float, optional): How often to pick positive matches. Defaults to 0.5.
         min_fam_count (int. optional): Lower threshold for family to pick positives
     """
 
-    def __init__(self, pfams: dict, pos_balance: float = 0.7, min_fam_count: int = 5):
+    def __init__(self, pfams: dict, data: dict, pos_balance: float = 0.7, min_fam_count: int = 5):
         assert pos_balance >= 0 and pos_balance <= 1, "pos_balance not between 0 and 1!"
         self.pos_balance = pos_balance
         self.pfams = pfams
+        self.data = data
         self.min_fam_count = min_fam_count
+        self.prot_weights = pd.Series({x: 1 for x in self.data.keys()})
 
     def __call__(self, data: Data) -> TwoGraphData:
         """Find a matching graph pair for this protein
@@ -110,52 +113,38 @@ class PfamTransformer:
             TwoGraphData: all features of original graph become 'a_<feature>', all features of the pair are 'b_<feature>'
         """
         fams = data["fam"].rstrip(";").split(";")
-        fam = random.choice(fams)
         new_data = add_arg_prefix("a_", data)
-        if len(self.pfams[fam]) <= self.min_fam_count:  # If from a small family only negative samples are allowed
+        relatives = []
+        for fam in fams:
+            relatives += self.pfams[fam]
+        relatives = set(relatives)
+        if len(relatives) <= self.min_fam_count:  # If from a small family only negative samples are allowed
             label = -1
         else:
-            label = np.random.choice([1, -1], size=1, p=[self.pos_balance, 1 - self.pos_balance])[0]
+            label = random.choices([1, -1], weights=[self.pos_balance, 1 - self.pos_balance], k=1)[0]
         if label == 1:
-            new_data.update(add_arg_prefix("b_", self._get_pos_sample(data["id"], fam)))
+            new_data.update(add_arg_prefix("b_", self._get_pos_sample(relatives, data.id)))
         else:
-            new_data.update(add_arg_prefix("b_", self._get_neg_sample(data["id"], fam)))
+            new_data.update(add_arg_prefix("b_", self._get_neg_sample(relatives)))
         new_data["label"] = torch.tensor(label, dtype=torch.long)
         new_data = TwoGraphData(**new_data)
         new_data.num_nodes = 0
         return new_data
 
-    def _get_pos_sample(self, prot_id: str, fam_id: str) -> dict:
-        """Get a positive match for given family (protein from same family)
+    def _get_pos_sample(self, relatives: set, prot_id: str) -> dict:
+        relatives.remove(prot_id)
+        weights = self.prot_weights.loc[relatives]
+        pair_prot = random.choices(weights.index, weights.values)[0]
+        return self.data[pair_prot]
 
-        Args:
-            prot_id (str): Protein id
-            fam_id (str): Family id
+    def _get_neg_sample(self, relatives: set) -> dict:
+        weights = self.prot_weights[~self.prot_weights.index.isin(relatives)]
+        pair_prot = random.choices(weights.index, weights.values)[0]
+        return self.data[pair_prot]
 
-        Returns:
-            dict: data of protein from same family
-        """
-        pair_prot = random.choice(self.pfams[fam_id])
-        if pair_prot["id"] == prot_id:
-            return self._get_pos_sample(prot_id, fam_id)
-        else:
-            return pair_prot
-
-    def _get_neg_sample(self, prot_id: str, fam_id: str) -> dict:
-        """Get a negative match for given family (protein from different family)
-
-        Args:
-            prot_id (str): Protein id
-            fam_id (str): Family id
-
-        Returns:
-            dict: data of protein from different family
-        """
-        other_fam_id = random.choice(list(self.pfams.keys()))
-        if other_fam_id == fam_id:
-            return self._get_neg_sample(prot_id, fam_id)
-        pair_prot = random.choice(self.pfams[other_fam_id])
-        return pair_prot
+    def update_weights(self, losses, min_val: float = 0.5):
+        losses = {k: np.mean(v) for k, v in losses.items()}
+        self.prot_weights = pd.Series(losses) + min_val
 
 
 class SizeFilter:

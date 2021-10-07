@@ -16,7 +16,7 @@ def pretrain(**kwargs):
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
     if kwargs["model"] == "pfam":
-        transformer = PfamTransformer(dataset.get_pfams())
+        transformer = PfamTransformer(*dataset.get_pfams())
     else:
         transformer = None
     dataset = PreTrainDataset(kwargs["data"], transform=transformer)
@@ -38,6 +38,7 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
+    model.transformer = transformer
     follow_batch = ["a_x", "b_x"] if kwargs["model"] == "pfam" else []
     train_dl = DataLoader(
         train,

@@ -39,12 +39,12 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _get_feat_embed(self, params: dict) -> Embedding:
-        return Embedding(params["feat_dim"] + 2, params["feat_embed_dim"], padding_idx=0)
+        return Embedding(params["feat_dim"] + 2, params["hidden_dim"], padding_idx=0)
 
     def _get_node_embed(self, params: dict, out_dim=None) -> LightningModule:
         if out_dim:
-            return node_embedders[params["node_embed"]](params["feat_embed_dim"], out_dim, **params)
-        return node_embedders[params["node_embed"]](params["feat_embed_dim"], params["hidden_dim"], **params)
+            return node_embedders[params["node_embed"]](params["hidden_dim"], out_dim, **params)
+        return node_embedders[params["node_embed"]](params["hidden_dim"], params["hidden_dim"], **params)
 
     def _get_pooler(self, params: dict) -> LightningModule:
         return poolers[params["pool"]](params["hidden_dim"], params["hidden_dim"], **params)

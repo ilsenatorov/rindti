@@ -204,10 +204,12 @@ class PreTrainDataset(InMemoryDataset):
             dict: keys are pfam families, values are list of proteins that are in there. Not mutually exclusive!
         """
         pfams = defaultdict(list)
+        data = {}
         for i in self:
+            data[i.id] = i
             for fam in i["fam"].split(";"):
-                pfams[fam].append(i)
-        return pfams
+                pfams[fam].append(i.id)
+        return pfams, data
 
 
 def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: float = 0.2):
