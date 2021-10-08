@@ -20,17 +20,9 @@ class PfamModel(BaseModel):
         self.encoder = Encoder(return_nodes=False, **kwargs)
         self.losses = defaultdict(list)
 
-    def forward(self, a: dict, b: dict) -> Tensor:
+    def forward(self, data: dict) -> Tensor:
         """Forward pass of the model"""
-        a_embed = self.encoder(a)
-        b_embed = self.encoder(b)
-        return a_embed, b_embed
-
-    def save_losses(self, a_ids, b_ids, losses):
-        for a, b, loss in zip(a_ids, b_ids, losses):
-            loss = float(loss)
-            self.losses[a].append(loss)
-            self.losses[b].append(loss)
+        return self.encoder(data)
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -41,14 +33,9 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        cor_data = data
-        a = remove_arg_prefix("a_", cor_data)
-        b = remove_arg_prefix("b_", cor_data)
-        a_embed, b_embed = self.forward(a, b)
-        labels = data.label
-        losses = F.cosine_embedding_loss(a_embed, b_embed, labels.float(), margin=0, reduction="none")
-        self.save_losses(data["a_id"], data["b_id"], losses)
-        return dict(loss=losses.mean())
+        anchor = self.forward(data)
+        loss = F.triplet_margin_loss(anchor, pos, neg)
+        return dict(loss=loss)
 
     def update_transformer(self):
         self.transformer.update_weights(self.losses)

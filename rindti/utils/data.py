@@ -2,7 +2,7 @@ import os
 import pickle
 import random
 from collections import defaultdict
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, List
 
 import torch
 from torch.utils.data import random_split
@@ -166,6 +166,10 @@ class PreTrainDataset(InMemoryDataset):
         super().__init__(root, transform, pre_transform)
         self.data, self.slices, self.config = torch.load(self.processed_paths[0])
 
+    def index(self, id: str):
+        """Find protein by id"""
+        return self[self.data.id.index(id)]
+
     @property
     def processed_file_names(self) -> Iterable[str]:
         """Which files have to be in the dir to consider dataset processed
@@ -197,19 +201,29 @@ class PreTrainDataset(InMemoryDataset):
             data, slices = self.collate(data_list)
             torch.save((data, slices, config), self.processed_paths[0])
 
-    def get_pfams(self) -> dict:
-        """Return dictionary of members of each pfam family in the dataset
 
-        Returns:
-            dict: keys are pfam families, values are list of proteins that are in there. Not mutually exclusive!
-        """
-        pfams = defaultdict(list)
-        data = {}
-        for i in self:
-            data[i.id] = i
-            for fam in i["fam"].split(";"):
-                pfams[fam].append(i.id)
-        return pfams, data
+class PfamSampler(torch.utils.data.Sampler):
+    def __init__(self, dataset: PreTrainDataset, batch_size: int = 64, num_anchor_fams: int = 8):
+        self.dataset = dataset
+        self.batch_size = batch_size
+        self.num_anchor_fams = num_anchor_fams
+        self.fam_idx = defaultdict(set)
+        for i, data in enumerate(self.dataset):
+            self.fam_idx[data.fam].add(i)
+        self.fam_idx = {k: list(v) for k, v in self.fam_idx.items()}
+
+    def _construct_batch(self) -> iter:
+        batch = []
+        anchor_fams = random.choices(list(self.fam_idx.keys()), k=self.num_anchor_fams)
+        for fam in anchor_fams:
+            batch += random.choices(self.fam_idx[fam], k=self.batch_size // self.num_anchor_fams)
+        return batch
+
+    def __iter__(self):
+        return iter([self._construct_batch() for _ in range(self.__len__() // self.batch_size)])
+
+    def __len__(self):
+        return len(self.dataset)
 
 
 def split_random(dataset: PreTrainDataset, train_frac: float = 0.8, val_frac: float = 0.2):

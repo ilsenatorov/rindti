@@ -15,11 +15,6 @@ def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
-    if kwargs["model"] == "pfam":
-        transformer = PfamTransformer(*dataset.get_pfams())
-    else:
-        transformer = None
-    dataset = PreTrainDataset(kwargs["data"], transform=transformer)
     kwargs.update(dataset.config)
     kwargs["feat_dim"] = 20
     train, val = split_random(dataset)
@@ -38,20 +33,16 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    model.transformer = transformer
-    follow_batch = ["a_x", "b_x"] if kwargs["model"] == "pfam" else []
     train_dl = DataLoader(
         train,
         batch_size=kwargs["batch_size"],
         num_workers=kwargs["num_workers"],
-        follow_batch=follow_batch,
         shuffle=True,
     )
     val_dl = DataLoader(
         val,
         batch_size=kwargs["batch_size"],
         num_workers=kwargs["num_workers"],
-        follow_batch=follow_batch,
     )
     trainer.fit(model, train_dl, val_dl)
 
