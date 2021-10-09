@@ -5,9 +5,9 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
+from rindti.data import TwoGraphData
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.models.base_model import node_embedders, poolers
-from rindti.utils.data import TwoGraphData
 
 fake_data = {
     "edge_feats": torch.randint(low=0, high=5, size=(10,)),
@@ -16,21 +16,7 @@ fake_data = {
     "x": torch.ones(size=(15,), dtype=torch.long),
 }
 
-
-fake_pfam_data = {
-    "a_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-    "a_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-    "a_x": torch.randint(low=0, high=5, size=(15,)),
-    "b_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-    "b_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-    "b_x": torch.randint(low=0, high=5, size=(15,)),
-    "label": torch.tensor([1]),
-}
-
 fake_data = next(iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_workers=1)))
-fake_pfam_data = next(
-    iter(DataLoader([TwoGraphData(**fake_pfam_data)] * 10, batch_size=5, num_workers=1, follow_batch=["a_x", "b_x"]))
-)
 
 
 class BaseTestModel:
@@ -107,16 +93,3 @@ class TestBGRLModel(BaseTestModel):
     """BGRL"""
 
     model = BGRLModel
-
-
-class TestPfamModel(BaseTestModel):
-    model = PfamModel
-
-    @pytest.mark.parametrize("node_embed", list(node_embedders.keys()))
-    @pytest.mark.parametrize("pool", list(poolers.keys()))
-    def test_shared_step(self, node_embed, pool):
-        """Test .shared_step"""
-        self.default_config["node_embed"] = node_embed
-        self.default_config["pool"] = pool
-        model = self.model(**self.default_config)
-        model.shared_step(fake_pfam_data)

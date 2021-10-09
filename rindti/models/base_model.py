@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from copy import copy
 from typing import Tuple
 
 import numpy as np
@@ -18,8 +17,8 @@ from torchmetrics.functional import (
     pearson_corrcoef,
 )
 
+from ..data import TwoGraphData
 from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool
-from ..utils.data import TwoGraphData
 
 node_embedders = {
     "ginconv": GINConvNet,

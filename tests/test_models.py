@@ -4,16 +4,10 @@ import pytest
 import torch
 from torch_geometric.loader import DataLoader
 
+from rindti.data import TwoGraphData
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from rindti.models.base_model import node_embedders, poolers
 from rindti.utils import MyArgParser
-from rindti.utils.data import TwoGraphData
-
-# "drug_node_embed": list(node_embedders.keys()),
-# "prot_node_embed": list(node_embedders.keys()),
-# "drug_pool": list(poolers.keys()),
-# "prot_pool": list(poolers.keys()),
-
 
 fake_data = {
     "prot_x": torch.randint(low=1, high=5, size=(15,)),

@@ -4,8 +4,8 @@ from collections import defaultdict
 import torch
 from torch.functional import Tensor
 
+from ..data import TwoGraphData
 from ..utils import MyArgParser
-from ..utils.data import TwoGraphData
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 

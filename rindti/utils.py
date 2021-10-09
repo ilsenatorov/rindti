@@ -1,10 +1,9 @@
 from argparse import ArgumentParser, _ArgumentGroup
 from typing import Union
 
-from pytorch_lightning.core.lightning import LightningModule
-from torch.nn import Embedding
+from torch.utils.data import random_split
 
-from rindti.utils.data import TwoGraphData
+from .data import PreTrainDataset, TwoGraphData
 
 
 def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
@@ -83,3 +82,11 @@ class MyArgParser(ArgumentParser):
         for group in self._action_groups:
             if group.title == group_title:
                 return group
+
+
+def split_random(dataset: PreTrainDataset, train_frac: float = 0.8):
+    """Randomly split dataset"""
+    tot = len(dataset)
+    train = int(tot * train_frac)
+    val = int(tot * (1 - train_frac))
+    return random_split(dataset, [train, val])

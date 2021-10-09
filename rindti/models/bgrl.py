@@ -9,8 +9,7 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
-from rindti.utils.transforms import DataCorruptor
-
+from ..data import DataCorruptor
 from ..utils import MyArgParser
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder

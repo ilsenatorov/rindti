@@ -1,10 +1,7 @@
-import torch
 import torch.nn.functional as F
-from torch.functional import Tensor
-from torchmetrics.functional import explained_variance, mean_absolute_error, pearson_corrcoef
 
+from ..data import TwoGraphData
 from ..utils import remove_arg_prefix
-from ..utils.data import TwoGraphData
 from .classification import ClassificationModel
 
 
