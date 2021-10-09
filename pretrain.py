@@ -4,8 +4,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
-from rindti.utils.data import PreTrainDataset, split_random
-from rindti.utils.transforms import PfamTransformer
+from rindti.utils.data import PfamSampler, PreTrainDataset
 from rindti.utils.utils import MyArgParser
 
 models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel, "bgrl": BGRLModel}
@@ -17,11 +16,10 @@ def pretrain(**kwargs):
     dataset = PreTrainDataset(kwargs["data"])
     kwargs.update(dataset.config)
     kwargs["feat_dim"] = 20
-    train, val = split_random(dataset)
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [
-        ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        ModelCheckpoint(monitor="train_loss", save_top_k=3, mode="min"),
+        EarlyStopping(monitor="train_loss", patience=kwargs["early_stop_patience"], mode="min"),
     ]
     trainer = Trainer(
         gpus=kwargs["gpus"],
@@ -33,18 +31,20 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    train_dl = DataLoader(
-        train,
-        batch_size=kwargs["batch_size"],
-        num_workers=kwargs["num_workers"],
-        shuffle=True,
-    )
-    val_dl = DataLoader(
-        val,
-        batch_size=kwargs["batch_size"],
-        num_workers=kwargs["num_workers"],
-    )
-    trainer.fit(model, train_dl, val_dl)
+    if kwargs["model"] == "pfam":
+        sampler = PfamSampler(dataset, batch_size=kwargs["batch_size"], prot_per_fam=kwargs["prot_per_fam"])
+        dl = DataLoader(
+            dataset,
+            batch_sampler=sampler,
+        )
+    else:
+        dl = DataLoader(
+            dataset,
+            batch_size=kwargs["batch_size"],
+            num_workers=kwargs["num_workers"],
+            shuffle=True,
+        )
+    trainer.fit(model, dl)
 
 
 if __name__ == "__main__":
@@ -83,6 +83,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     optim.add_argument("--lr", type=float, default=0.0001, help="learning rate")
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
+    optim.add_argument("--monitor", type=str, default="train_loss", help="Value to monitor for lr reduction etc")
 
     parser = models[model_type].add_arguments(parser)
 
