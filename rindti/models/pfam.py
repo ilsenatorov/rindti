@@ -63,7 +63,12 @@ class PfamModel(BaseModel):
             neg_dist = dist[neg_idxt[:, None], pos_idxt]
             fam_loss = generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
             loss.append(fam_loss)
+            self.losses[fam].append(fam_loss.mean().item())
         return dict(loss=torch.cat(loss).mean())
+
+    def training_epoch_end(self, outputs: dict):
+        self.sampler.update_weights(self.losses)
+        return super().training_epoch_end(outputs)
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:
