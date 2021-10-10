@@ -88,6 +88,12 @@ class WeightedPfamSampler(PfamSampler):
         self.fam_weights.update({k: np.mean(v) for k, v in losses.items()})
 
     def _construct_batch(self) -> List[int]:
+        """Creates a single batch. takes self.prot_per_fam families with
+        self.fam_weights probabilities and samples them
+
+        Returns:
+            List[int]: Indices of the proteins from the main dataset
+        """
         batch = []
         anchor_fams = random.choices(
             list(self.fam_weights.keys()),
