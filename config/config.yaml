@@ -23,6 +23,7 @@ prepare_proteins:
   node_feats: label
   # can be label, onehot or none
   edge_feats: none
+  shard_size: 10000
 
 prepare_drugs:
   max_num_atoms: 150

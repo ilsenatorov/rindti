@@ -1,13 +1,11 @@
-from argparse import ArgumentParser
-
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
+from rindti.data import DTIDataset
+from rindti.data.transforms import GnomadTransformer
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
-from rindti.utils.data import Dataset
-from rindti.utils.transforms import GnomadTransformer
 
 models = {
     "class": ClassificationModel,
@@ -26,9 +24,9 @@ def train(**kwargs):
         )
     else:
         transform = None
-    train = Dataset(kwargs["data"], split="train", transform=transform)
-    val = Dataset(kwargs["data"], split="val")
-    test = Dataset(kwargs["data"], split="test")
+    train = DTIDataset(kwargs["data"], split="train", transform=transform)
+    val = DTIDataset(kwargs["data"], split="val")
+    test = DTIDataset(kwargs["data"], split="test")
 
     kwargs.update(train.config)
     logger = TensorBoardLogger(

@@ -1,17 +1,15 @@
 import os
 import pickle
-import random
-from collections import defaultdict
-from typing import Callable, Iterable, List
+from typing import Callable, Iterable
 
+import pandas as pd
 import torch
-from torch.utils.data import random_split
-from torch_geometric.data import Data, InMemoryDataset
+from torch_geometric.data import Data, Dataset, InMemoryDataset
 
 from .data import TwoGraphData
 
 
-class Dataset(InMemoryDataset):
+class DTIDataset(InMemoryDataset):
     """Dataset class for proteins and drugs
 
     Args:
@@ -134,21 +132,78 @@ class PreTrainDataset(InMemoryDataset):
     def process(self):
         """If the dataset was not seen before, process everything"""
         config = dict(max_nodes=0)
-        with open(self.filename, "rb") as file:
-            df = pickle.load(file)
-            data_list = []
+        df = pd.read_pickle(self.filename)
+        data_list = []
+        for id, x in df["data"].to_dict().items():
+            if "index_mapping" in x:
+                del x["index_mapping"]
+            config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
+            x["id"] = id
+            data_list.append(Data(**x))
+
+        if self.pre_filter is not None:
+            data_list = [data for data in data_list if self.pre_filter(data)]
+
+        if self.pre_transform is not None:
+            data_list = [self.pre_transform(data) for data in data_list]
+
+        data, slices = self.collate(data_list)
+        torch.save((data, slices, config), self.processed_paths[0])
+
+
+class LargePreTrainDataset(Dataset):
+    """Dataset that doesn't fit in the memory"""
+
+    def __init__(self, rawdir, transform=None, pre_transform=None):
+        self.rawdir = rawdir
+        dirname = rawdir.rstrip("/").split("/")[-1]
+        root = os.path.join("data", dirname)
+        super().__init__(root, transform, pre_transform)
+        self.config = torch.load(self.config_file)
+
+    @property
+    def raw_file_names(self):
+        """Sharded pickles"""
+        return os.listdir(self.rawdir)
+
+    @property
+    def config_file(self):
+        """Saved config file"""
+        return os.path.join(self.processed_dir, "config.pt")
+
+    @property
+    def processed_file_names(self):
+        """Saved graphs"""
+        return [os.path.join(self.processed_dir, x) for x in ["config.pt", "data_0.pt"]]
+
+    def process(self):
+        """Save each graph as a file"""
+        i = 0
+        config = dict(max_nodes=0)
+        for shard in os.listdir(self.rawdir):
+            df = pd.read_pickle(os.path.join(self.rawdir, shard))
             for id, x in df["data"].to_dict().items():
                 if "index_mapping" in x:
                     del x["index_mapping"]
                 config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
                 x["id"] = id
-                data_list.append(Data(**x))
+                data = Data(**x)
 
-            if self.pre_filter is not None:
-                data_list = [data for data in data_list if self.pre_filter(data)]
+                if self.pre_filter is not None and not self.pre_filter(data):
+                    continue
 
-            if self.pre_transform is not None:
-                data_list = [self.pre_transform(data) for data in data_list]
+                if self.pre_transform is not None:
+                    data = self.pre_transform(data)
 
-            data, slices = self.collate(data_list)
-            torch.save((data, slices, config), self.processed_paths[0])
+                torch.save(data, os.path.join(self.processed_dir, "data_{}.pt".format(i)))
+                i += 1
+        config["count"] = i
+        torch.save(config, self.config_file)
+
+    def len(self):
+        return self.config["count"]
+
+    def get(self, idx):
+        """Load graph"""
+        data = torch.load(os.path.join(self.processed_dir, "data_{}.pt".format(idx)))
+        return data

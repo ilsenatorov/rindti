@@ -198,5 +198,4 @@ if __name__ == "__main__":
         snakemake.config["prepare_proteins"]["node_feats"], snakemake.config["prepare_proteins"]["edge_feats"]
     )
     proteins["data"] = proteins["sif"].apply(prot_encoder)
-    with open(snakemake.output.protein_pickle, "wb") as file:
-        pickle.dump(proteins, file)
+    proteins.to_pickle(snakemake.output.protein_pickle)
