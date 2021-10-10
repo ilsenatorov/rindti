@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-from typing import List
+from typing import Dict, Iterable, List
 
 import numpy as np
 from torch.utils.data import Sampler
@@ -9,23 +9,25 @@ from .datasets import PreTrainDataset
 
 
 class PfamSampler(Sampler):
+    """Sampler for generating pfam-conforming batches.
+    Ensure that in each batch there are positive and negative matches for each protein
+
+    Args:
+        dataset (PreTrainDataset): dataset, each data point has to contain data.fam
+        batch_size (int, optional): Defaults to 64.
+        prot_per_fam (int, optional): Number of proteins per family. Defaults to 8
+        batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000
+
+    """
+
     def __init__(
         self,
         dataset: PreTrainDataset,
         batch_size: int = 64,
         prot_per_fam: int = 8,
         batch_per_epoch: int = 1000,
+        **kwargs,
     ):
-        """Sampler for generating pfam-conforming batches.
-        Ensure that in each batch there are positive and negative matches for each protein
-
-        Args:
-            dataset (PreTrainDataset): dataset, each data point has to contain data.fam
-            batch_size (int, optional): Defaults to 64.
-            prot_per_fam (int, optional): Number of proteins per family. Defaults to 8
-            batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000
-
-        """
         assert batch_size % prot_per_fam == 0, "Batch size should be divisible by prot_per_fam!"
         self.dataset = dataset
         self.batch_size = batch_size
@@ -61,12 +63,29 @@ class PfamSampler(Sampler):
 
 
 class WeightedPfamSampler(PfamSampler):
+    """Weighted for generating pfam-conforming batches.
+    Ensure that in each batch there are positive and negative matches for each protein.
+    Picks families with certain probabilities, based on losses
+
+    Args:
+        dataset (PreTrainDataset): dataset, each data point has to contain data.fam
+        batch_size (int, optional): Defaults to 64.
+        prot_per_fam (int, optional): Number of proteins per family. Defaults to 8
+        batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000
+
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fam_weights = {k: 1 for k in self.fam_idx.keys()}
+        self.fam_weights = {k: 1000 for k in self.fam_idx.keys()}
 
-    def update_weights(self, losses: dict):
-        self.fam_weights = {k: np.mean(v) for k, v in losses.items()}
+    def update_weights(self, losses: Dict[str, Iterable]):
+        """Update sampling weight of families
+
+        Args:
+            losses (Dict[str, Iterable]): family ids and their respective losses
+        """
+        self.fam_weights.update({k: np.mean(v) for k, v in losses.items()})
 
     def _construct_batch(self) -> List[int]:
         batch = []

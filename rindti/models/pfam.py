@@ -87,4 +87,5 @@ class PfamModel(BaseModel):
         pool.add_arguments(pooler_args)
         parser.add_argument("--margin", type=float, default=1)
         parser.add_argument("--prot_per_fam", type=int, default=8)
+        parser.add_argument("--batch_per_epoch", type=int, default=1000)
         return parser
