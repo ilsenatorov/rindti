@@ -3,9 +3,9 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
+from rindti.data import PfamSampler, PreTrainDataset
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
-from rindti.utils.data import PfamSampler, PreTrainDataset
-from rindti.utils.utils import MyArgParser
+from rindti.utils import MyArgParser
 
 models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel, "bgrl": BGRLModel}
 

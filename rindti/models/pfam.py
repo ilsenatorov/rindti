@@ -10,7 +10,7 @@ from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 
 
-def lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin: float = 1.0) -> Tensor:
+def generalised_lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin: float = 1.0) -> Tensor:
     """
     https://lilianweng.github.io/lil-log/2021/05/31/contrastive-representation-learning.html
 
@@ -23,7 +23,7 @@ def lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin: float = 1.
         Tensor: resulting loss
     """
     pos_loss = torch.logsumexp(pos_dist, dim=0)
-    neg_loss = torch.logsumexp(neg_dist, dim=0)
+    neg_loss = torch.logsumexp(margin - neg_dist, dim=0)
     return torch.relu(pos_loss + neg_loss)
 
 
@@ -61,7 +61,7 @@ class PfamModel(BaseModel):
             neg_idxt = torch.tensor(list(all_idx.difference(idx)))
             pos_dist = dist[pos_idxt[:, None], pos_idxt]
             neg_dist = dist[neg_idxt[:, None], pos_idxt]
-            fam_loss = lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
+            fam_loss = generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
             loss.append(fam_loss)
         return dict(loss=torch.cat(loss).mean())
 
