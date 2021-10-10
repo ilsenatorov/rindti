@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 
+from ..data import TwoGraphData
 from ..utils import remove_arg_prefix
-from ..utils.data import TwoGraphData
 from .noisy_nodes_classification import NoisyNodesClassModel
 
 

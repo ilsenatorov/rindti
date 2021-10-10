@@ -2,9 +2,8 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
+from ..data import DataCorruptor, TwoGraphData
 from ..utils import MyArgParser, remove_arg_prefix
-from ..utils.data import TwoGraphData
-from ..utils.transforms import DataCorruptor
 from .classification import ClassificationModel
 
 

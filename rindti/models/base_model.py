@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from copy import copy
 from typing import Tuple
 
 import numpy as np
@@ -18,8 +17,8 @@ from torchmetrics.functional import (
     pearson_corrcoef,
 )
 
+from ..data import TwoGraphData
 from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool
-from ..utils.data import TwoGraphData
 
 node_embedders = {
     "ginconv": GINConvNet,
@@ -39,12 +38,12 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _get_feat_embed(self, params: dict) -> Embedding:
-        return Embedding(params["feat_dim"] + 2, params["feat_embed_dim"], padding_idx=0)
+        return Embedding(params["feat_dim"] + 2, params["hidden_dim"], padding_idx=0)
 
     def _get_node_embed(self, params: dict, out_dim=None) -> LightningModule:
         if out_dim:
-            return node_embedders[params["node_embed"]](params["feat_embed_dim"], out_dim, **params)
-        return node_embedders[params["node_embed"]](params["feat_embed_dim"], params["hidden_dim"], **params)
+            return node_embedders[params["node_embed"]](params["hidden_dim"], out_dim, **params)
+        return node_embedders[params["node_embed"]](params["hidden_dim"], params["hidden_dim"], **params)
 
     def _get_pooler(self, params: dict) -> LightningModule:
         return poolers[params["pool"]](params["hidden_dim"], params["hidden_dim"], **params)
@@ -117,7 +116,11 @@ class BaseModel(LightningModule):
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step"""
-        return self.shared_step(data)
+        ss = self.shared_step(data)
+        # val_loss has to be logged for early stopping and reduce_lr
+        for key, value in ss.items():
+            self.log("train_" + key, value)
+        return ss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during validation step. Also logs the values for various callbacks."""
@@ -177,7 +180,7 @@ class BaseModel(LightningModule):
                 patience=self.hparams.reduce_lr_patience,
                 verbose=True,
             ),
-            "monitor": "val_loss",
+            "monitor": self.hparams.monitor,
         }
         return [optimiser], [lr_scheduler]
 

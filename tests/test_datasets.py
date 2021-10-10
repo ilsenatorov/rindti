@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 import torch
 
-from rindti.utils.data import Dataset, PreTrainDataset
+from rindti.data import Dataset, PreTrainDataset
 
 N_PROTS = 10
 N_DRUGS = 10

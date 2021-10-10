@@ -96,6 +96,7 @@ if __name__ == "__main__":
     optim.add_argument("--weight_decay", type=float, default=0.01, help="weight decay")
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
+    optim.add_argument("--monitor", type=str, default="val_loss", help="Value to monitor for lr reduction etc")
 
     transformer.add_argument("--transformer", type=str, default="none", help="Type of transformer to apply")
     transformer.add_argument(

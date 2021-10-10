@@ -3,10 +3,9 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
+from rindti.data import PreTrainDataset, WeightedPfamSampler
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
-from rindti.utils.data import PreTrainDataset, split_random
-from rindti.utils.transforms import PfamTransformer
-from rindti.utils.utils import MyArgParser
+from rindti.utils import MyArgParser
 
 models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel, "bgrl": BGRLModel}
 
@@ -15,18 +14,12 @@ def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
-    if kwargs["model"] == "pfam":
-        transformer = PfamTransformer(dataset.get_pfams())
-    else:
-        transformer = None
-    dataset = PreTrainDataset(kwargs["data"], transform=transformer)
     kwargs.update(dataset.config)
     kwargs["feat_dim"] = 20
-    train, val = split_random(dataset)
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [
-        ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        ModelCheckpoint(monitor="train_loss", save_top_k=3, mode="min"),
+        EarlyStopping(monitor="train_loss", patience=kwargs["early_stop_patience"], mode="min"),
     ]
     trainer = Trainer(
         gpus=kwargs["gpus"],
@@ -38,21 +31,13 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    follow_batch = ["a_x", "b_x"] if kwargs["model"] == "pfam" else []
-    train_dl = DataLoader(
-        train,
-        batch_size=kwargs["batch_size"],
-        num_workers=kwargs["num_workers"],
-        follow_batch=follow_batch,
-        shuffle=True,
-    )
-    val_dl = DataLoader(
-        val,
-        batch_size=kwargs["batch_size"],
-        num_workers=kwargs["num_workers"],
-        follow_batch=follow_batch,
-    )
-    trainer.fit(model, train_dl, val_dl)
+    if kwargs["model"] == "pfam":
+        sampler = WeightedPfamSampler(dataset, **kwargs)
+        dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
+        model.sampler = sampler
+    else:
+        dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    trainer.fit(model, dl)
 
 
 if __name__ == "__main__":
@@ -92,6 +77,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     optim.add_argument("--lr", type=float, default=0.0001, help="learning rate")
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
+    optim.add_argument("--monitor", type=str, default="train_loss", help="Value to monitor for lr reduction etc")
 
     parser = models[model_type].add_arguments(parser)
 

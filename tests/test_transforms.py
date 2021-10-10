@@ -4,7 +4,7 @@ from math import ceil
 import pytest
 import torch
 
-from rindti.utils.transforms import DataCorruptor, corrupt_features, mask_features
+from rindti.data import DataCorruptor, corrupt_features, mask_features
 
 LOW = 1
 HIGH = 10

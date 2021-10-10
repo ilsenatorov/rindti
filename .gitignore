@@ -9,8 +9,9 @@ __pycache__/
 *.csv
 *.pkl
 *.pyc
-data/
+data/*
 report/
 resources/
 results/
 tb_logs/
+*Untitled*

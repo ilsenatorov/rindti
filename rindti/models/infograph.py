@@ -6,9 +6,8 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
+from ..data import corrupt_features
 from ..layers import MutualInformation
-from ..layers.graphconv import GINConvNet
-from ..utils.transforms import corrupt_features
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 
