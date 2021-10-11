@@ -45,6 +45,11 @@ class Encoder(BaseModel):
             return embed, node_embed
         return embed
 
+    def embed(self, data: Data, **kwargs):
+        self.return_nodes = False
+        embed = self.forward(data)
+        return embed.detach()
+
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
         """Generate arguments for this module"""

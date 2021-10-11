@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 import torch
 from torch.functional import Tensor
 
@@ -51,6 +53,11 @@ class PfamModel(BaseModel):
         """
         embeds = self.forward(data)
         dist = torch.cdist(embeds, embeds)
+        if self.global_step % 100 == 0:
+            fig = plt.figure()
+            sns.heatmap(dist.detach().cpu())
+            self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
+            self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
         fam_idx = defaultdict(list)
         all_idx = set(list(range(len(data.id))))
         for idx, fam in enumerate(data.fam):
