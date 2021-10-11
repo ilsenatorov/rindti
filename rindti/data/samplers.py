@@ -3,8 +3,10 @@ from collections import defaultdict
 from typing import Dict, Iterable, List
 
 import numpy as np
+import pandas as pd
 from torch.utils.data import Sampler
 
+from ..utils import minmax_normalise
 from .datasets import PreTrainDataset
 
 
@@ -69,15 +71,22 @@ class WeightedPfamSampler(PfamSampler):
 
     Args:
         dataset (PreTrainDataset): dataset, each data point has to contain data.fam
+        minprob (float, optional): lowest weighted probability. Defaults to 0.1
         batch_size (int, optional): Defaults to 64.
         prot_per_fam (int, optional): Number of proteins per family. Defaults to 8
         batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000
 
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, minprob: float = 0.1, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fam_weights = {k: 1000 for k in self.fam_idx.keys()}
+        self.minprob = minprob
+        self.fam_weights = pd.Series({k: 1000 * len(v) for k, v in self.fam_idx.items()})
+        self.normalised_weights = self.fam_weights
+
+    def get_normalised_weights(self):
+        """Get minmax normalised weights"""
+        self.normalised_weights = minmax_normalise(self.fam_weights) + self.minprob
 
     def update_weights(self, losses: Dict[str, Iterable]):
         """Update sampling weight of families
@@ -86,6 +95,7 @@ class WeightedPfamSampler(PfamSampler):
             losses (Dict[str, Iterable]): family ids and their respective losses
         """
         self.fam_weights.update({k: np.mean(v) for k, v in losses.items()})
+        self.get_normalised_weights()
 
     def _construct_batch(self) -> List[int]:
         """Creates a single batch. takes self.prot_per_fam families with
@@ -96,8 +106,8 @@ class WeightedPfamSampler(PfamSampler):
         """
         batch = []
         anchor_fams = random.choices(
-            list(self.fam_weights.keys()),
-            weights=self.fam_weights.values(),
+            list(self.normalised_weights.index),
+            weights=self.normalised_weights.values,
             k=self.batch_size // self.prot_per_fam,
         )
         for fam in anchor_fams:

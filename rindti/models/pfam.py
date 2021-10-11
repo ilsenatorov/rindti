@@ -7,7 +7,7 @@ import torch
 from torch.functional import Tensor
 
 from ..data import TwoGraphData
-from ..utils import MyArgParser
+from ..utils import MyArgParser, plot_fam_losses
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 
@@ -75,6 +75,7 @@ class PfamModel(BaseModel):
 
     def training_epoch_end(self, outputs: dict):
         self.sampler.update_weights(self.losses)
+        self.logger.experiment.add_figure("loss_dist", plot_fam_losses(self.losses), global_step=self.global_step)
         return super().training_epoch_end(outputs)
 
     @staticmethod

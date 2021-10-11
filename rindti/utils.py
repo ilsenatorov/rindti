@@ -1,6 +1,11 @@
 from argparse import ArgumentParser, _ArgumentGroup
 from typing import Union
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib.figure import Figure
 from torch.utils.data import random_split
 
 from .data import PreTrainDataset, TwoGraphData
@@ -90,3 +95,20 @@ def split_random(dataset: PreTrainDataset, train_frac: float = 0.8):
     train = int(tot * train_frac)
     val = int(tot * (1 - train_frac))
     return random_split(dataset, [train, val])
+
+
+def minmax_normalise(s: pd.Series) -> pd.Series:
+    """MinMax normalisation of a pandas series"""
+    return (s - s.min()) / (s.max() - s.min())
+
+
+def plot_fam_losses(losses: dict) -> Figure:
+    """Plot distribution of times sampled vs avg loss of families"""
+    fig = plt.figure()
+    plt.xlabel("Times sampled")
+    plt.ylabel("Avg loss")
+    plt.title("Family statistics")
+    count = [len(x) for x in losses.values()]
+    mean = [np.mean(x) for x in losses.values()]
+    plt.scatter(x=count, y=mean)
+    return fig
