@@ -55,6 +55,7 @@ class TestChebConv(BaseTestGraphConv):
     module = ChebConvNet
 
 
+@pytest.mark.xfail
 class TestPNAConv(BaseTestGraphConv):
 
     module = PNAConvNet

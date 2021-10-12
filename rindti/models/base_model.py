@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 import torch
 from pytorch_lightning import LightningModule
 from torch import LongTensor, Tensor
-from torch.nn import Embedding
+from torch.nn import Embedding, LazyLinear
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics.functional import (
@@ -37,13 +37,24 @@ class BaseModel(LightningModule):
     def __init__(self):
         super().__init__()
 
-    def _get_feat_embed(self, params: dict) -> Embedding:
-        return Embedding(params["feat_dim"] + 2, params["hidden_dim"], padding_idx=0)
+    def _get_label_embed(self, params: dict) -> Embedding:
+        return Embedding(params["feat_dim"] + 1, params["hidden_dim"], padding_idx=0)
+
+    def _get_onehot_embed(self, params: dict) -> LazyLinear:
+        return LazyLinear(params["hidden_dim"], bias=False)
+
+    def _get_feat_embed(self, params: dict) -> Union[Embedding, LazyLinear]:
+        if params["feat_type"] == "onehot":
+            return self._get_onehot_embed(params)
+        elif params["feat_type"] == "label":
+            return self._get_label_embed(params)
+        else:
+            raise ValueError("Unknown feature type!")
 
     def _get_node_embed(self, params: dict, out_dim=None) -> LightningModule:
         if out_dim:
-            return node_embedders[params["node_embed"]](params["hidden_dim"], out_dim, **params)
-        return node_embedders[params["node_embed"]](params["hidden_dim"], params["hidden_dim"], **params)
+            return node_embedders[params["node_embed"]](out_dim, **params)
+        return node_embedders[params["node_embed"]](params["hidden_dim"], **params)
 
     def _get_pooler(self, params: dict) -> LightningModule:
         return poolers[params["pool"]](params["hidden_dim"], params["hidden_dim"], **params)

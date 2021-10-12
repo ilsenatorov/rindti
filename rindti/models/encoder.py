@@ -11,14 +11,9 @@ from .base_model import BaseModel
 class Encoder(BaseModel):
     """Encoder for graphs"""
 
-    def __init__(self, feat_embed: str = "bag", return_nodes: bool = False, **kwargs):
+    def __init__(self, return_nodes: bool = False, **kwargs):
         super().__init__()
-        if feat_embed == "bag":
-            self.feat_embed = self._get_feat_embed(kwargs)
-        elif feat_embed == "linear":
-            self.feat_embed = nn.LazyLinear(kwargs["hidden_dim"], bias=False)
-        elif feat_embed == "none":
-            self.feat_embed = None
+        self.feat_embed = self._get_feat_embed(kwargs)
         self.node_embed = self._get_node_embed(kwargs)
         self.pool = self._get_pooler(kwargs)
         self.return_nodes = return_nodes
@@ -37,8 +32,7 @@ class Encoder(BaseModel):
             Union[Tensor, Tuple[Tensor, Tensor]]: Either graph of graph+node embeddings
         """
         x, edge_index, batch = data["x"], data["edge_index"], data["batch"]
-        if self.feat_embed is not None:
-            feat_embed = self.feat_embed(x)
+        feat_embed = self.feat_embed(x)
         node_embed = self.node_embed(feat_embed, edge_index)
         embed = self.pool(node_embed, edge_index, batch)
         if self.return_nodes:

@@ -13,6 +13,7 @@ def default_config():
         "drug_alpha": 1,
         "drug_dropout": 0.2,
         "drug_frac": 0.05,
+        "drug_feat_type": "label",
         "drug_hidden_dim": 32,
         "drug_node_embed": "ginconv",
         "drug_num_heads": 4,
@@ -24,13 +25,13 @@ def default_config():
         "feat_method": "element_l1",
         "lr": 0.001,
         "mlp_dropout": 0.2,
-        "mlp_hidden_dim": 64,
         "momentum": 0.3,
         "optimiser": "adamw",
         "prot_alpha": 1,
         "prot_dropout": 0.2,
         "prot_frac": 0.05,
         "prot_hidden_dim": 32,
+        "prot_feat_type": "label",
         "prot_node_embed": "ginconv",
         "prot_num_heads": 4,
         "prot_num_layers": 3,
@@ -47,14 +48,10 @@ def default_config():
 
 class BaseTestModel:
     @pytest.mark.parametrize("prot_node_embed", list(node_embedders.keys()))
-    @pytest.mark.parametrize("drug_node_embed", list(node_embedders.keys()))
     @pytest.mark.parametrize("prot_pool", list(poolers.keys()))
-    @pytest.mark.parametrize("drug_pool", list(poolers.keys()))
     def test_shared_step(
         self,
-        drug_node_embed,
         prot_node_embed,
-        drug_pool,
         prot_pool,
         dti_dataset,
         dti_batch,
@@ -62,8 +59,6 @@ class BaseTestModel:
     ):
         default_config["prot_node_embed"] = prot_node_embed
         default_config["prot_pool"] = prot_pool
-        default_config["drug_node_embed"] = drug_node_embed
-        default_config["drug_pool"] = drug_pool
         default_config.update(dti_dataset.config)
         model = self.model(**default_config)
         model.shared_step(dti_batch)
