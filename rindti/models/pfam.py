@@ -26,7 +26,7 @@ def generalised_lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin
     """
     pos_loss = torch.logsumexp(pos_dist, dim=0)
     neg_loss = torch.logsumexp(margin - neg_dist, dim=0)
-    return torch.relu(pos_loss + neg_loss)
+    return torch.relu(pos_loss + neg_loss) ** 2
 
 
 class PfamModel(BaseModel):
