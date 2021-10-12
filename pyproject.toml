@@ -16,7 +16,7 @@ ignore-semiprivate = true
 ignore-private = true
 ignore-module = true
 fail-under = 80
-exclude = ["setup.py", "docs", "build"]
+exclude = ["tests"]
 ignore-regex = ["^get$", "^mock_.*", ".*Base*.*"]
 verbose = 0
 quiet = false
@@ -31,3 +31,6 @@ line_length = 119
 [tool.mypy]
 ignore_missing_imports = true
 follow_imports = "silent"
+
+[tool.pytest.ini_options]
+minversion = "6.0"

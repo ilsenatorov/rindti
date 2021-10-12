@@ -1,42 +1,19 @@
-from copy import deepcopy
-
 import pytest
 import torch
-from torch_geometric.loader import DataLoader
 
-from rindti.data import TwoGraphData
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 from rindti.models.base_model import node_embedders, poolers
 from rindti.utils import MyArgParser
 
-fake_data = {
-    "prot_x": torch.randint(low=1, high=5, size=(15,)),
-    "drug_x": torch.randint(low=1, high=5, size=(15,)),
-    "prot_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-    "drug_edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-    "prot_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-    "drug_edge_feats": torch.randint(low=0, high=5, size=(10,)),
-    "label": torch.tensor([1]),
-}
 
-dl = DataLoader([TwoGraphData(**fake_data)] * 10, batch_size=5, num_workers=1, follow_batch=["prot_x", "drug_x"])
-fake_data = next(iter(dl))
-
-
-class BaseTestModel:
-    """Abstract class for model testing"""
-
-    default_config = {
+@pytest.fixture
+def default_config():
+    return {
         "corruption": "mask",
         "drug_alpha": 1,
-        "drug_deg": torch.zeros((100), dtype=torch.long),
         "drug_dropout": 0.2,
-        "drug_edge_dim": 3,
-        "drug_feat_dim": 9,
-        "drug_feat_embed_dim": 32,
         "drug_frac": 0.05,
         "drug_hidden_dim": 32,
-        "drug_max_nodes": 78,
         "drug_node_embed": "ginconv",
         "drug_num_heads": 4,
         "drug_num_layers": 3,
@@ -45,20 +22,15 @@ class BaseTestModel:
         "drug_ratio": 0.25,
         "early_stop_patience": 60,
         "feat_method": "element_l1",
-        "lr": 0.0005,
+        "lr": 0.001,
         "mlp_dropout": 0.2,
         "mlp_hidden_dim": 64,
         "momentum": 0.3,
         "optimiser": "adamw",
         "prot_alpha": 1,
-        "prot_deg": torch.zeros((100), dtype=torch.long),
         "prot_dropout": 0.2,
-        "prot_edge_dim": 5,
-        "prot_feat_dim": 20,
-        "prot_feat_embed_dim": 32,
         "prot_frac": 0.05,
         "prot_hidden_dim": 32,
-        "prot_max_nodes": 593,
         "prot_node_embed": "ginconv",
         "prot_num_heads": 4,
         "prot_num_layers": 3,
@@ -72,19 +44,29 @@ class BaseTestModel:
         "weighted": 0,
     }
 
+
+class BaseTestModel:
     @pytest.mark.parametrize("prot_node_embed", list(node_embedders.keys()))
     @pytest.mark.parametrize("drug_node_embed", list(node_embedders.keys()))
     @pytest.mark.parametrize("prot_pool", list(poolers.keys()))
     @pytest.mark.parametrize("drug_pool", list(poolers.keys()))
-    def test_shared_step(self, drug_node_embed, prot_node_embed, drug_pool, prot_pool):
-        """Test .__init__"""
-        self.default_config["prot_node_embed"] = prot_node_embed
-        self.default_config["prot_pool"] = prot_pool
-        self.default_config["drug_node_embed"] = drug_node_embed
-        self.default_config["drug_pool"] = drug_pool
-        model = self.model(**self.default_config)
-        data = deepcopy(fake_data)
-        model.shared_step(data)
+    def test_shared_step(
+        self,
+        drug_node_embed,
+        prot_node_embed,
+        drug_pool,
+        prot_pool,
+        dti_dataset,
+        dti_batch,
+        default_config,
+    ):
+        default_config["prot_node_embed"] = prot_node_embed
+        default_config["prot_pool"] = prot_pool
+        default_config["drug_node_embed"] = drug_node_embed
+        default_config["drug_pool"] = drug_pool
+        default_config.update(dti_dataset.config)
+        model = self.model(**default_config)
+        model.shared_step(dti_batch)
 
     def test_arg_parser(self):
         parser = MyArgParser()
@@ -92,15 +74,16 @@ class BaseTestModel:
 
 
 class TestClassModel(BaseTestModel):
-    """Classification Model"""
 
     model = ClassificationModel
 
     @pytest.mark.parametrize("feat_method", ["element_l1", "element_l2", "mult", "concat"])
-    def test_feat_methods(self, feat_method: str):
+    def test_feat_methods(self, feat_method, default_config):
         """Test feature concatenation"""
-        self.default_config["feat_method"] = feat_method
-        model = self.model(**self.default_config)
+        default_config["feat_method"] = feat_method
+        default_config["prot_feat_dim"] = 1
+        default_config["drug_feat_dim"] = 1
+        model = self.model(**default_config)
         prot = torch.rand((32, 64), dtype=torch.float32)
         drug = torch.rand((32, 64), dtype=torch.float32)
         combined = model.merge_features(drug, prot)
@@ -112,18 +95,15 @@ class TestClassModel(BaseTestModel):
 
 
 class TestNoisyNodesClassModel(BaseTestModel):
-    """Noisy Nodes"""
 
     model = NoisyNodesClassModel
 
 
 class TestNoisyNodesRegModel(BaseTestModel):
-    """Noisy Nodes"""
 
     model = NoisyNodesRegModel
 
 
 class TestRegressionModel(BaseTestModel):
-    """Regression Model"""
 
     model = RegressionModel

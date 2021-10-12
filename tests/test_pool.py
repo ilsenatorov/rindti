@@ -28,18 +28,15 @@ fake_data = next(iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_wor
 
 class BaseTestGraphPool:
     def test_init(self):
-        """Tests .__init__"""
         self.module(**default_config)
 
     def test_forward(self):
-        """Tests .forward"""
         module = self.module(**default_config)
         output = module.forward(fake_data.x, fake_data.edge_index, fake_data.batch)
         assert output.size(0) == 5
         assert output.size(1) == 32
 
     def test_args(self):
-        """Test arguments parsing"""
         parser = MyArgParser()
         self.module.add_arguments(parser)
 
@@ -52,19 +49,16 @@ class BaseTestGraphPool:
 
 
 class TestGMTNet(BaseTestGraphPool):
-    """Tests GMTNet"""
 
     module = GMTNet
 
 
 class TestDiffPool(BaseTestGraphPool):
-    """Tests DiffPool"""
 
     module = DiffPoolNet
 
 
 class TestMeanPool(BaseTestGraphPool):
-    """Tests MeanPool"""
 
     module = MeanPool
 

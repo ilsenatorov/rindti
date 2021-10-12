@@ -4,14 +4,11 @@ from typing import Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from matplotlib.figure import Figure
 from torch.utils.data import random_split
 
-from .data import PreTrainDataset, TwoGraphData
 
-
-def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
+def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
     """Removes the prefix from all the args
     Args:
         prefix (str): prefix to remove (`drug_`, `prot_` or `mlp_` usually)
@@ -89,7 +86,7 @@ class MyArgParser(ArgumentParser):
                 return group
 
 
-def split_random(dataset: PreTrainDataset, train_frac: float = 0.8):
+def split_random(dataset, train_frac: float = 0.8):
     """Randomly split dataset"""
     tot = len(dataset)
     train = int(tot * train_frac)
@@ -102,13 +99,18 @@ def minmax_normalise(s: pd.Series) -> pd.Series:
     return (s - s.min()) / (s.max() - s.min())
 
 
-def plot_fam_losses(losses: dict) -> Figure:
+def plot_loss_count_dist(losses: dict) -> Figure:
     """Plot distribution of times sampled vs avg loss of families"""
     fig = plt.figure()
     plt.xlabel("Times sampled")
     plt.ylabel("Avg loss")
-    plt.title("Family statistics")
+    plt.title("Prot statistics")
     count = [len(x) for x in losses.values()]
     mean = [np.mean(x) for x in losses.values()]
     plt.scatter(x=count, y=mean)
     return fig
+
+
+def to_prob(s: pd.Series) -> pd.Series:
+    """Convert to probabilities"""
+    return s / s.sum()

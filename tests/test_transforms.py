@@ -26,7 +26,6 @@ def _assert_mask(masked_features, frac):
 
 @pytest.mark.parametrize("frac", [0.0, 0.25, 0.5, 1.0])
 def test_mask(frac):
-    """Tests masking with different (legit) fractions"""
     features = deepcopy(original_features)
     features, idx = mask_features(features, frac)
     _assert_mask(features, frac)
@@ -34,7 +33,6 @@ def test_mask(frac):
 
 @pytest.mark.parametrize("frac", [0.0, 0.25, 0.5, 1.0])
 def test_corrupt(frac):
-    """Tests corruption with different (legit) fractions"""
     features = deepcopy(original_features)
     features, idx = corrupt_features(features, frac)
     _assert_corruption(original_features, features, frac)
@@ -43,7 +41,6 @@ def test_corrupt(frac):
 @pytest.mark.parametrize("func", [mask_features, corrupt_features])
 @pytest.mark.parametrize("frac", [-1, 3])
 def test_assert_fail(func, frac):
-    """Tests corrupt and mask failing with wrong fracs"""
     features = deepcopy(original_features)
     with pytest.raises(AssertionError):
         func(features, frac)
@@ -52,7 +49,6 @@ def test_assert_fail(func, frac):
 @pytest.mark.parametrize("d", [{"x": 0.2}, {"prot_x": 0.4, "drug_x": 0.7}])
 @pytest.mark.parametrize("type", ["mask", "corrupt"])
 def test_data_corruptor(d, type):
-    """Tests DataCorruptor"""
     dc = DataCorruptor(d, type)
     corrupted_data = deepcopy(original_data)
     corrupted_data = dc(corrupted_data)

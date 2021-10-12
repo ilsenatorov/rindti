@@ -7,7 +7,7 @@ import torch
 from torch.functional import Tensor
 
 from ..data import TwoGraphData
-from ..utils import MyArgParser, plot_fam_losses
+from ..utils import MyArgParser, plot_loss_count_dist
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 
@@ -53,7 +53,7 @@ class PfamModel(BaseModel):
         """
         embeds = self.forward(data)
         dist = torch.cdist(embeds, embeds)
-        if self.global_step % 100 == 0:
+        if self.global_step % 100 == 1:
             fig = plt.figure()
             sns.heatmap(dist.detach().cpu())
             self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
@@ -68,14 +68,15 @@ class PfamModel(BaseModel):
             neg_idxt = torch.tensor(list(all_idx.difference(idx)))
             pos_dist = dist[pos_idxt[:, None], pos_idxt]
             neg_dist = dist[neg_idxt[:, None], pos_idxt]
-            fam_loss = generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
-            loss.append(fam_loss)
-            self.losses[fam].append(fam_loss.mean().item())
-        return dict(loss=torch.cat(loss).mean())
+            loss.append(generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin))
+        loss = torch.cat(loss)
+        for l, name in zip(loss, data.id):
+            self.losses[name].append(l.item())
+        return dict(loss=loss.mean())
 
     def training_epoch_end(self, outputs: dict):
         self.sampler.update_weights(self.losses)
-        self.logger.experiment.add_figure("loss_dist", plot_fam_losses(self.losses), global_step=self.global_step)
+        self.logger.experiment.add_figure("loss_dist", plot_loss_count_dist(self.losses), global_step=self.global_step)
         return super().training_epoch_end(outputs)
 
     @staticmethod

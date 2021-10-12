@@ -1,12 +1,13 @@
 import random
 from collections import defaultdict
+from os import replace
 from typing import Dict, Iterable, List
 
 import numpy as np
 import pandas as pd
 from torch.utils.data import Sampler
 
-from ..utils import minmax_normalise
+from ..utils import minmax_normalise, to_prob
 from .datasets import PreTrainDataset
 
 
@@ -36,8 +37,10 @@ class PfamSampler(Sampler):
         self.prot_per_fam = prot_per_fam
         self.batch_per_epoch = batch_per_epoch
         self.fam_idx = defaultdict(set)
+        self.prot_idx = {}
         for i, data in enumerate(self.dataset):
             self.fam_idx[data.fam].add(i)
+            self.prot_idx[data.id] = i
         self.fam_idx = {k: list(v) for k, v in self.fam_idx.items()}
 
     def _construct_batch(self) -> List[int]:
@@ -47,9 +50,13 @@ class PfamSampler(Sampler):
             List[int]: Indices of the proteins from the main dataset
         """
         batch = []
-        anchor_fams = random.choices(list(self.fam_idx.keys()), k=self.batch_size // self.prot_per_fam)
+        anchor_fams = np.random.choice(
+            list(self.fam_idx.keys()),
+            size=self.batch_size // self.prot_per_fam,
+            replace=False,
+        )
         for fam in anchor_fams:
-            batch += random.choices(self.fam_idx[fam], k=self.prot_per_fam)
+            batch += list(np.random.choice(self.fam_idx[fam], size=self.prot_per_fam, replace=False))
         return batch
 
     def __iter__(self) -> iter:
@@ -81,12 +88,18 @@ class WeightedPfamSampler(PfamSampler):
     def __init__(self, *args, minprob: float = 0.1, **kwargs):
         super().__init__(*args, **kwargs)
         self.minprob = minprob
+        self.prot_weights = {k: 1000 for k in range(len(self.dataset))}
         self.fam_weights = pd.Series({k: 1000 * len(v) for k, v in self.fam_idx.items()})
-        self.normalised_weights = self.fam_weights
 
-    def get_normalised_weights(self):
+    def update_fam_weights(self):
         """Get minmax normalised weights"""
-        self.normalised_weights = minmax_normalise(self.fam_weights) + self.minprob
+        fam_weights = defaultdict(list)
+        for fam_id, fam in self.fam_idx.items():
+            for prot in fam:
+                fam_weights[fam_id].append(self.prot_weights[prot])
+        self.fam_weights.update({k: np.mean(v) for k, v in fam_weights.items()})
+        self.fam_weights = minmax_normalise(self.fam_weights) + self.minprob
+        self.fam_weights = self.fam_weights / self.fam_weights.sum()
 
     def update_weights(self, losses: Dict[str, Iterable]):
         """Update sampling weight of families
@@ -94,8 +107,8 @@ class WeightedPfamSampler(PfamSampler):
         Args:
             losses (Dict[str, Iterable]): family ids and their respective losses
         """
-        self.fam_weights.update({k: np.mean(v) for k, v in losses.items()})
-        self.get_normalised_weights()
+        self.prot_weights.update({self.prot_idx[k]: np.mean(v) for k, v in losses.items()})
+        self.update_fam_weights()
 
     def _construct_batch(self) -> List[int]:
         """Creates a single batch. takes self.prot_per_fam families with
@@ -105,11 +118,21 @@ class WeightedPfamSampler(PfamSampler):
             List[int]: Indices of the proteins from the main dataset
         """
         batch = []
-        anchor_fams = random.choices(
-            list(self.normalised_weights.index),
-            weights=self.normalised_weights.values,
-            k=self.batch_size // self.prot_per_fam,
+        anchor_fams = list(
+            np.random.choice(
+                list(self.fam_weights.index),
+                p=to_prob(self.fam_weights.values),
+                size=self.batch_size // self.prot_per_fam,
+                replace=False,
+            )
         )
         for fam in anchor_fams:
-            batch += random.choices(self.fam_idx[fam], k=self.prot_per_fam)
+            batch += list(
+                np.random.choice(
+                    self.fam_idx[fam],
+                    p=to_prob(np.asarray([self.prot_weights[x] for x in self.fam_idx[fam]])),
+                    size=self.prot_per_fam,
+                    replace=False,
+                )
+            )
         return batch
