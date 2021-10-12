@@ -205,5 +205,4 @@ class LargePreTrainDataset(Dataset):
 
     def get(self, idx):
         """Load graph"""
-        data = torch.load(os.path.join(self.processed_dir, "data_{}.pt".format(idx)))
-        return data
+        return torch.load(os.path.join(self.processed_dir, "data_{}.pt".format(idx)))

@@ -1,3 +1,4 @@
+import os.path as osp
 import pickle
 import string
 from random import choice, randint
@@ -73,47 +74,51 @@ def pretrain_pickle(tmpdir_factory):
 
 
 @pytest.fixture(scope="session")
+def sharded_pretrain_pickle(tmpdir_factory):
+    """Create a collection of pickled files with fake protein dataset"""
+    ds = pd.Series([create_fake_graph(randint(100, 200), 20, fam=["a", "b"]) for _ in range(N_PROTS)], name="data")
+    ds = pd.DataFrame(ds)
+    fn = tmpdir_factory.mktemp("shards")
+    for i in range(0, len(ds), N_PROTS // 2):
+        ds.iloc[i : i + N_PROTS // 2].to_pickle(fn.join("data{}.pkl".format(i)))
+    return str(fn)
+
+
+@pytest.fixture(scope="session")
 def dti_dataset(dti_pickle):
-    ds = DTIDataset(dti_pickle)
-    return ds
+    return DTIDataset(dti_pickle)
 
 
 @pytest.fixture(scope="session")
 def dti_dataloader(dti_dataset):
-    dl = DataLoader(dti_dataset, batch_size=BATCH_SIZE, follow_batch=["prot_x", "drug_x"])
-    return dl
+    return DataLoader(dti_dataset, batch_size=BATCH_SIZE, follow_batch=["prot_x", "drug_x"])
 
 
 @pytest.fixture
 def dti_batch(dti_dataloader):
-    batch = next(iter(dti_dataloader))
-    return batch
+    return next(iter(dti_dataloader))
 
 
 @pytest.fixture(scope="session")
 def pretrain_dataset(pretrain_pickle):
-    ds = PreTrainDataset(pretrain_pickle)
-    return ds
+    return PreTrainDataset(pretrain_pickle)
 
 
 @pytest.fixture(scope="session")
 def pfam_sampler(pretrain_dataset):
-    sampler = PfamSampler(
+    return PfamSampler(
         pretrain_dataset,
         batch_size=BATCH_SIZE,
         prot_per_fam=PROT_PER_FAM,
         batch_per_epoch=BATCH_PER_EPOCH,
     )
-    return sampler
 
 
 @pytest.fixture(scope="session")
 def pretrain_dataloader(pretrain_dataset, pfam_sampler):
-    dl = DataLoader(pretrain_dataset, batch_sampler=pfam_sampler)
-    return dl
+    return DataLoader(pretrain_dataset, batch_sampler=pfam_sampler)
 
 
 @pytest.fixture
 def pretrain_batch(pretrain_dataloader):
-    batch = next(iter(pretrain_dataloader))
-    return batch
+    return next(iter(pretrain_dataloader))
