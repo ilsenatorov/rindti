@@ -27,7 +27,6 @@ def create_fake_graph(n_nodes, n_features, fam: list = None):
     d = {
         "x": torch.randint(1, n_features, (n_nodes,), dtype=torch.long),
         "edge_index": torch.randint(low=0, high=5, size=(2, 10)),
-        "id": randomword(20),
     }
     if fam:
         d["fam"] = choice(fam)

@@ -4,7 +4,6 @@ from typing import Callable, Iterable
 
 import pandas as pd
 import torch
-from torch import FloatTensor, LongTensor
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 
 from ..utils import get_feat_type
@@ -21,6 +20,8 @@ class DTIDataset(InMemoryDataset):
         pre_transform (Callable, optional): pre-transformer to apply once before. Defaults to None.
     """
 
+    splits = {"train": 0, "val": 1, "test": 2}
+
     def _set_filenames(self, filename: str) -> str:
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
@@ -33,25 +34,7 @@ class DTIDataset(InMemoryDataset):
         self.config["drug_feat_type"] = get_feat_type(data, "drug_x")
         return self.config
 
-    @property
-    def processed_file_names(self) -> Iterable[str]:
-        """Files that are created"""
-        return ["train.pt", "val.pt", "test.pt"]
-
-    def __init__(
-        self,
-        filename: str,
-        split: str = "train",
-        transform: Callable = None,
-        pre_transform: Callable = None,
-        pre_filter: Callable = None,
-    ):
-        self.splits = {"train": 0, "val": 1, "test": 2}
-        root = self._set_filenames(filename)
-        super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
-
-    def process_(self, data_list: list, s: int):
+    def process_(self, data_list: list, split: str):
         """Process the datalist
 
         Args:
@@ -65,13 +48,32 @@ class DTIDataset(InMemoryDataset):
             data_list = [self.pre_transform(data) for data in data_list]
 
         data, slices = self.collate(data_list)
-        torch.save((data, slices, self.config), self.processed_paths[s])
+        torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
 
     def _get_datum(self, all_data: dict, id: str, which: str) -> dict:
+        """Get either prot or drug data"""
         graph = all_data[which].loc[id, "data"]
         graph["count"] = float(all_data[which].loc[id, "count"])
-        graph[id] = id
+        graph["id"] = id
         return {which.rstrip("s") + "_" + k: v for k, v in graph.items()}
+
+    @property
+    def processed_file_names(self) -> Iterable[str]:
+        """Files that are created"""
+        return [k + ".pt" for k in self.splits.keys()]
+
+    def __init__(
+        self,
+        filename: str,
+        split: str = "train",
+        transform: Callable = None,
+        pre_transform: Callable = None,
+        pre_filter: Callable = None,
+    ):
+        root = self._set_filenames(filename)
+        print(root)
+        super().__init__(root, transform, pre_transform, pre_filter)
+        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
 
     def process(self):
         """If the dataset was not seen before, process everything"""
@@ -80,7 +82,7 @@ class DTIDataset(InMemoryDataset):
             self.config = all_data["config"]
             self.config["prot_max_nodes"] = 0
             self.config["drug_max_nodes"] = 0
-            for s, split in self.splits.items():
+            for split in self.splits.keys():
                 data_list = []
                 for i in all_data["data"]:
                     if i["split"] != split:
@@ -93,9 +95,9 @@ class DTIDataset(InMemoryDataset):
                     self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
                     self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
                     data_list.append(two_graph_data)
-                    self.config = self.set_feat_type(self.config, data_list[0])
+                    self.config = self._set_feat_type(data_list[0])
                 if data_list:
-                    self.process_(data_list, s, self.config)
+                    self.process_(data_list, split)
 
 
 class PreTrainDataset(InMemoryDataset):
