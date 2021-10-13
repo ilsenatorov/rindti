@@ -4,8 +4,10 @@ from typing import Callable, Iterable
 
 import pandas as pd
 import torch
+from torch import FloatTensor, LongTensor
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 
+from ..utils import get_feat_type
 from .data import TwoGraphData
 
 
@@ -19,6 +21,23 @@ class DTIDataset(InMemoryDataset):
         pre_transform (Callable, optional): pre-transformer to apply once before. Defaults to None.
     """
 
+    def _set_filenames(self, filename: str) -> str:
+        basefilename = os.path.basename(filename)
+        basefilename = os.path.splitext(basefilename)[0]
+        self.filename = filename
+        return os.path.join("data", basefilename)
+
+    def _set_feat_type(self, data: dict) -> dict:
+        """Sets feat type in the self.config from snakemake self.config"""
+        self.config["prot_feat_type"] = get_feat_type(data, "prot_x")
+        self.config["drug_feat_type"] = get_feat_type(data, "drug_x")
+        return self.config
+
+    @property
+    def processed_file_names(self) -> Iterable[str]:
+        """Files that are created"""
+        return ["train.pt", "val.pt", "test.pt"]
+
     def __init__(
         self,
         filename: str,
@@ -27,26 +46,10 @@ class DTIDataset(InMemoryDataset):
         pre_transform: Callable = None,
         pre_filter: Callable = None,
     ):
-        pre_transform_tag = "" if pre_transform is None else str(pre_transform)
-        pre_filter_tag = "" if pre_transform is None else str(pre_filter)
-        basefilename = os.path.basename(filename)
-        basefilename = os.path.splitext(basefilename)[0]
-        root = os.path.join("data", basefilename + pre_transform_tag + pre_filter_tag)
-        self.filename = filename
+        self.splits = {"train": 0, "val": 1, "test": 2}
+        root = self._set_filenames(filename)
         super().__init__(root, transform, pre_transform, pre_filter)
-        if split == "train":
-            self.data, self.slices, self.config = torch.load(self.processed_paths[0])
-        elif split == "val":
-            self.data, self.slices, self.config = torch.load(self.processed_paths[1])
-        elif split == "test":
-            self.data, self.slices, self.config = torch.load(self.processed_paths[2])
-        else:
-            raise ValueError("Unknown split!")
-
-    @property
-    def processed_file_names(self) -> Iterable[str]:
-        """Files that are created"""
-        return ["train.pt", "val.pt", "test.pt"]
+        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
 
     def process_(self, data_list: list, s: int):
         """Process the datalist
@@ -64,6 +67,12 @@ class DTIDataset(InMemoryDataset):
         data, slices = self.collate(data_list)
         torch.save((data, slices, self.config), self.processed_paths[s])
 
+    def _get_datum(self, all_data: dict, id: str, which: str) -> dict:
+        graph = all_data[which].loc[id, "data"]
+        graph["count"] = float(all_data[which].loc[id, "count"])
+        graph[id] = id
+        return {which.rstrip("s") + "_" + k: v for k, v in graph.items()}
+
     def process(self):
         """If the dataset was not seen before, process everything"""
         with open(self.filename, "rb") as file:
@@ -71,31 +80,22 @@ class DTIDataset(InMemoryDataset):
             self.config = all_data["config"]
             self.config["prot_max_nodes"] = 0
             self.config["drug_max_nodes"] = 0
-            for s, split in enumerate(["train", "val", "test"]):
+            for s, split in self.splits.items():
                 data_list = []
                 for i in all_data["data"]:
                     if i["split"] != split:
                         continue
-                    prot_id = i["prot_id"]
-                    drug_id = i["drug_id"]
-                    prot_data = all_data["prots"].loc[prot_id, "data"]
-                    drug_data = all_data["drugs"].loc[drug_id, "data"]
-                    new_i = {
-                        "prot_count": float(all_data["prots"].loc[prot_id, "count"]),
-                        "drug_count": float(all_data["drugs"].loc[drug_id, "count"]),
-                        "prot_id": prot_id,
-                        "drug_id": drug_id,
-                        "label": i["label"],
-                    }
-                    new_i.update({"prot_" + k: v for (k, v) in prot_data.items()})
-                    new_i.update({"drug_" + k: v for (k, v) in drug_data.items()})
-                    two_graph_data = TwoGraphData(**new_i)
+                    data = self._get_datum(all_data, i["prot_id"], "prots")
+                    data.update(self._get_datum(all_data, i["drug_id"], "drugs"))
+                    data["label"] = i["label"]
+                    two_graph_data = TwoGraphData(**data)
                     two_graph_data.num_nodes = 1  # supresses the warning
                     self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
                     self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
                     data_list.append(two_graph_data)
+                    self.config = self.set_feat_type(self.config, data_list[0])
                 if data_list:
-                    self.process_(data_list, s)
+                    self.process_(data_list, s, self.config)
 
 
 class PreTrainDataset(InMemoryDataset):
@@ -131,13 +131,13 @@ class PreTrainDataset(InMemoryDataset):
 
     def process(self):
         """If the dataset was not seen before, process everything"""
-        config = dict(max_nodes=0)
+        self.config = dict(max_nodes=0)
         df = pd.read_pickle(self.filename)
         data_list = []
         for id, x in df["data"].to_dict().items():
             if "index_mapping" in x:
                 del x["index_mapping"]
-            config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
+            self.config["max_nodes"] = max(self.config["max_nodes"], x["x"].size(0))
             x["id"] = id
             data_list.append(Data(**x))
 
@@ -146,9 +146,9 @@ class PreTrainDataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
-
+        self.config["feat_type"] = get_feat_type(data_list[0], "x")
         data, slices = self.collate(data_list)
-        torch.save((data, slices, config), self.processed_paths[0])
+        torch.save((data, slices, self.config), self.processed_paths[0])
 
 
 class LargePreTrainDataset(Dataset):
@@ -168,24 +168,24 @@ class LargePreTrainDataset(Dataset):
 
     @property
     def config_file(self):
-        """Saved config file"""
-        return os.path.join(self.processed_dir, "config.pt")
+        """Saved self.config file"""
+        return os.path.join(self.processed_dir, "self.config.pt")
 
     @property
     def processed_file_names(self):
         """Saved graphs"""
-        return [os.path.join(self.processed_dir, x) for x in ["config.pt", "data_0.pt"]]
+        return [os.path.join(self.processed_dir, x) for x in ["self.config.pt", "data_0.pt"]]
 
     def process(self):
         """Save each graph as a file"""
         i = 0
-        config = dict(max_nodes=0)
+        self.config = dict(max_nodes=0)
         for shard in os.listdir(self.rawdir):
             df = pd.read_pickle(os.path.join(self.rawdir, shard))
             for id, x in df["data"].to_dict().items():
                 if "index_mapping" in x:
                     del x["index_mapping"]
-                config["max_nodes"] = max(config["max_nodes"], x["x"].size(0))
+                self.config["max_nodes"] = max(self.config["max_nodes"], x["x"].size(0))
                 x["id"] = id
                 data = Data(**x)
 
@@ -197,8 +197,8 @@ class LargePreTrainDataset(Dataset):
 
                 torch.save(data, os.path.join(self.processed_dir, "data_{}.pt".format(i)))
                 i += 1
-        config["count"] = i
-        torch.save(config, self.config_file)
+        self.config["count"] = i
+        torch.save(self.config, self.config_file)
 
     def len(self):
         return self.config["count"]

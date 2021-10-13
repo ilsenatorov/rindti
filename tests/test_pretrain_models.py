@@ -73,7 +73,6 @@ class TestInfoGraphModel(BaseTestModel):
     model = InfoGraphModel
 
 
-@pytest.mark.xfail
 class TestBGRLModel(BaseTestModel):
 
     model = BGRLModel

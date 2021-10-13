@@ -127,6 +127,7 @@ class BaseModel(LightningModule):
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step"""
+        # sourcery skip: class-extract-method
         ss = self.shared_step(data)
         # val_loss has to be logged for early stopping and reduce_lr
         for key, value in ss.items():

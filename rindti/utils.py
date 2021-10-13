@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
+from torch import FloatTensor, LongTensor
 from torch.utils.data import random_split
 
 
@@ -29,7 +30,7 @@ def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
 
 
 def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
-    """Adds the prefix to all the args. Removes None values and 'index_mapping'
+    """Adds the prefix to all the args. Removes None values and "index_mapping"
 
     Args:
         prefix (str): prefix to add (`drug_`, `prot_` or `mlp_` usually)
@@ -114,3 +115,23 @@ def plot_loss_count_dist(losses: dict) -> Figure:
 def to_prob(s: pd.Series) -> pd.Series:
     """Convert to probabilities"""
     return s / s.sum()
+
+
+def get_feat_type(data: dict, key: str) -> str:
+    """Check which type of data we have
+
+    Args:
+        data (dict): TwoGraphData or Data
+        key (str): "x" or "prot_x" or "drug_x" usually
+
+    Raises:
+        ValueError: If not FloatTensor or LongTensor
+
+    Returns:
+        str: "label" for LongTensor, "onehot" for FloatTensor
+    """
+    if isinstance(data[key], LongTensor):
+        return "label"
+    if isinstance(data[key], FloatTensor):
+        return "onehot"
+    raise ValueError("Unknown data type {}".format(type(data[key])))
