@@ -1,8 +1,7 @@
 from argparse import ArgumentParser
 
-import torch
+from torch import nn
 from torch.functional import Tensor
-from torch.nn import BatchNorm1d, LazyLinear, ModuleList, PReLU, ReLU, Sequential
 from torch_geometric.nn import GINConv
 from torch_geometric.typing import Adj
 
@@ -19,34 +18,34 @@ class GINConvNet(BaseLayer):
         num_layers (int, optional): Total number of layers. Defaults to 3.
     """
 
-    def __init__(self, output_dim: int, hidden_dim: int = 64, num_layers: int = 3, **kwargs):
+    def __init__(self, input_dim: int, output_dim: int, hidden_dim: int = 64, num_layers: int = 3, **kwargs):
         super().__init__()
         self.inp = GINConv(
-            Sequential(
-                LazyLinear(hidden_dim),
-                PReLU(),
-                LazyLinear(hidden_dim),
-                BatchNorm1d(hidden_dim),
+            nn.Sequential(
+                nn.Linear(input_dim, hidden_dim),
+                nn.PReLU(),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.BatchNorm1d(hidden_dim),
             )
         )
         mid_layers = [
             GINConv(
-                Sequential(
-                    LazyLinear(hidden_dim),
-                    PReLU(),
-                    LazyLinear(hidden_dim),
-                    BatchNorm1d(hidden_dim),
+                nn.Sequential(
+                    nn.Linear(hidden_dim, hidden_dim),
+                    nn.PReLU(),
+                    nn.Linear(hidden_dim, hidden_dim),
+                    nn.BatchNorm1d(hidden_dim),
                 )
             )
             for _ in range(num_layers - 2)
         ]
-        self.mid_layers = ModuleList(mid_layers)
+        self.mid_layers = nn.ModuleList(mid_layers)
         self.out = GINConv(
-            Sequential(
-                LazyLinear(hidden_dim),
-                PReLU(),
-                LazyLinear(output_dim),
-                BatchNorm1d(output_dim),
+            nn.Sequential(
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.PReLU(),
+                nn.Linear(hidden_dim, output_dim),
+                nn.BatchNorm1d(output_dim),
             )
         )
 

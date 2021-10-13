@@ -20,6 +20,7 @@ class ChebConvNet(BaseLayer):
 
     def __init__(
         self,
+        input_dim: int,
         output_dim: int,
         hidden_dim: int = 32,
         K: int = 1,
@@ -27,10 +28,10 @@ class ChebConvNet(BaseLayer):
         **kwargs,
     ):
         super().__init__()
-        self.inp = ChebConv(-1, hidden_dim, K)
-        mid_layers = [ChebConv(-1, hidden_dim, K) for _ in range(num_layers - 2)]
+        self.inp = ChebConv(input_dim, hidden_dim, K)
+        mid_layers = [ChebConv(hidden_dim, hidden_dim, K) for _ in range(num_layers - 2)]
         self.mid_layers = ModuleList(mid_layers)
-        self.out = ChebConv(-1, output_dim, K)
+        self.out = ChebConv(hidden_dim, output_dim, K)
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
         """Forward pass of the module"""

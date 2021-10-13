@@ -13,12 +13,14 @@ class FilmConvNet(BaseLayer):
     https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.FiLMConv
     """
 
-    def __init__(self, output_dim: int, hidden_dim: int = 32, edge_dim=None, num_layers: int = 10, **kwargs):
+    def __init__(
+        self, input_dim: int, output_dim: int, hidden_dim: int = 32, edge_dim=None, num_layers: int = 10, **kwargs
+    ):
         super().__init__()
-        self.inp = FiLMConv(-1, hidden_dim, num_relations=edge_dim)
-        mid_layers = [FiLMConv(-1, hidden_dim, num_relations=edge_dim) for _ in range(num_layers - 2)]
+        self.inp = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
+        mid_layers = [FiLMConv(hidden_dim, hidden_dim, num_relations=edge_dim) for _ in range(num_layers - 2)]
         self.mid_layers = ModuleList(mid_layers)
-        self.out = FiLMConv(-1, output_dim, num_relations=edge_dim)
+        self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats, **kwargs) -> Tensor:
         """Forward pass of the module"""

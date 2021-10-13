@@ -17,9 +17,11 @@ class GatConvNet(BaseLayer):
         heads (int, optional): Number of heads for multi-head attention. Defaults to 4.
     """
 
-    def __init__(self, output_dim: int, hidden_dim: int = 32, heads: int = 4, num_layers: int = 4, **kwargs):
+    def __init__(
+        self, input_dim, output_dim: int, hidden_dim: int = 32, heads: int = 4, num_layers: int = 4, **kwargs
+    ):
         super().__init__()
-        self.inp = GATv2Conv(-1, hidden_dim, heads)
+        self.inp = GATv2Conv(input_dim, hidden_dim, heads)
         mid_layers = [GATv2Conv(-1, hidden_dim, heads) for _ in range(num_layers - 2)]
         self.mid_layers = ModuleList(mid_layers)
         self.out = GATv2Conv(-1, output_dim, heads=1)

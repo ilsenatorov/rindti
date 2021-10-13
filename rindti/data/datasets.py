@@ -71,7 +71,6 @@ class DTIDataset(InMemoryDataset):
         pre_filter: Callable = None,
     ):
         root = self._set_filenames(filename)
-        print(root)
         super().__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
 

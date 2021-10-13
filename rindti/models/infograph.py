@@ -53,7 +53,6 @@ class InfoGraphModel(BaseModel):
 
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
-        parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--frac", default=0.15, type=float)
         parser.add_argument("--corruption", default="corrupt", type=str)
         parser.add_argument("--alpha", default=1.0, type=float)

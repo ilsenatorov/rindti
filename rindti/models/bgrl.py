@@ -141,7 +141,6 @@ class BGRLModel(BaseModel):
         parser.add_argument("--frac", default=0.1, type=float, help="Corruption percentage")
         parser.add_argument("--corruption", default="mask", type=str, help="Corruption type")
         parser.add_argument("--alpha", default=1.0, type=float)
-        parser.add_argument("--feat_embed_dim", default=32, type=int)
 
         pooler_args = parser.add_argument_group("Pool", prefix="--")
         node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
