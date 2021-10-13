@@ -18,6 +18,7 @@ class MLP(BaseLayer):
 
     def __init__(
         self,
+        input_dim: int,
         out_dim: int,
         hidden_dim: int = 64,
         num_layers: int = 2,
@@ -26,13 +27,13 @@ class MLP(BaseLayer):
     ):
         super().__init__()
 
-        self.mlp = nn.Sequential(nn.LazyLinear(hidden_dim), nn.ReLU(), nn.Dropout(dropout))
+        self.mlp = nn.Sequential(nn.Linear(input_dim, hidden_dim), nn.ReLU(), nn.Dropout(dropout))
 
         for i in range(num_layers - 2):
-            self.mlp.add_module("hidden_linear{}".format(i), nn.LazyLinear(hidden_dim))
+            self.mlp.add_module("hidden_linear{}".format(i), nn.Linear(hidden_dim, hidden_dim))
             self.mlp.add_module("hidden_relu{}".format(i), nn.ReLU())
             self.mlp.add_module("hidden_dropout{}".format(i), nn.Dropout(dropout))
-        self.mlp.add_module("final_linear", nn.LazyLinear(out_dim))
+        self.mlp.add_module("final_linear", nn.Linear(input_dim, out_dim))
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward pass of the module"""
