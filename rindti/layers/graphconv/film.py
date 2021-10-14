@@ -20,6 +20,7 @@ class FilmConvNet(BaseLayer):
         self.inp = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
         mid_layers = [FiLMConv(hidden_dim, hidden_dim, num_relations=edge_dim) for _ in range(num_layers - 2)]
         self.mid_layers = ModuleList(mid_layers)
+
         self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats, **kwargs) -> Tensor:
