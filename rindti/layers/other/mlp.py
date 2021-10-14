@@ -33,7 +33,7 @@ class MLP(BaseLayer):
             self.mlp.add_module("hidden_linear{}".format(i), nn.Linear(hidden_dim, hidden_dim))
             self.mlp.add_module("hidden_relu{}".format(i), nn.ReLU())
             self.mlp.add_module("hidden_dropout{}".format(i), nn.Dropout(dropout))
-        self.mlp.add_module("final_linear", nn.Linear(input_dim, out_dim))
+        self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))
 
     def forward(self, x: Tensor) -> Tensor:
         """Forward pass of the module"""

@@ -20,7 +20,7 @@ class Encoder(BaseModel):
 
     def forward(
         self,
-        data: Data,
+        data: dict,
         **kwargs,
     ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Encode a graph
@@ -31,10 +31,24 @@ class Encoder(BaseModel):
         Returns:
             Union[Tensor, Tuple[Tensor, Tensor]]: Either graph of graph+node embeddings
         """
-        x, edge_index, batch = data["x"], data["edge_index"], data["batch"]
+        if not isinstance(data, dict):
+            data = data.to_dict()
+        x, edge_index, batch, edge_attr, edge_feat = (
+            data["x"],
+            data["edge_index"],
+            data["batch"],
+            data.get("edge_attr"),
+            data.get("edge_feat"),
+        )
         feat_embed = self.feat_embed(x)
-        node_embed = self.node_embed(feat_embed, edge_index)
-        embed = self.pool(node_embed, edge_index, batch)
+        node_embed = self.node_embed(
+            x=feat_embed,
+            edge_index=edge_index,
+            edge_attr=edge_attr,
+            edge_feat=edge_feat,
+            batch=batch,
+        )
+        embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)
         if self.return_nodes:
             return embed, node_embed
         return embed
