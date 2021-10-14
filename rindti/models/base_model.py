@@ -17,13 +17,24 @@ from torchmetrics.functional import (
 )
 
 from ..data import TwoGraphData
-from ..layers import MLP, ChebConvNet, DiffPoolNet, GatConvNet, GINConvNet, GMTNet, MeanPool
+from ..layers import (
+    MLP,
+    ChebConvNet,
+    DiffPoolNet,
+    FilmConvNet,
+    GatConvNet,
+    GINConvNet,
+    GMTNet,
+    MeanPool,
+    TransformerNet,
+)
 
 node_embedders = {
     "ginconv": GINConvNet,
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
-    # "filmconv": FilmConvNet,
+    "filmconv": FilmConvNet,
+    "transformernet": TransformerNet,
 }
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 

@@ -14,21 +14,29 @@ class FilmConvNet(BaseLayer):
     """
 
     def __init__(
-        self, input_dim: int, output_dim: int, hidden_dim: int = 32, edge_dim=None, num_layers: int = 10, **kwargs
+        self,
+        input_dim: int,
+        output_dim: int,
+        hidden_dim: int = 32,
+        edge_dim=None,
+        num_layers: int = 10,
+        **kwargs,
     ):
         super().__init__()
+        if edge_dim is None:
+            edge_dim = 1
         self.inp = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
         mid_layers = [FiLMConv(hidden_dim, hidden_dim, num_relations=edge_dim) for _ in range(num_layers - 2)]
         self.mid_layers = ModuleList(mid_layers)
 
         self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_feats, **kwargs) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Adj, edge_attr: Tensor = None, **kwargs) -> Tensor:
         """Forward pass of the module"""
-        x = self.inp(x, edge_index, edge_feats)
+        x = self.inp(x, edge_index, edge_attr)
         for module in self.mid_layers:
-            x = module(x, edge_index, edge_feats)
-        x = self.out(x, edge_index, edge_feats)
+            x = module(x, edge_index, edge_attr)
+        x = self.out(x, edge_index, edge_attr)
         return x
 
     @staticmethod

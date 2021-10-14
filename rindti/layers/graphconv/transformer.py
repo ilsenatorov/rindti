@@ -29,7 +29,7 @@ class TransformerNet(BaseLayer):
         self.mid_layers = ModuleList(mid_layers)
         self.out = TransformerConv(-1, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim)
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_attr: Tensor, **kwargs) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Adj, edge_attr: Tensor = None, **kwargs) -> Tensor:
         """Forward pass of the module"""
         x = self.inp(x, edge_index, edge_attr)
         for module in self.mid_layers:

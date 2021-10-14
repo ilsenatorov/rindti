@@ -23,10 +23,24 @@ def randomword(length: int) -> str:
     return "".join(choice(letters) for i in range(length))
 
 
-def create_fake_graph(n_nodes, n_features, fam: list = None):
+def create_fake_graph(
+    n_nodes: int,
+    n_features: int,
+    n_edges: int,
+    edge_attr_type: str,
+    edge_dim: int,
+    fam: list = None,
+):
+    if edge_attr_type == "label":
+        edge_attr = torch.randint(low=0, high=edge_dim - 1, size=(n_edges, edge_dim))
+    elif edge_attr_type == "onehot":
+        edge_attr = torch.rand(size=(n_edges, edge_dim))
+    else:
+        edge_attr = None
     d = {
         "x": torch.randint(1, n_features, (n_nodes,), dtype=torch.long),
-        "edge_index": torch.randint(low=0, high=5, size=(2, 10)),
+        "edge_index": torch.randint(low=0, high=n_nodes - 1, size=(2, n_edges)),
+        "edge_attr": edge_attr,
     }
     if fam:
         d["fam"] = choice(fam)
@@ -34,7 +48,17 @@ def create_fake_graph(n_nodes, n_features, fam: list = None):
 
 
 def create_fake_dataset(n_prots, n_drugs, n_interactions):
-    prots = pd.Series([create_fake_graph(randint(100, 200), 20) for _ in range(n_prots)], name="data")
+    prots = pd.Series(
+        [
+            create_fake_graph(
+                randint(100, 200),
+                20,
+                randint(100, 100),
+            )
+            for _ in range(n_prots)
+        ],
+        name="data",
+    )
     drugs = pd.Series([create_fake_graph(randint(100, 200), 9) for _ in range(n_drugs)], name="data")
     prots = pd.DataFrame(prots)
     drugs = pd.DataFrame(drugs)
