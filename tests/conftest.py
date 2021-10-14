@@ -6,10 +6,13 @@ from random import choice, randint
 import pandas as pd
 import pytest
 import torch
+from torch.functional import Tensor
 from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataset, PfamSampler, PreTrainDataset
 
+MIN_NODES = 100
+MAX_NODES = 200
 N_PROTS = 100
 N_DRUGS = 100
 N_INTER = 250
@@ -23,35 +26,46 @@ def randomword(length: int) -> str:
     return "".join(choice(letters) for i in range(length))
 
 
+def create_features(feat_type: str, dim: tuple) -> Tensor:
+    if feat_type == "onehot":
+        return torch.rand(dim)
+    elif feat_type == "label":
+        return torch.randint(1, dim[1], (dim[0],), dtype=torch.long)
+    else:
+        return None
+
+
 def create_fake_graph(
+    node_attr_type: str,
+    node_dim: int,
     n_nodes: int,
-    n_features: int,
-    n_edges: int,
     edge_attr_type: str,
     edge_dim: int,
+    n_edges: int,
     fam: list = None,
 ):
-    if edge_attr_type == "label":
-        edge_attr = torch.randint(low=0, high=edge_dim - 1, size=(n_edges, edge_dim))
-    elif edge_attr_type == "onehot":
-        edge_attr = torch.rand(size=(n_edges, edge_dim))
-    else:
-        edge_attr = None
-    d = {
-        "x": torch.randint(1, n_features, (n_nodes,), dtype=torch.long),
-        "edge_index": torch.randint(low=0, high=n_nodes - 1, size=(2, n_edges)),
-        "edge_attr": edge_attr,
-    }
+    d = (
+        dict(
+            x=create_features(node_attr_type, (n_nodes, node_dim)),
+            edge_index=torch.randint(0, n_nodes, (2, n_edges)),
+            edge_attr=create_features(edge_attr_type, (n_edges, edge_dim)),
+        ),
+    )
     if fam:
         d["fam"] = choice(fam)
     return d
 
 
-def create_fake_dataset(n_prots, n_drugs, n_interactions):
+def generate_params():
+    pass
+
+
+@pytest.fixture
+def create_fake_dataset():
     prots = pd.Series(
         [
             create_fake_graph(
-                randint(100, 200),
+                randint(MIN_NODES, MAX_NODES),
                 20,
                 randint(100, 100),
             )
