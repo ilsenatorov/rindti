@@ -33,11 +33,12 @@ class PNAConvNet(BaseLayer):
             deg=deg,
         )
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor, batch: Tensor, **kwargs) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
         """Forward pass of the module"""
-        edge_feats = self.edge_embedding(edge_feats)
-        x = self.conv1(x, edge_index, edge_feats)
-        x = self.conv2(x, edge_index, edge_feats)
+        x = self.inp(x, edge_index)
+        for module in self.mid_layers:
+            x = module(x, edge_index)
+        x = self.out(x, edge_index)
         return x
 
     @staticmethod

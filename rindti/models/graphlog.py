@@ -310,7 +310,6 @@ class GraphLogModel(BaseModel):
 
         node_embed = node_embedders[args.node_embed]
         pool = poolers[args.pool]
-        parser.add_argument("--feat_embed_dim", default=32, type=int)
         parser.add_argument("--decay_ratio", default=0.5, type=float)
         parser.add_argument("--mask_rate", default=0.3, type=float)
         parser.add_argument("--alpha", default=1.0, type=float)

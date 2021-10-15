@@ -1,6 +1,6 @@
 def list_to_dict(l):
     """Convert list to dict"""
-    return {val: i for i, val in enumerate(l)}
+    return {val: i + 1 for i, val in enumerate(l)}
 
 
 def onehot_encode(position: int, count: int) -> list:
@@ -11,6 +11,6 @@ def onehot_encode(position: int, count: int) -> list:
     Returns:
         list: list with zeroes and 1 in <position>
     """
-    t = [0] * count
-    t[position] = 1
+    t = [0] * (count)
+    t[position - 1] = 1
     return t

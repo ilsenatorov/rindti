@@ -34,7 +34,7 @@ class DrugEncoder:
         if self.node_feats == "onehot":
             return onehot_encode(label, len(node_encoding))
         elif self.node_feats == "label":
-            return label
+            return label + 1
         else:
             raise ValueError("Unknown node encoding!")
 
@@ -80,9 +80,19 @@ class DrugEncoder:
             atom_features.append(self.encode_node(atom_num))
         if len(atom_features) > self.max_num_atoms:
             return np.nan
-        x = torch.tensor(atom_features, dtype=torch.long)
+        if self.node_feats == "label":
+            x = torch.tensor(atom_features, dtype=torch.long)
+        else:
+            x = torch.tensor(atom_features, dtype=torch.float32)
         edge_index = torch.tensor(edges).t().contiguous()
-        edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+        if self.edge_feats == "onehot":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.float32)
+        elif self.edge_feats == "label":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+        elif self.edge_feats == "none":
+            edge_feats = None
+        else:
+            raise ValueError("Unknown edge encoding!")
         edge_index, edge_feats = to_undirected(edge_index, edge_feats)
         return dict(x=x, edge_index=edge_index, edge_feats=edge_feats)
 

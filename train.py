@@ -18,13 +18,7 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    if kwargs["transformer"] != "none":
-        transform = {"gnomad": GnomadTransformer}[kwargs["transformer"]].from_pickle(
-            kwargs["transformer_pickle"], max_num_mut=kwargs["max_num_mut"]
-        )
-    else:
-        transform = None
-    train = DTIDataset(kwargs["data"], split="train", transform=transform)
+    train = DTIDataset(kwargs["data"], split="train")
     val = DTIDataset(kwargs["data"], split="val")
     test = DTIDataset(kwargs["data"], split="test")
 
@@ -76,7 +70,6 @@ if __name__ == "__main__":
     trainer = parser.add_argument_group("Trainer")
     model = parser.add_argument_group("Model")
     optim = parser.add_argument_group("Optimiser")
-    transformer = parser.add_argument_group("Transformer")
 
     trainer.add_argument("--gpus", type=int, default=1, help="Number of GPUs to use")
     trainer.add_argument("--max_epochs", type=int, default=1000, help="Max number of epochs")
@@ -95,14 +88,6 @@ if __name__ == "__main__":
     optim.add_argument("--reduce_lr_patience", type=int, default=20)
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
     optim.add_argument("--monitor", type=str, default="val_loss", help="Value to monitor for lr reduction etc")
-
-    transformer.add_argument("--transformer", type=str, default="none", help="Type of transformer to apply")
-    transformer.add_argument(
-        "--transformer_pickle",
-        type=str,
-        default="../rins/results/prepare_transformer/onehot_simple_transformer.pkl",
-    )
-    transformer.add_argument("--max_num_mut", type=int, default=100)
 
     parser = models[model_type].add_arguments(parser)
 

@@ -8,7 +8,6 @@ from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(
     [
-        "padding",
         "ala",
         "arg",
         "asn",
@@ -50,10 +49,8 @@ class ProteinEncoder:
             np.array: Concatenated node_feats and one-hot encoding of residue name
         """
         residue = residue.lower()
-        if residue not in node_encoding:
-            None
-        elif self.node_feats == "label":
-            return node_encoding[residue]
+        if self.node_feats == "label":
+            return node_encoding[residue] + 1
         elif self.node_feats == "onehot":
             return onehot_encode(node_encoding[residue], len(node_encoding))
         else:

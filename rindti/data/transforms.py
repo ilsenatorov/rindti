@@ -145,10 +145,10 @@ def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor,
     """
     assert frac >= 0 and frac <= 1, "frac has to between 0 and 1!"
     num_nodes = features.size(0)
-    num_node_types = int(features.max() + 1)
     num_corrupt_nodes = ceil(num_nodes * frac)
     idx = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
-    features[idx] = torch.randint_like(features[idx], low=1, high=num_node_types)
+    new = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
+    features[idx] = features[new]
     return features, idx
 
 

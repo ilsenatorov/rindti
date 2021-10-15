@@ -2,39 +2,37 @@ from argparse import ArgumentParser
 
 from torch.functional import Tensor
 from torch.nn import ModuleList
-from torch_geometric.nn import FiLMConv
+from torch_geometric.nn import TransformerConv
 from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
 
 
-class FilmConvNet(BaseLayer):
-    """FiLMConv
-    https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.FiLMConv
-    """
-
+class TransformerNet(BaseLayer):
     def __init__(
         self,
-        input_dim: int,
+        input_dim,
         output_dim: int,
         hidden_dim: int = 32,
+        dropout: float = 0.1,
         edge_dim: int = None,
-        num_layers: int = 10,
+        heads: int = 1,
+        num_layers: int = 3,
         **kwargs,
     ):
         super().__init__()
-        if edge_dim is None:
-            edge_dim = 1
         self.edge_dim = edge_dim
-        self.inp = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
-        mid_layers = [FiLMConv(hidden_dim, hidden_dim, num_relations=edge_dim) for _ in range(num_layers - 2)]
+        self.inp = TransformerConv(input_dim, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim)
+        mid_layers = [
+            TransformerConv(-1, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim)
+            for _ in range(num_layers - 2)
+        ]
         self.mid_layers = ModuleList(mid_layers)
-
-        self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
+        self.out = TransformerConv(-1, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """Forward pass of the module"""
-        if self.edge_dim <= 1:
+        if self.edge_dim is None:
             edge_feats = None
         x = self.inp(x, edge_index, edge_feats)
         for module in self.mid_layers:
@@ -45,7 +43,10 @@ class FilmConvNet(BaseLayer):
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:
         """Generate arguments for this module"""
+        parser.add_argument("dropout", default=0.2, type=float, help="Dropout")
         parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
-        parser.add_argument("node_embed", default="filmconv", type=str)
+        parser.add_argument("node_embed", default="gatconv", type=str)
         parser.add_argument("num_layers", default=3, type=int, help="Number of convolutional layers")
+        parser.add_argument("dropout", default=0.2, type=float)
+        parser.add_argument("heads", default=1, type=int)
         return parser
