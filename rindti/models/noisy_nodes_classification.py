@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch import FloatTensor, LongTensor, Tensor
 
 from ..data import DataCorruptor, TwoGraphData
-from ..utils import MyArgParser, remove_arg_prefix
+from ..utils import MyArgParser, get_node_loss, remove_arg_prefix
 from .classification import ClassificationModel
 
 
@@ -36,19 +36,6 @@ class NoisyNodesClassModel(ClassificationModel):
         drug_pred = self.drug_node_pred(**drug)
         return pred, prot_pred, drug_pred
 
-    def _get_node_loss(
-        self,
-        prot_x: Tensor,
-        drug_x: Tensor,
-        pred_prot_x: Tensor,
-        pred_drug_x: Tensor,
-    ) -> Tuple[Tensor, Tensor]:
-        prot_x = prot_x if isinstance(prot_x, LongTensor) else prot_x.argmax(dim=1)
-        drug_x = drug_x if isinstance(drug_x, LongTensor) else drug_x.argmax(dim=1)
-        prot_loss = F.cross_entropy(pred_prot_x, prot_x)
-        drug_loss = F.cross_entropy(pred_drug_x, drug_x)
-        return prot_loss, drug_loss
-
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
 
@@ -67,12 +54,8 @@ class NoisyNodesClassModel(ClassificationModel):
         loss = F.binary_cross_entropy(output, labels.float())
         prot_idx = cor_data.prot_idx
         drug_idx = cor_data.drug_idx
-        prot_loss, drug_loss = self._get_node_loss(
-            data["prot_x"][prot_idx],
-            data["drug_x"][drug_idx],
-            prot_pred[prot_idx],
-            drug_pred[drug_idx],
-        )
+        prot_loss = get_node_loss(data["prot_x"][prot_idx], prot_pred[prot_idx])
+        drug_loss = get_node_loss(data["drug_x"][drug_idx], drug_pred[drug_idx])
         metrics = self._get_class_metrics(output, labels)
         metrics.update(
             dict(

@@ -8,6 +8,7 @@ from torch_geometric.data import Data
 
 from ..data import corrupt_features
 from ..layers import MutualInformation
+from ..utils import get_node_loss
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 
@@ -38,7 +39,7 @@ class InfoGraphModel(BaseModel):
         cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac)
         data["x"] = cor_x
         mi, node_pred = self.forward(data)
-        node_loss = F.cross_entropy(node_pred[cor_idx], orig_x[cor_idx])
+        node_loss = get_node_loss(orig_x[cor_idx], node_pred[cor_idx])
         loss = -mi + node_loss * self.hparams.alpha
         return {"loss": loss, "mi": mi.detach(), "node_loss": node_loss.detach()}
 

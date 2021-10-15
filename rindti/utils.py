@@ -1,11 +1,12 @@
 from argparse import ArgumentParser, _ArgumentGroup
-from typing import Union
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import torch.nn.functional as F
 from matplotlib.figure import Figure
-from torch import FloatTensor, LongTensor
+from torch import FloatTensor, LongTensor, Tensor
 from torch.utils.data import random_split
 
 
@@ -138,3 +139,12 @@ def get_type(data: dict, key: str) -> str:
     if feat is None:
         return "none"
     raise ValueError("Unknown data type {}".format(type(data[key])))
+
+
+def get_node_loss(
+    x: Tensor,
+    pred_x: Tensor,
+) -> Tuple[Tensor, Tensor]:
+    """Calculate cross-entropy loss for node prediction"""
+    x = x if isinstance(x, LongTensor) else x.argmax(dim=1)
+    return F.cross_entropy(pred_x, x)
