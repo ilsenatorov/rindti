@@ -85,7 +85,14 @@ class DrugEncoder:
         else:
             x = torch.tensor(atom_features, dtype=torch.float32)
         edge_index = torch.tensor(edges).t().contiguous()
-        edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+        if self.edge_feats == "onehot":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.float32)
+        elif self.edge_feats == "label":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+        elif self.edge_feats == "none":
+            edge_feats = None
+        else:
+            raise ValueError("Unknown edge encoding!")
         edge_index, edge_feats = to_undirected(edge_index, edge_feats)
         return dict(x=x, edge_index=edge_index, edge_feats=edge_feats)
 

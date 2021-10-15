@@ -32,7 +32,7 @@ class DTIDataset(InMemoryDataset):
         """Sets feat type in the self.config from snakemake self.config"""
         self.config["prot_feat_type"] = get_type(data, "prot_x")
         self.config["drug_feat_type"] = get_type(data, "drug_x")
-        self.config["prot_edge_type"] = get_type(data, "prot_edge_attr")
+        self.config["prot_edge_type"] = get_type(data, "prot_edge_feats")
         self.config["drug_edge_type"] = get_type(data, "drug_edge_feats")
         return self.config
 

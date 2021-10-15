@@ -34,7 +34,7 @@ node_embedders = {
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
     "filmconv": FilmConvNet,
-    "transformernet": TransformerNet,
+    "transformer": TransformerNet,
 }
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 

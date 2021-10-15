@@ -48,4 +48,5 @@ class TransformerNet(BaseLayer):
         parser.add_argument("node_embed", default="gatconv", type=str)
         parser.add_argument("num_layers", default=3, type=int, help="Number of convolutional layers")
         parser.add_argument("dropout", default=0.2, type=float)
+        parser.add_argument("heads", default=1, type=int)
         return parser
