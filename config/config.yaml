@@ -13,16 +13,16 @@ plddt:
 structures: template
 
 # If set to true, only computes the proteins data (useful for pretraining)
-only_proteins: false
+only_proteins: true
 
 # Seed for reproducibility of random processes
 seed: 42
 
 prepare_proteins:
   # can be label or onehot
-  node_feats: label
+  node_feats: onehot
   # can be label, onehot or none
-  edge_feats: none
+  edge_feats: label
   shard_size: 10000
 
 prepare_drugs:
