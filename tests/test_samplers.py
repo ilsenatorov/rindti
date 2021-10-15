@@ -46,7 +46,7 @@ class TestWeightedPfamSampler(BaseTestSampler):
             prot_per_fam=PROT_PER_FAM,
             batch_per_epoch=BATCH_PER_EPOCH,
         )
-        sampler.update_weights({i.id: [random.randint(0, 5)] for i in ds})
+        sampler.update_weights({i.id: [random.random()] for i in ds})
         dl = DataLoader(ds, batch_sampler=sampler)
         batch = next(iter(dl))
         count = Counter(batch.fam)

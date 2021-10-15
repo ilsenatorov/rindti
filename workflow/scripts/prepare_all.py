@@ -35,10 +35,7 @@ def update_config(config: dict) -> dict:
     """Updates config with dims of everything"""
     config["prot_feat_dim"] = len(prot_node_encoding)
     config["drug_feat_dim"] = len(drug_node_encoding)
-    if config["prepare_proteins"]["edge_feats"] == "label":
-        config["prot_edge_dim"] = len(prot_edge_encoding)
-    else:
-        config["prot_edge_dim"] = 1
+    config["prot_edge_dim"] = len(prot_edge_encoding)
     config["drug_edge_dim"] = len(drug_edge_encoding)
     return config
 

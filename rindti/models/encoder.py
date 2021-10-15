@@ -33,17 +33,17 @@ class Encoder(BaseModel):
         """
         if not isinstance(data, dict):
             data = data.to_dict()
-        x, edge_index, batch, edge_attr = (
+        x, edge_index, batch, edge_feats = (
             data["x"],
             data["edge_index"],
             data["batch"],
-            data.get("edge_attr"),
+            data.get("edge_feats"),
         )
         feat_embed = self.feat_embed(x)
         node_embed = self.node_embed(
             x=feat_embed,
             edge_index=edge_index,
-            edge_attr=edge_attr,
+            edge_feats=edge_feats,
             batch=batch,
         )
         embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)

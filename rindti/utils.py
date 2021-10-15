@@ -117,7 +117,7 @@ def to_prob(s: pd.Series) -> pd.Series:
     return s / s.sum()
 
 
-def get_feat_type(data: dict, key: str) -> str:
+def get_type(data: dict, key: str) -> str:
     """Check which type of data we have
 
     Args:
@@ -130,8 +130,11 @@ def get_feat_type(data: dict, key: str) -> str:
     Returns:
         str: "label" for LongTensor, "onehot" for FloatTensor
     """
-    if isinstance(data[key], LongTensor):
+    feat = data.get(key)
+    if isinstance(feat, LongTensor):
         return "label"
-    if isinstance(data[key], FloatTensor):
+    if isinstance(feat, FloatTensor):
         return "onehot"
+    if feat is None:
+        return "none"
     raise ValueError("Unknown data type {}".format(type(data[key])))

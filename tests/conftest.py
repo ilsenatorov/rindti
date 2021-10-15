@@ -1,6 +1,4 @@
-import os.path as osp
 import pickle
-import string
 from random import choice, randint
 
 import pandas as pd
@@ -11,19 +9,20 @@ from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataset, PfamSampler, PreTrainDataset
 
-MIN_NODES = 100
-MAX_NODES = 200
-N_PROTS = 100
-N_DRUGS = 100
-N_INTER = 250
+PROT_FEAT_DIM = 20
+PROT_EDGE_DIM = 5
+DRUG_FEAT_DIM = 14
+DRUG_EDGE_DIM = 3
+MIN_NODES = 10
+MAX_NODES = 20
+MIN_EDGES = 20
+MAX_EDGES = 40
+N_PROTS = 20
+N_DRUGS = 20
+N_INTER = 45
 BATCH_SIZE = 16
 PROT_PER_FAM = 8
 BATCH_PER_EPOCH = 10
-
-
-def randomword(length: int) -> str:
-    letters = string.ascii_lowercase
-    return "".join(choice(letters) for i in range(length))
 
 
 def create_features(feat_type: str, dim: tuple) -> Tensor:
@@ -38,18 +37,16 @@ def create_features(feat_type: str, dim: tuple) -> Tensor:
 def create_fake_graph(
     node_attr_type: str,
     node_dim: int,
-    n_nodes: int,
     edge_attr_type: str,
     edge_dim: int,
-    n_edges: int,
     fam: list = None,
 ):
-    d = (
-        dict(
-            x=create_features(node_attr_type, (n_nodes, node_dim)),
-            edge_index=torch.randint(0, n_nodes, (2, n_edges)),
-            edge_attr=create_features(edge_attr_type, (n_edges, edge_dim)),
-        ),
+    n_nodes = randint(MIN_NODES, MAX_NODES)
+    n_edges = randint(MIN_EDGES, MAX_EDGES)
+    d = dict(
+        x=create_features(node_attr_type, (n_nodes, node_dim)),
+        edge_index=torch.randint(0, n_nodes, (2, n_edges)),
+        edge_attr=create_features(edge_attr_type, (n_edges, edge_dim)),
     )
     if fam:
         d["fam"] = choice(fam)
@@ -57,63 +54,113 @@ def create_fake_graph(
 
 
 def generate_params():
-    pass
+    for edge_type in ["label", "onehot", "none"]:
+        for node_type in ["label", "onehot"]:
+            yield {"edge_type": edge_type, "node_type": node_type}
 
 
-@pytest.fixture
-def create_fake_dataset():
+def fake_dataset(params):
     prots = pd.Series(
         [
             create_fake_graph(
-                randint(MIN_NODES, MAX_NODES),
-                20,
-                randint(100, 100),
+                params["prot_node_type"],
+                PROT_FEAT_DIM,
+                params["prot_edge_type"],
+                PROT_EDGE_DIM,
             )
-            for _ in range(n_prots)
+            for _ in range(N_PROTS)
         ],
         name="data",
     )
-    drugs = pd.Series([create_fake_graph(randint(100, 200), 9) for _ in range(n_drugs)], name="data")
+    drugs = pd.Series(
+        [
+            create_fake_graph(
+                "label",
+                DRUG_FEAT_DIM,
+                "label",
+                DRUG_EDGE_DIM,
+            )
+            for _ in range(N_DRUGS)
+        ],
+        name="data",
+    )
     prots = pd.DataFrame(prots)
     drugs = pd.DataFrame(drugs)
     prots["count"] = 1
     drugs["count"] = 1
     inter = [
         {
-            "prot_id": randint(0, n_prots - 1),
-            "drug_id": randint(0, n_drugs - 1),
+            "prot_id": randint(0, N_PROTS - 1),
+            "drug_id": randint(0, N_DRUGS - 1),
             "split": "train",
             "label": randint(0, 1),
         }
-        for _ in range(n_interactions)
+        for _ in range(N_INTER)
     ]
-    return dict(prots=prots, drugs=drugs, data=inter, config={"prot_feat_dim": 20, "drug_feat_dim": 9})
+    return dict(
+        prots=prots,
+        drugs=drugs,
+        data=inter,
+        config={
+            "prot_feat_dim": PROT_FEAT_DIM,
+            "drug_feat_dim": DRUG_FEAT_DIM,
+            "prot_edge_dim": PROT_EDGE_DIM,
+            "drug_edge_dim": DRUG_EDGE_DIM,
+        },
+    )
 
 
-@pytest.fixture(scope="session")
-def dti_pickle(tmpdir_factory):
+@pytest.fixture(scope="session", params=[{"prot_" + k: v for k, v in p.items()} for p in generate_params()])
+def dti_pickle(tmpdir_factory, request):
     """Create a pickle file with fake DTI dataset"""
-    fake_dataset = create_fake_dataset(N_PROTS, N_DRUGS, N_INTER)
+    params = request.param
+    ds = fake_dataset(params)
     fn = tmpdir_factory.mktemp("data").join("temp_data.pkl")
     with open(fn, "wb") as file:
-        pickle.dump(fake_dataset, file)
+        pickle.dump(ds, file)
     return fn
 
 
-@pytest.fixture(scope="session")
-def pretrain_pickle(tmpdir_factory):
+@pytest.fixture(scope="session", params=generate_params())
+def pretrain_pickle(tmpdir_factory, request):
     """Create a pickle file with fake protein dataset"""
-    ds = pd.Series([create_fake_graph(randint(100, 200), 20, fam=["a", "b"]) for _ in range(N_PROTS)], name="data")
+    params = request.param
+    ds = pd.Series(
+        [
+            create_fake_graph(
+                params["node_type"],
+                PROT_FEAT_DIM,
+                params["edge_type"],
+                PROT_EDGE_DIM,
+                fam=["a", "b"],
+            )
+            for _ in range(N_PROTS)
+        ],
+        name="data",
+    )
     ds = pd.DataFrame(ds)
     fn = tmpdir_factory.mktemp("data").join("temp_pretrain_data.pkl")
     ds.to_pickle(fn)
     return fn
 
 
-@pytest.fixture(scope="session")
-def sharded_pretrain_pickle(tmpdir_factory):
+@pytest.fixture(scope="session", params=generate_params())
+def sharded_pretrain_pickle(tmpdir_factory, request):
     """Create a collection of pickled files with fake protein dataset"""
-    ds = pd.Series([create_fake_graph(randint(100, 200), 20, fam=["a", "b"]) for _ in range(N_PROTS)], name="data")
+    params = request.param
+    ds = pd.Series(
+        [
+            create_fake_graph(
+                params["node_type"],
+                PROT_FEAT_DIM,
+                params["edge_type"],
+                PROT_EDGE_DIM,
+                fam=["a", "b"],
+            )
+            for _ in range(N_PROTS)
+        ],
+        name="data",
+    )
     ds = pd.DataFrame(ds)
     fn = tmpdir_factory.mktemp("shards")
     for i in range(0, len(ds), N_PROTS // 2):

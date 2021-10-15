@@ -31,16 +31,16 @@ def default_config(fake_data):
 def fake_data(request):
     p = request.param
     if p == "label":
-        edge_attr = torch.randint(low=0, high=EDGE_DIM - 1, size=(N_EDGES,))
+        edge_feats = torch.randint(low=0, high=EDGE_DIM - 1, size=(N_EDGES,))
     elif p == "onehot":
-        edge_attr = torch.rand(size=(N_EDGES, EDGE_DIM))
+        edge_feats = torch.rand(size=(N_EDGES, EDGE_DIM))
     else:
-        edge_attr = None
+        edge_feats = None
     return {
         "x": torch.rand(size=(N_NODES, INPUT_DIM)),
         "edge_index": torch.randint(low=0, high=N_NODES - 1, size=(2, N_EDGES)),
         "batch": torch.zeros((N_NODES), dtype=torch.long),
-        "edge_attr": edge_attr,
+        "edge_feats": edge_feats,
         "type": p,
     }
 

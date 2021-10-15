@@ -5,6 +5,8 @@ import pytest
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.models.base_model import node_embedders, poolers
 
+from .conftest import PROT_EDGE_DIM, PROT_FEAT_DIM
+
 
 @pytest.fixture
 def default_config():
@@ -12,7 +14,7 @@ def default_config():
         "alpha": 1.0,
         "beta": 1.0,
         "corruption": "mask",
-        "data": "kek",
+        "edge_type": "none",
         "decay_ratio": 0.5,
         "dropout": 0.2,
         "early_stop_patience": 60,
@@ -55,10 +57,12 @@ class BaseTestModel:
 
     @pytest.mark.parametrize("node_embed", list(node_embedders.keys()))
     @pytest.mark.parametrize("pool", list(poolers.keys()))
-    def test_shared_step(self, node_embed, pool, pretrain_batch, default_config):
+    def test_shared_step(self, node_embed, pool, pretrain_batch, default_config, pretrain_dataset):
         default_config["node_embed"] = node_embed
         default_config["pool"] = pool
-        default_config["feat_dim"] = 20
+        default_config["feat_dim"] = PROT_FEAT_DIM
+        default_config["edge_dim"] = PROT_EDGE_DIM
+        default_config.update(pretrain_dataset.config)
         model = self.model(**default_config)
         model.shared_step(pretrain_batch)
 

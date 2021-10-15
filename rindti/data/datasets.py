@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 
-from ..utils import get_feat_type
+from ..utils import get_type
 from .data import TwoGraphData
 
 
@@ -28,10 +28,12 @@ class DTIDataset(InMemoryDataset):
         self.filename = filename
         return os.path.join("data", basefilename)
 
-    def _set_feat_type(self, data: dict) -> dict:
+    def _set_types(self, data: dict) -> dict:
         """Sets feat type in the self.config from snakemake self.config"""
-        self.config["prot_feat_type"] = get_feat_type(data, "prot_x")
-        self.config["drug_feat_type"] = get_feat_type(data, "drug_x")
+        self.config["prot_feat_type"] = get_type(data, "prot_x")
+        self.config["drug_feat_type"] = get_type(data, "drug_x")
+        self.config["prot_edge_type"] = get_type(data, "prot_edge_attr")
+        self.config["drug_edge_type"] = get_type(data, "drug_edge_feats")
         return self.config
 
     def process_(self, data_list: list, split: str):
@@ -94,7 +96,7 @@ class DTIDataset(InMemoryDataset):
                     self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
                     self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
                     data_list.append(two_graph_data)
-                    self.config = self._set_feat_type(data_list[0])
+                    self.config = self._set_types(data_list[0])
                 if data_list:
                     self.process_(data_list, split)
 
@@ -147,7 +149,8 @@ class PreTrainDataset(InMemoryDataset):
 
         if self.pre_transform is not None:
             data_list = [self.pre_transform(data) for data in data_list]
-        self.config["feat_type"] = get_feat_type(data_list[0], "x")
+        self.config["feat_type"] = get_type(data_list[0], "x")
+        self.config["edge_type"] = get_type(data_list[0], "edge_feats")
         data, slices = self.collate(data_list)
         torch.save((data, slices, self.config), self.processed_paths[0])
 

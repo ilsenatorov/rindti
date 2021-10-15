@@ -21,6 +21,7 @@ class TransformerNet(BaseLayer):
         **kwargs,
     ):
         super().__init__()
+        self.edge_dim = edge_dim
         self.inp = TransformerConv(input_dim, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim)
         mid_layers = [
             TransformerConv(-1, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim)
@@ -29,12 +30,14 @@ class TransformerNet(BaseLayer):
         self.mid_layers = ModuleList(mid_layers)
         self.out = TransformerConv(-1, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim)
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_attr: Tensor = None, **kwargs) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """Forward pass of the module"""
-        x = self.inp(x, edge_index, edge_attr)
+        if self.edge_dim is None:
+            edge_feats = None
+        x = self.inp(x, edge_index, edge_feats)
         for module in self.mid_layers:
-            x = module(x, edge_index, edge_attr)
-        x = self.out(x, edge_index, edge_attr)
+            x = module(x, edge_index, edge_feats)
+        x = self.out(x, edge_index, edge_feats)
         return x
 
     @staticmethod

@@ -13,9 +13,12 @@ def default_config():
         "drug_alpha": 1,
         "drug_dropout": 0.2,
         "drug_frac": 0.05,
-        "drug_feat_type": "label",
         "drug_hidden_dim": 32,
         "drug_node_embed": "ginconv",
+        "prot_feat_type": "label",
+        "prot_edge_type": "none",
+        "drug_feat_type": "label",
+        "drug_edge_type": "none",
         "drug_num_heads": 4,
         "drug_num_layers": 3,
         "drug_pool": "gmt",
@@ -31,7 +34,6 @@ def default_config():
         "prot_dropout": 0.2,
         "prot_frac": 0.05,
         "prot_hidden_dim": 32,
-        "prot_feat_type": "label",
         "prot_node_embed": "ginconv",
         "prot_num_heads": 4,
         "prot_num_layers": 3,
@@ -49,7 +51,7 @@ def default_config():
 class BaseTestModel:
     @pytest.mark.parametrize("prot_node_embed", list(node_embedders.keys()))
     @pytest.mark.parametrize("prot_pool", list(poolers.keys()))
-    def test_shared_step(
+    def test_no_edge_shared_step(
         self,
         prot_node_embed,
         prot_pool,
@@ -60,7 +62,13 @@ class BaseTestModel:
         default_config["prot_node_embed"] = prot_node_embed
         default_config["prot_pool"] = prot_pool
         default_config.update(dti_dataset.config)
+        default_config["prot_edge_type"] = "none"
+        default_config["drug_edge_type"] = "none"
         model = self.model(**default_config)
+        print(default_config)
+        if default_config["prot_pool"] == "filmconv" and default_config["prot_edge_type"] == "onehot":
+            with pytest.raises(AssertionError):
+                model.shared_step(dti_batch)
         model.shared_step(dti_batch)
 
     def test_arg_parser(self):

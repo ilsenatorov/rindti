@@ -62,6 +62,8 @@ class BaseModel(LightningModule):
             raise ValueError("Unknown feature type!")
 
     def _get_node_embed(self, params: dict, out_dim=None) -> LightningModule:
+        if params["edge_type"] == "none":
+            params["edge_dim"] = None
         if out_dim:
             return node_embedders[params["node_embed"]](params["hidden_dim"], out_dim, **params)
         return node_embedders[params["node_embed"]](params["hidden_dim"], params["hidden_dim"], **params)
