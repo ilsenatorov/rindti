@@ -24,28 +24,22 @@ class GatConvNet(BaseLayer):
         hidden_dim: int = 32,
         heads: int = 4,
         num_layers: int = 4,
-        edge_dim: int = None,
         **kwargs,
     ):
         super().__init__()
-        self.edge_dim = edge_dim
-        heads = 1
-        self.inp = GATConv(input_dim, hidden_dim, heads)
-        mid_layers = []
-        for _ in range(num_layers - 2):
-            mid_layers.append(GATConv(hidden_dim, hidden_dim, heads))
-            hidden_dim *= heads
-        self.mid_layers = ModuleList(mid_layers)
-        self.out = GATConv(hidden_dim, output_dim, heads=1)
+        self.inp = GATConv(input_dim, hidden_dim, heads, concat=False)
+        self.mid_layers = ModuleList(
+            [GATConv(hidden_dim, hidden_dim, heads, concat=False) for _ in range(num_layers - 2)]
+        )
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
+        self.out = GATConv(hidden_dim, output_dim, concat=False)
+
+    def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
         """Forward pass of the module"""
-        if self.edge_dim is None:
-            edge_feats = None
-        x = self.inp(x, edge_index, edge_feats)
+        x = self.inp(x, edge_index)
         for module in self.mid_layers:
-            x = module(x, edge_index, edge_feats)
-        x = self.out(x, edge_index, edge_feats)
+            x = module(x, edge_index)
+        x = self.out(x, edge_index)
         return x
 
     @staticmethod

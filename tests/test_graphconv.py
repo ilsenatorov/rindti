@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import pytest
 import torch
 from _pytest.mark import param
@@ -11,20 +13,6 @@ INPUT_DIM = 16
 HIDDEN_DIM = 64
 OUTPUT_DIM = 32
 EDGE_DIM = 6
-
-
-@pytest.fixture
-def default_config(fake_data):
-    return {
-        "K": 1,
-        "deg": torch.randint(low=0, high=5, size=(25,)),
-        "dropout": 0.2,
-        "edge_dim": EDGE_DIM if fake_data["type"] != "none" else None,
-        "hidden_dim": HIDDEN_DIM,
-        "input_dim": INPUT_DIM,
-        "num_heads": 4,
-        "output_dim": OUTPUT_DIM,
-    }
 
 
 @pytest.fixture
@@ -45,6 +33,20 @@ def fake_data(request):
     }
 
 
+@pytest.fixture
+def default_config(fake_data):
+    return {
+        "K": 1,
+        "deg": torch.randint(low=0, high=5, size=(25,)),
+        "dropout": 0.2,
+        "edge_dim": EDGE_DIM if fake_data["type"] != "none" else None,
+        "hidden_dim": HIDDEN_DIM,
+        "input_dim": INPUT_DIM,
+        "num_heads": 4,
+        "output_dim": OUTPUT_DIM,
+    }
+
+
 class BaseTestGraphConv:
     @pytest.mark.parametrize("fake_data", ["label", "onehot", "none"], indirect=True)
     def test_forward(self, default_config, fake_data):
@@ -58,24 +60,17 @@ class BaseTestGraphConv:
         self.module.add_arguments(parser)
 
 
-class TestGINConv(BaseTestGraphConv):
-    module = GINConvNet
+class BaseOnehotEdgeConv(BaseTestGraphConv):
+    @pytest.mark.parametrize("fake_data", ["onehot", "none"], indirect=True)
+    def test_forward(self, default_config, fake_data):
+        pprint(fake_data)
+        module = self.module(**default_config)
+        output = module.forward(**fake_data)
+        assert output.size(0) == N_NODES
+        assert output.size(1) == OUTPUT_DIM
 
 
-class TestGATConv(BaseTestGraphConv):
-
-    module = GatConvNet
-
-
-class TestChebConv(BaseTestGraphConv):
-
-    module = ChebConvNet
-
-
-class TestFilmConv(BaseTestGraphConv):
-
-    module = FilmConvNet
-
+class BaseLabelEdgeConv(BaseTestGraphConv):
     @pytest.mark.parametrize("fake_data", ["label", "none"], indirect=True)
     def test_forward(self, default_config, fake_data):
         module = self.module(**default_config)
@@ -84,13 +79,25 @@ class TestFilmConv(BaseTestGraphConv):
         assert output.size(1) == OUTPUT_DIM
 
 
-class TestTransformerConv(BaseTestGraphConv):
+class TestGINConv(BaseTestGraphConv):
+    module = GINConvNet
+
+
+class TestChebConv(BaseTestGraphConv):
+
+    module = ChebConvNet
+
+
+class TestGATConv(BaseTestGraphConv):
+
+    module = GatConvNet
+
+
+class TestFilmConv(BaseLabelEdgeConv):
+
+    module = FilmConvNet
+
+
+class TestTransformerConv(BaseOnehotEdgeConv):
 
     module = TransformerNet
-
-    @pytest.mark.parametrize("fake_data", ["onehot", "none"], indirect=True)
-    def test_forward(self, default_config, fake_data):
-        module = self.module(**default_config)
-        output = module.forward(**fake_data)
-        assert output.size(0) == N_NODES
-        assert output.size(1) == OUTPUT_DIM
