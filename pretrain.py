@@ -74,8 +74,8 @@ To get help for different modules run with python pretrain.py --help --prot_node
 
     optim.add_argument("--optimiser", type=str, default="adam", help="Optimisation algorithm")
     optim.add_argument("--lr", type=float, default=0.0005, help="learning rate")
-    optim.add_argument("--reduce_lr_patience", type=int, default=20)
-    optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
+    optim.add_argument("--reduce_lr_patience", type=int, default=100)
+    optim.add_argument("--reduce_lr_factor", type=float, default=0.5)
     optim.add_argument("--monitor", type=str, default="train_loss", help="Value to monitor for lr reduction etc")
 
     parser = models[model_type].add_arguments(parser)
