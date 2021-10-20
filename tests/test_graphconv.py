@@ -2,7 +2,6 @@ from pprint import pprint
 
 import pytest
 import torch
-from _pytest.mark import param
 
 from rindti.layers import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, PNAConvNet, TransformerNet
 from rindti.utils import MyArgParser
