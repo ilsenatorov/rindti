@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 
 from torch.functional import Tensor
 from torch.nn import ModuleList
+from torch.nn.modules.module import Module
 from torch_geometric.nn import TransformerConv
 from torch_geometric.typing import Adj
 
@@ -9,6 +10,8 @@ from ..base_layer import BaseLayer
 
 
 class TransformerNet(BaseLayer):
+    """https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.TransformerConv"""
+
     def __init__(
         self,
         input_dim,
@@ -22,13 +25,23 @@ class TransformerNet(BaseLayer):
     ):
         super().__init__()
         self.edge_dim = edge_dim
-        self.inp = TransformerConv(input_dim, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim)
-        mid_layers = []
-        for _ in range(num_layers - 2):
-            mid_layers.append(TransformerConv(hidden_dim, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim))
-            hidden_dim *= heads
-        self.mid_layers = ModuleList(mid_layers)
-        self.out = TransformerConv(hidden_dim, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim)
+        self.inp = TransformerConv(
+            input_dim, hidden_dim, heads=heads, dropout=dropout, edge_dim=edge_dim, concat=False
+        )
+        self.mid_layers = ModuleList(
+            [
+                TransformerConv(
+                    hidden_dim,
+                    hidden_dim,
+                    heads=heads,
+                    dropout=dropout,
+                    edge_dim=edge_dim,
+                    concat=False,
+                )
+                for _ in range(num_layers - 2)
+            ]
+        )
+        self.out = TransformerConv(hidden_dim, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim, concat=False)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """Forward pass of the module"""
