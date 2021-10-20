@@ -59,7 +59,7 @@ To get help for different modules run with python pretrain.py --help --prot_node
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
     parser.add_argument("--num_workers", type=int, default=16, help="number of workers for data loading")
-    parser.add_argument("--early_stop_patience", type=int, default=60, help="epochs with no improvement before stop")
+    parser.add_argument("--early_stop_patience", type=int, default=200, help="epochs with no improvement before stop")
     parser.add_argument("--max_epochs", type=int, default=None, help="Max number of epochs to train for")
 
     trainer = parser.add_argument_group("Trainer")
