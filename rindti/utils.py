@@ -148,3 +148,7 @@ def get_node_loss(
     """Calculate cross-entropy loss for node prediction"""
     x = x if isinstance(x, LongTensor) else x.argmax(dim=1)
     return F.cross_entropy(pred_x, x)
+
+
+def construct_file_name(config: dict):
+    print(config)

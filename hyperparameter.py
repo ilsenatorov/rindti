@@ -18,12 +18,8 @@ torch.manual_seed(42)
 
 def train(kwargs, data, num_epochs=100):
     """Run one training instance"""
-    all_data = data[kwargs["rin_type"]]
-    if kwargs["prot_node_embed"] in ["filmconv", "pnaconv"]:
-        train_data, val_data = all_data["edge"]
-    else:
-        train_data, val_data = all_data["none"]
-    kwargs.update(train_data.info)
+    train_data, val_data = data
+    kwargs.update(train_data.config)
     model = ClassificationModel(**kwargs)
     trainer = Trainer(
         max_epochs=num_epochs,
