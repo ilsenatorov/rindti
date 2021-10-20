@@ -1,4 +1,4 @@
-name: rindti
+name: test
 channels:
   - bioconda
   - pyg
@@ -312,7 +312,6 @@ dependencies:
     - pydeprecate==0.3.1
     - pydot==1.4.2
     - pyflakes==2.3.1
-    - pygraphviz==1.7
     - pynndescent==0.5.4
     - pyrsistent==0.18.0
     - pytdc==0.2.0
@@ -348,4 +347,3 @@ dependencies:
     - typing-inspect==0.7.1
     - virtualenv==20.7.0
     - wrapt==1.12.1
-prefix: /home/ilya/miniconda3/envs/rindti

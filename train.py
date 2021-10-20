@@ -4,7 +4,6 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataset
-from rindti.data.transforms import GnomadTransformer
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
 
 models = {
