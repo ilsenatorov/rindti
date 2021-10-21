@@ -18,6 +18,7 @@ torch.manual_seed(42)
 
 def train(kwargs, data, num_epochs=100):
     """Run one training instance"""
+    tune.util.wait_for_gpu()
     train_data, val_data = data
     kwargs.update(train_data.config)
     model = ClassificationModel(**kwargs)
@@ -52,8 +53,8 @@ def tune_asha(num_samples=1000, num_epochs=100):
         "prot_hidden_dim": tune.choice([8, 16, 32, 64, 128]),
         "batch_size": 512,
         "num_workers": 16,
-        "prot_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer", "filmconv"]),
-        "drug_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer", "filmconv"]),
+        "prot_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
+        "drug_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
         "prot_pool": tune.choice(["gmt", "diffpool", "mean"]),
         "drug_pool": tune.choice(["gmt", "diffpool", "mean"]),
         "optimiser": "adamw",
