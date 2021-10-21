@@ -5,7 +5,7 @@ import os.path as osp
 report: "report/workflow.rst"
 
 
-configfile: "config/config.yaml"
+configfile: "config/snakemake.yaml"
 
 
 targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.endswith(".pdb")]
