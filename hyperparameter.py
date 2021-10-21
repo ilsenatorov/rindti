@@ -56,8 +56,8 @@ def tune_asha(num_samples=1000, num_epochs=100):
         "num_workers": 16,
         "prot_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
         "drug_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
-        "prot_pool": tune.choice(["gmt", "diffpool", "mean"]),
-        "drug_pool": tune.choice(["gmt", "diffpool", "mean"]),
+        "prot_pool": tune.choice(["gmt", "diffpool"]),
+        "drug_pool": tune.choice(["gmt", "diffpool"]),
         "optimiser": "adamw",
         "lr": 0.001,
         "weight_decay": 0.001,
@@ -75,18 +75,18 @@ def tune_asha(num_samples=1000, num_epochs=100):
     train_data = DTIDataset(sys.argv[1], split="train")
     val_data = DTIDataset(sys.argv[1], split="val")
 
-    scheduler = ASHAScheduler(max_t=num_epochs, grace_period=40, reduction_factor=3)
+    scheduler = ASHAScheduler(max_t=num_epochs, grace_period=20, reduction_factor=3)
 
     reporter = CLIReporter(
         parameter_columns=["prot_node_embed", "drug_node_embed", "prot_pool", "drug_pool", "transformer", "rin_type"],
-        metric_columns=["loss", "training_iteration"],
+        metric_columns=["auroc", "acc", "training_iteration"],
     )
 
     analysis = tune.run(
         tune.with_parameters(train, data=(train_data, val_data), num_epochs=num_epochs),
         resources_per_trial={"cpu": 16, "gpu": 1},
-        metric="loss",
-        mode="min",
+        metric="auroc",
+        mode="max",
         config=config,
         num_samples=num_samples,
         scheduler=scheduler,

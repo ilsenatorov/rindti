@@ -32,17 +32,17 @@ prepare_drugs:
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: random
+  method: colddrug
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: all
+  filtering: posneg
   # sampling
   # sampling can be over, under or none
-  sampling: none
+  sampling: under
   # class or reg
   task: class
   # threshold values for class problem
