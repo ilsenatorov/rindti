@@ -1,25 +1,29 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Testing
 
 on:
-  push:
-    branches: [master]
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.8.10
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda env update --file workflow/envs/main.yml --name base
+          pip install matplotlib
+          pip install numpy
+          pip install seaborn
+          pip install yaml
+          pip install torch
+          pip install pytorch_lightning
+          pip install torchmetrics
+          pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
       - name: Test with pytest
         run: |
           pip install pytest
