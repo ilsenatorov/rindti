@@ -18,7 +18,6 @@ torch.manual_seed(42)
 
 def train(kwargs, data, num_epochs=100):
     """Run one training instance"""
-    tune.util.wait_for_gpu()
     train_data, val_data = data
     kwargs.update(train_data.config)
     model = ClassificationModel(**kwargs)
@@ -48,9 +47,11 @@ def train(kwargs, data, num_epochs=100):
 def tune_asha(num_samples=1000, num_epochs=100):
     """Tune hparams with ASHA"""
     config = {
-        "feat_method": tune.choice(["concat", "element_l1", "mult"]),
+        "feat_method": "concat",
         "drug_hidden_dim": tune.choice([8, 16, 32, 64, 128]),
         "prot_hidden_dim": tune.choice([8, 16, 32, 64, 128]),
+        "prot_pretrain": None,
+        "drug_pretrain": None,
         "batch_size": 512,
         "num_workers": 16,
         "prot_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
@@ -65,6 +66,11 @@ def tune_asha(num_samples=1000, num_epochs=100):
         "weighted": False,
         "prot_dropout": tune.choice([0, 0.1, 0.2, 0.3, 0.4, 0.5]),
         "drug_dropout": tune.choice([0, 0.1, 0.2, 0.3, 0.4, 0.5]),
+        "prot_heads": 4,
+        "drug_heads": 4,
+        "prot_lr": 0.001,
+        "drug_lr": 0.001,
+        "monitor": "val_loss",
     }
     train_data = DTIDataset(sys.argv[1], split="train")
     val_data = DTIDataset(sys.argv[1], split="val")

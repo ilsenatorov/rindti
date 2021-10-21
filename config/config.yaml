@@ -13,14 +13,14 @@ plddt:
 structures: template
 
 # If set to true, only computes the proteins data (useful for pretraining)
-only_proteins: true
+only_proteins: false
 
 # Seed for reproducibility of random processes
 seed: 42
 
 prepare_proteins:
   # can be label or onehot
-  node_feats: label
+  node_feats: onehot
   # can be label, onehot or none
   edge_feats: onehot
   shard_size: 10000
@@ -39,10 +39,10 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: posneg
+  filtering: all
   # sampling
   # sampling can be over, under or none
-  sampling: under
+  sampling: none
   # class or reg
   task: class
   # threshold values for class problem
