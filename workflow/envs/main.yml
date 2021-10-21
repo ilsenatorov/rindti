@@ -1,4 +1,4 @@
-name: rindti
+name: test
 channels:
   - bioconda
   - pyg
@@ -347,4 +347,3 @@ dependencies:
     - typing-inspect==0.7.1
     - virtualenv==20.7.0
     - wrapt==1.12.1
-prefix: /home/ilya/miniconda3/envs/rindti

@@ -21,7 +21,6 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
     """
     if how == "none":
         return inter
-
     total = []
     pos = inter[inter["Y"] == 1]
     neg = inter[inter["Y"] == 0]
@@ -74,11 +73,12 @@ if __name__ == "__main__":
         raise ValueError(
             "Can't use filtering {filter} with task {task}!".format(filter=config["filtering"], task=config["task"])
         )
-    inter = sample(inter, how=config["sampling"])
 
     if config["filtering"] == "posneg":
         inter = posneg_filter(inter)
     elif config["filtering"] != "all":
         raise ValueError("No such type of filtering!")
+
+    inter = sample(inter, how=config["sampling"])
 
     inter.to_csv(snakemake.output.inter, index=False, sep="\t")

@@ -4,8 +4,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataset
-from rindti.data.transforms import GnomadTransformer
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
+from rindti.utils import read_config
 
 models = {
     "class": ClassificationModel,
@@ -30,6 +30,7 @@ def train(**kwargs):
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
     ]
+    print(type(kwargs["profiler"]))
     trainer = Trainer(
         gpus=kwargs["gpus"],
         callbacks=callbacks,
@@ -52,6 +53,7 @@ if __name__ == "__main__":
     import argparse
 
     from rindti.utils import MyArgParser
+    from pprint import pprint
 
     tmp_parser = argparse.ArgumentParser(add_help=False)
     tmp_parser.add_argument("--model", type=str, default="class")
@@ -60,7 +62,8 @@ if __name__ == "__main__":
 
     parser = MyArgParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("data", type=str)
+    parser.add_argument("--data", type=str, default=None)
+    parser.add_argument("--config", type=str, default=None, help="If given, read config from file")
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
     parser.add_argument("--num_workers", type=int, default=4, help="number of workers for data loading")
@@ -92,5 +95,9 @@ if __name__ == "__main__":
     parser = models[model_type].add_arguments(parser)
 
     args = parser.parse_args()
-    argvars = vars(args)
+    if args.config:
+        argvars = read_config(args.config)
+    else:
+        argvars = vars(args)
+    pprint(argvars)
     train(**argvars)

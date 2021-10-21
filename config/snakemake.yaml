@@ -13,26 +13,26 @@ plddt:
 structures: template
 
 # If set to true, only computes the proteins data (useful for pretraining)
-only_proteins: true
+only_proteins: false
 
 # Seed for reproducibility of random processes
 seed: 42
 
 prepare_proteins:
   # can be label or onehot
-  node_feats: onehot
+  node_feats: label
   # can be label, onehot or none
-  edge_feats: onehot
+  edge_feats: none
   shard_size: 10000
 
 prepare_drugs:
   max_num_atoms: 150
-  node_feats: onehot
-  edge_feats: onehot
+  node_feats: label
+  edge_feats: none
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: random
+  method: colddrug
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val

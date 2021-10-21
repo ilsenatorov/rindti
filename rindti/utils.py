@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from matplotlib.figure import Figure
 from torch import FloatTensor, LongTensor, Tensor
 from torch.utils.data import random_split
+import yaml
+from yaml.loader import Loader
 
 
 def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
@@ -148,3 +150,10 @@ def get_node_loss(
     """Calculate cross-entropy loss for node prediction"""
     x = x if isinstance(x, LongTensor) else x.argmax(dim=1)
     return F.cross_entropy(pred_x, x)
+
+
+def read_config(filename: str) -> dict:
+    """Read in yaml config for training"""
+    with open(filename, "r") as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    return config
