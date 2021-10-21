@@ -52,7 +52,7 @@ def tune_asha(num_samples=1000, num_epochs=100):
         "prot_hidden_dim": tune.choice([8, 16, 32, 64, 128]),
         "prot_pretrain": None,
         "drug_pretrain": None,
-        "batch_size": 512,
+        "batch_size": 128,
         "num_workers": 16,
         "prot_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
         "drug_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
