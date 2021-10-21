@@ -1,9 +1,11 @@
+from typing import Tuple
+
 import torch
 import torch.nn.functional as F
-from torch.functional import Tensor
+from torch import FloatTensor, LongTensor, Tensor
 
 from ..data import DataCorruptor, TwoGraphData
-from ..utils import MyArgParser, remove_arg_prefix
+from ..utils import MyArgParser, get_node_loss, remove_arg_prefix
 from .classification import ClassificationModel
 
 
@@ -52,8 +54,8 @@ class NoisyNodesClassModel(ClassificationModel):
         loss = F.binary_cross_entropy(output, labels.float())
         prot_idx = cor_data.prot_idx
         drug_idx = cor_data.drug_idx
-        prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
-        drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
+        prot_loss = get_node_loss(data["prot_x"][prot_idx], prot_pred[prot_idx])
+        drug_loss = get_node_loss(data["drug_x"][drug_idx], drug_pred[drug_idx])
         metrics = self._get_class_metrics(output, labels)
         metrics.update(
             dict(

@@ -1,13 +1,11 @@
-from argparse import ArgumentParser
-
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
+from rindti.data import DTIDataset
 from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
-from rindti.utils.data import Dataset
-from rindti.utils.transforms import GnomadTransformer
+from rindti.utils import read_config
 
 models = {
     "class": ClassificationModel,
@@ -20,15 +18,9 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    if kwargs["transformer"] != "none":
-        transform = {"gnomad": GnomadTransformer}[kwargs["transformer"]].from_pickle(
-            kwargs["transformer_pickle"], max_num_mut=kwargs["max_num_mut"]
-        )
-    else:
-        transform = None
-    train = Dataset(kwargs["data"], split="train", transform=transform)
-    val = Dataset(kwargs["data"], split="val")
-    test = Dataset(kwargs["data"], split="test")
+    train = DTIDataset(kwargs["data"], split="train")
+    val = DTIDataset(kwargs["data"], split="val")
+    test = DTIDataset(kwargs["data"], split="test")
 
     kwargs.update(train.config)
     logger = TensorBoardLogger(
@@ -38,6 +30,7 @@ def train(**kwargs):
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
     ]
+    print(type(kwargs["profiler"]))
     trainer = Trainer(
         gpus=kwargs["gpus"],
         callbacks=callbacks,
@@ -60,6 +53,7 @@ if __name__ == "__main__":
     import argparse
 
     from rindti.utils import MyArgParser
+    from pprint import pprint
 
     tmp_parser = argparse.ArgumentParser(add_help=False)
     tmp_parser.add_argument("--model", type=str, default="class")
@@ -68,7 +62,8 @@ if __name__ == "__main__":
 
     parser = MyArgParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("data", type=str)
+    parser.add_argument("--data", type=str, default=None)
+    parser.add_argument("--config", type=str, default=None, help="If given, read config from file")
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
     parser.add_argument("--num_workers", type=int, default=4, help="number of workers for data loading")
@@ -78,7 +73,6 @@ if __name__ == "__main__":
     trainer = parser.add_argument_group("Trainer")
     model = parser.add_argument_group("Model")
     optim = parser.add_argument_group("Optimiser")
-    transformer = parser.add_argument_group("Transformer")
 
     trainer.add_argument("--gpus", type=int, default=1, help="Number of GPUs to use")
     trainer.add_argument("--max_epochs", type=int, default=1000, help="Max number of epochs")
@@ -98,16 +92,12 @@ if __name__ == "__main__":
     optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
     optim.add_argument("--monitor", type=str, default="val_loss", help="Value to monitor for lr reduction etc")
 
-    transformer.add_argument("--transformer", type=str, default="none", help="Type of transformer to apply")
-    transformer.add_argument(
-        "--transformer_pickle",
-        type=str,
-        default="../rins/results/prepare_transformer/onehot_simple_transformer.pkl",
-    )
-    transformer.add_argument("--max_num_mut", type=int, default=100)
-
     parser = models[model_type].add_arguments(parser)
 
     args = parser.parse_args()
-    argvars = vars(args)
+    if args.config:
+        argvars = read_config(args.config)
+    else:
+        argvars = vars(args)
+    pprint(argvars)
     train(**argvars)

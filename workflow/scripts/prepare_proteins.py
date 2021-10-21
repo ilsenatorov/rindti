@@ -8,7 +8,6 @@ from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(
     [
-        "padding",
         "ala",
         "arg",
         "asn",
@@ -50,10 +49,8 @@ class ProteinEncoder:
             np.array: Concatenated node_feats and one-hot encoding of residue name
         """
         residue = residue.lower()
-        if residue not in node_encoding:
-            None
-        elif self.node_feats == "label":
-            return node_encoding[residue]
+        if self.node_feats == "label":
+            return node_encoding[residue] + 1
         elif self.node_feats == "onehot":
             return onehot_encode(node_encoding[residue], len(node_encoding))
         else:
@@ -198,5 +195,4 @@ if __name__ == "__main__":
         snakemake.config["prepare_proteins"]["node_feats"], snakemake.config["prepare_proteins"]["edge_feats"]
     )
     proteins["data"] = proteins["sif"].apply(prot_encoder)
-    with open(snakemake.output.protein_pickle, "wb") as file:
-        pickle.dump(proteins, file)
+    proteins.to_pickle(snakemake.output.protein_pickle)

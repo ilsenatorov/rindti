@@ -14,14 +14,17 @@ edge_encoding = list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"])
 
 
 class DrugEncoder:
-    def __init__(self, node_feats: str, edge_feats: str, max_num_atoms: int = 150):
-        """Drug encoder, goes from SMILES to dictionary of torch data
+    """Drug encoder, goes from SMILES to dictionary of torch data
 
-        Args:
-            node_feats (str): 'label' or 'onehot'
-            edge_feats (str): 'label' or 'onehot
-            max_num_atoms (int, optional): filter out molecules that are too big. Defaults to 150.
-        """
+    Args:
+        node_feats (str): 'label' or 'onehot'
+        edge_feats (str): 'label' or 'onehot
+        max_num_atoms (int, optional): filter out molecules that are too big. Defaults to 150.
+    """
+
+    def __init__(self, node_feats: str, edge_feats: str, max_num_atoms: int = 150):
+        assert node_feats in {"label", "onehot"}
+        assert edge_feats in {"label", "onehot", "none"}
         self.node_feats = node_feats
         self.edge_feats = edge_feats
         self.max_num_atoms = max_num_atoms
@@ -33,10 +36,7 @@ class DrugEncoder:
         label = node_encoding[atom_num]
         if self.node_feats == "onehot":
             return onehot_encode(label, len(node_encoding))
-        elif self.node_feats == "label":
-            return label
-        else:
-            raise ValueError("Unknown node encoding!")
+        return label + 1
 
     def encode_edge(self, edge):
         """Encode single edge"""
@@ -46,7 +46,7 @@ class DrugEncoder:
         elif self.edge_feats == "label":
             return label
         else:
-            raise ValueError("Unknown edge encoding!")
+            raise ValueError("This shouldn't be called for edge type none")
 
     def __call__(self, smiles: str) -> dict:
         """Generate drug Data from smiles
@@ -63,7 +63,7 @@ class DrugEncoder:
         new_order = rdmolfiles.CanonicalRankAtoms(mol)
         mol = rdmolops.RenumberAtoms(mol, new_order)
         edges = []
-        edge_feats = []
+        edge_feats = [] if self.edge_feats != "none" else None
         for bond in mol.GetBonds():
             start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
             edges.append([start, end])
@@ -71,7 +71,8 @@ class DrugEncoder:
             # If bond type is unknown, remove molecule
             if btype not in edge_encoding.keys():
                 return np.nan
-            edge_feats.append(self.encode_edge(btype))
+            if self.edge_feats != "none":
+                edge_feats.append(self.encode_edge(btype))
         if not edges:  # If no edges (bonds) were found, remove molecule
             return np.nan
         atom_features = []
@@ -80,10 +81,23 @@ class DrugEncoder:
             atom_features.append(self.encode_node(atom_num))
         if len(atom_features) > self.max_num_atoms:
             return np.nan
-        x = torch.tensor(atom_features, dtype=torch.long)
+        if self.node_feats == "label":
+            x = torch.tensor(atom_features, dtype=torch.long)
+        else:
+            x = torch.tensor(atom_features, dtype=torch.float32)
         edge_index = torch.tensor(edges).t().contiguous()
-        edge_feats = torch.tensor(edge_feats, dtype=torch.long)
-        edge_index, edge_feats = to_undirected(edge_index, edge_feats)
+        if self.edge_feats == "onehot":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.float32)
+        elif self.edge_feats == "label":
+            edge_feats = torch.tensor(edge_feats, dtype=torch.long)
+        elif self.edge_feats == "none":
+            edge_feats = None
+        else:
+            raise ValueError("Unknown edge encoding!")
+        if self.edge_feats != "none":
+            edge_index, edge_feats = to_undirected(edge_index, edge_feats)
+        else:
+            edge_index = to_undirected(edge_index)
         return dict(x=x, edge_index=edge_index, edge_feats=edge_feats)
 
 

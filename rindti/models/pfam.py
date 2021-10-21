@@ -1,11 +1,13 @@
 from argparse import ArgumentParser
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 import torch
 from torch.functional import Tensor
 
 from ..data import TwoGraphData
-from ..utils import MyArgParser
+from ..utils import MyArgParser, plot_loss_count_dist
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
 
@@ -24,7 +26,7 @@ def generalised_lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin
     """
     pos_loss = torch.logsumexp(pos_dist, dim=0)
     neg_loss = torch.logsumexp(margin - neg_dist, dim=0)
-    return torch.relu(pos_loss + neg_loss)
+    return torch.relu(pos_loss + neg_loss) ** 2
 
 
 class PfamModel(BaseModel):
@@ -40,6 +42,43 @@ class PfamModel(BaseModel):
         """Forward pass of the model"""
         return self.encoder(data)
 
+    def log_distmap(self, dist: Tensor, data: TwoGraphData, embeds: Tensor):
+        """Plot and save distance matrix of this batch"""
+        fig = plt.figure()
+        sns.heatmap(dist.detach().cpu())
+        self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
+        self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
+
+    def get_loss(self, dist: Tensor, idx: list, all_idx: set) -> Tensor:
+        """Calculate loss for one family
+
+        Args:
+            dist (Tensor): distance matrix
+            idx (list): ids of target family
+            all_idx (set): all_ids
+
+        Returns:
+            Tensor: 1D tensor of length len(idx) with losses
+        """
+        pos_idxt = torch.tensor(idx)
+        neg_idxt = torch.tensor(list(all_idx.difference(idx)))
+        pos_dist = dist[pos_idxt[:, None], pos_idxt]
+        neg_dist = dist[neg_idxt[:, None], pos_idxt]
+        return generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
+
+    def save_losses(self, losses: Tensor, ids: list):
+        """Save the losses to general loss counter"""
+        for l, name in zip(losses, ids):
+            self.losses[name].append(l.item())
+
+    def get_fam_all_idx(self, data: TwoGraphData):
+        """Get indices of each family"""
+        fam_idx = defaultdict(list)
+        all_idx = set(list(range(len(data.id))))
+        for idx, fam in enumerate(data.fam):
+            fam_idx[fam].append(idx)
+        return fam_idx, all_idx
+
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
 
@@ -51,23 +90,17 @@ class PfamModel(BaseModel):
         """
         embeds = self.forward(data)
         dist = torch.cdist(embeds, embeds)
-        fam_idx = defaultdict(list)
-        all_idx = set(list(range(len(data.id))))
-        for idx, fam in enumerate(data.fam):
-            fam_idx[fam].append(idx)
-        loss = []
-        for fam, idx in fam_idx.items():
-            pos_idxt = torch.tensor(list(idx))
-            neg_idxt = torch.tensor(list(all_idx.difference(idx)))
-            pos_dist = dist[pos_idxt[:, None], pos_idxt]
-            neg_dist = dist[neg_idxt[:, None], pos_idxt]
-            fam_loss = generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
-            loss.append(fam_loss)
-            self.losses[fam].append(fam_loss.mean().item())
-        return dict(loss=torch.cat(loss).mean())
+        if self.global_step % 100 == 1:
+            self.log_distmap(dist, data, embeds)
+        fam_idx, all_idx = self.get_fam_all_idx(data)
+        loss = torch.cat([self.get_loss(dist, idx, all_idx) for idx in fam_idx.values()])
+        self.save_losses(loss, data.id)
+        return dict(loss=loss.mean())
 
     def training_epoch_end(self, outputs: dict):
+        """Same as base version, but additionally updates weights of sampler"""
         self.sampler.update_weights(self.losses)
+        self.logger.experiment.add_figure("loss_dist", plot_loss_count_dist(self.losses), global_step=self.global_step)
         return super().training_epoch_end(outputs)
 
     @staticmethod

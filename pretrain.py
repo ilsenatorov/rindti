@@ -5,7 +5,7 @@ from torch_geometric.loader import DataLoader
 
 from rindti.data import PreTrainDataset, WeightedPfamSampler
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
-from rindti.utils import MyArgParser
+from rindti.utils import MyArgParser, read_config
 
 models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel, "bgrl": BGRLModel}
 
@@ -55,11 +55,12 @@ To get help for different models run with python pretrain.py --help --model <mod
 To get help for different modules run with python pretrain.py --help --prot_node_embed <module name> """,
     )
 
-    parser.add_argument("data", type=str)
+    parser.add_argument("--data", type=str, default=None)
+    parser.add_argument("--config", type=str, default=None, help="If given, read config from file")
     parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
     parser.add_argument("--batch_size", type=int, default=512, help="batch size")
     parser.add_argument("--num_workers", type=int, default=16, help="number of workers for data loading")
-    parser.add_argument("--early_stop_patience", type=int, default=60, help="epochs with no improvement before stop")
+    parser.add_argument("--early_stop_patience", type=int, default=200, help="epochs with no improvement before stop")
     parser.add_argument("--max_epochs", type=int, default=None, help="Max number of epochs to train for")
 
     trainer = parser.add_argument_group("Trainer")
@@ -73,14 +74,16 @@ To get help for different modules run with python pretrain.py --help --prot_node
     trainer.add_argument("--profiler", type=str, default=None)
 
     optim.add_argument("--optimiser", type=str, default="adam", help="Optimisation algorithm")
-    optim.add_argument("--weight_decay", type=float, default=0.01)
-    optim.add_argument("--lr", type=float, default=0.0001, help="learning rate")
-    optim.add_argument("--reduce_lr_patience", type=int, default=20)
-    optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
+    optim.add_argument("--lr", type=float, default=0.0005, help="learning rate")
+    optim.add_argument("--reduce_lr_patience", type=int, default=100)
+    optim.add_argument("--reduce_lr_factor", type=float, default=0.5)
     optim.add_argument("--monitor", type=str, default="train_loss", help="Value to monitor for lr reduction etc")
 
     parser = models[model_type].add_arguments(parser)
 
     args = parser.parse_args()
-    argvars = vars(args)
+    if args.config:
+        argvars = read_config(args.config)
+    else:
+        argvars = vars(args)
     pretrain(**argvars)

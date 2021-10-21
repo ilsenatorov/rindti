@@ -101,8 +101,6 @@ class ClassificationModel(BaseModel):
         drug_pool = poolers[args.drug_pool]
         prot = parser.add_argument_group("Prot", prefix="--prot_")
         drug = parser.add_argument_group("Drug", prefix="--drug_")
-        prot.add_argument("feat_embed_dim", default=32, type=int)
-        drug.add_argument("feat_embed_dim", default=32, type=int)
         prot.add_argument("pretrain", default=None, type=str)
         drug.add_argument("pretrain", default=None, type=str)
         prot.add_argument("lr", type=float, default=0.0005)

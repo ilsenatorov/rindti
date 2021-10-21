@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 
 from ..data import TwoGraphData
-from ..utils import remove_arg_prefix
+from ..utils import get_node_loss, remove_arg_prefix
 from .noisy_nodes_classification import NoisyNodesClassModel
 
 
@@ -25,8 +25,8 @@ class NoisyNodesRegModel(NoisyNodesClassModel):
         loss = F.mse_loss(output, labels)
         prot_idx = cor_data.prot_idx
         drug_idx = cor_data.drug_idx
-        prot_loss = F.cross_entropy(prot_pred[prot_idx], data["prot_x"][prot_idx])
-        drug_loss = F.cross_entropy(drug_pred[drug_idx], data["drug_x"][drug_idx])
+        prot_loss = get_node_loss(data["prot_x"][prot_idx], prot_pred[prot_idx])
+        drug_loss = get_node_loss(data["drug_x"][drug_idx], drug_pred[drug_idx])
         metrics = self._get_reg_metrics(output, labels)
         metrics.update(
             dict(

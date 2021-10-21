@@ -1,12 +1,18 @@
 from argparse import ArgumentParser, _ArgumentGroup
-from typing import Union
+from typing import Tuple
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import torch.nn.functional as F
+from matplotlib.figure import Figure
+from torch import FloatTensor, LongTensor, Tensor
 from torch.utils.data import random_split
+import yaml
+from yaml.loader import Loader
 
-from .data import PreTrainDataset, TwoGraphData
 
-
-def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
+def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
     """Removes the prefix from all the args
     Args:
         prefix (str): prefix to remove (`drug_`, `prot_` or `mlp_` usually)
@@ -27,7 +33,7 @@ def remove_arg_prefix(prefix: str, kwargs: Union[dict, TwoGraphData]) -> dict:
 
 
 def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
-    """Adds the prefix to all the args. Removes None values and 'index_mapping'
+    """Adds the prefix to all the args. Removes None values and "index_mapping"
 
     Args:
         prefix (str): prefix to add (`drug_`, `prot_` or `mlp_` usually)
@@ -84,9 +90,70 @@ class MyArgParser(ArgumentParser):
                 return group
 
 
-def split_random(dataset: PreTrainDataset, train_frac: float = 0.8):
+def split_random(dataset, train_frac: float = 0.8):
     """Randomly split dataset"""
     tot = len(dataset)
     train = int(tot * train_frac)
     val = int(tot * (1 - train_frac))
     return random_split(dataset, [train, val])
+
+
+def minmax_normalise(s: pd.Series) -> pd.Series:
+    """MinMax normalisation of a pandas series"""
+    return (s - s.min()) / (s.max() - s.min())
+
+
+def plot_loss_count_dist(losses: dict) -> Figure:
+    """Plot distribution of times sampled vs avg loss of families"""
+    fig = plt.figure()
+    plt.xlabel("Times sampled")
+    plt.ylabel("Avg loss")
+    plt.title("Prot statistics")
+    count = [len(x) for x in losses.values()]
+    mean = [np.mean(x) for x in losses.values()]
+    plt.scatter(x=count, y=mean)
+    return fig
+
+
+def to_prob(s: pd.Series) -> pd.Series:
+    """Convert to probabilities"""
+    return s / s.sum()
+
+
+def get_type(data: dict, key: str) -> str:
+    """Check which type of data we have
+
+    Args:
+        data (dict): TwoGraphData or Data
+        key (str): "x" or "prot_x" or "drug_x" usually
+
+    Raises:
+        ValueError: If not FloatTensor or LongTensor
+
+    Returns:
+        str: "label" for LongTensor, "onehot" for FloatTensor
+    """
+    feat = data.get(key)
+    if isinstance(feat, LongTensor):
+        return "label"
+    if isinstance(feat, FloatTensor):
+        return "onehot"
+    if feat is None:
+        return "none"
+    raise ValueError("Unknown data type {}".format(type(data[key])))
+
+
+def get_node_loss(
+    x: Tensor,
+    pred_x: Tensor,
+) -> Tuple[Tensor, Tensor]:
+    """Calculate cross-entropy loss for node prediction"""
+    x = x if isinstance(x, LongTensor) else x.argmax(dim=1)
+    return F.cross_entropy(pred_x, x)
+
+
+def read_config(filename: str) -> dict:
+    """Read in yaml config for training"""
+    with open(filename, "r") as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+    return config
