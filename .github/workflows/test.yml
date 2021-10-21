@@ -22,7 +22,7 @@ jobs:
           pip install matplotlib
           pip install numpy
           pip install seaborn
-          pip install yaml
+          pip install PyYAML
           pip install torch
           pip install pytorch_lightning
           pip install torchmetrics
