@@ -19,14 +19,15 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+          pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
+          pip install torchmetrics
+          pip install pytorch_lightning
           pip install matplotlib
           pip install numpy
           pip install seaborn
           pip install PyYAML
-          pip install torch
-          pip install pytorch_lightning
-          pip install torchmetrics
-          pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.9.0+cpu.html
       - name: Test with pytest
         run: |
           pip install pytest
