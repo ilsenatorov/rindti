@@ -8,7 +8,7 @@ from ray import tune
 from ray.tune import CLIReporter
 from ray.tune.integration.pytorch_lightning import TuneReportCallback
 from ray.tune.schedulers import ASHAScheduler
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataset
 from rindti.models import ClassificationModel
@@ -73,12 +73,19 @@ def tune_asha(num_samples=1000, num_epochs=100):
         "monitor": "val_loss",
     }
     train_data = DTIDataset(sys.argv[1], split="train")
-    val_data = DTIDataset(sys.argv[1], split="val")
+    val_data = DTIDataset(sys.argv[1], split="val").shuffle()
 
     scheduler = ASHAScheduler(max_t=num_epochs, grace_period=20, reduction_factor=3)
 
     reporter = CLIReporter(
-        parameter_columns=["prot_node_embed", "drug_node_embed", "prot_pool", "drug_pool", "transformer", "rin_type"],
+        parameter_columns=[
+            "prot_node_embed",
+            "drug_node_embed",
+            "prot_pool",
+            "drug_pool",
+            "prot_hidden_dim",
+            "drug_hidden_dim",
+        ],
         metric_columns=["auroc", "acc", "training_iteration"],
     )
 

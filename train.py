@@ -18,9 +18,9 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    train = DTIDataset(kwargs["data"], split="train")
-    val = DTIDataset(kwargs["data"], split="val")
-    test = DTIDataset(kwargs["data"], split="test")
+    train = DTIDataset(kwargs["data"], split="train").shuffle()
+    val = DTIDataset(kwargs["data"], split="val").shuffle()
+    test = DTIDataset(kwargs["data"], split="test").shuffle()
 
     kwargs.update(train.config)
     logger = TensorBoardLogger(
@@ -51,9 +51,9 @@ def train(**kwargs):
 
 if __name__ == "__main__":
     import argparse
+    from pprint import pprint
 
     from rindti.utils import MyArgParser
-    from pprint import pprint
 
     tmp_parser = argparse.ArgumentParser(add_help=False)
     tmp_parser.add_argument("--model", type=str, default="class")

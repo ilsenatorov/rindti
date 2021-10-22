@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch.nn.functional as F
+import yaml
 from matplotlib.figure import Figure
 from torch import FloatTensor, LongTensor, Tensor
 from torch.utils.data import random_split
-import yaml
 from yaml.loader import Loader
 
 
