@@ -13,5 +13,5 @@ data/*
 report/
 resources/
 results/
-tb_logs/
+*logs/
 *Untitled*

@@ -20,19 +20,19 @@ seed: 42
 
 prepare_proteins:
   # can be label or onehot
-  node_feats: label
+  node_feats: onehot
   # can be label, onehot or none
-  edge_feats: none
+  edge_feats: onehot
   shard_size: 10000
 
 prepare_drugs:
   max_num_atoms: 150
-  node_feats: label
-  edge_feats: none
+  node_feats: onehot
+  edge_feats: onehot
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: colddrug
+  method: random
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val

@@ -2,7 +2,6 @@ from argparse import ArgumentParser
 
 from torch.functional import Tensor
 from torch.nn import ModuleList
-from torch.nn.modules.module import Module
 from torch_geometric.nn import TransformerConv
 from torch_geometric.typing import Adj
 

@@ -2,7 +2,7 @@ import sys
 
 import torch
 import yaml
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.loggers import TensorBoardLogger
 from ray import tune
 from ray.tune import CLIReporter
@@ -13,7 +13,7 @@ from torch_geometric.loader import DataLoader
 from rindti.data import DTIDataset
 from rindti.models import ClassificationModel
 
-torch.manual_seed(42)
+seed_everything(42)
 
 
 def train(kwargs, data, num_epochs=100):
@@ -48,16 +48,16 @@ def tune_asha(num_samples=1000, num_epochs=100):
     """Tune hparams with ASHA"""
     config = {
         "feat_method": "concat",
-        "drug_hidden_dim": tune.choice([8, 16, 32, 64, 128]),
-        "prot_hidden_dim": tune.choice([8, 16, 32, 64, 128]),
+        "drug_hidden_dim": tune.choice([8, 32, 128]),
+        "prot_hidden_dim": tune.choice([8, 32, 128]),
         "prot_pretrain": None,
         "drug_pretrain": None,
-        "batch_size": 128,
+        "batch_size": 1024,
         "num_workers": 16,
-        "prot_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
-        "drug_node_embed": tune.choice(["ginconv", "chebconv", "gatconv", "transformer"]),
-        "prot_pool": tune.choice(["gmt", "diffpool"]),
-        "drug_pool": tune.choice(["gmt", "diffpool"]),
+        "prot_node_embed": "transformer",
+        "dru_node_embed": "transformer",
+        "prot_pool": "gmt",
+        "drug_pool": "gmt",
         "optimiser": "adamw",
         "lr": 0.001,
         "weight_decay": 0.001,
@@ -79,10 +79,6 @@ def tune_asha(num_samples=1000, num_epochs=100):
 
     reporter = CLIReporter(
         parameter_columns=[
-            "prot_node_embed",
-            "drug_node_embed",
-            "prot_pool",
-            "drug_pool",
             "prot_hidden_dim",
             "drug_hidden_dim",
         ],
