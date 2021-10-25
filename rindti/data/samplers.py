@@ -39,9 +39,10 @@ class PfamSampler(Sampler):
         self.fam_idx = defaultdict(set)
         self.prot_idx = {}
         for i, data in enumerate(self.dataset):
-            self.fam_idx[data.fam].add(i)
-            self.prot_idx[data.id] = i
-        self.fam_idx = {k: list(v) for k, v in self.fam_idx.items()}
+            for fam in data.fam.rstrip(";").split(";"):
+                self.fam_idx[fam].add(i)
+                self.prot_idx[data.id] = i
+        self.fam_idx = pd.Series({k: list(v) for k, v in self.fam_idx.items()})
 
     def _construct_batch(self) -> List[int]:
         """Creates a single batch. takes self.prot_per_fam families and samples them
@@ -50,13 +51,15 @@ class PfamSampler(Sampler):
             List[int]: Indices of the proteins from the main dataset
         """
         batch = []
-        anchor_fams = np.random.choice(
-            list(self.fam_idx.keys()),
-            size=self.batch_size // self.prot_per_fam,
-            replace=False,
-        )
-        for fam in anchor_fams:
-            batch += list(np.random.choice(self.fam_idx[fam], size=self.prot_per_fam, replace=False))
+        blacklist = set()
+        for _ in range(self.batch_size // self.prot_per_fam):
+            subset = self.fam_idx.drop(blacklist)
+            anchor_fam = random.choice(subset.index)
+            batchlet = list(np.random.choice(self.fam_idx[anchor_fam], size=self.prot_per_fam, replace=False))
+            for idx in batchlet:
+                for fam in self.dataset[idx].fam.split(";"):
+                    blacklist.add(fam)
+            batch += batchlet
         return batch
 
     def __iter__(self) -> iter:
@@ -65,6 +68,8 @@ class PfamSampler(Sampler):
         Returns:
             iter: over list of lists, each list is one batch of indices
         """
+        for _ in range(self.batch_per_epoch):
+            yield self._construct_batch()
         return iter([self._construct_batch() for _ in range(self.batch_per_epoch)])
 
     def __len__(self):
@@ -118,21 +123,20 @@ class WeightedPfamSampler(PfamSampler):
             List[int]: Indices of the proteins from the main dataset
         """
         batch = []
-        anchor_fams = list(
-            np.random.choice(
-                list(self.fam_weights.index),
-                p=to_prob(self.fam_weights.values),
-                size=self.batch_size // self.prot_per_fam,
-                replace=False,
-            )
-        )
-        for fam in anchor_fams:
-            batch += list(
+        blacklist = set()
+        for _ in range(self.batch_size // self.prot_per_fam):
+            subset = self.fam_idx.drop(blacklist)
+            anchor_fam = random.choice(subset.index)
+            batchlet = list(
                 np.random.choice(
-                    self.fam_idx[fam],
-                    p=to_prob(np.asarray([self.prot_weights[x] for x in self.fam_idx[fam]])),
+                    self.fam_idx[anchor_fam],
+                    p=to_prob(np.asarray([self.prot_weights[x] for x in self.fam_idx[anchor_fam]])),
                     size=self.prot_per_fam,
                     replace=False,
                 )
             )
+            for idx in batchlet:
+                for fam in self.dataset[idx].fam.split(";"):
+                    blacklist.add(fam)
+            batch += batchlet
         return batch

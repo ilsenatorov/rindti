@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from collections import defaultdict
+from typing import List
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -37,6 +38,23 @@ class PfamModel(BaseModel):
         self.save_hyperparameters()
         self.encoder = Encoder(return_nodes=False, **kwargs)
         self.losses = defaultdict(list)
+        self.all_idx = set(range(kwargs["batch_size"]))
+
+    @property
+    def fam_idx(self) -> List[List]:
+        """Using batch_size and prot_per_fam, get idx of each family
+
+        Returns:
+            List[List]: First list is families, second list is entries in the family
+        """
+        return [
+            [*range(x, x + self.hparams.prot_per_fam)]
+            for x in range(
+                0,
+                self.hparams.batch_size,
+                self.hparams.prot_per_fam,
+            )
+        ]
 
     def forward(self, data: dict) -> Tensor:
         """Forward pass of the model"""
@@ -49,7 +67,7 @@ class PfamModel(BaseModel):
         self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
         self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
 
-    def get_loss(self, dist: Tensor, idx: list, all_idx: set) -> Tensor:
+    def get_loss(self, dist: Tensor, idx: list) -> Tensor:
         """Calculate loss for one family
 
         Args:
@@ -61,7 +79,7 @@ class PfamModel(BaseModel):
             Tensor: 1D tensor of length len(idx) with losses
         """
         pos_idxt = torch.tensor(idx)
-        neg_idxt = torch.tensor(list(all_idx.difference(idx)))
+        neg_idxt = torch.tensor(list(self.all_idx.difference(idx)))
         pos_dist = dist[pos_idxt[:, None], pos_idxt]
         neg_dist = dist[neg_idxt[:, None], pos_idxt]
         return generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
@@ -70,14 +88,6 @@ class PfamModel(BaseModel):
         """Save the losses to general loss counter"""
         for l, name in zip(losses, ids):
             self.losses[name].append(l.item())
-
-    def get_fam_all_idx(self, data: TwoGraphData):
-        """Get indices of each family"""
-        fam_idx = defaultdict(list)
-        all_idx = set(list(range(len(data.id))))
-        for idx, fam in enumerate(data.fam):
-            fam_idx[fam].append(idx)
-        return fam_idx, all_idx
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -88,12 +98,12 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
+        print(self.fam_idx)
         embeds = self.forward(data)
         dist = torch.cdist(embeds, embeds)
         if self.global_step % 100 == 1:
             self.log_distmap(dist, data, embeds)
-        fam_idx, all_idx = self.get_fam_all_idx(data)
-        loss = torch.cat([self.get_loss(dist, idx, all_idx) for idx in fam_idx.values()])
+        loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])
         self.save_losses(loss, data.id)
         return dict(loss=loss.mean())
 
