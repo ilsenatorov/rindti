@@ -4,6 +4,7 @@ from random import choice, randint
 import pandas as pd
 import pytest
 import torch
+from pytorch_lightning.utilities.seed import seed_everything
 from torch.functional import Tensor
 from torch_geometric.loader import DataLoader
 
@@ -132,7 +133,7 @@ def pretrain_pickle(tmpdir_factory, request):
                 PROT_FEAT_DIM,
                 params["edge_type"],
                 PROT_EDGE_DIM,
-                fam=["a", "b"],
+                fam=["a", "b", "c", "a;b"],
             )
             for _ in range(N_PROTS)
         ],
@@ -206,3 +207,8 @@ def pretrain_dataloader(pretrain_dataset, pfam_sampler):
 @pytest.fixture
 def pretrain_batch(pretrain_dataloader):
     return next(iter(pretrain_dataloader))
+
+
+@pytest.fixture(autouse=True)
+def seed():
+    seed_everything(42)

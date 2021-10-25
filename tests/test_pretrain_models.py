@@ -5,7 +5,7 @@ import pytest
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.models.base_model import node_embedders, poolers
 
-from .conftest import PROT_EDGE_DIM, PROT_FEAT_DIM
+from .conftest import BATCH_SIZE, PROT_EDGE_DIM, PROT_FEAT_DIM, PROT_PER_FAM
 
 
 @pytest.fixture
@@ -13,6 +13,7 @@ def default_config():
     return {
         "alpha": 1.0,
         "beta": 1.0,
+        "batch_size": BATCH_SIZE,
         "corruption": "mask",
         "edge_type": "none",
         "decay_ratio": 0.5,
@@ -38,6 +39,7 @@ def default_config():
         "num_workers": 4,
         "optimiser": "adamw",
         "pooling_method": "mincut",
+        "prot_per_fam": PROT_PER_FAM,
         "ratio": 0.25,
         "reduce_lr_factor": 0.1,
         "reduce_lr_patience": 20,
