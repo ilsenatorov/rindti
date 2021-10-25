@@ -39,10 +39,10 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: posneg
+  filtering: all
   # sampling
   # sampling can be over, under or none
-  sampling: under
+  sampling: none
   # class or reg
   task: class
   # threshold values for class problem
