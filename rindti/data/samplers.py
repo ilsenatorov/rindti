@@ -65,6 +65,8 @@ class PfamSampler(Sampler):
         Returns:
             iter: over list of lists, each list is one batch of indices
         """
+        for _ in range(self.batch_per_epoch):
+            yield self._construct_batch()
         return iter([self._construct_batch() for _ in range(self.batch_per_epoch)])
 
     def __len__(self):
