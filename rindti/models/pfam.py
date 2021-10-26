@@ -30,6 +30,10 @@ def generalised_lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin
     return torch.relu(pos_loss + neg_loss) ** 2
 
 
+def soft_nearest_neighbor_loss(possim: Tensor, negsim: Tensor, temperature: float = 0.1) -> Tensor:
+    return -torch.log(possim.sum(dim=0) / negsim.sum(dim=0)).mean().view(-1)
+
+
 class PfamModel(BaseModel):
     """Model for Pfam class comparison problem"""
 
@@ -39,9 +43,10 @@ class PfamModel(BaseModel):
         self.encoder = Encoder(return_nodes=False, **kwargs)
         self.losses = defaultdict(list)
         self.all_idx = set(range(kwargs["batch_size"]))
+        print(self.hparams)
+        self.fam_idx = self.get_fam_idx()
 
-    @property
-    def fam_idx(self) -> List[List]:
+    def get_fam_idx(self) -> List[List]:
         """Using batch_size and prot_per_fam, get idx of each family
 
         Returns:
@@ -82,7 +87,7 @@ class PfamModel(BaseModel):
         neg_idxt = torch.tensor(list(self.all_idx.difference(idx)))
         pos_dist = dist[pos_idxt[:, None], pos_idxt]
         neg_dist = dist[neg_idxt[:, None], pos_idxt]
-        return generalised_lifted_structure_loss(pos_dist, neg_dist, margin=self.hparams.margin)
+        return soft_nearest_neighbor_loss(pos_dist, neg_dist, temperature=self.hparams.temp)
 
     def save_losses(self, losses: Tensor, ids: list):
         """Save the losses to general loss counter"""
@@ -98,9 +103,11 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        print(self.fam_idx)
         embeds = self.forward(data)
-        dist = torch.cdist(embeds, embeds)
+        batch_size = embeds.size(0)
+        norm_emb = torch.nn.functional.normalize(embeds)
+        sim = 1 - torch.matmul(norm_emb, norm_emb.t())
+        dist = torch.exp(-sim / self.hparams.temp) - torch.eye(batch_size, device=self.device)
         if self.global_step % 100 == 1:
             self.log_distmap(dist, data, embeds)
         loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])

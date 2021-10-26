@@ -75,6 +75,10 @@ class PfamSampler(Sampler):
     def __len__(self):
         return self.batch_per_epoch
 
+    def update_weights(self, *args, **kwargs):
+        """For consistency"""
+        pass
+
 
 class WeightedPfamSampler(PfamSampler):
     """Weighted for generating pfam-conforming batches.

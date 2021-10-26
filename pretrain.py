@@ -3,7 +3,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
-from rindti.data import PreTrainDataset, WeightedPfamSampler
+from rindti.data import PfamSampler, PreTrainDataset, WeightedPfamSampler
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.utils import MyArgParser, read_config
 
@@ -32,7 +32,7 @@ def pretrain(**kwargs):
     )
     model = models[kwargs["model"]](**kwargs)
     if kwargs["model"] == "pfam":
-        sampler = WeightedPfamSampler(dataset, **kwargs)
+        sampler = PfamSampler(dataset, **kwargs)
         dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
         model.sampler = sampler
     else:
