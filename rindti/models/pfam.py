@@ -8,26 +8,9 @@ import torch
 from torch.functional import Tensor
 
 from ..data import TwoGraphData
-from ..utils import MyArgParser, plot_loss_count_dist
+from ..utils import MyArgParser
 from .base_model import BaseModel, node_embedders, poolers
 from .encoder import Encoder
-
-
-def generalised_lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin: float = 1.0) -> Tensor:
-    """
-    https://lilianweng.github.io/lil-log/2021/05/31/contrastive-representation-learning.html
-
-    Args:
-        pos_dist (Tensor): distances between positive pairs
-        neg_dist (Tensor): distances between negative pairs
-        margin (float, optional): alpha, margin. Defaults to 1.0.
-
-    Returns:
-        Tensor: resulting loss
-    """
-    pos_loss = torch.logsumexp(pos_dist, dim=0)
-    neg_loss = torch.logsumexp(margin - neg_dist, dim=0)
-    return torch.relu(pos_loss + neg_loss) ** 2
 
 
 class PfamModel(BaseModel):
@@ -39,10 +22,78 @@ class PfamModel(BaseModel):
         self.encoder = Encoder(return_nodes=False, **kwargs)
         self.losses = defaultdict(list)
         self.all_idx = set(range(kwargs["batch_size"]))
-        print(self.hparams)
-        self.fam_idx = self.get_fam_idx()
+        self.fam_idx = self._get_fam_idx()
+        self.loss = {"snnl": self.soft_nearest_neighbor_loss, "lifted": self.generalised_lifted_structure_loss}[
+            kwargs["loss"]
+        ]
 
-    def get_fam_idx(self) -> List[List]:
+    def generalised_lifted_structure_loss(self, embeds: Tensor) -> Tensor:
+        """Hard mines for negatives
+
+        Args:
+            embeds (Tensor): Embeddings of all data points
+            fam_idx (List[List]): List of lists of family indices
+
+        Returns:
+            Tensor: final loss
+        """
+        for idx in self.fam_idx:
+            dist = torch.cdist(embeds, embeds)
+            pos_idxt = torch.tensor(idx)
+            neg_idxt = torch.tensor(list(self.all_idx.difference(idx)))
+            pos = dist[pos_idxt[:, None], pos_idxt]
+            neg = dist[neg_idxt[:, None], pos_idxt]
+            pos_loss = torch.logsumexp(pos, dim=0)
+            neg_loss = torch.logsumexp(self.hparams.margin - neg, dim=0)
+        return torch.relu(pos_loss + neg_loss) ** 2
+
+    def soft_nearest_neighbor_loss(self, embeds: Tensor) -> Tensor:
+        temp, init_temp = (
+            torch.tensor(1, dtype=torch.float32, device=self.device, requires_grad=True)
+            if self.hparams.optim_temp
+            else 1,
+            self.hparams.temp,
+        )
+        norm_emb = torch.nn.functional.normalize(embeds)
+        sim = 1 - torch.matmul(norm_emb, norm_emb.t())
+        loss = self._get_loss(sim, init_temp / temp)
+        if not self.hparams.optim_temp:
+            return loss
+        loss.mean().backward(inputs=[temp])
+        with torch.no_grad():
+            temp -= 0.1 * temp.grad
+        return self._get_loss(sim, init_temp / temp)
+
+    def _get_fam_loss(self, expsim: Tensor, idx: list) -> Tensor:
+        """Calculate loss for one family
+
+        Args:
+            expsim (Tensor): Exponentiated similarity matrix
+            idx (list): ids of target family
+            all_idx (set): all_ids
+
+        Returns:
+            Tensor: 1D tensor of length len(idx) with losses
+        """
+        pos_idxt = torch.tensor(idx)
+        pos = expsim[pos_idxt[:, None], pos_idxt]
+        batch = expsim[:, pos_idxt]
+        return -torch.log(pos.sum(dim=0) / batch.sum(dim=0)).mean().view(-1)
+
+    def _get_loss(self, sim: Tensor, tau: Tensor) -> Tensor:
+        """Calculate SNNL
+
+        Args:
+            sim (Tensor): similarity matrix
+            tau (Tensor): temperature
+
+        Returns:
+            Tensor: 1D Tensor of losses for each entry
+        """
+        expsim = torch.exp(-sim / tau) - torch.eye(self.hparams.batch_size, device=self.device)
+        return torch.cat([self._get_fam_loss(expsim, idx) for idx in self.fam_idx])
+
+    def _get_fam_idx(self) -> List[List]:
         """Using batch_size and prot_per_fam, get idx of each family
 
         Returns:
@@ -61,35 +112,6 @@ class PfamModel(BaseModel):
         """Forward pass of the model"""
         return self.encoder(data)
 
-    def log_distmap(self, dist: Tensor, data: TwoGraphData, embeds: Tensor):
-        """Plot and save distance matrix of this batch"""
-        fig = plt.figure()
-        sns.heatmap(dist.detach().cpu())
-        self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
-        self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
-
-    def get_loss(self, dist: Tensor, idx: list) -> Tensor:
-        """Calculate loss for one family
-
-        Args:
-            dist (Tensor): distance matrix
-            idx (list): ids of target family
-            all_idx (set): all_ids
-
-        Returns:
-            Tensor: 1D tensor of length len(idx) with losses
-        """
-        pos_idxt = torch.tensor(idx)
-        neg_idxt = torch.tensor(list(self.all_idx.difference(idx)))
-        pos_dist = dist[pos_idxt[:, None], pos_idxt]
-        neg_dist = dist[neg_idxt[:, None], pos_idxt]
-        return -torch.log(pos_dist.sum(dim=0) / neg_dist.sum(dim=0)).mean().view(-1)
-
-    def save_losses(self, losses: Tensor, ids: list):
-        """Save the losses to general loss counter"""
-        for l, name in zip(losses, ids):
-            self.losses[name].append(l.item())
-
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
 
@@ -100,28 +122,8 @@ class PfamModel(BaseModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         embeds = self.forward(data)
-        temp = torch.tensor(1, dtype=torch.float32, device=self.device, requires_grad=True)
-        inverse_temp = self.hparams.initial_temp / temp
-        norm_emb = torch.nn.functional.normalize(embeds)
-        sim = 1 - torch.matmul(norm_emb, norm_emb.t())
-        dist = torch.exp(-sim / inverse_temp) - torch.eye(self.hparams.batch_size, device=self.device) + 1e-6
-        loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])
-        loss.mean().backward(inputs=[temp])
-        with torch.no_grad():
-            temp -= 0.1 * temp.grad
-        inverse_temp = self.hparams.initial_temp / temp
-        dist = torch.exp(-sim / inverse_temp) - torch.eye(self.hparams.batch_size, device=self.device) + 1e-6
-        loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])
-        if self.global_step % 100 == 1:
-            self.log_distmap(dist, data, embeds)
-        self.save_losses(loss, data.id)
+        loss = self.soft_nearest_neighbor_loss(embeds)
         return dict(loss=loss.mean())
-
-    def training_epoch_end(self, outputs: dict):
-        """Same as base version, but additionally updates weights of sampler"""
-        self.sampler.update_weights(self.losses)
-        self.logger.experiment.add_figure("loss_dist", plot_loss_count_dist(self.losses), global_step=self.global_step)
-        return super().training_epoch_end(outputs)
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:
