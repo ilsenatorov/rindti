@@ -1,6 +1,6 @@
 data: /scratch/SCRATCH_NVME/ilya/pretrain_data/pfam_label_none_processed_100.pkl
 # Hardware
-batch_size: 512
+batch_size: 256
 gpus: 1
 max_epochs: 1000
 num_workers: 16
@@ -18,10 +18,10 @@ reduce_lr_patience: 100
 dropout: 0.2
 hidden_dim: 64
 model: pfam
-prot_per_fam: 8
+prot_per_fam: 64
 margin: 1
 batch_per_epoch: 1000
-temp: 1
+initial_temp: 1
 # Encoder
 node_embed: transformer
 num_heads: 4

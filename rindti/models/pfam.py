@@ -30,10 +30,6 @@ def generalised_lifted_structure_loss(pos_dist: Tensor, neg_dist: Tensor, margin
     return torch.relu(pos_loss + neg_loss) ** 2
 
 
-def soft_nearest_neighbor_loss(possim: Tensor, negsim: Tensor, temperature: float = 0.1) -> Tensor:
-    return -torch.log(possim.sum(dim=0) / negsim.sum(dim=0)).mean().view(-1)
-
-
 class PfamModel(BaseModel):
     """Model for Pfam class comparison problem"""
 
@@ -87,7 +83,7 @@ class PfamModel(BaseModel):
         neg_idxt = torch.tensor(list(self.all_idx.difference(idx)))
         pos_dist = dist[pos_idxt[:, None], pos_idxt]
         neg_dist = dist[neg_idxt[:, None], pos_idxt]
-        return soft_nearest_neighbor_loss(pos_dist, neg_dist, temperature=self.hparams.temp)
+        return -torch.log(pos_dist.sum(dim=0) / neg_dist.sum(dim=0)).mean().view(-1)
 
     def save_losses(self, losses: Tensor, ids: list):
         """Save the losses to general loss counter"""
@@ -104,13 +100,20 @@ class PfamModel(BaseModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         embeds = self.forward(data)
-        batch_size = embeds.size(0)
+        temp = torch.tensor(1, dtype=torch.float32, device=self.device, requires_grad=True)
+        inverse_temp = self.hparams.initial_temp / temp
         norm_emb = torch.nn.functional.normalize(embeds)
         sim = 1 - torch.matmul(norm_emb, norm_emb.t())
-        dist = torch.exp(-sim / self.hparams.temp) - torch.eye(batch_size, device=self.device)
+        dist = torch.exp(-sim / inverse_temp) - torch.eye(self.hparams.batch_size, device=self.device) + 1e-6
+        loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])
+        loss.mean().backward(inputs=[temp])
+        with torch.no_grad():
+            temp -= 0.1 * temp.grad
+        inverse_temp = self.hparams.initial_temp / temp
+        dist = torch.exp(-sim / inverse_temp) - torch.eye(self.hparams.batch_size, device=self.device) + 1e-6
+        loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])
         if self.global_step % 100 == 1:
             self.log_distmap(dist, data, embeds)
-        loss = torch.cat([self.get_loss(dist, idx) for idx in self.fam_idx])
         self.save_losses(loss, data.id)
         return dict(loss=loss.mean())
 
