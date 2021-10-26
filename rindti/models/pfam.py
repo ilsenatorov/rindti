@@ -23,9 +23,10 @@ class PfamModel(BaseModel):
         self.losses = defaultdict(list)
         self.all_idx = set(range(kwargs["batch_size"]))
         self.fam_idx = self._get_fam_idx()
-        self.loss = {"snnl": self.soft_nearest_neighbor_loss, "lifted": self.generalised_lifted_structure_loss}[
-            kwargs["loss"]
-        ]
+        self.loss = {
+            "snnl": self.soft_nearest_neighbor_loss,
+            "lifted": self.generalised_lifted_structure_loss,
+        }[kwargs["loss"]]
 
     def generalised_lifted_structure_loss(self, embeds: Tensor) -> Tensor:
         """Hard mines for negatives
@@ -61,7 +62,7 @@ class PfamModel(BaseModel):
             return loss
         loss.mean().backward(inputs=[temp])
         with torch.no_grad():
-            temp -= 0.1 * temp.grad
+            temp -= 0.2 * temp.grad
         return self._get_loss(sim, init_temp / temp)
 
     def _get_fam_loss(self, expsim: Tensor, idx: list) -> Tensor:
@@ -78,7 +79,7 @@ class PfamModel(BaseModel):
         pos_idxt = torch.tensor(idx)
         pos = expsim[pos_idxt[:, None], pos_idxt]
         batch = expsim[:, pos_idxt]
-        return -torch.log(pos.sum(dim=0) / batch.sum(dim=0)).mean().view(-1)
+        return -torch.log(pos.sum(dim=0) / batch.sum(dim=0))
 
     def _get_loss(self, sim: Tensor, tau: Tensor) -> Tensor:
         """Calculate SNNL
@@ -122,7 +123,7 @@ class PfamModel(BaseModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         embeds = self.forward(data)
-        loss = self.soft_nearest_neighbor_loss(embeds)
+        loss = self.loss(embeds)
         return dict(loss=loss.mean())
 
     @staticmethod
