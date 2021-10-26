@@ -1,0 +1,32 @@
+data: /scratch/SCRATCH_NVME/ilya/pretrain_data/pfam_label_none_processed_100.pkl
+# Hardware
+batch_size: 256
+gpus: 1
+max_epochs: 1000
+num_workers: 16
+profiler: null
+seed: 42
+# Optimisation + learning
+early_stop_patience: 200
+gradient_clip_val: 100
+lr: 0.001
+monitor: train_loss
+optimiser: adamw
+reduce_lr_factor: 0.1
+reduce_lr_patience: 100
+# Model
+dropout: 0.2
+hidden_dim: 64
+model: pfam
+batch_per_epoch: 1000
+prot_per_fam: 64
+margin: 1
+temp: 1
+optim_temp: True
+loss: snnl # lifted or snnl
+# Encoder
+node_embed: transformer
+num_heads: 4
+num_layers: 3
+pool: gmt
+ratio: 0.25
