@@ -20,29 +20,29 @@ seed: 42
 
 prepare_proteins:
   # can be label or onehot
-  node_feats: onehot
+  node_feats: label
   # can be label, onehot or none
-  edge_feats: onehot
+  edge_feats: label
   shard_size: 10000
 
 prepare_drugs:
   max_num_atoms: 150
-  node_feats: onehot
-  edge_feats: onehot
+  node_feats: label
+  edge_feats: label
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: random
+  method: colddrug
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: all
+  filtering: posneg
   # sampling
   # sampling can be over, under or none
-  sampling: none
+  sampling: under
   # class or reg
   task: class
   # threshold values for class problem

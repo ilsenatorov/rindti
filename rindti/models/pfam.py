@@ -81,6 +81,9 @@ class PfamModel(BaseModel):
         batch = expsim[:, pos_idxt]
         return -torch.log(pos.sum(dim=0) / batch.sum(dim=0))
 
+    def _inverted_eye(self):
+        return 1.0 - torch.eye(self.hparams.batch_size, device=self.device)
+
     def _get_loss(self, sim: Tensor, tau: Tensor) -> Tensor:
         """Calculate SNNL
 
@@ -91,7 +94,7 @@ class PfamModel(BaseModel):
         Returns:
             Tensor: 1D Tensor of losses for each entry
         """
-        expsim = torch.exp(-sim / tau) - torch.eye(self.hparams.batch_size, device=self.device)
+        expsim = torch.exp(-sim / tau) * self._inverted_eye()
         return torch.cat([self._get_fam_loss(expsim, idx) for idx in self.fam_idx])
 
     def _get_fam_idx(self) -> List[List]:

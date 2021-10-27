@@ -1,4 +1,4 @@
-data: results/prepare_all/random_all_none_class_template_onehot_onehot_onehot_onehot.pkl
+data: results/prepare_all/colddrug_posneg_under_class_template_label_label_label_label.pkl
 # Hardware
 batch_size: 256
 gpus: 1

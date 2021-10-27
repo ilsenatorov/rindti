@@ -27,7 +27,7 @@ class TransformerNet(BaseLayer):
         if edge_type == "none":
             edge_dim = None
         if edge_type == "label":
-            self.edge_embed = nn.Embedding(edge_dim, edge_dim)
+            self.edge_embed = nn.Embedding(edge_dim + 1, edge_dim)
         self.inp = TransformerConv(
             input_dim,
             hidden_dim,
