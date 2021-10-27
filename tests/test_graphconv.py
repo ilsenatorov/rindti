@@ -59,16 +59,6 @@ class BaseTestGraphConv:
         self.module.add_arguments(parser)
 
 
-class BaseOnehotEdgeConv(BaseTestGraphConv):
-    @pytest.mark.parametrize("fake_data", ["onehot", "none"], indirect=True)
-    def test_forward(self, default_config, fake_data):
-        pprint(fake_data)
-        module = self.module(**default_config)
-        output = module.forward(**fake_data)
-        assert output.size(0) == N_NODES
-        assert output.size(1) == OUTPUT_DIM
-
-
 class BaseLabelEdgeConv(BaseTestGraphConv):
     @pytest.mark.parametrize("fake_data", ["label", "none"], indirect=True)
     def test_forward(self, default_config, fake_data):
@@ -92,11 +82,11 @@ class TestGATConv(BaseTestGraphConv):
     module = GatConvNet
 
 
+class TestTransformerConv(BaseTestGraphConv):
+
+    module = TransformerNet
+
+
 class TestFilmConv(BaseLabelEdgeConv):
 
     module = FilmConvNet
-
-
-class TestTransformerConv(BaseOnehotEdgeConv):
-
-    module = TransformerNet
