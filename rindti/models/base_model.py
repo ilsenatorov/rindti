@@ -127,10 +127,7 @@ class BaseModel(LightningModule):
         """Calculate metrics common for class - accuracy, auroc and Matthews coefficient
         Returns dict of all"""
         acc = accuracy(output, labels)
-        # try:
         _auroc = auroc(output, labels, pos_label=1)
-        # except Exception:
-        #     _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
         return {
             "acc": acc,
@@ -140,9 +137,7 @@ class BaseModel(LightningModule):
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step"""
-        # sourcery skip: class-extract-method
         ss = self.shared_step(data)
-        # val_loss has to be logged for early stopping and reduce_lr
         for key, value in ss.items():
             self.log("train_" + key, value)
         return ss
@@ -150,7 +145,6 @@ class BaseModel(LightningModule):
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during validation step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
-        # val_loss has to be logged for early stopping and reduce_lr
         for key, value in ss.items():
             self.log("val_" + key, value)
         return ss
@@ -170,7 +164,6 @@ class BaseModel(LightningModule):
         metrics = {}
         for i in entries:
             val = torch.stack([x[i] for x in outputs])
-            val = val[~val.isnan()].mean()
             self.logger.experiment.add_scalar(prefix + i, val, self.current_epoch)
             metrics[i] = val
         if log_hparams:
