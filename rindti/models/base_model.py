@@ -49,7 +49,7 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _get_label_embed(self, params: dict) -> nn.Embedding:
-        return nn.Embedding(params["feat_dim"] + 2, params["hidden_dim"], padding_idx=0)
+        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"], padding_idx=0)
 
     def _get_onehot_embed(self, params: dict) -> nn.LazyLinear:
         return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
@@ -164,6 +164,7 @@ class BaseModel(LightningModule):
         metrics = {}
         for i in entries:
             val = torch.stack([x[i] for x in outputs])
+            val = val[~val.isnan()].mean()
             self.logger.experiment.add_scalar(prefix + i, val, self.current_epoch)
             metrics[i] = val
         if log_hparams:
