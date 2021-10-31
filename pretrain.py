@@ -3,7 +3,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
-from rindti.data import PfamSampler, PreTrainDataset, WeightedPfamSampler
+from rindti.data import DataCorruptor, PfamSampler, PreTrainDataset, WeightedPfamSampler
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.utils import MyArgParser, read_config
 
@@ -14,7 +14,6 @@ def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
-    print(dataset.config)
     kwargs.update(dataset.config)
     kwargs["feat_dim"] = 21
     kwargs["edge_dim"] = 5

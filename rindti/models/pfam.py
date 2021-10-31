@@ -5,7 +5,11 @@ from typing import List
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
+import torch.nn.functional as F
 from torch.functional import Tensor
+from torchmetrics.functional import accuracy, confusion_matrix
+
+from rindti.data.transforms import DataCorruptor
 
 from ..data import TwoGraphData
 from ..utils import MyArgParser
@@ -19,7 +23,8 @@ class PfamModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.encoder = Encoder(return_nodes=False, **kwargs)
+        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
+        self.encoder = Encoder(return_nodes=True, **kwargs)
         self.losses = defaultdict(list)
         self.all_idx = set(range(kwargs["batch_size"]))
         self.fam_idx = self._get_fam_idx()
@@ -27,6 +32,7 @@ class PfamModel(BaseModel):
             "snnl": self.soft_nearest_neighbor_loss,
             "lifted": self.generalised_lifted_structure_loss,
         }[kwargs["loss"]]
+        self.masker = DataCorruptor(dict(x=self.hparams.frac), type="mask")
 
     def generalised_lifted_structure_loss(self, embeds: Tensor) -> Tensor:
         """Hard mines for negatives
@@ -114,7 +120,10 @@ class PfamModel(BaseModel):
 
     def forward(self, data: dict) -> Tensor:
         """Forward pass of the model"""
-        return self.encoder(data)
+        data = self.masker(data)
+        embeds, node_embeds = self.encoder(data)
+        node_preds = self.node_pred(node_embeds, data.edge_index)
+        return embeds, node_preds
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -125,9 +134,43 @@ class PfamModel(BaseModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        embeds = self.forward(data)
-        loss = self.loss(embeds)
-        return dict(loss=loss.mean())
+        embeds, node_preds = self.forward(data)
+        node_loss = torch.tensor(0, device=self.device)
+        node_loss = F.cross_entropy(node_preds[data["x_idx"]], data["x_orig"])
+        loss = self.loss(embeds).mean()
+        node_acc = accuracy(node_preds[data["x_idx"]], data["x_orig"])
+        if self.global_step % 100 == 1:
+            self.log_distmap(data, embeds)
+            self.log_node_confusionmatrix(
+                confusion_matrix(
+                    node_preds[data["x_idx"]],
+                    data["x_orig"],
+                    num_classes=21,
+                )
+            )
+        return dict(
+            loss=loss + node_loss * self.hparams.alpha,
+            node_loss=node_loss.detach(),
+            graph_loss=loss.detach(),
+            node_acc=node_acc.detach(),
+        )
+
+    def log_node_confusionmatrix(self, confmatrix: Tensor):
+        """Saves the confusion matrix of node prediction
+
+        Args:
+            confmatrix (Tensor): 20x20 matrix
+        """
+        fig = plt.figure()
+        sns.heatmap(confmatrix.detach().cpu())
+        self.logger.experiment.add_figure("confmatrix", fig, global_step=self.global_step)
+
+    def log_distmap(self, data: TwoGraphData, embeds: Tensor):
+        """Plot and save distance matrix of this batch"""
+        fig = plt.figure()
+        sns.heatmap(torch.cdist(embeds, embeds).detach().cpu())
+        self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
+        self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
 
     @staticmethod
     def add_arguments(parser: MyArgParser) -> MyArgParser:

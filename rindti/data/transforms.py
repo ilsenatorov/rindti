@@ -116,7 +116,7 @@ class DataCorruptor:
         else:
             raise ValueError("Unknown corruption function type, should be 'mask' or 'corrupt'!")
 
-    def __call__(self, orig_data: Union[Data, TwoGraphData]) -> TwoGraphData:
+    def __call__(self, data: Union[Data, TwoGraphData]) -> TwoGraphData:
         """Apply corruption
 
         Args:
@@ -125,11 +125,11 @@ class DataCorruptor:
         Returns:
             TwoGraphData: Data with corrupted features
         """
-        data = deepcopy(orig_data)
         for k, v in self.frac.items():
             new_feat, idx = self.corr_func(data[k], v)
-            data[k] = new_feat
-            data[k[:-1] + "idx"] = idx
+            data[k + "_orig"] = data[k][idx].detach().clone()
+            data[k + "_idx"] = idx
+            data[k][idx] = new_feat
         return data
 
 
@@ -146,7 +146,7 @@ def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor,
     assert frac >= 0 and frac <= 1, "frac has to between 0 and 1!"
     num_nodes = features.size(0)
     num_corrupt_nodes = ceil(num_nodes * frac)
-    idx = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
+    idx = list(np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False))
     new = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
     features[idx] = features[new]
     return features, idx
@@ -165,6 +165,6 @@ def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, li
     assert frac >= 0 and frac <= 1, "frac has to between 0 and 1!"
     num_nodes = features.size(0)
     num_corrupt_nodes = ceil(num_nodes * frac)
-    idx = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
-    features[idx] = torch.zeros_like(features[idx])
+    idx = list(np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False))
+    features = torch.zeros_like(features[idx])
     return features, idx

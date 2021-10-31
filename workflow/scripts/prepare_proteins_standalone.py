@@ -13,8 +13,8 @@ parser.add_argument("outdir", type=str)
 parser.add_argument("-j", type=int, default=128)
 args = parser.parse_args()
 
-for node in ["label", "onehot"]:
-    for edge in ["label", "onehot", "none"]:
+for node in ["label"]:
+    for edge in ["none"]:
         filename = "pfam_{}_{}.pkl".format(node, edge)
         print("working on " + filename)
         if filename not in os.listdir(args.outdir):
