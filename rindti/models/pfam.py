@@ -146,6 +146,8 @@ class PfamModel(BaseModel):
                     node_preds[data["x_idx"]],
                     data["x_orig"],
                     num_classes=21,
+                    normalize="true",
+                    # multilabel=True,
                 )
             )
         return dict(
