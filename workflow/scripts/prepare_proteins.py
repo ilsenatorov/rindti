@@ -110,7 +110,13 @@ class ProteinEncoder:
                 edges.append(edge1)
                 edges.append(edge2)
         nodes = pd.DataFrame(nodes).drop_duplicates()
-        nodes = nodes.sort_values("resn").reset_index(drop=True).reset_index().set_index("resn")
+        try:
+            nodes = nodes.sort_values("resn").reset_index(drop=True).reset_index().set_index("resn")
+        except Exception as e:
+            print(nodes)
+            print(filename)
+            print(e)
+            return None, None
         for node in nodes.index:
             if (node - 1) in nodes.index:
                 edges.append({"resn1": node, "resn2": node - 1, "type": "pept"})
@@ -175,6 +181,8 @@ class ProteinEncoder:
             dict: standard format with x for node node_feats, edge_index for edges etc
         """
         nodes, edges = self.parse_sif(protein_sif)
+        if nodes is None:
+            return np.nan
         node_attr = self.encode_nodes(nodes)
         edge_index, edge_feats = self.encode_edges(edges)
         return dict(x=node_attr, edge_index=edge_index, edge_feats=edge_feats, index_mapping=nodes["index"].to_dict())
