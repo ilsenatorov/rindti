@@ -25,8 +25,8 @@ temp: 0.5
 optim_temp: True
 loss: snnl # lifted or snnl
 node_pred: True
-frac: 1.0
-alpha: 100
+frac: 0.2
+alpha: 0.1
 # Encoder
 node_embed: transformer
 num_heads: 4
