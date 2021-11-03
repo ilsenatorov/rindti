@@ -44,6 +44,7 @@ class PfamModel(BaseModel):
         Returns:
             Tensor: final loss
         """
+        losses = []
         for idx in self.fam_idx:
             dist = torch.cdist(embeds, embeds)
             pos_idxt = torch.tensor(idx)
@@ -52,7 +53,8 @@ class PfamModel(BaseModel):
             neg = dist[neg_idxt[:, None], pos_idxt]
             pos_loss = torch.logsumexp(pos, dim=0)
             neg_loss = torch.logsumexp(self.hparams.margin - neg, dim=0)
-        return torch.relu(pos_loss + neg_loss) ** 2
+            losses.append(torch.relu(pos_loss + neg_loss) ** 2)
+        return torch.cat(losses)
 
     def soft_nearest_neighbor_loss(self, embeds: Tensor) -> Tensor:
         temp, init_temp = (
