@@ -45,17 +45,14 @@ class NoisyNodesClassModel(ClassificationModel):
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
-        cor_data = self.corruptor(data)
-        prot = remove_arg_prefix("prot_", cor_data)
-        drug = remove_arg_prefix("drug_", cor_data)
+        data = self.corruptor(data)
+        prot = remove_arg_prefix("prot_", data)
+        drug = remove_arg_prefix("drug_", data)
         output, prot_pred, drug_pred = self.forward(prot, drug)
-        output = torch.sigmoid(output)
         labels = data.label.unsqueeze(1)
         loss = F.binary_cross_entropy(output, labels.float())
-        prot_idx = cor_data.prot_idx
-        drug_idx = cor_data.drug_idx
-        prot_loss = get_node_loss(data["prot_x"][prot_idx], prot_pred[prot_idx])
-        drug_loss = get_node_loss(data["drug_x"][drug_idx], drug_pred[drug_idx])
+        prot_loss = get_node_loss(prot_pred[data["prot_x_idx"]], data["prot_x_orig"])
+        drug_loss = get_node_loss(drug_pred[data["drug_x_idx"]], data["drug_x_orig"])
         metrics = self._get_class_metrics(output, labels)
         metrics.update(
             dict(

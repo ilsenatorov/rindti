@@ -23,10 +23,8 @@ class NoisyNodesRegModel(NoisyNodesClassModel):
         output, prot_pred, drug_pred = self.forward(prot, drug)
         labels = data.label.unsqueeze(1).float()
         loss = F.mse_loss(output, labels)
-        prot_idx = cor_data.prot_idx
-        drug_idx = cor_data.drug_idx
-        prot_loss = get_node_loss(data["prot_x"][prot_idx], prot_pred[prot_idx])
-        drug_loss = get_node_loss(data["drug_x"][drug_idx], drug_pred[drug_idx])
+        prot_loss = get_node_loss(prot_pred[data["prot_x_idx"]], data["prot_x_orig"])
+        drug_loss = get_node_loss(drug_pred[data["drug_x_idx"]], data["drug_x_orig"])
         metrics = self._get_reg_metrics(output, labels)
         metrics.update(
             dict(

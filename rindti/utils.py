@@ -143,13 +143,10 @@ def get_type(data: dict, key: str) -> str:
     raise ValueError("Unknown data type {}".format(type(data[key])))
 
 
-def get_node_loss(
-    x: Tensor,
-    pred_x: Tensor,
-) -> Tuple[Tensor, Tensor]:
+def get_node_loss(x: Tensor, target: Tensor) -> Tensor:
     """Calculate cross-entropy loss for node prediction"""
     x = x if isinstance(x, LongTensor) else x.argmax(dim=1)
-    return F.cross_entropy(pred_x, x)
+    return F.cross_entropy(target, x)
 
 
 def read_config(filename: str) -> dict:

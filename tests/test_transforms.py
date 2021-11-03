@@ -24,20 +24,6 @@ def _assert_mask(masked_features, frac):
     assert torch.count_nonzero(masked_features) == (N_NODES - expected_number)
 
 
-@pytest.mark.parametrize("frac", [0.0, 0.25, 0.5, 1.0])
-def test_mask(frac):
-    features = deepcopy(original_features)
-    features, idx = mask_features(features, frac)
-    _assert_mask(features, frac)
-
-
-@pytest.mark.parametrize("frac", [0.0, 0.25, 0.5, 1.0])
-def test_corrupt(frac):
-    features = deepcopy(original_features)
-    features, idx = corrupt_features(features, frac)
-    _assert_corruption(original_features, features, frac)
-
-
 @pytest.mark.parametrize("func", [mask_features, corrupt_features])
 @pytest.mark.parametrize("frac", [-1, 3])
 def test_assert_fail(func, frac):

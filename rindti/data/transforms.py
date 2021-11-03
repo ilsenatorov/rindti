@@ -134,7 +134,7 @@ class DataCorruptor:
 
 
 def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
-    """Corrupt the features
+    """Return corrupt features
 
     Args:
         features (torch.Tensor): Node features
@@ -148,12 +148,11 @@ def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor,
     num_corrupt_nodes = ceil(num_nodes * frac)
     idx = list(np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False))
     new = np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False)
-    features[idx] = features[new]
-    return features, idx
+    return features[new], idx
 
 
 def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
-    """Mask the features
+    """Return masked features
 
     Args:
         features (torch.Tensor): Node features
