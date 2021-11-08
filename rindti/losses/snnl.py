@@ -7,11 +7,14 @@ from torch import Tensor
 
 
 class SoftNearestNeighborLoss(LightningModule):
+    """https://arxiv.org/pdf/1902.01889.pdf"""
+
     def __init__(self, temperature: float = 1.0, **kwargs):
         super().__init__()
         self.temperature = temperature
 
     def forward(self, embeds: Tensor, fam_idx: List[List[int]]) -> Tensor:
+        """Calculate the loss"""
         norm_emb = F.normalize(embeds, dim=1)
         sim = torch.cdist(norm_emb, norm_emb)
         expsim = torch.exp(-sim / self.temperature) * (1 - torch.eye(len(sim), device=self.device)) + 1e-6
