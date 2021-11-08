@@ -13,19 +13,17 @@ lr: 0.001
 monitor: train_loss
 optimiser: adamw
 reduce_lr_factor: 0.1
-reduce_lr_patience: 50
+reduce_lr_patience: 100
 # Model
-dropout: 0.2
+dropout: 0.25
 hidden_dim: 64
 model: pfam
 batch_per_epoch: 1000
-prot_per_fam: 16
-margin: 1
-temp: 0.25
-optim_temp: True
+prot_per_fam: 32
+temp: 0.1
 loss: snnl # lifted or snnl
 node_pred: True
-frac: 0.3
+frac: 0.2
 alpha: 0.1
 # Encoder
 node_embed: transformer

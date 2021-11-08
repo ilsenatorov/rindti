@@ -21,7 +21,7 @@ class PfamModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
+        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"] - 1)
         self.encoder = Encoder(return_nodes=True, **kwargs)
         self.fam_idx = self._get_fam_idx()
         self.loss = {"snnl": SoftNearestNeighborLoss, "lifted": GeneralisedLiftedStructureLoss}[kwargs["loss"]](
@@ -61,15 +61,15 @@ class PfamModel(BaseModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         embeds, node_preds = self.forward(data)
-        node_metrics = get_node_loss(node_preds[data["x_idx"]], data["x_orig"])
+        node_metrics = get_node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
         loss = self.loss(embeds, self.fam_idx).mean()
         if self.global_step % 100 == 1:
             self.log_distmap(data, embeds)
             self.log_node_confusionmatrix(
                 confusion_matrix(
                     node_preds[data["x_idx"]],
-                    data["x_orig"],
-                    num_classes=21,
+                    data["x_orig"] - 1,
+                    num_classes=20,
                     normalize="true",
                 )
             )

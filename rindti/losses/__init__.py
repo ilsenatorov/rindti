@@ -1,2 +1,2 @@
-from .generalised_lifted_structure import GeneralisedLiftedStructureLoss
+from .lifted_structure import GeneralisedLiftedStructureLoss
 from .snnl import SoftNearestNeighborLoss
