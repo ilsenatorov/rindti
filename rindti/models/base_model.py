@@ -159,7 +159,7 @@ class BaseModel(LightningModule):
             self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
     def shared_epoch_end(self, outputs: dict, prefix: str, log_hparams=False):
-        """Things that are the same foor train, test and val"""
+        """Things that are the same for train, test and val"""
         entries = outputs[0].keys()
         metrics = {}
         for i in entries:

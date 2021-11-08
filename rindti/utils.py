@@ -1,15 +1,15 @@
 from argparse import ArgumentParser, _ArgumentGroup
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import torch
 import torch.nn.functional as F
 import yaml
 from matplotlib.figure import Figure
 from torch import FloatTensor, LongTensor, Tensor
 from torch.utils.data import random_split
-from yaml.loader import Loader
+from torchmetrics.functional import accuracy, confusion_matrix
 
 
 def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
@@ -145,8 +145,11 @@ def get_type(data: dict, key: str) -> str:
 
 def get_node_loss(x: Tensor, target: Tensor) -> Tensor:
     """Calculate cross-entropy loss for node prediction"""
-    x = x if isinstance(x, LongTensor) else x.argmax(dim=1)
-    return F.cross_entropy(target, x)
+    target = target if target.dtype == torch.long else target.argmax(dim=1)
+    return dict(
+        node_loss=F.cross_entropy(x, target),
+        node_acc=accuracy(x, target),
+    )
 
 
 def read_config(filename: str) -> dict:
