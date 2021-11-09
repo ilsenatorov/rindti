@@ -23,26 +23,24 @@ class PfamModel(BaseModel):
         self.save_hyperparameters()
         self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"] - 1)
         self.encoder = Encoder(return_nodes=True, **kwargs)
-        self.fam_idx = self._get_fam_idx()
         self.loss = {"snnl": SoftNearestNeighborLoss, "lifted": GeneralisedLiftedStructureLoss}[kwargs["loss"]](
             **kwargs
         )
         self.masker = DataCorruptor(dict(x=self.hparams.frac), type="mask")
 
-    def _get_fam_idx(self) -> List[List]:
+    @property
+    def fam_idx(self) -> List[int]:
         """Using batch_size and prot_per_fam, get idx of each family
 
         Returns:
             List[List]: First list is families, second list is entries in the family
         """
-        return [
-            [*range(x, x + self.hparams.prot_per_fam)]
-            for x in range(
-                0,
-                self.hparams.batch_size,
-                self.hparams.prot_per_fam,
-            )
-        ]
+        res = []
+        fam = 0
+        for _ in range(0, self.hparams.batch_size, self.hparams.prot_per_fam):
+            res += [fam] * self.hparams.prot_per_fam
+            fam += 1
+        return res
 
     def forward(self, data: dict) -> Tensor:
         """Forward pass of the model"""
@@ -61,8 +59,13 @@ class PfamModel(BaseModel):
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
         embeds, node_preds = self.forward(data)
+        fam_idx = torch.tensor(
+            self.fam_idx,
+            dtype=torch.long,
+            device=self.device,
+        ).view(-1, 1)
         node_metrics = get_node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
-        loss = self.loss(embeds, self.fam_idx).mean()
+        loss = self.loss(embeds, fam_idx).mean()
         if self.global_step % 100 == 1:
             self.log_distmap(data, embeds)
             self.log_node_confusionmatrix(

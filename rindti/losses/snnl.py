@@ -9,20 +9,20 @@ from torch import Tensor
 class SoftNearestNeighborLoss(LightningModule):
     """https://arxiv.org/pdf/1902.01889.pdf"""
 
-    def __init__(self, temperature: float = 1.0, **kwargs):
+    def __init__(self, temperature: float = 1.0, eps: float = 1e-6, **kwargs):
         super().__init__()
         self.temperature = temperature
+        self.eps = eps
 
-    def forward(self, embeds: Tensor, fam_idx: List[List[int]]) -> Tensor:
-        """Calculate the loss"""
-        norm_emb = F.normalize(embeds, dim=1)
-        sim = torch.cdist(norm_emb, norm_emb)
-        expsim = torch.exp(-sim / self.temperature) * (1 - torch.eye(len(sim), device=self.device)) + 1e-6
+    def forward(self, embeds: Tensor, fam_idx: List[int]) -> Tensor:
+        """Calculate the soft nearest neighbor loss"""
         losses = []
-        for idx in fam_idx:
-            pos_idxt = torch.tensor(idx)
-            pos = expsim[pos_idxt[:, None], pos_idxt]
-            batch = expsim[:, pos_idxt]
-            loss = -torch.log(torch.sum(pos, dim=0) / torch.sum(batch, dim=0))
-            losses.append(loss)
+        embeds = F.normalize(embeds)
+        sim = 1 - torch.matmul(embeds, embeds.t())
+        expsim = torch.exp(-sim / self.temperature) - torch.eye(sim.size(0), device=self.device)
+        f = expsim / (self.eps + expsim.sum(dim=1))
+        fam_mask = (fam_idx == fam_idx.t()).float()
+        f = f * fam_mask
+        loss = -torch.log(self.eps + f.sum(dim=1))
+        losses.append(loss)
         return torch.stack(losses).view(-1)
