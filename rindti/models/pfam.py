@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from collections import defaultdict
 from typing import List
 
 import matplotlib.pyplot as plt

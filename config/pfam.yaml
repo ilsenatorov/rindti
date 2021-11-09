@@ -22,9 +22,9 @@ batch_per_epoch: 1000
 prot_per_fam: 32
 
 loss: snnl # lifted or snnl
-temperature: 1
+temperature: 0.1
 optim_temperature: true
-grad_step: 0.2
+grad_step: 0.1
 node_pred: True
 frac: 0.1
 alpha: 0.05
