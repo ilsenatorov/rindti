@@ -14,10 +14,10 @@ PROT_FEAT_DIM = 20
 PROT_EDGE_DIM = 5
 DRUG_FEAT_DIM = 14
 DRUG_EDGE_DIM = 3
-MIN_NODES = 10
-MAX_NODES = 20
-MIN_EDGES = 20
-MAX_EDGES = 40
+MIN_NODES = 100
+MAX_NODES = 200
+MIN_EDGES = 200
+MAX_EDGES = 400
 N_PROTS = 100
 N_DRUGS = 100
 N_INTER = 200
@@ -30,7 +30,7 @@ def create_features(feat_type: str, dim: tuple) -> Tensor:
     if feat_type == "onehot":
         return torch.rand(dim)
     elif feat_type == "label":
-        return torch.randint(1, dim[1], (dim[0],), dtype=torch.long)
+        return torch.randint(1, dim[1] + 1, (dim[0],), dtype=torch.long)
     else:
         return None
 

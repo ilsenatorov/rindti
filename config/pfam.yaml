@@ -20,8 +20,11 @@ hidden_dim: 64
 model: pfam
 batch_per_epoch: 1000
 prot_per_fam: 32
-temp: 100
+
 loss: snnl # lifted or snnl
+temperature: 1
+optim_temperature: true
+grad_step: 0.2
 node_pred: True
 frac: 0.1
 alpha: 0.05
