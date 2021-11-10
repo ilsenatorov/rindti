@@ -8,7 +8,7 @@ from torch import Tensor
 class GeneralisedLiftedStructureLoss(LightningModule):
     """https://arxiv.org/abs/1511.06452"""
 
-    def __init__(self, pos_margin: int = 0, neg_margin: int = 1) -> None:
+    def __init__(self, pos_margin: int = 0, neg_margin: int = 1, **kwargs) -> None:
         super().__init__()
         self.pos_margin = pos_margin
         self.neg_margin = neg_margin
