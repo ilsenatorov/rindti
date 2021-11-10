@@ -7,11 +7,11 @@ import torch
 from torch.functional import Tensor
 from torchmetrics.functional import confusion_matrix
 
-from ..data import DataCorruptor, TwoGraphData
-from ..losses import GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss
-from ..utils import MyArgParser, get_node_loss
-from .base_model import BaseModel, node_embedders, poolers
-from .encoder import Encoder
+from ...data import DataCorruptor, TwoGraphData
+from ...losses import GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss
+from ...utils import MyArgParser, get_node_loss
+from ..base_model import BaseModel, node_embedders, poolers
+from ..encoder import Encoder
 
 
 class PfamModel(BaseModel):

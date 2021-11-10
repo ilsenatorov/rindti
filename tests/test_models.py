@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
+from rindti.models import ClassificationModel, RegressionModel
 from rindti.models.base_model import node_embedders, poolers
 from rindti.utils import MyArgParser
 
@@ -95,16 +95,6 @@ class TestClassModel(BaseTestModel):
             assert combined.size(1) == 128
         else:
             assert combined.size(1) == 64
-
-
-class TestNoisyNodesClassModel(BaseTestModel):
-
-    model = NoisyNodesClassModel
-
-
-class TestNoisyNodesRegModel(BaseTestModel):
-
-    model = NoisyNodesRegModel
 
 
 class TestRegressionModel(BaseTestModel):

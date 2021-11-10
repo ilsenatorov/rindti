@@ -5,16 +5,12 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
-from rindti.models.bgrl import BGRLModel
-from rindti.models.encoder import Encoder
-
-from ..data import TwoGraphData
-from ..layers.base_layer import BaseLayer
-from ..utils import remove_arg_prefix
-from .base_model import BaseModel, node_embedders, poolers
-from .graphlog import GraphLogModel
-from .infograph import InfoGraphModel
-from .pfam import PfamModel
+from ...data import TwoGraphData
+from ...layers.base_layer import BaseLayer
+from ...utils import remove_arg_prefix
+from ..base_model import BaseModel, node_embedders, poolers
+from ..encoder import Encoder
+from ..pretrain import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 
 
 class ClassificationModel(BaseModel):

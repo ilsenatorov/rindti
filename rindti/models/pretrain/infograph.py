@@ -6,11 +6,11 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
-from ..data import corrupt_features
-from ..layers import MutualInformation
-from ..utils import get_node_loss
-from .base_model import BaseModel, node_embedders, poolers
-from .encoder import Encoder
+from ...data import corrupt_features
+from ...layers import MutualInformation
+from ...utils import get_node_loss
+from ..base_model import BaseModel, node_embedders, poolers
+from ..encoder import Encoder
 
 
 class InfoGraphModel(BaseModel):

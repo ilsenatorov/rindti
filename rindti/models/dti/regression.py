@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 
-from ..data import TwoGraphData
-from ..utils import remove_arg_prefix
+from ...data import TwoGraphData
+from ...utils import remove_arg_prefix
 from .classification import ClassificationModel
 
 

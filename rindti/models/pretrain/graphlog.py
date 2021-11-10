@@ -7,9 +7,9 @@ from typing import Tuple
 import torch
 from torch_geometric.data import Data
 
-from ..utils import MyArgParser
-from .base_model import BaseModel, node_embedders, poolers
-from .encoder import Encoder
+from ...utils import MyArgParser
+from ..base_model import BaseModel, node_embedders, poolers
+from ..encoder import Encoder
 
 # NCE loss between graphs and prototypes
 
