@@ -8,8 +8,8 @@ from torch.functional import Tensor
 from torchmetrics.functional import confusion_matrix
 
 from ...data import DataCorruptor, TwoGraphData
-from ...losses import GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss
-from ...utils import MyArgParser, get_node_loss
+from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, SoftNearestNeighborLoss
+from ...utils import MyArgParser
 from ..base_model import BaseModel, node_embedders, poolers
 from ..encoder import Encoder
 
@@ -20,11 +20,12 @@ class PfamModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"] - 1)
+        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
         self.encoder = Encoder(return_nodes=True, **kwargs)
         self.loss = {"snnl": SoftNearestNeighborLoss, "lifted": GeneralisedLiftedStructureLoss}[kwargs["loss"]](
             **kwargs
         )
+        self.node_loss = NodeLoss(**kwargs)
         self.masker = DataCorruptor(dict(x=self.hparams.frac), type="mask")
 
     @property
@@ -63,18 +64,8 @@ class PfamModel(BaseModel):
             dtype=torch.long,
             device=self.device,
         ).view(-1, 1)
-        node_metrics = get_node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
+        node_metrics = self.node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
         loss = self.loss(embeds, fam_idx).mean()
-        if self.global_step % 100 == 1:
-            self.log_distmap(data, embeds)
-            self.log_node_confusionmatrix(
-                confusion_matrix(
-                    node_preds[data["x_idx"]],
-                    data["x_orig"] - 1,
-                    num_classes=20,
-                    normalize="true",
-                )
-            )
         node_metrics.update(
             dict(
                 loss=loss + node_metrics["node_loss"] * self.hparams.alpha,

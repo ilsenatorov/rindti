@@ -26,11 +26,11 @@ PROT_PER_FAM = 8
 BATCH_PER_EPOCH = 10
 
 
-def create_features(feat_type: str, dim: tuple) -> Tensor:
+def create_features(feat_type: str, n: int, feat_dim: int) -> Tensor:
     if feat_type == "onehot":
-        return torch.rand(dim)
+        return torch.rand((n, feat_dim))
     elif feat_type == "label":
-        return torch.randint(1, dim[1] + 1, (dim[0],), dtype=torch.long)
+        return torch.randint(low=1, high=feat_dim, size=(n,), dtype=torch.long)
     else:
         return None
 
@@ -45,9 +45,9 @@ def create_fake_graph(
     n_nodes = randint(MIN_NODES, MAX_NODES)
     n_edges = randint(MIN_EDGES, MAX_EDGES)
     d = dict(
-        x=create_features(node_attr_type, (n_nodes, node_dim)),
+        x=create_features(node_attr_type, n_nodes, node_dim),
         edge_index=torch.randint(0, n_nodes, (2, n_edges)),
-        edge_attr=create_features(edge_attr_type, (n_edges, edge_dim)),
+        edge_attr=create_features(edge_attr_type, n_edges, edge_dim),
     )
     if fam:
         d["fam"] = choice(fam)

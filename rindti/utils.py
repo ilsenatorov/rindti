@@ -143,17 +143,6 @@ def get_type(data: dict, key: str) -> str:
     raise ValueError("Unknown data type {}".format(type(data[key])))
 
 
-def get_node_loss(x: Tensor, target: Tensor) -> Tensor:
-    """Calculate cross-entropy loss for node prediction"""
-    target = target if target.dtype == torch.long else target.argmax(dim=1)
-    _, weight = torch.unique(target, return_counts=True)
-    weight = weight / weight.sum()
-    return dict(
-        node_loss=F.cross_entropy(x, target, weight=weight),
-        node_acc=accuracy(x, target),
-    )
-
-
 def read_config(filename: str) -> dict:
     """Read in yaml config for training"""
     with open(filename, "r") as file:

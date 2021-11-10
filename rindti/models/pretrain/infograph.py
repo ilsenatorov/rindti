@@ -2,13 +2,12 @@ from argparse import ArgumentParser
 from typing import Tuple
 
 import torch
-import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
-from ...data import corrupt_features
+from ...data import DataCorruptor
 from ...layers import MutualInformation
-from ...utils import get_node_loss
+from ...losses import NodeLoss
 from ..base_model import BaseModel, node_embedders, poolers
 from ..encoder import Encoder
 
@@ -23,9 +22,12 @@ class InfoGraphModel(BaseModel):
         self.encoder = Encoder(return_nodes=True, **kwargs)
         self.mi = MutualInformation(kwargs["hidden_dim"], kwargs["hidden_dim"])
         self.node_pred = self._get_node_embed(kwargs, out_dim=kwargs["feat_dim"] + 1)
+        self.masker = DataCorruptor(dict(x=self.hparams.frac), type="mask")
+        self.node_loss = NodeLoss(**kwargs)
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
         """Forward pass of the module"""
+        data = self.masker(data)
         node_index = torch.arange(data["x"].size(0), device=self.device)
         pair_index = torch.stack([data["batch"], node_index], dim=-1)
         graph_embed, node_embed = self.encoder(data)
@@ -35,13 +37,21 @@ class InfoGraphModel(BaseModel):
 
     def shared_step(self, data: Data) -> dict:
         """Shared step"""
-        orig_x = data["x"].clone()
-        cor_x, cor_idx = corrupt_features(data["x"], self.hparams.frac)
-        data["x"] = cor_x
-        mi, node_pred = self.forward(data)
-        node_loss = get_node_loss(orig_x[cor_idx], node_pred[cor_idx])
-        loss = -mi + node_loss * self.hparams.alpha
-        return {"loss": loss, "mi": mi.detach(), "node_loss": node_loss.detach()}
+        mi, node_preds = self.forward(data)
+        node_metrics = self.node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
+        node_metrics.update(
+            dict(
+                loss=-mi + node_metrics["node_loss"] * self.hparams.alpha,
+                mi=mi,
+            )
+        )
+        res = {}
+        for k, v in node_metrics.items():
+            if k != "loss":
+                res[k] = v.detach()
+            else:
+                res[k] = v
+        return res
 
     @staticmethod
     def add_arguments(parser: ArgumentParser) -> ArgumentParser:

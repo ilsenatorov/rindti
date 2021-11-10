@@ -15,7 +15,7 @@ def pretrain(**kwargs):
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
     kwargs.update(dataset.config)
-    kwargs["feat_dim"] = 21
+    kwargs["feat_dim"] = 20
     kwargs["edge_dim"] = 5
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [

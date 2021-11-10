@@ -27,11 +27,12 @@ class SoftNearestNeighborLoss(LightningModule):
         """Calculate the soft nearest neighbor loss for a given temp denominator"""
         embeds = F.normalize(embeds)
         sim = 1 - torch.matmul(embeds, embeds.t())
-        expsim = torch.exp(-sim / (self.temperature / temp_frac)) - torch.eye(sim.size(0), device=self.device)
+        expsim = torch.exp(-sim / (self.temperature / temp_frac)) * (1 - torch.eye(sim.size(0), device=self.device))
         f = expsim / (self.eps + expsim.sum(dim=1))
         fam_mask = (fam_idx == fam_idx.t()).float()
         f = f * fam_mask
-        return -torch.log(self.eps + f.sum(dim=1))
+        loss = -torch.log(self.eps + f.sum(dim=1))
+        return loss
 
     def forward(self, embeds: Tensor, fam_idx: List[int]) -> Tensor:
         """Calculate the soft nearest neighbor loss, optimise temperature if necessary"""
