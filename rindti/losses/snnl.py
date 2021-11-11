@@ -13,7 +13,7 @@ class SoftNearestNeighborLoss(LightningModule):
         self,
         temperature: float = 1.0,
         eps: float = 1e-6,
-        optim_temperature: bool = True,
+        optim_temperature: bool = False,
         grad_step: float = 0.2,
         **kwargs,
     ):
