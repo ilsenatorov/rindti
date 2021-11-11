@@ -60,44 +60,9 @@ if __name__ == "__main__":
     args = tmp_parser.parse_known_args()[0]
     model_type = args.model
 
-    parser = MyArgParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument("--data", type=str, default=None)
-    parser.add_argument("--config", type=str, default=None, help="If given, read config from file")
-    parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
-    parser.add_argument("--batch_size", type=int, default=512, help="batch size")
-    parser.add_argument("--num_workers", type=int, default=4, help="number of workers for data loading")
-    parser.add_argument("--early_stop_patience", type=int, default=60, help="epochs with no improvement before stop")
-    parser.add_argument("--feat_method", type=str, default="element_l1", help="How to combine embeddings")
-
-    trainer = parser.add_argument_group("Trainer")
-    model = parser.add_argument_group("Model")
-    optim = parser.add_argument_group("Optimiser")
-
-    trainer.add_argument("--gpus", type=int, default=1, help="Number of GPUs to use")
-    trainer.add_argument("--max_epochs", type=int, default=1000, help="Max number of epochs")
-    trainer.add_argument("--model", type=str, default="class", help="Type of model")
-    trainer.add_argument("--weighted", type=bool, default=1, help="Whether to weight the data points")
-    trainer.add_argument("--gradient_clip_val", type=float, default=30, help="Gradient clipping")
-    trainer.add_argument("--profiler", type=str, default=None)
-
-    model.add_argument("--mlp_hidden_dim", default=64, type=int, help="MLP hidden dims")
-    model.add_argument("--mlp_dropout", default=0.2, type=float, help="MLP dropout")
-
-    optim.add_argument("--optimiser", type=str, default="adamw", help="Optimisation algorithm")
-    optim.add_argument("--momentum", type=float, default=0.3)
-    optim.add_argument("--lr", type=float, default=0.0005, help="mlp learning rate")
-    optim.add_argument("--weight_decay", type=float, default=0.01, help="weight decay")
-    optim.add_argument("--reduce_lr_patience", type=int, default=20)
-    optim.add_argument("--reduce_lr_factor", type=float, default=0.1)
-    optim.add_argument("--monitor", type=str, default="val_loss", help="Value to monitor for lr reduction etc")
-
-    parser = models[model_type].add_arguments(parser)
-
+    parser = MyArgParser(prog="Model Trainer")
+    parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
-    if args.config:
-        argvars = read_config(args.config)
-    else:
-        argvars = vars(args)
-    pprint(argvars)
-    train(**argvars)
+
+    config = read_config(args.config)
+    pprint(config)

@@ -79,31 +79,3 @@ class ClassificationModel(BaseModel):
         metrics = self._get_class_metrics(output, labels)
         metrics.update(dict(loss=loss))
         return metrics
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        # Hack to find which embedding are used and add their arguments
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--drug_node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--prot_node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--prot_pool", type=str, default="gmt")
-        tmp_parser.add_argument("--drug_pool", type=str, default="gmt")
-        args = tmp_parser.parse_known_args()[0]
-
-        prot_node_embed = node_embedders[args.prot_node_embed]
-        drug_node_embed = node_embedders[args.drug_node_embed]
-        prot_pool = poolers[args.prot_pool]
-        drug_pool = poolers[args.drug_pool]
-        prot = parser.add_argument_group("Prot", prefix="--prot_")
-        drug = parser.add_argument_group("Drug", prefix="--drug_")
-        prot.add_argument("pretrain", default=None, type=str)
-        drug.add_argument("pretrain", default=None, type=str)
-        prot.add_argument("lr", type=float, default=0.0005)
-        drug.add_argument("lr", type=float, default=0.0005)
-        ## Add module-specific embeddings
-        prot_node_embed.add_arguments(prot)
-        drug_node_embed.add_arguments(drug)
-        prot_pool.add_arguments(prot)
-        drug_pool.add_arguments(drug)
-        return parser

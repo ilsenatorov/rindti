@@ -71,10 +71,6 @@ class BaseTestModel:
                 model.shared_step(dti_batch)
         model.shared_step(dti_batch)
 
-    def test_arg_parser(self):
-        parser = MyArgParser()
-        self.model.add_arguments(parser)
-
 
 class TestClassModel(BaseTestModel):
 

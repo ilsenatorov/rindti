@@ -11,15 +11,6 @@ from ..base_layer import BaseLayer
 class GMTNet(BaseLayer):
     """https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.glob.GraphMultisetTransformer"""
 
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("pool", default="gmt", type=str)
-        parser.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
-        parser.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
-        parser.add_argument("num_heads", default=4, type=float, help="Number of attention heads")
-        return parser
-
     def __init__(
         self,
         input_dim: int,

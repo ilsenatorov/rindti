@@ -202,13 +202,3 @@ class BaseModel(LightningModule):
             "monitor": self.hparams.monitor,
         }
         return [optimiser], [lr_scheduler]
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--drug_node_embed", type=str, default="chebconv")
-        tmp_parser.add_argument("--prot_node_embed", type=str, default="chebconv")
-        tmp_parser.add_argument("--prot_pool", type=str, default="gmt")
-        tmp_parser.add_argument("--drug_pool", type=str, default="gmt")
-        return parser

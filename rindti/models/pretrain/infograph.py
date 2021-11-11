@@ -52,23 +52,3 @@ class InfoGraphModel(BaseModel):
             else:
                 res[k] = v
         return res
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        # Hack to find which embedding are used and add their arguments
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--pool", type=str, default="gmt")
-        args = tmp_parser.parse_known_args()[0]
-
-        node_embed = node_embedders[args.node_embed]
-        pool = poolers[args.pool]
-        parser.add_argument("--frac", default=0.15, type=float)
-        parser.add_argument("--corruption", default="corrupt", type=str)
-        parser.add_argument("--alpha", default=1.0, type=float)
-        pooler_args = parser.add_argument_group("Pool", prefix="--")
-        node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
-        node_embed.add_arguments(node_embed_args)
-        pool.add_arguments(pooler_args)
-        return parser
