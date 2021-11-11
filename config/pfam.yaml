@@ -22,15 +22,15 @@ batch_per_epoch: 1000
 prot_per_fam: 16
 
 loss: snnl # lifted or snnl
-temperature: 0.1
+temperature: 1
 optim_temperature: false
 grad_step: 0.1
 node_pred: True
 frac: 0.15
 alpha: 0.05
 # Encoder
-node_embed: transformer
+node_embed: ginconv
 num_heads: 1
-num_layers: 3
+num_layers: 5
 pool: gmt
 ratio: 0.25
