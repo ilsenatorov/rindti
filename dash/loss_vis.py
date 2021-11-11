@@ -4,17 +4,17 @@
 import json
 from typing import Union
 
-import dash
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 import torch
-from dash import dcc, html
-from dash.dependencies import Input, Output
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from umap import UMAP
 
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
 from rindti.losses import GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss
 
 
