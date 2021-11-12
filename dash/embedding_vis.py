@@ -1,8 +1,9 @@
-import json
+from collections import defaultdict
 
 import dash_bio as dashbio
 import dash_bio_utils.ngl_parser as ngl_parser
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 
 import dash
@@ -12,8 +13,14 @@ from dash.exceptions import PreventUpdate
 
 app = dash.Dash(__name__)
 
-df = pd.read_csv("data/embeddings.tsv", sep="\t")
-df["select"] = "grey"
+df = pd.read_csv("data/embeddings.tsv", sep="\t").iloc[:1000]
+fam_counts = defaultdict(int)
+for fams in df["fam"]:
+    for fam in fams.split(";"):
+        fam_counts[fam] += 1
+fam_counts = pd.Series(fam_counts).sort_values(ascending=False)
+df["color"] = "grey"
+df["symbol"] = "circle"
 
 
 app.layout = html.Div(
@@ -21,11 +28,13 @@ app.layout = html.Div(
     children=[
         html.Div(
             [
+                dcc.Store(id="highlighted_prot"),
                 dashbio.NglMoleculeViewer(id="molecule"),
-                html.A("UniProt Link", id="uniprot_link"),
-            ]
+                html.Table(id="prot_table", children=[]),
+            ],
+            style={"width": "30%"},
         ),
-        html.Div([dcc.Graph(id="fig1")]),
+        html.Div([dcc.Graph(id="embedding-fig")]),
         html.Div(
             [
                 html.H5("Opacity"),
@@ -33,16 +42,29 @@ app.layout = html.Div(
                 html.H5("Size"),
                 dcc.Slider(id="size", min=1, max=20, step=1, value=8, marks={k: str(k) for k in range(1, 21)}),
                 html.H5("Family Search"),
-                dcc.Input(
+                dcc.Dropdown(
                     id="fam_search",
-                    type="text",
-                    placeholder="Family name",
+                    multi=True,
+                    options=[{"label": x, "value": x} for x in fam_counts.index],
+                    value=[],
                 ),
-                html.H5("Protein Search"),
-                dcc.Input(
+                dcc.RadioItems(
+                    id="fam_search_highlight",
+                    options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
+                    value="on",
+                    labelStyle={"display": "inline-block"},
+                ),
+                html.H5("UniProt ID Search"),
+                dcc.Dropdown(
                     id="prot_search",
-                    type="text",
-                    placeholder="Protein name",
+                    options=[{"label": x, "value": x} for x in df["id"].value_counts().index],
+                    placeholder="UniProt ID",
+                ),
+                html.H5("Species Search"),
+                dcc.Dropdown(
+                    id="species_search",
+                    options=[{"label": x, "value": x} for x in df["organism"].unique()],
+                    placeholder="Species",
                 ),
             ],
             style={"padding": 10, "flex": 1},
@@ -51,21 +73,29 @@ app.layout = html.Div(
 )
 
 
-@app.callback(Output("uniprot_link", "href"), Input("fig1", "clickData"))
-def get_uniprot_link(clickData):
-    """show link to uniprot"""
-    if clickData is None:
+@app.callback(
+    Output("highlighted_prot", "data"),
+    Output("embedding-fig", "clickData"),
+    Output("prot_search", "value"),
+    Input("prot_search", "value"),
+    Input("embedding-fig", "clickData"),
+)
+def highlight_prot(prot_search, clickData):
+    """Save the protein that is highlighted, clean other stores"""
+    if prot_search is None and clickData is None:
         raise PreventUpdate
-    prot_id, fams = clickData["points"][0]["customdata"]
-    return f"https://www.uniprot.org/uniprot/{prot_id}"
+    if prot_search is not None:
+        return prot_search, None, None
+    prot_search = clickData["points"][0]["customdata"][0]
+    return prot_search, None, None
 
 
-@app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("fig1", "clickData"))
-def return_molecule(prot_dict):
+@app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("highlighted_prot", "data"))
+def plot_molecule(highlight):
     """Get molecular visualisation on click"""
-    if prot_dict is None:
+    if highlight is None:
         raise PreventUpdate
-    prot_id = prot_dict["points"][0]["customdata"][0]
+    prot_id = highlight
 
     molstyles_dict = {
         "representations": ["cartoon"],
@@ -87,42 +117,88 @@ def return_molecule(prot_dict):
 
 
 @app.callback(
-    Output("fig1", "figure"),
+    Output("embedding-fig", "figure"),
     [
         Input("opacity", "value"),
         Input("fam_search", "value"),
-        Input("prot_search", "value"),
+        Input("fam_search_highlight", "value"),
+        Input("highlighted_prot", "data"),
         Input("size", "value"),
+        Input("species_search", "value"),
+        Input("embedding-fig", "relayoutData"),
     ],
 )
-def output_fig(opacity, fam_search, prot_search, size):
+def update_figure(
+    opacity: float,
+    fam_search: list,
+    highlight: str,
+    highlighted_prot: str,
+    size: int,
+    species: str,
+    relayoutData: dict,
+) -> go.Figure:
     """Update figure"""
     data = df.copy()
+    data["size"] = size
+    data["opacity"] = opacity
+    if species:
+        data.loc[data["organism"] == species, "color"] = "teal"
+        data.loc[data["organism"] == species, "symbol"] = "diamond"
+        if highlight == "off":
+            data = data[data["organism"] == species]
+
     if fam_search:
-        data.loc[data["fam"].str.contains(fam_search), "select"] = "red"
-    if prot_search:
-        data.loc[data["id"].str.contains(prot_search), "select"] = "blue"
+        for i, fam in enumerate(fam_search):
+            data.loc[data["fam"] == fam, "color"] = px.colors.qualitative.G10[i]
+        if highlight == "off":
+            data = data[data["fam"].str.contains("|".join(fam_search))]
+    if highlighted_prot:  # highlight clicked protein
+        data.loc[data["id"] == highlighted_prot, "symbol"] = "star"
+        data.loc[data["id"] == highlighted_prot, "size"] = size * 2.5
+        data.loc[data["id"] == highlighted_prot, "opacity"] = 1
     fig = go.Figure(
         data=[
             go.Scattergl(
                 x=data["x"],
                 y=data["y"],
                 mode="markers",
-                marker=dict(size=size, opacity=opacity, color=data["select"]),
+                marker=dict(size=data["size"], opacity=data["opacity"], color=data["color"], symbol=data["symbol"]),
                 customdata=data[["id", "fam"]].values,
                 hovertemplate="UniProt ID: <b>%{customdata[0]}</b><br>Pfam IDs: <b>%{customdata[1]}</b>",
             )
         ]
     )
     fig.update_layout(
-        title="Embeddings",
-        xaxis_title="x",
-        yaxis_title="y",
-        width=800,
-        height=800,
-        clickmode="event+select",
+        title="Embeddings", xaxis_title="x", yaxis_title="y", width=800, height=800,
     )
+    if relayoutData and "xaxis.range[0]" in relayoutData:
+        fig.update_xaxes(range=[relayoutData["xaxis.range[0]"], relayoutData["xaxis.range[1]"]])
+        fig.update_yaxes(range=[relayoutData["yaxis.range[0]"], relayoutData["yaxis.range[1]"]])
     return fig
+
+
+@app.callback(Output("prot_table", "children"), Input("highlighted_prot", "data"))
+def update_prot_table(highlighted_prot: str) -> list:
+    """Creates table with info for a protein"""
+    if highlighted_prot is None:
+        return []
+    series = df.set_index("id").loc[highlighted_prot]
+    renames = {"organism": "Organism", "name": "Protein name"}
+    table = [html.Tr([html.Th(renames[key]), value]) for key, value in series.items() if key in renames]
+    table.append(
+        html.Tr(
+            [
+                html.Th("UniProt ID"),
+                html.A(series.name, href="https://www.uniprot.org/uniprot/{}".format(series.name)),
+            ]
+        )
+    )
+    pfams = [html.Th("Pfam IDs")]
+    for x in series.fam.split(";"):
+        pfams.append(html.A(x, href=f"https://pfam.xfam.org/family/{x}"))
+        pfams.append(html.Br())
+    table.append(html.Tr(pfams,))
+    return table
 
 
 if __name__ == "__main__":
