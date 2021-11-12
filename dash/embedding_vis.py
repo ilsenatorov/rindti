@@ -22,9 +22,8 @@ for fams in df["fam"]:
 fam_counts = pd.Series(fam_counts).sort_values(ascending=False)
 df["color"] = "grey"
 df["symbol"] = "circle"
-df["size"] = 10
-df["opacity"] = 0.5
 
+symbols = ["square", "diamond", "triangle-up", "x", "star", "hourglass"]
 
 app.layout = html.Div(
     style={"display": "flex", "flex-direction": "row"},
@@ -39,7 +38,14 @@ app.layout = html.Div(
         html.Div(  # right side, with all the sliders and dropdowns
             [
                 html.H4("Opacity"),
-                dcc.Slider(id="opacity", min=0, max=1, step=0.01, value=0.5),
+                dcc.Slider(
+                    id="opacity",
+                    min=0,
+                    max=1,
+                    step=0.01,
+                    value=0.25,
+                    marks={0.25: "25%", 0.5: "50%", 0.75: "75%", 1: "100%"},
+                ),
                 html.H4("Sample"),
                 dcc.Slider(
                     id="sample",
@@ -47,7 +53,7 @@ app.layout = html.Div(
                     max=len(df),
                     step=1,
                     value=10000,
-                    marks={i: str(i)[:-3] + "K" for i in range(10000, len(df), 10000)},
+                    marks={i: str(i)[:-3] + "K" for i in range(10000, len(df) - 10000, 10000)} | {len(df): "All"},
                 ),
                 html.H4("Size"),
                 dcc.Slider(id="size", min=1, max=20, step=1, value=10, marks={k: str(k) for k in range(1, 21)}),
@@ -57,6 +63,7 @@ app.layout = html.Div(
                     multi=True,
                     options=[{"label": x, "value": x} for x in fam_counts.index],
                     value=[],
+                    placeholder="Pfam families",
                 ),
                 dcc.RadioItems(
                     id="fam_search_highlight",
@@ -75,6 +82,7 @@ app.layout = html.Div(
                     id="organism_search",
                     options=[{"label": x, "value": x} for x in df["organism"].unique()],
                     placeholder="organism",
+                    multi=True,
                 ),
                 dcc.RadioItems(
                     id="organism_search_highlight",
@@ -164,9 +172,9 @@ def update_figure(
     highlighted_prot: str,
     fam_search: list,
     fam_highlight: str,
-    organism: str,
+    organism_search: list,
     organism_highlight: str,
-    name: str,
+    name_search: str,
     name_highlight: str,
     size: int,
     opacity: float,
@@ -176,24 +184,24 @@ def update_figure(
     """Update figure"""
     data = df.copy().iloc[sample]
     if highlighted_prot and highlighted_prot not in data["id"]:
-        data.loc["highlight"] = df[df['id'] == highlighted_prot].iloc[0]
+        data.loc["highlight"] = df[df["id"] == highlighted_prot].iloc[0]
     data["size"] = size
     data["opacity"] = opacity
-    if organism:  # highlight an organism
-        data.loc[data["organism"] == organism, "color"] = "teal"
-        data.loc[data["organism"] == organism, "symbol"] = "diamond"
+    if organism_search:  # highlight an organism
+        for i, organism in enumerate(organism_search):
+            data.loc[data["organism"] == organism, "color"] = px.colors.qualitative.Dark24[i]
         if organism_highlight == "off":
-            data = data[data["organism"] == organism]
+            data = data[data["organism"].isin(organism_search)]
     if fam_search:  # many families can be chosen
         for i, fam in enumerate(fam_search):
-            data.loc[data["fam"].str.contains(fam), "color"] = px.colors.qualitative.G10[i]
+            data.loc[data["fam"].str.contains(fam), "color"] = px.colors.qualitative.Light24[i]
         if fam_highlight == "off":
             data = data[data["fam"].str.contains("|".join(fam_search))]
-    if name:  # search by name
+    if name_search:  # search by name
         if name_highlight == "on":
-            data.loc[data["name"].str.contains(name, case=False), "color"] = "red"
+            data.loc[data["name"].str.contains(name_search, case=False), "color"] = "red"
         else:
-            data = data[data["name"].str.contains(name, case=False)]
+            data = data[data["name"].str.contains(name_search, case=False)]
     if highlighted_prot:
         data.loc[data["id"] == highlighted_prot, "symbol"] = "star"
         data.loc[data["id"] == highlighted_prot, "size"] = size * 2.5
