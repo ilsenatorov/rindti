@@ -6,7 +6,6 @@ from typing import Union
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objs as go
 import torch
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
