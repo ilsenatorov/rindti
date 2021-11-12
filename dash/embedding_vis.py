@@ -5,6 +5,7 @@ import dash_bio_utils.ngl_parser as ngl_parser
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import random
 
 import dash
 from dash import dcc, html
@@ -13,7 +14,7 @@ from dash.exceptions import PreventUpdate
 
 app = dash.Dash(__name__)
 
-df = pd.read_csv("data/embeddings.tsv", sep="\t").iloc[:1000]
+df = pd.read_csv("data/embeddings.tsv", sep="\t")
 fam_counts = defaultdict(int)
 for fams in df["fam"]:
     for fam in fams.split(";"):
@@ -21,27 +22,36 @@ for fams in df["fam"]:
 fam_counts = pd.Series(fam_counts).sort_values(ascending=False)
 df["color"] = "grey"
 df["symbol"] = "circle"
+df["size"] = 10
+df["opacity"] = 0.5
 
 
 app.layout = html.Div(
     style={"display": "flex", "flex-direction": "row"},
     children=[
-        html.Div(
-            [
-                dcc.Store(id="highlighted_prot"),
-                dashbio.NglMoleculeViewer(id="molecule"),
-                html.Table(id="prot_table", children=[]),
-            ],
+        dcc.Store(id="highlighted_prot"),  # store highlighted protein
+        dcc.Store(id="sample_index"),  # store highlighted family
+        html.Div(  # left side, visualising protein structure and info
+            [dashbio.NglMoleculeViewer(id="molecule"), html.Table(id="prot_table", children=[])],
             style={"width": "30%"},
         ),
-        html.Div([dcc.Graph(id="embedding-fig")]),
-        html.Div(
+        html.Div([dcc.Graph(id="embedding-fig")]),  # center, embedding plot
+        html.Div(  # right side, with all the sliders and dropdowns
             [
-                html.H5("Opacity"),
+                html.H4("Opacity"),
                 dcc.Slider(id="opacity", min=0, max=1, step=0.01, value=0.5),
-                html.H5("Size"),
-                dcc.Slider(id="size", min=1, max=20, step=1, value=8, marks={k: str(k) for k in range(1, 21)}),
-                html.H5("Family Search"),
+                html.H4("Sample"),
+                dcc.Slider(
+                    id="sample",
+                    min=10000,
+                    max=len(df),
+                    step=1,
+                    value=10000,
+                    marks={i: str(i)[:-3] + "K" for i in range(10000, len(df), 10000)},
+                ),
+                html.H4("Size"),
+                dcc.Slider(id="size", min=1, max=20, step=1, value=10, marks={k: str(k) for k in range(1, 21)}),
+                html.H4("Family Search"),
                 dcc.Dropdown(
                     id="fam_search",
                     multi=True,
@@ -54,17 +64,31 @@ app.layout = html.Div(
                     value="on",
                     labelStyle={"display": "inline-block"},
                 ),
-                html.H5("UniProt ID Search"),
+                html.H4("UniProt ID Search"),
                 dcc.Dropdown(
                     id="prot_search",
                     options=[{"label": x, "value": x} for x in df["id"].value_counts().index],
                     placeholder="UniProt ID",
                 ),
-                html.H5("Species Search"),
+                html.H4("Organism Search"),
                 dcc.Dropdown(
-                    id="species_search",
+                    id="organism_search",
                     options=[{"label": x, "value": x} for x in df["organism"].unique()],
-                    placeholder="Species",
+                    placeholder="organism",
+                ),
+                dcc.RadioItems(
+                    id="organism_search_highlight",
+                    options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
+                    value="on",
+                    labelStyle={"display": "inline-block"},
+                ),
+                html.H4("Name search"),
+                dcc.Input(id="name_search", placeholder="Keywords...", value=""),
+                dcc.RadioItems(
+                    id="name_search_highlight",
+                    options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
+                    value="on",
+                    labelStyle={"display": "inline-block"},
                 ),
             ],
             style={"padding": 10, "flex": 1},
@@ -90,20 +114,24 @@ def highlight_prot(prot_search, clickData):
     return prot_search, None, None
 
 
-@app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("highlighted_prot", "data"))
-def plot_molecule(highlight):
-    """Get molecular visualisation on click"""
-    if highlight is None:
-        raise PreventUpdate
-    prot_id = highlight
+@app.callback(Output("sample_index", "data"), Input("sample", "value"))
+def update_sample_idx(sample):
+    """Save the sample index"""
+    return random.sample(range(len(df)), sample)
 
+
+@app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("highlighted_prot", "data"))
+def plot_molecule(fam_highlight):
+    """Get molecular visualisation on click"""
+    if fam_highlight is None:
+        raise PreventUpdate
+    prot_id = fam_highlight
     molstyles_dict = {
         "representations": ["cartoon"],
         "chosenAtomsColor": "white",
         "chosenAtomsRadius": 1,
         "molSpacingXaxis": 100,
     }
-
     data_list = [
         ngl_parser.get_data(
             data_path="https://alphafold.ebi.ac.uk/files/",
@@ -119,40 +147,54 @@ def plot_molecule(highlight):
 @app.callback(
     Output("embedding-fig", "figure"),
     [
-        Input("opacity", "value"),
+        Input("highlighted_prot", "data"),
         Input("fam_search", "value"),
         Input("fam_search_highlight", "value"),
-        Input("highlighted_prot", "data"),
+        Input("organism_search", "value"),
+        Input("organism_search_highlight", "value"),
+        Input("name_search", "value"),
+        Input("name_search_highlight", "value"),
         Input("size", "value"),
-        Input("species_search", "value"),
+        Input("opacity", "value"),
+        Input("sample_index", "data"),
         Input("embedding-fig", "relayoutData"),
     ],
 )
 def update_figure(
-    opacity: float,
-    fam_search: list,
-    highlight: str,
     highlighted_prot: str,
+    fam_search: list,
+    fam_highlight: str,
+    organism: str,
+    organism_highlight: str,
+    name: str,
+    name_highlight: str,
     size: int,
-    species: str,
+    opacity: float,
+    sample: int,
     relayoutData: dict,
 ) -> go.Figure:
     """Update figure"""
-    data = df.copy()
+    data = df.copy().iloc[sample]
+    if highlighted_prot and highlighted_prot not in data["id"]:
+        data.loc["highlight"] = df[df['id'] == highlighted_prot].iloc[0]
     data["size"] = size
     data["opacity"] = opacity
-    if species:
-        data.loc[data["organism"] == species, "color"] = "teal"
-        data.loc[data["organism"] == species, "symbol"] = "diamond"
-        if highlight == "off":
-            data = data[data["organism"] == species]
-
-    if fam_search:
+    if organism:  # highlight an organism
+        data.loc[data["organism"] == organism, "color"] = "teal"
+        data.loc[data["organism"] == organism, "symbol"] = "diamond"
+        if organism_highlight == "off":
+            data = data[data["organism"] == organism]
+    if fam_search:  # many families can be chosen
         for i, fam in enumerate(fam_search):
-            data.loc[data["fam"] == fam, "color"] = px.colors.qualitative.G10[i]
-        if highlight == "off":
+            data.loc[data["fam"].str.contains(fam), "color"] = px.colors.qualitative.G10[i]
+        if fam_highlight == "off":
             data = data[data["fam"].str.contains("|".join(fam_search))]
-    if highlighted_prot:  # highlight clicked protein
+    if name:  # search by name
+        if name_highlight == "on":
+            data.loc[data["name"].str.contains(name, case=False), "color"] = "red"
+        else:
+            data = data[data["name"].str.contains(name, case=False)]
+    if highlighted_prot:
         data.loc[data["id"] == highlighted_prot, "symbol"] = "star"
         data.loc[data["id"] == highlighted_prot, "size"] = size * 2.5
         data.loc[data["id"] == highlighted_prot, "opacity"] = 1
@@ -162,14 +204,22 @@ def update_figure(
                 x=data["x"],
                 y=data["y"],
                 mode="markers",
-                marker=dict(size=data["size"], opacity=data["opacity"], color=data["color"], symbol=data["symbol"]),
-                customdata=data[["id", "fam"]].values,
-                hovertemplate="UniProt ID: <b>%{customdata[0]}</b><br>Pfam IDs: <b>%{customdata[1]}</b>",
+                marker=dict(
+                    size=data["size"],
+                    opacity=data["opacity"],
+                    color=data["color"],
+                    symbol=data["symbol"],
+                    line=dict(width=0),
+                ),
+                customdata=data[["id", "fam", "name"]].values,
+                hovertemplate="<b>UniProt ID:</b> %{customdata[0]}<br>"
+                + "<b>Pfam IDs:</b> %{customdata[1]}</b><br>"
+                + "<b>Name:</b> %{customdata[2]}",
             )
         ]
     )
     fig.update_layout(
-        title="Embeddings", xaxis_title="x", yaxis_title="y", width=800, height=800,
+        width=800, height=800, margin=dict(l=5, r=5, t=5, b=5),
     )
     if relayoutData and "xaxis.range[0]" in relayoutData:
         fig.update_xaxes(range=[relayoutData["xaxis.range[0]"], relayoutData["xaxis.range[1]"]])
