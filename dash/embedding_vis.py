@@ -44,7 +44,7 @@ app.layout = html.Div(
                     max=1,
                     step=0.01,
                     value=0.25,
-                    marks={0.25: "25%", 0.5: "50%", 0.75: "75%", 1: "100%"},
+                    marks={i / 100: str(i) + "%" for i in range(0, 100, 10)},
                 ),
                 html.H4("Sample"),
                 dcc.Slider(
@@ -71,17 +71,11 @@ app.layout = html.Div(
                     value="on",
                     labelStyle={"display": "inline-block"},
                 ),
-                html.H4("UniProt ID Search"),
-                dcc.Dropdown(
-                    id="prot_search",
-                    options=[{"label": x, "value": x} for x in df["id"].value_counts().index],
-                    placeholder="UniProt ID",
-                ),
                 html.H4("Organism Search"),
                 dcc.Dropdown(
                     id="organism_search",
                     options=[{"label": x, "value": x} for x in df["organism"].unique()],
-                    placeholder="organism",
+                    placeholder="Organism",
                     multi=True,
                 ),
                 dcc.RadioItems(
@@ -89,6 +83,12 @@ app.layout = html.Div(
                     options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
                     value="on",
                     labelStyle={"display": "inline-block"},
+                ),
+                html.H4("UniProt ID Search"),
+                dcc.Dropdown(
+                    id="prot_search",
+                    options=[{"label": x, "value": x} for x in df["id"].value_counts().index],
+                    placeholder="UniProt ID",
                 ),
                 html.H4("Name search"),
                 dcc.Input(id="name_search", placeholder="Keywords...", value=""),
