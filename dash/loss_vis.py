@@ -1,9 +1,9 @@
 # Run this app with `python app.py` and
 # visit http://127.0.0.1:8050/ in your web browser.
 
-import json
 from typing import Union
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import torch
@@ -75,15 +75,50 @@ app.layout = html.Div(
         html.Div(
             [
                 html.H5("Distance"),
-                dcc.Slider(id="distance", min=0, max=2, step=0.01, value=0),
+                dcc.Slider(
+                    id="distance",
+                    min=0,
+                    max=2,
+                    step=0.01,
+                    value=0,
+                    marks={i: str(round(i, 2)) for i in np.linspace(0, 2, 41)},
+                ),
                 html.H5("Scale"),
-                dcc.Slider(id="scale", min=0, max=2, step=0.01, value=0),
+                dcc.Slider(
+                    id="scale",
+                    min=0,
+                    max=2,
+                    step=0.01,
+                    value=0,
+                    marks={i: str(round(i, 2)) for i in np.linspace(0, 2, 41)},
+                ),
                 html.H5("Temperature"),
-                dcc.Slider(id="temperature", min=-3, max=3, step=0.1, value=0),
+                dcc.Slider(
+                    id="temperature",
+                    min=-3,
+                    max=3,
+                    step=0.1,
+                    value=0,
+                    marks={i: "10^" + str(i) for i in [-3, -2, -1, 0, 1, 2, 3]},
+                ),
                 html.H5("Positive Margin"),
-                dcc.Slider(id="pos_margin", min=0, max=10, step=1, value=0),
+                dcc.Slider(
+                    id="pos_margin",
+                    min=0,
+                    max=10,
+                    step=0.1,
+                    value=0,
+                    marks={i: str(i) for i in range(10)},
+                ),
                 html.H5("Negative Margin"),
-                dcc.Slider(id="neg_margin", min=0, max=10, step=1, value=0),
+                dcc.Slider(
+                    id="neg_margin",
+                    min=0,
+                    max=10,
+                    step=0.1,
+                    value=0,
+                    marks={i: str(i) for i in range(10)},
+                ),
                 html.H5("Loss"),
                 dcc.Dropdown(
                     id="loss",
@@ -121,7 +156,7 @@ app.layout = html.Div(
 )
 
 
-p = Plotter(num=100)
+p = Plotter(num=250)
 
 
 @app.callback(
@@ -157,13 +192,13 @@ def output_fig(dims, distance, scale, dim_reducer, loss, temperature, pos_margin
         symbol="symbol",
         hover_name="distance",
         hover_data=["loss"],
-        width=1000,
-        height=800,
+        width=1200,
+        height=1200,
         symbol_sequence=["circle", "cross"],
         title="Loss = {}".format(data["loss"].mean()),
     )
     fig.update_traces(marker=dict(size=12))
-    fig.update_layout(showlegend=False)
+    fig.update_layout(showlegend=False, margin=dict(t=30, b=5, l=5, r=5))
     fig.update_coloraxes(showscale=False)
     return fig
 

@@ -1,3 +1,4 @@
+import random
 from collections import defaultdict
 
 import dash_bio as dashbio
@@ -5,7 +6,6 @@ import dash_bio_utils.ngl_parser as ngl_parser
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import random
 
 import dash
 from dash import dcc, html
@@ -53,7 +53,7 @@ app.layout = html.Div(
                     max=len(df),
                     step=1,
                     value=10000,
-                    marks={i: str(i)[:-3] + "K" for i in range(10000, len(df) - 10000, 10000)} | {len(df): "All"},
+                    marks={i: str(i)[:-3] + "K" for i in range(10000, len(df) - 10000, 10000)},
                 ),
                 html.H4("Size"),
                 dcc.Slider(id="size", min=1, max=20, step=1, value=10, marks={k: str(k) for k in range(1, 21)}),
@@ -227,7 +227,9 @@ def update_figure(
         ]
     )
     fig.update_layout(
-        width=800, height=800, margin=dict(l=5, r=5, t=5, b=5),
+        width=800,
+        height=800,
+        margin=dict(l=5, r=5, t=5, b=5),
     )
     if relayoutData and "xaxis.range[0]" in relayoutData:
         fig.update_xaxes(range=[relayoutData["xaxis.range[0]"], relayoutData["xaxis.range[1]"]])
@@ -255,7 +257,11 @@ def update_prot_table(highlighted_prot: str) -> list:
     for x in series.fam.split(";"):
         pfams.append(html.A(x, href=f"https://pfam.xfam.org/family/{x}"))
         pfams.append(html.Br())
-    table.append(html.Tr(pfams,))
+    table.append(
+        html.Tr(
+            pfams,
+        )
+    )
     return table
 
 
