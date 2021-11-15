@@ -1,3 +1,4 @@
+import os
 from typing import Tuple
 
 import numpy as np
@@ -66,6 +67,8 @@ class ProteinEncoder:
         """
         nodes = []
         edges = []
+        if not os.path.exists():
+            return None, None
         with open(filename, "r") as file:
             for line in file:
                 line = line.strip()
@@ -180,12 +183,19 @@ class ProteinEncoder:
         Returns:
             dict: standard format with x for node node_feats, edge_index for edges etc
         """
-        nodes, edges = self.parse_sif(protein_sif)
-        if nodes is None:
+        try:
+            nodes, edges = self.parse_sif(protein_sif)
+            if nodes is None:
+                return np.nan
+            node_attr = self.encode_nodes(nodes)
+            edge_index, edge_feats = self.encode_edges(edges)
+            return dict(
+                x=node_attr, edge_index=edge_index, edge_feats=edge_feats, index_mapping=nodes["index"].to_dict()
+            )
+        except Exception as e:
+            print(protein_sif)
+            print(e)
             return np.nan
-        node_attr = self.encode_nodes(nodes)
-        edge_index, edge_feats = self.encode_edges(edges)
-        return dict(x=node_attr, edge_index=edge_index, edge_feats=edge_feats, index_mapping=nodes["index"].to_dict())
 
 
 def extract_name(protein_sif: str) -> str:
