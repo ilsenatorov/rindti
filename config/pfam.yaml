@@ -21,7 +21,7 @@ model: pfam
 batch_per_epoch: 1000
 prot_per_fam: 16
 
-loss: snnl # lifted or snnl
+loss: crossentropy # lifted, crossentropy or snnl
 temperature: 0.1
 optim_temperature: false
 grad_step: 0.1

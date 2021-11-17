@@ -62,7 +62,10 @@ class PfamModel(BaseModel):
             device=self.device,
         ).view(-1, 1)
         node_metrics = self.node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
-        loss = self.loss(embeds, fam_idx).mean()
+        if self.hparams.loss == "crossentropy":
+            loss = self.loss(embeds, data.fam)
+        else:
+            loss = self.loss(embeds, fam_idx).mean()
         node_metrics.update(
             dict(
                 loss=loss + node_metrics["node_loss"] * self.hparams.alpha,
