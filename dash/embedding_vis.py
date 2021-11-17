@@ -14,7 +14,7 @@ from dash.exceptions import PreventUpdate
 
 app = dash.Dash(__name__)
 
-df = pd.read_csv("data/embeddings.tsv", sep="\t")
+df = pd.read_csv("data/fragments_embeddings.tsv", sep="\t")
 fam_counts = defaultdict(int)
 for fams in df["fam"]:
     for fam in fams.split(";"):
