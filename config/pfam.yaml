@@ -1,4 +1,4 @@
-data: /scratch/SCRATCH_NVME/ilya/pretrain_data/pfam_label_none_proc.pkl
+data: /scratch/SCRATCH_NVME/ilya/pretrain_data/pfam_fragments_label_none.pkl
 # Hardware
 batch_size: 256
 gpus: 1
@@ -13,7 +13,7 @@ lr: 0.001
 monitor: train_loss
 optimiser: adam
 reduce_lr_factor: 0.1
-reduce_lr_patience: 50
+reduce_lr_patience: 100
 # Model
 dropout: 0.1
 hidden_dim: 64
@@ -22,15 +22,15 @@ batch_per_epoch: 1000
 prot_per_fam: 16
 
 loss: snnl # lifted or snnl
-temperature: 1
+temperature: 0.1
 optim_temperature: false
 grad_step: 0.1
 node_pred: True
-frac: 0.15
+frac: 0.1
 alpha: 0.05
 # Encoder
 node_embed: ginconv
 num_heads: 1
-num_layers: 5
-pool: gmt
+num_layers: 3
+pool: diffpool
 ratio: 0.25

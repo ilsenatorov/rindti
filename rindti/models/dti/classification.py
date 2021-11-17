@@ -46,18 +46,20 @@ class ClassificationModel(BaseModel):
             Iterable[BaseLayer]: feat_embed, node_embed, pool of the pretrained model
         """
         if "infograph" in checkpoint_path:
-            return InfoGraphModel.load_from_checkpoint(checkpoint_path).encoder
+            encoder = InfoGraphModel.load_from_checkpoint(checkpoint_path).encoder
         elif "graphlog" in checkpoint_path:
-            return GraphLogModel.load_from_checkpoint(checkpoint_path).encoder
+            encoder = GraphLogModel.load_from_checkpoint(checkpoint_path).encoder
         elif "pfam" in checkpoint_path:
-            return PfamModel.load_from_checkpoint(checkpoint_path).encoder
+            encoder = PfamModel.load_from_checkpoint(checkpoint_path).encoder
         elif "bgrl" in checkpoint_path:
-            return BGRLModel.load_from_checkpoint(checkpoint_path).student_encoder
+            encoder = BGRLModel.load_from_checkpoint(checkpoint_path).student_encoder
         else:
             raise ValueError(
                 """Unknown pretraining model type!
                 Please ensure 'pfam', 'graphlog', 'bgrl' or 'infograph' are present in the model path"""
             )
+        encoder.return_nodes = False
+        return encoder
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
