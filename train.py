@@ -4,14 +4,12 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataset
-from rindti.models import ClassificationModel, NoisyNodesClassModel, NoisyNodesRegModel, RegressionModel
+from rindti.models import ClassificationModel, RegressionModel
 from rindti.utils import read_config
 
 models = {
     "class": ClassificationModel,
     "reg": RegressionModel,
-    "noisyclass": NoisyNodesClassModel,
-    "noisyreg": NoisyNodesRegModel,
 }
 
 
@@ -30,7 +28,6 @@ def train(**kwargs):
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
     ]
-    print(type(kwargs["profiler"]))
     trainer = Trainer(
         gpus=kwargs["gpus"],
         callbacks=callbacks,
@@ -66,3 +63,4 @@ if __name__ == "__main__":
 
     config = read_config(args.config)
     pprint(config)
+    train(**config)
