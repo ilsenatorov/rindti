@@ -14,6 +14,9 @@ def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
+    ## TODO need a more elegant solution for this
+    fams = {i.fam for i in dataset}
+    kwargs["fam_list"] = list(fams)
     kwargs.update(dataset.config)
     kwargs["feat_dim"] = 20
     kwargs["edge_dim"] = 5

@@ -1,16 +1,13 @@
-from argparse import ArgumentParser
 from typing import List
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 from torch.functional import Tensor
-from torchmetrics.functional import confusion_matrix
 
 from ...data import DataCorruptor, TwoGraphData
-from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, SoftNearestNeighborLoss
-from ...utils import MyArgParser
-from ..base_model import BaseModel, node_embedders, poolers
+from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, PfamCrossEntropyLoss, SoftNearestNeighborLoss
+from ..base_model import BaseModel
 from ..encoder import Encoder
 
 
@@ -22,9 +19,11 @@ class PfamModel(BaseModel):
         self.save_hyperparameters()
         self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
         self.encoder = Encoder(return_nodes=True, **kwargs)
-        self.loss = {"snnl": SoftNearestNeighborLoss, "lifted": GeneralisedLiftedStructureLoss}[kwargs["loss"]](
-            **kwargs
-        )
+        self.loss = {
+            "snnl": SoftNearestNeighborLoss,
+            "lifted": GeneralisedLiftedStructureLoss,
+            "crossentropy": PfamCrossEntropyLoss,
+        }[kwargs["loss"]](**kwargs)
         self.node_loss = NodeLoss(**kwargs)
         self.masker = DataCorruptor(dict(x=self.hparams.frac), type="mask")
 
@@ -36,10 +35,8 @@ class PfamModel(BaseModel):
             List[List]: First list is families, second list is entries in the family
         """
         res = []
-        fam = 0
-        for _ in range(0, self.hparams.batch_size, self.hparams.prot_per_fam):
+        for fam, _ in enumerate(range(0, self.hparams.batch_size, self.hparams.prot_per_fam)):
             res += [fam] * self.hparams.prot_per_fam
-            fam += 1
         return res
 
     def forward(self, data: dict) -> Tensor:
@@ -72,13 +69,7 @@ class PfamModel(BaseModel):
                 graph_loss=loss,
             )
         )
-        res = {}
-        for k, v in node_metrics.items():
-            if k != "loss":
-                res[k] = v.detach()
-            else:
-                res[k] = v
-        return res
+        return {k: v.detach() if k != "loss" else v for k, v in node_metrics.items()}
 
     def log_node_confusionmatrix(self, confmatrix: Tensor):
         """Saves the confusion matrix of node prediction
