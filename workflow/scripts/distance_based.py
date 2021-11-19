@@ -97,15 +97,41 @@ if __name__ == "__main__":
     from joblib import Parallel, delayed
     from tqdm import tqdm
 
-    all_structures = snakemake.input.pdbs
-    threshold = snakemake.params.threshold
+    if "snakemake" in globals():
+        all_structures = snakemake.input.pdbs
+        threshold = snakemake.params.threshold
 
-    def get_graph(filename: str) -> Data:
-        return Structure(filename, snakemake.config["prepare_proteins"]["node_feats"]).get_graph(threshold)
+        def get_graph(filename: str) -> Data:
+            return Structure(filename, snakemake.config["prepare_proteins"]["node_feats"]).get_graph(threshold)
 
-    data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
-    df = pd.DataFrame(pd.Series(data, name="data"))
-    df["filename"] = all_structures
-    df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
-    df.set_index("ID", inplace=True)
-    df.drop("filename", axis=1).to_pickle(snakemake.output.pickle)
+        data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
+        df = pd.DataFrame(pd.Series(data, name="data"))
+        df["filename"] = all_structures
+        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+        df.set_index("ID", inplace=True)
+        df.drop("filename", axis=1).to_pickle(snakemake.output.pickle)
+    else:
+        import argparse
+
+        parser = argparse.ArgumentParser(description="Prepare protein data")
+        parser.add_argument("--pdbs", nargs="+", required=True, help="PDB files")
+        parser.add_argument("--output", required=True, help="Output pickle file")
+        parser.add_argument("--threshold", type=float, default=5.0, help="Threshold for edge")
+        parser.add_argument(
+            "--node_feats",
+            type=str,
+            default="label",
+            help="Node features: label or onehot",
+        )
+        parser.add_argument("--threads", type=int, default=1, help="Number of threads to use")
+        args = parser.parse_args()
+
+        def get_graph(filename: str) -> Data:
+            return Structure(filename, args.node_feats).get_graph(args.threshold)
+
+        data = Parallel(n_jobs=args.threads)(delayed(get_graph)(i) for i in tqdm(args.pdbs))
+        df = pd.DataFrame(pd.Series(data, name="data"))
+        df["filename"] = args.pdbs
+        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+        df.set_index("ID", inplace=True)
+        df.drop("filename", axis=1).to_pickle(args.output)

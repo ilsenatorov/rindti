@@ -16,7 +16,7 @@ plddt:
 # how to compute the graphs
 # `rinerator` uses rinerator, also can produce edge labels
 # `distance` just uses a threshold distance between CA atoms
-graph: distance
+graph: rinerator
 
 distance:
   threshold: 7
