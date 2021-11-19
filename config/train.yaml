@@ -1,4 +1,4 @@
-data: results/prepare_all/coldtarget_posneg_under_class_template_label_none_label_none.pkl
+data: results/prepare_all/coldtarget_posneg_under_class_whole_distance_label_none_label_none.pkl
 # Hardware
 batch_size: 1024
 gpus: 1
@@ -40,5 +40,5 @@ prot_node_embed: ginconv
 prot_num_heads: 4
 prot_num_layers: 3
 prot_pool: diffpool
-prot_pretrain: tb_logs/pfam/version_4/checkpoints/epoch=288-step=288999.ckpt
+prot_pretrain: null
 prot_ratio: 0.5
