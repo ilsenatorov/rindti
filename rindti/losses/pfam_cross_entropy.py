@@ -2,7 +2,7 @@ import torch
 from pytorch_lightning import LightningModule
 from sklearn.preprocessing import LabelEncoder
 from torch import Tensor
-from torch._C import dtype
+from torchmetrics.functional import accuracy
 
 from ..layers import MLP
 
@@ -21,5 +21,8 @@ class PfamCrossEntropyLoss(LightningModule):
         """Forward pass of the module"""
         x = self.mlp(x)
         y = torch.tensor(self.label_encoder.transform(y), device=self.device, dtype=torch.long)
-        x = self.loss(x, y)
-        return x
+        loss = self.loss(x, y)
+        return dict(
+            graph_loss=loss,
+            graph_acc=accuracy(x, y),
+        )

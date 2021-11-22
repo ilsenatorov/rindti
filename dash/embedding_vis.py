@@ -1,4 +1,5 @@
 import random
+import sys
 from collections import defaultdict
 
 import dash_bio as dashbio
@@ -14,7 +15,7 @@ from dash.exceptions import PreventUpdate
 
 app = dash.Dash(__name__)
 
-df = pd.read_csv("data/fragments_embeddings.tsv", sep="\t")
+df = pd.read_csv(sys.argv[1], sep="\t")
 fam_counts = defaultdict(int)
 for fams in df["fam"]:
     for fam in fams.split(";"):
@@ -22,6 +23,11 @@ for fams in df["fam"]:
 fam_counts = pd.Series(fam_counts).sort_values(ascending=False)
 df["color"] = "grey"
 df["symbol"] = "circle"
+if "organism" not in df.columns:
+    df["organism"] = "unknown"
+if "name" not in df.columns:
+    df["name"] = "unknown"
+
 
 symbols = ["square", "diamond", "triangle-up", "x", "star", "hourglass"]
 
@@ -49,11 +55,11 @@ app.layout = html.Div(
                 html.H4("Sample"),
                 dcc.Slider(
                     id="sample",
-                    min=10000,
+                    min=1000,
                     max=len(df),
                     step=1,
-                    value=10000,
-                    marks={i: str(i)[:-3] + "K" for i in range(10000, len(df) - 10000, 10000)},
+                    value=1000,
+                    marks={i: str(i)[:-3] + "K" for i in range(1000, len(df) - 1000, 1000)},
                 ),
                 html.H4("Size"),
                 dcc.Slider(id="size", min=1, max=20, step=1, value=10, marks={k: str(k) for k in range(1, 21)}),
@@ -142,8 +148,8 @@ def plot_molecule(fam_highlight):
     }
     data_list = [
         ngl_parser.get_data(
-            data_path="https://alphafold.ebi.ac.uk/files/",
-            pdb_id=f"AF-{prot_id}-F1-model_v1",
+            data_path="file:/scratch/SCRATCH_NVME/ilya/fragments/",
+            pdb_id=prot_id,
             color="blue",
             reset_view=True,
             local=False,

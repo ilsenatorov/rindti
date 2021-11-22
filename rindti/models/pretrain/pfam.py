@@ -3,9 +3,10 @@ from typing import List
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
-from torch.functional import Tensor
+from torch import Tensor
 
 from ...data import DataCorruptor, TwoGraphData
+from ...layers import MLP
 from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, PfamCrossEntropyLoss, SoftNearestNeighborLoss
 from ..base_model import BaseModel
 from ..encoder import Encoder
@@ -17,7 +18,7 @@ class PfamModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
+        self.node_pred = MLP(kwargs["hidden_dim"], kwargs["feat_dim"], num_layers=3, hidden_dim=128)
         self.encoder = Encoder(return_nodes=True, **kwargs)
         self.loss = {
             "snnl": SoftNearestNeighborLoss,
@@ -43,7 +44,7 @@ class PfamModel(BaseModel):
         """Forward pass of the model"""
         data = self.masker(data)
         embeds, node_embeds = self.encoder(data)
-        node_preds = self.node_pred(node_embeds, data.edge_index)
+        node_preds = self.node_pred(node_embeds)
         return embeds, node_preds
 
     def shared_step(self, data: TwoGraphData) -> dict:
@@ -63,16 +64,12 @@ class PfamModel(BaseModel):
         ).view(-1, 1)
         node_metrics = self.node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
         if self.hparams.loss == "crossentropy":
-            loss = self.loss(embeds, data.fam)
+            metrics = self.loss(embeds, data.fam)
         else:
-            loss = self.loss(embeds, fam_idx).mean()
-        node_metrics.update(
-            dict(
-                loss=loss + node_metrics["node_loss"] * self.hparams.alpha,
-                graph_loss=loss,
-            )
-        )
-        return {k: v.detach() if k != "loss" else v for k, v in node_metrics.items()}
+            metrics = self.loss(embeds, fam_idx).mean()
+        metrics.update(node_metrics)
+        metrics["loss"] = metrics["graph_loss"] + metrics["node_loss"] * self.hparams.alpha
+        return {k: v.detach() if k != "loss" else v for k, v in metrics.items()}
 
     def log_node_confusionmatrix(self, confmatrix: Tensor):
         """Saves the confusion matrix of node prediction
