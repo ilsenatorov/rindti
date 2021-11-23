@@ -7,8 +7,9 @@ from torch.functional import Tensor
 
 from ...data import TwoGraphData
 from ...layers.base_layer import BaseLayer
+from ...losses import SoftNearestNeighborLoss
 from ...utils import remove_arg_prefix
-from ..base_model import BaseModel, node_embedders, poolers
+from ..base_model import BaseModel
 from ..encoder import Encoder
 from ..pretrain import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 
@@ -34,6 +35,7 @@ class ClassificationModel(BaseModel):
         else:
             self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
+        self.snnl = SoftNearestNeighborLoss(kwargs["temperature"])
 
     def _load_pretrained(self, checkpoint_path: str) -> Iterable[BaseLayer]:
         """Load pretrained model
@@ -66,7 +68,12 @@ class ClassificationModel(BaseModel):
         prot_embed = self.prot_encoder(prot)
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
-        return self.mlp(joint_embedding)
+        return dict(
+            pred=torch.sigmoid(self.mlp(joint_embedding)),
+            prot_embed=prot_embed,
+            drug_embed=drug_embed,
+            joint_embed=joint_embedding,
+        )
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -75,9 +82,16 @@ class ClassificationModel(BaseModel):
         """
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
-        output = torch.sigmoid(self.forward(prot, drug))
+        fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        loss = F.binary_cross_entropy(output, labels.float())
-        metrics = self._get_class_metrics(output, labels)
-        metrics.update(dict(loss=loss))
+        bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
+        metrics = self._get_class_metrics(fwd_dict["pred"], labels)
+        snnl = self.snnl(fwd_dict["joint_embed"], data.label).mean()
+        metrics.update(
+            dict(
+                loss=bce_loss + self.hparams.alpha * snnl,
+                snn_loss=snnl.detach(),
+                bce_loss=bce_loss.detach(),
+            )
+        )
         return metrics
