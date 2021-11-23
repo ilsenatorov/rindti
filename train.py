@@ -1,5 +1,5 @@
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
@@ -27,18 +27,19 @@ def train(**kwargs):
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        RichModelSummary(),
+        RichProgressBar(),
     ]
     trainer = Trainer(
         gpus=kwargs["gpus"],
         callbacks=callbacks,
         logger=logger,
         gradient_clip_val=kwargs["gradient_clip_val"],
-        deterministic=True,
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
     dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ["batch_size", "num_workers"]}
-    dataloader_kwargs.update({"follow_batch": ["prot_x", "drug_x"]})
+    dataloader_kwargs["follow_batch"] = ["prot_x", "drug_x"]
     train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=False)
     val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
     test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
