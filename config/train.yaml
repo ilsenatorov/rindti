@@ -1,6 +1,6 @@
 data: results/prepare_all/colddrug_posneg_under_class_whole_rinerator_label_none_label_none.pkl
 # Hardware
-batch_size: 128
+batch_size: 64
 gpus: 1
 max_epochs: 1000
 num_workers: 16
