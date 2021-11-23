@@ -31,7 +31,8 @@ class SoftNearestNeighborLoss(LightningModule):
         f = expsim / (self.eps + expsim.sum(dim=1))
         fam_mask = (fam_idx == fam_idx.t()).float()
         f = f * fam_mask
-        return -torch.log(self.eps + f.sum(dim=1))
+        loss = -torch.log(self.eps + f.sum(dim=1))
+        return dict(graph_loss=loss.mean())
 
     def forward(self, embeds: Tensor, fam_idx: List[int]) -> Tensor:
         """Calculate the soft nearest neighbor loss, optimise temperature if necessary"""

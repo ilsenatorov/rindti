@@ -1,6 +1,6 @@
 data: /scratch/SCRATCH_NVME/ilya/pretrain_data/pfam_fragments_label_none.pkl
 # Hardware
-batch_size: 256
+batch_size: 2048
 gpus: 1
 max_epochs: 1000
 num_workers: 16
@@ -27,7 +27,7 @@ optim_temperature: false
 grad_step: 0.1
 node_pred: True
 frac: 0.1
-alpha: 0.05
+alpha: 1
 # Encoder
 node_embed: ginconv
 num_heads: 1

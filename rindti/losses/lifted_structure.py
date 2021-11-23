@@ -21,4 +21,5 @@ class GeneralisedLiftedStructureLoss(LightningModule):
         neg = (self.neg_margin - dist) * (1 - fam_mask)
         pos_loss = torch.logsumexp(pos, dim=0)
         neg_loss = torch.logsumexp(neg, dim=0)
-        return torch.relu(pos_loss + neg_loss)
+        loss = torch.relu(pos_loss + neg_loss)
+        return dict(graph_loss=loss)
