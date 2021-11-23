@@ -18,7 +18,7 @@ class PfamModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.node_pred = MLP(kwargs["hidden_dim"], kwargs["feat_dim"], num_layers=3, hidden_dim=128)
+        self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
         self.encoder = Encoder(return_nodes=True, **kwargs)
         self.loss = {
             "snnl": SoftNearestNeighborLoss,
@@ -44,7 +44,7 @@ class PfamModel(BaseModel):
         """Forward pass of the model"""
         data = self.masker(data)
         embeds, node_embeds = self.encoder(data)
-        node_preds = self.node_pred(node_embeds)
+        node_preds = self.node_pred(node_embeds, data.edge_index)
         return embeds, node_preds
 
     def shared_step(self, data: TwoGraphData) -> dict:

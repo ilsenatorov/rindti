@@ -26,7 +26,7 @@ class GMTNet(BaseLayer):
             input_dim,
             hidden_dim,
             output_dim,
-            num_nodes=max_nodes,
+            num_nodes=max_nodes * 1.2,
             pooling_ratio=ratio,
             num_heads=num_heads,
             pool_sequences=["GMPool_G", "SelfAtt", "SelfAtt", "GMPool_I"],
