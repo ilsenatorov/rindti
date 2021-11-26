@@ -1,9 +1,9 @@
-data: results/prepare_all/colddrug_posneg_under_class_whole_rinerator_label_none_label_none.pkl
+data: results/prepare_all/coldtarget_posneg_under_class_template_rinerator_label_none_label_none.pkl
 # Hardware
-batch_size: 64
+batch_size: 1024
 gpus: 1
 max_epochs: 1000
-num_workers: 16
+num_workers: 0
 profiler: null
 seed: 42
 # Optimisation + learning
@@ -35,7 +35,7 @@ drug_ratio: 0.25
 # Prot encoder
 prot_dropout: 0.3
 prot_hidden_dim: 64
-prot_lr: 0.0000001 # for protein encoder
+prot_lr: 0.001 # for protein encoder
 prot_node_embed: ginconv
 prot_num_heads: 4
 prot_num_layers: 3
@@ -44,4 +44,4 @@ prot_pretrain: null
 prot_ratio: 0.5
 
 temperature: 1
-alpha: 1
+alpha: 0.01

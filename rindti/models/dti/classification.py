@@ -86,7 +86,7 @@ class ClassificationModel(BaseModel):
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
         metrics = self._get_class_metrics(fwd_dict["pred"], labels)
-        snnl = self.snnl(fwd_dict["joint_embed"], data.label).mean()
+        snnl = 1 / self.snnl(fwd_dict["joint_embed"], data.label)["graph_loss"]
         metrics.update(
             dict(
                 loss=bce_loss + self.hparams.alpha * snnl,
