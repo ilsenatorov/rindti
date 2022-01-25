@@ -66,7 +66,7 @@ class PfamModel(BaseModel):
         if self.hparams.loss == "crossentropy":
             metrics = self.loss(embeds, data.fam)
         else:
-            metrics = self.loss(embeds, fam_idx).mean()
+            metrics = self.loss(embeds, fam_idx)
         metrics.update(node_metrics)
         metrics["loss"] = metrics["graph_loss"] + metrics["node_loss"] * self.hparams.alpha
         return {k: v.detach() if k != "loss" else v for k, v in metrics.items()}
