@@ -1,15 +1,6 @@
 from argparse import ArgumentParser, _ArgumentGroup
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import torch
-import torch.nn.functional as F
 import yaml
-from matplotlib.figure import Figure
-from torch import FloatTensor, LongTensor, Tensor
-from torch.utils.data import random_split
-from torchmetrics.functional import accuracy, confusion_matrix
 
 
 def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
@@ -88,59 +79,6 @@ class MyArgParser(ArgumentParser):
         for group in self._action_groups:
             if group.title == group_title:
                 return group
-
-
-def split_random(dataset, train_frac: float = 0.8):
-    """Randomly split dataset"""
-    tot = len(dataset)
-    train = int(tot * train_frac)
-    val = int(tot * (1 - train_frac))
-    return random_split(dataset, [train, val])
-
-
-def minmax_normalise(s: pd.Series) -> pd.Series:
-    """MinMax normalisation of a pandas series"""
-    return (s - s.min()) / (s.max() - s.min())
-
-
-def plot_loss_count_dist(losses: dict) -> Figure:
-    """Plot distribution of times sampled vs avg loss of families"""
-    fig = plt.figure()
-    plt.xlabel("Times sampled")
-    plt.ylabel("Avg loss")
-    plt.title("Prot statistics")
-    count = [len(x) for x in losses.values()]
-    mean = [np.mean(x) for x in losses.values()]
-    plt.scatter(x=count, y=mean)
-    return fig
-
-
-def to_prob(s: pd.Series) -> pd.Series:
-    """Convert to probabilities"""
-    return s / s.sum()
-
-
-def get_type(data: dict, key: str) -> str:
-    """Check which type of data we have
-
-    Args:
-        data (dict): TwoGraphData or Data
-        key (str): "x" or "prot_x" or "drug_x" usually
-
-    Raises:
-        ValueError: If not FloatTensor or LongTensor
-
-    Returns:
-        str: "label" for LongTensor, "onehot" for FloatTensor
-    """
-    feat = data.get(key)
-    if isinstance(feat, LongTensor):
-        return "label"
-    if isinstance(feat, FloatTensor):
-        return "onehot"
-    if feat is None:
-        return "none"
-    raise ValueError("Unknown data type {}".format(type(data[key])))
 
 
 def read_config(filename: str) -> dict:
