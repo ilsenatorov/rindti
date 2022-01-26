@@ -61,7 +61,10 @@ def init_weights(m):
 
 
 class BGRLModel(BaseModel):
-    """Bootrstrapped Graph Representational learning"""
+    """Bootrstrapped Graph Representational learning
+    https://arxiv.org/pdf/2102.06514v1.pdf
+
+    """
 
     def __init__(self, moving_average_decay: float = 0.99, epochs: int = 1000, **kwargs):
         super().__init__()
