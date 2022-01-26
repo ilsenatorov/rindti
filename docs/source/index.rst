@@ -16,6 +16,7 @@ This is a collection of various models and utilities that are focused on using p
    :maxdepth: 1
    :caption: Package Reference
 
+   notes/installation
    notes/snakemake
    modules/models
    modules/layers
