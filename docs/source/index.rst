@@ -14,10 +14,17 @@ This is a collection of various models and utilities that are focused on using p
 .. toctree::
    :glob:
    :maxdepth: 1
-   :caption: Package Reference
+   :caption: Notes
 
    notes/installation
    notes/snakemake
+
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+   :caption: Package Reference
+
    modules/models
    modules/layers
    modules/data

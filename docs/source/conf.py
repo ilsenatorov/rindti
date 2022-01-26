@@ -59,10 +59,16 @@ exclude_patterns = []
 #
 html_theme = "sphinx_rtd_theme"
 
+html_theme_options = {
+    "collapse_navigation": False,
+    "display_version": True,
+    "logo_only": True,
+    "navigation_depth": 2,
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
 rst_context = {"rindti": rindti}
 
 
