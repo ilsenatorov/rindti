@@ -298,27 +298,3 @@ class GraphLogModel(BaseModel):
                 self.proto_connection.append(tmp_proto_connection)
 
         super().training_epoch_end(outputs)
-
-    @staticmethod
-    def add_arguments(parser: MyArgParser) -> MyArgParser:
-        """Generate arguments for this module"""
-        # Hack to find which embedding are used and add their arguments
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--pool", type=str, default="gmt")
-        args = tmp_parser.parse_known_args()[0]
-
-        node_embed = node_embedders[args.node_embed]
-        pool = poolers[args.pool]
-        parser.add_argument("--decay_ratio", default=0.5, type=float)
-        parser.add_argument("--mask_rate", default=0.3, type=float)
-        parser.add_argument("--alpha", default=1.0, type=float)
-        parser.add_argument("--beta", default=1.0, type=float)
-        parser.add_argument("--gamma", default=0.1, type=float)
-        parser.add_argument("--num_proto", default=8, type=int)
-        parser.add_argument("--hierarchy", default=3, type=int)
-        pooler_args = parser.add_argument_group("Pool", prefix="--")
-        node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
-        node_embed.add_arguments(node_embed_args)
-        pool.add_arguments(pooler_args)
-        return parser

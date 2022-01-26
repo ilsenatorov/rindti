@@ -18,9 +18,3 @@ class MeanPool(BaseLayer):
         """Forward pass of the module"""
         pool = global_mean_pool(x, batch)
         return F.normalize(pool, dim=1)
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("pool", default="gmt", type=str)
-        return parser

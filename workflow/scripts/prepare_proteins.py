@@ -1,3 +1,4 @@
+import os
 from typing import Tuple
 
 import numpy as np
@@ -66,6 +67,8 @@ class ProteinEncoder:
         """
         nodes = []
         edges = []
+        if not os.path.exists(filename):
+            return None, None
         with open(filename, "r") as file:
             for line in file:
                 line = line.strip()
@@ -180,12 +183,22 @@ class ProteinEncoder:
         Returns:
             dict: standard format with x for node node_feats, edge_index for edges etc
         """
-        nodes, edges = self.parse_sif(protein_sif)
-        if nodes is None:
+        try:
+            nodes, edges = self.parse_sif(protein_sif)
+            if nodes is None:
+                return np.nan
+            node_attr = self.encode_nodes(nodes)
+            edge_index, edge_feats = self.encode_edges(edges)
+            return dict(
+                x=node_attr,
+                edge_index=edge_index,
+                edge_feats=edge_feats,
+                # index_mapping=nodes["index"].to_dict(),
+            )
+        except Exception as e:
+            print(protein_sif)
+            print(e)
             return np.nan
-        node_attr = self.encode_nodes(nodes)
-        edge_index, edge_feats = self.encode_edges(edges)
-        return dict(x=node_attr, edge_index=edge_index, edge_feats=edge_feats, index_mapping=nodes["index"].to_dict())
 
 
 def extract_name(protein_sif: str) -> str:
@@ -194,12 +207,34 @@ def extract_name(protein_sif: str) -> str:
 
 
 if __name__ == "__main__":
-    proteins = pd.Series(list(snakemake.input.rins), name="sif")
-    proteins = pd.DataFrame(proteins)
-    proteins["ID"] = proteins["sif"].apply(extract_name)
-    proteins.set_index("ID", inplace=True)
-    prot_encoder = ProteinEncoder(
-        snakemake.config["prepare_proteins"]["node_feats"], snakemake.config["prepare_proteins"]["edge_feats"]
-    )
-    proteins["data"] = proteins["sif"].apply(prot_encoder)
-    proteins.to_pickle(snakemake.output.protein_pickle)
+    if "snakemake" in globals():
+        proteins = pd.Series(list(snakemake.input.rins), name="sif")
+        proteins = pd.DataFrame(proteins)
+        proteins["ID"] = proteins["sif"].apply(extract_name)
+        proteins.set_index("ID", inplace=True)
+        prot_encoder = ProteinEncoder(
+            snakemake.config["prepare_proteins"]["node_feats"], snakemake.config["prepare_proteins"]["edge_feats"]
+        )
+        proteins["data"] = proteins["sif"].apply(prot_encoder)
+        proteins.to_pickle(snakemake.output.protein_pickle)
+    else:
+        import argparse
+
+        from joblib import Parallel, delayed
+        from tqdm import tqdm
+
+        parser = argparse.ArgumentParser(description="Prepare protein data from rinerator")
+        parser.add_argument("--sifs", nargs="+", required=True, help="Rinerator output folders")
+        parser.add_argument("--output", required=True, help="Output pickle file")
+        parser.add_argument("--node_feats", type=str, default="label")
+        parser.add_argument("--edge_feats", type=str, default="none")
+        parser.add_argument("--threads", type=int, default=1, help="Number of threads to use")
+        args = parser.parse_args()
+
+        proteins = pd.DataFrame(pd.Series(args.sifs, name="sif"))
+        proteins["ID"] = proteins["sif"].apply(extract_name)
+        proteins.set_index("ID", inplace=True)
+        prot_encoder = ProteinEncoder(args.node_feats, args.edge_feats)
+        data = Parallel(n_jobs=args.threads)(delayed(prot_encoder)(i) for i in tqdm(proteins["sif"]))
+        proteins["data"] = data
+        proteins.to_pickle(args.output)

@@ -1,0 +1,137 @@
+import numpy as np
+import torch
+from torch_geometric.data import Data
+from utils import list_to_dict, onehot_encode
+
+node_encoding = list_to_dict(
+    [
+        "ala",
+        "arg",
+        "asn",
+        "asp",
+        "cys",
+        "gln",
+        "glu",
+        "gly",
+        "his",
+        "ile",
+        "leu",
+        "lys",
+        "met",
+        "phe",
+        "pro",
+        "ser",
+        "thr",
+        "trp",
+        "tyr",
+        "val",
+    ]
+)
+
+
+def encode_residue(residue: str, node_feats: str):
+    """Encode a residue"""
+    residue = residue.lower()
+    if node_feats == "label":
+        return node_encoding[residue] + 1
+    elif node_feats == "onehot":
+        return onehot_encode(node_encoding[residue], len(node_encoding))
+    else:
+        raise ValueError("Unknown node_feats type!")
+
+
+class Residue:
+    """Residue class"""
+
+    def __init__(self, line: str) -> None:
+        self.name = line[17:20].strip()
+        self.num = int(line[22:26].strip())
+        self.chainID = line[21].strip()
+        self.x = float(line[30:38].strip())
+        self.y = float(line[38:46].strip())
+        self.z = float(line[46:54].strip())
+
+
+class Structure:
+    """Structure class"""
+
+    def __init__(self, filename: str, node_feats: str) -> None:
+        self.residues = {}
+        self.parse_file(filename)
+        self.node_feats = node_feats
+
+    def parse_file(self, filename: str) -> None:
+        """Parse PDB file"""
+        for line in open(filename, "r"):
+            if line.startswith("ATOM") and line[12:16].strip() == "CA":
+                res = Residue(line)
+                self.residues[res.num] = res
+
+    def get_coords(self) -> torch.Tensor:
+        """Get coordinates of all atoms"""
+        coords = [[res.x, res.y, res.z] for res in self.residues.values()]
+        return torch.tensor(coords)
+
+    def get_nodes(self) -> torch.Tensor:
+        """Get features of all nodes of a graph"""
+        return torch.tensor([encode_residue(res.name, self.node_feats) for res in self.residues.values()])
+
+    def get_edges(self, threshold: float) -> torch.Tensor:
+        """Get edges of a graph using threshold as a cutoff"""
+        coords = self.get_coords()
+        dist = torch.cdist(coords, coords)
+        edges = torch.where(dist < threshold)
+        edges = torch.cat([arr.view(-1, 1) for arr in edges], axis=1)
+        edges = edges[edges[:, 0] != edges[:, 1]]
+        return edges.t()
+
+    def get_graph(self, threshold: float) -> Data:
+        """Get a graph using threshold as a cutoff"""
+        nodes = self.get_nodes()
+        edges = self.get_edges(threshold)
+        return Data(x=nodes, edge_index=edges)
+
+
+if __name__ == "__main__":
+    import pandas as pd
+    from joblib import Parallel, delayed
+    from tqdm import tqdm
+
+    if "snakemake" in globals():
+        all_structures = snakemake.input.pdbs
+        threshold = snakemake.params.threshold
+
+        def get_graph(filename: str) -> Data:
+            return Structure(filename, snakemake.config["prepare_proteins"]["node_feats"]).get_graph(threshold)
+
+        data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
+        df = pd.DataFrame(pd.Series(data, name="data"))
+        df["filename"] = all_structures
+        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+        df.set_index("ID", inplace=True)
+        df.drop("filename", axis=1).to_pickle(snakemake.output.pickle)
+    else:
+        import argparse
+
+        parser = argparse.ArgumentParser(description="Prepare protein data")
+        parser.add_argument("--pdbs", nargs="+", required=True, help="PDB files")
+        parser.add_argument("--output", required=True, help="Output pickle file")
+        parser.add_argument("--threshold", type=float, default=5.0, help="Threshold for edge")
+        parser.add_argument(
+            "--node_feats",
+            type=str,
+            default="label",
+            help="Node features: label or onehot",
+        )
+        parser.add_argument("--threads", type=int, default=1, help="Number of threads to use")
+        args = parser.parse_args()
+
+        def get_graph(filename: str) -> Data:
+            return Structure(filename, args.node_feats).get_graph(args.threshold)
+
+        data = Parallel(n_jobs=args.threads)(delayed(get_graph)(i) for i in tqdm(args.pdbs))
+        df = pd.DataFrame(pd.Series(data, name="data"))
+        df["filename"] = args.pdbs
+        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+        df.set_index("ID", inplace=True)
+        df.drop("filename", axis=1).to_pickle(args.output)

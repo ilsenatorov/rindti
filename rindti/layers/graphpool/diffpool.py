@@ -37,7 +37,7 @@ class DiffPoolNet(BaseLayer):
     ):
         super().__init__()
 
-        self.max_nodes = max_nodes
+        self.max_nodes = ceil(max_nodes * 1.2)
         self.dropout = dropout
 
         self.pool = {
@@ -76,16 +76,6 @@ class DiffPoolNet(BaseLayer):
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = F.normalize(x, dim=1)
         return x
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("pool", default="diffpool", type=str)
-        parser.add_argument("hidden_dim", default=32, type=int, help="Size of output vector")
-        parser.add_argument("ratio", default=0.25, type=float, help="Pooling ratio")
-        parser.add_argument("dropout", default=0.25, type=float, help="Dropout ratio")
-        parser.add_argument("pooling_method", default="mincut", type=str, help="Type of pooling")
-        return parser
 
 
 class DiffPoolBlock(torch.nn.Module):

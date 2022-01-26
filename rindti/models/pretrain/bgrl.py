@@ -126,24 +126,3 @@ class BGRLModel(BaseModel):
             "node_loss": node_loss.detach(),
             "graph_loss": graph_loss.detach(),
         }
-
-    @staticmethod
-    def add_arguments(parser: MyArgParser) -> MyArgParser:
-        """Generate arguments for this module"""
-        # Hack to find which embedding are used and add their arguments
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--pool", type=str, default="gmt")
-        args = tmp_parser.parse_known_args()[0]
-
-        node_embed = node_embedders[args.node_embed]
-        pool = poolers[args.pool]
-        parser.add_argument("--frac", default=0.1, type=float, help="Corruption percentage")
-        parser.add_argument("--corruption", default="mask", type=str, help="Corruption type")
-        parser.add_argument("--alpha", default=1.0, type=float)
-
-        pooler_args = parser.add_argument_group("Pool", prefix="--")
-        node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
-        node_embed.add_arguments(node_embed_args)
-        pool.add_arguments(pooler_args)
-        return parser

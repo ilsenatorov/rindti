@@ -55,9 +55,3 @@ class Encoder(BaseModel):
         self.return_nodes = False
         embed = self.forward(data)
         return embed.detach()
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("--feat_embedding", default="bag", type=str)
-        return parser

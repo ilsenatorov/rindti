@@ -38,11 +38,3 @@ class MLP(BaseLayer):
     def forward(self, x: Tensor) -> Tensor:
         """Forward pass of the module"""
         return self.mlp(x)
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
-        parser.add_argument("dropout", default=0.2, type=float, help="Dropout")
-        parser.add_argument("num_layers", default=3, type=int, help="Number of convolutional layers")
-        return parser

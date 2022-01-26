@@ -27,7 +27,8 @@ def process_df(df: DataFrame) -> Iterable[dict]:
 
 def del_index_mapping(x: dict) -> dict:
     """Delete 'index_mapping' entry from the dict"""
-    del x["index_mapping"]
+    if "index_mapping" in x:
+        del x["index_mapping"]
     return x
 
 

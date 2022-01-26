@@ -41,12 +41,3 @@ class GatConvNet(BaseLayer):
             x = module(x, edge_index)
         x = self.out(x, edge_index)
         return x
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("dropout", default=0.2, type=float, help="Dropout")
-        parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
-        parser.add_argument("node_embed", default="gatconv", type=str)
-        parser.add_argument("num_layers", default=3, type=int, help="Number of convolutional layers")
-        return parser

@@ -1,16 +1,14 @@
-from argparse import ArgumentParser
 from typing import List
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
-from torch.functional import Tensor
-from torchmetrics.functional import confusion_matrix
+from torch import Tensor
 
 from ...data import DataCorruptor, TwoGraphData
-from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, SoftNearestNeighborLoss
-from ...utils import MyArgParser
-from ..base_model import BaseModel, node_embedders, poolers
+from ...layers import MLP
+from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, PfamCrossEntropyLoss, SoftNearestNeighborLoss
+from ..base_model import BaseModel
 from ..encoder import Encoder
 
 
@@ -22,9 +20,11 @@ class PfamModel(BaseModel):
         self.save_hyperparameters()
         self.node_pred = self._get_node_embed(kwargs, kwargs["feat_dim"])
         self.encoder = Encoder(return_nodes=True, **kwargs)
-        self.loss = {"snnl": SoftNearestNeighborLoss, "lifted": GeneralisedLiftedStructureLoss}[kwargs["loss"]](
-            **kwargs
-        )
+        self.loss = {
+            "snnl": SoftNearestNeighborLoss,
+            "lifted": GeneralisedLiftedStructureLoss,
+            "crossentropy": PfamCrossEntropyLoss,
+        }[kwargs["loss"]](**kwargs)
         self.node_loss = NodeLoss(**kwargs)
         self.masker = DataCorruptor(dict(x=self.hparams.frac), type="mask")
 
@@ -36,10 +36,8 @@ class PfamModel(BaseModel):
             List[List]: First list is families, second list is entries in the family
         """
         res = []
-        fam = 0
-        for _ in range(0, self.hparams.batch_size, self.hparams.prot_per_fam):
+        for fam, _ in enumerate(range(0, self.hparams.batch_size, self.hparams.prot_per_fam)):
             res += [fam] * self.hparams.prot_per_fam
-            fam += 1
         return res
 
     def forward(self, data: dict) -> Tensor:
@@ -65,20 +63,13 @@ class PfamModel(BaseModel):
             device=self.device,
         ).view(-1, 1)
         node_metrics = self.node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
-        loss = self.loss(embeds, fam_idx).mean()
-        node_metrics.update(
-            dict(
-                loss=loss + node_metrics["node_loss"] * self.hparams.alpha,
-                graph_loss=loss,
-            )
-        )
-        res = {}
-        for k, v in node_metrics.items():
-            if k != "loss":
-                res[k] = v.detach()
-            else:
-                res[k] = v
-        return res
+        if self.hparams.loss == "crossentropy":
+            metrics = self.loss(embeds, data.fam)
+        else:
+            metrics = self.loss(embeds, fam_idx)
+        metrics.update(node_metrics)
+        metrics["loss"] = metrics["graph_loss"] + metrics["node_loss"] * self.hparams.alpha
+        return {k: v.detach() if k != "loss" else v for k, v in metrics.items()}
 
     def log_node_confusionmatrix(self, confmatrix: Tensor):
         """Saves the confusion matrix of node prediction
@@ -96,23 +87,3 @@ class PfamModel(BaseModel):
         sns.heatmap(torch.cdist(embeds, embeds).detach().cpu())
         self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
         self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
-
-    @staticmethod
-    def add_arguments(parser: MyArgParser) -> MyArgParser:
-        """Generate arguments for this module"""
-        # Hack to find which embedding are used and add their arguments
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--node_embed", type=str, default="ginconv")
-        tmp_parser.add_argument("--pool", type=str, default="gmt")
-        args = tmp_parser.parse_known_args()[0]
-
-        node_embed = node_embedders[args.node_embed]
-        pool = poolers[args.pool]
-        pooler_args = parser.add_argument_group("Pool", prefix="--")
-        node_embed_args = parser.add_argument_group("Node embedding", prefix="--")
-        node_embed.add_arguments(node_embed_args)
-        pool.add_arguments(pooler_args)
-        parser.add_argument("--margin", type=float, default=1)
-        parser.add_argument("--prot_per_fam", type=int, default=8)
-        parser.add_argument("--batch_per_epoch", type=int, default=1000)
-        return parser

@@ -3,7 +3,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
-from rindti.data import DataCorruptor, PfamSampler, PreTrainDataset, WeightedPfamSampler
+from rindti.data import PfamSampler, PreTrainDataset
 from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
 from rindti.utils import MyArgParser, read_config
 
@@ -14,6 +14,9 @@ def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
+    ## TODO need a more elegant solution for this
+    fams = {i.fam for i in dataset}
+    kwargs["fam_list"] = list(fams)
     kwargs.update(dataset.config)
     kwargs["feat_dim"] = 20
     kwargs["edge_dim"] = 5
@@ -32,59 +35,22 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    if kwargs["model"] == "pfam":
-        sampler = PfamSampler(dataset, **kwargs)
-        dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
-        model.sampler = sampler
-    else:
-        dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    # if kwargs["model"] == "pfam":
+    #     sampler = PfamSampler(dataset, **kwargs)
+    #     dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
+    #     model.sampler = sampler
+    # else:
+    dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
     trainer.fit(model, dl)
 
 
 if __name__ == "__main__":
-    import argparse
+    from pprint import pprint
 
-    tmp_parser = argparse.ArgumentParser(add_help=False)
-    tmp_parser.add_argument("--model", type=str, default="graphlog")
-    args = tmp_parser.parse_known_args()[0]
-    model_type = args.model
-    parser = MyArgParser(
-        prog="Model Trainer",
-        usage="""
-Run with python train.py <data pickle file>
-To get help for different models run with python pretrain.py --help --model <model name>
-To get help for different modules run with python pretrain.py --help --prot_node_embed <module name> """,
-    )
-
-    parser.add_argument("--data", type=str, default=None)
-    parser.add_argument("--config", type=str, default=None, help="If given, read config from file")
-    parser.add_argument("--seed", type=int, default=42, help="Random generator seed")
-    parser.add_argument("--batch_size", type=int, default=512, help="batch size")
-    parser.add_argument("--num_workers", type=int, default=16, help="number of workers for data loading")
-    parser.add_argument("--early_stop_patience", type=int, default=200, help="epochs with no improvement before stop")
-    parser.add_argument("--max_epochs", type=int, default=None, help="Max number of epochs to train for")
-
-    trainer = parser.add_argument_group("Trainer")
-    model = parser.add_argument_group("Model")
-    optim = parser.add_argument_group("Optimiser")
-
-    trainer.add_argument("--gpus", type=int, default=1, help="Number of GPUs to use")
-    trainer.add_argument("--max_epochs", type=int, default=1000, help="Max number of epochs")
-    trainer.add_argument("--gradient_clip_val", type=float, default=10, help="Gradient clipping")
-    trainer.add_argument("--model", type=str, default="graphlog", help="Type of model")
-    trainer.add_argument("--profiler", type=str, default=None)
-
-    optim.add_argument("--optimiser", type=str, default="adam", help="Optimisation algorithm")
-    optim.add_argument("--lr", type=float, default=0.0005, help="learning rate")
-    optim.add_argument("--reduce_lr_patience", type=int, default=100)
-    optim.add_argument("--reduce_lr_factor", type=float, default=0.5)
-    optim.add_argument("--monitor", type=str, default="train_loss", help="Value to monitor for lr reduction etc")
-
-    parser = models[model_type].add_arguments(parser)
-
+    parser = MyArgParser(prog="Model Trainer")
+    parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
-    if args.config:
-        argvars = read_config(args.config)
-    else:
-        argvars = vars(args)
-    pretrain(**argvars)
+
+    config = read_config(args.config)
+    pprint(config)
+    pretrain(**config)

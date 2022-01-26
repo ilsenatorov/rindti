@@ -2,31 +2,37 @@ import os
 import os.path as osp
 
 
-report: "report/workflow.rst"
-
-
 configfile: "config/snakemake.yaml"
 
 
 targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.endswith(".pdb")]
 
 if config["structures"] == "whole":
-    rinerator_input = "resources/structures/{protein}.pdb"
+    structures = "resources/structures/{protein}.pdb"
     script_output = ""
 else:
-    rinerator_input = "results/parsed_structures_{structures}/{{protein}}.pdb".format(structures=config["structures"])
+    structures = "results/parsed_structures_{structures}/{{protein}}.pdb".format(structures=config["structures"])
     script_output = "results/pymol_{structures}/{{protein}}.pml".format(structures=config["structures"])
 
 
 rinerator_output = "results/rinerator_{structures}/{{protein}}/{{protein}}_h.sif".format(
     structures=config["structures"]
 )
-
-protein_output = "results/prepare_proteins/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
+rinerator_protein_output = "results/rinerator_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
     structures=config["structures"],
     node_feats=config["prepare_proteins"]["node_feats"],
     edge_feats=config["prepare_proteins"]["edge_feats"],
 )
+
+distance_protein_output = "results/distance_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
+    structures=config["structures"],
+    node_feats=config["prepare_proteins"]["node_feats"],
+    edge_feats=config["prepare_proteins"]["edge_feats"],
+)
+if config["graph"] == "distance":
+    protein_output = distance_protein_output
+else:
+    protein_output = rinerator_protein_output
 
 drug_output = "results/prepare_drugs/drug_data_{node_feats}_{edge_feats}.pkl".format(**config["prepare_drugs"])
 
@@ -41,12 +47,13 @@ transformer_output = "results/prepare_transformer/{node_feats}_transformer.pkl".
     node_feats=config["prepare_proteins"]["node_feats"]
 )
 
-final_output = "results/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{prot_node_feats}_{prot_edge_feats}_{drug_node_feats}_{drug_edge_feats}.pkl".format(
+final_output = "results/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_node_feats}_{prot_edge_feats}_{drug_node_feats}_{drug_edge_feats}.pkl".format(
     split=config["split"]["method"],
     filtering=config["parse_dataset"]["filtering"],
     sampling=config["parse_dataset"]["sampling"],
     task=config["parse_dataset"]["task"],
     structures=config["structures"],
+    graph=config["graph"],
     prot_node_feats=config["prepare_proteins"]["node_feats"],
     prot_edge_feats=config["prepare_proteins"]["edge_feats"],
     drug_node_feats=config["prepare_drugs"]["node_feats"],
@@ -110,7 +117,7 @@ rule run_pymol:
         script=script_output,
         struct="resources/structures/{protein}.pdb",
     output:
-        structures=rinerator_input,
+        structures=structures,
     log:
         "results/logs/run_pymol/{protein}.log",
     conda:
@@ -125,7 +132,7 @@ rule run_pymol:
 
 rule save_structure_info:
     input:
-        structs=expand(rinerator_input, protein=targets),
+        structs=expand(structures, protein=targets),
     output:
         tsv="results/structure_info/{type}_info.tsv".format(type=config["structures"]),
     script:
@@ -134,7 +141,7 @@ rule save_structure_info:
 
 rule rinerator:
     input:
-        pdb=rinerator_input,
+        pdb=structures,
     output:
         sif=rinerator_output,
     log:
@@ -147,6 +154,37 @@ rule rinerator:
         "shallow"
     shell:
         """rinerator {input.pdb} {params.dir}/{wildcards.protein} > {log} 2>&1"""
+
+
+rule prepare_proteins:
+    input:
+        rins=expand(rinerator_output, protein=targets),
+    output:
+        protein_pickle=rinerator_protein_output,
+    message:
+        """
+        Creating protein data.
+        Structures config is {config[structures]}
+        Node feature type is {config[prepare_proteins][node_feats]}.
+        Edge feature type is {config[prepare_proteins][edge_feats]}.
+        """
+    script:
+        "scripts/prepare_proteins.py"
+
+
+rule distance_based:
+    input:
+        pdbs=expand(structures, protein=targets),
+    output:
+        pickle=distance_protein_output,
+    log:
+        "results/logs/distance_based.log",
+    params:
+        threshold=config["distance"]["threshold"],
+    message:
+        "Running distance based network calculation, logs are in {log}"
+    script:
+        "scripts/distance_based.py"
 
 
 rule parse_dataset:
@@ -167,23 +205,6 @@ rule parse_dataset:
         """
     script:
         "scripts/parse_dataset.py"
-
-
-rule prepare_proteins:
-    input:
-        rins=expand(rinerator_output, protein=targets),
-    output:
-        protein_pickle=protein_output,
-    message:
-        """
-        Creating protein data.
-
-        Structures config is {config[structures]}
-        Node feature type is {config[prepare_proteins][node_feats]}.
-        Edge feature type is {config[prepare_proteins][edge_feats]}.
-        """
-    script:
-        "scripts/prepare_proteins.py"
 
 
 rule split_data:
@@ -215,7 +236,7 @@ rule prepare_drugs:
 rule prepare_all:
     input:
         drugs=rules.prepare_drugs.output.drug_pickle,
-        proteins=rules.prepare_proteins.output.protein_pickle,
+        proteins=protein_output,
         inter=rules.split_data.output.split_data,
     output:
         combined_pickle=final_output,

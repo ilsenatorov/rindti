@@ -49,7 +49,7 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _get_label_embed(self, params: dict) -> nn.Embedding:
-        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"], padding_idx=0)
+        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"])
 
     def _get_onehot_embed(self, params: dict) -> nn.LazyLinear:
         return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
@@ -202,13 +202,3 @@ class BaseModel(LightningModule):
             "monitor": self.hparams.monitor,
         }
         return [optimiser], [lr_scheduler]
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        tmp_parser = ArgumentParser(add_help=False)
-        tmp_parser.add_argument("--drug_node_embed", type=str, default="chebconv")
-        tmp_parser.add_argument("--prot_node_embed", type=str, default="chebconv")
-        tmp_parser.add_argument("--prot_pool", type=str, default="gmt")
-        tmp_parser.add_argument("--drug_pool", type=str, default="gmt")
-        return parser

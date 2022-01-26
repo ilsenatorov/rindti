@@ -41,11 +41,3 @@ class FilmConvNet(BaseLayer):
             x = module(x, edge_index, edge_feats)
         x = self.out(x, edge_index, edge_feats)
         return x
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        parser.add_argument("hidden_dim", default=32, type=int, help="Number of hidden dimensions")
-        parser.add_argument("node_embed", default="filmconv", type=str)
-        parser.add_argument("num_layers", default=3, type=int, help="Number of convolutional layers")
-        return parser

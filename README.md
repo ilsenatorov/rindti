@@ -8,16 +8,41 @@ This repository aims to simplify the drug-target interaction prediction process 
 
 The repository aims to go from a simple collections of inputs - structures of proteins, interactions data on drugs to a fully-function GNN model
 
-### Snakemake pipeline
+## Installation
 
-Snakemake pipeline (located in `workflow` directory) is responsible for obtaining the data for the model, including:
+1. clone the repository with `git clone https://github.com/ilsenatorov/rindti`
+2. change in the root directory with `cd rindti`
+3. *(Optional)* install mamba with `conda install -n base -c conda-forge mamba`
+4. create the conda environment with `mamba env create -f workflow/envs/main.yml` (might take some time)
+5. activate the environment with `conda activate rindti`
+6. clone rinerator repository into your home dir with `git clone --branch perf https://wibi-git.helmholtz-hzi.de/ske18/rinerator/ ~/rinerator`
+7. install rinerator with `pip install ~/rinerator`
 
-* Calculating RINs of proteins
-* Converting RINs to torch_geometric Data
-* Converting molecular SMILES to torch_geometric Data
-* Parsing and splitting the dataset
+## Snakemake pipeline
 
-The result of the pipeline is a single pickle file, containing all the necessary for the construction of torch_geometric Dataset entry.
+Snakemake pipeline (located in `workflow` directory) is responsible for parsing all the data.
+Usually the result is a single pickle file containing all the necessary information for training, testing etc.
+The pipeline relies on the `resources` folder which should contain `resources/structures/` folder with pdb files for acquiring protein networks.
+For DTI prediction the model also needs csv files in `resources/drugs`, more info will be provided later.
+The pipeline is controlled by a config file `config/snakemake.yaml` which can be modified to change the output of the pipeline
+
+### DTI data
+
+In order to obtain the pickle file necessary for training the DTI model please ensure the `only_proteins` entry in the yaml config file is set to `false`.
+Once pipeline is run with `snakemake -j <num_cores> --use-conda`, it will generate a pickle file in the `results/prepare_all/` directory.
+
+### Pretraining data
+
+In order to omit the drug data, one can set the `only_proteins` to `true` in the config file.
+Running the pipeline with `snakemake -j <num_cores> --use-conda` will generate a pickle file in `results/prepare_proteins/` directory.
+
+Since snakemake sometimes struggles with calculating DAG for really large pipelines, steps of this pipeline could be ran manually
+
+* For rinerator-based networks please run the rinerator on all the necessary pdb files, then use the `workflow/scripts/prepare_proteins.py` script to generate the necessary pickle file.
+* For distance-based networks please run the `workflow/scripts/distance_based.py` script to generate the necessary pickle file.
+
+Information on both scripts can be found through `workflow/scripts/distance_based.py --help` or `workflow/scripts/prepare_proteins.py --help`
+
 
 ### GNN model
 
@@ -25,24 +50,6 @@ The GNN model is shipped as a package, located in the `rindti` directory.
 
 Additionally, scripts that give an example of model training are provided (`train.py` and `pretrain.py`), which can be used as plug-and-play, or as inspiration to create custom training approaches.
 
-## Installation
-
-1. clone the repository with `git clone https://github.com/ilsenatorov/rindti`
-1. change in the root directory with `cd rindti`
-1. unzip the gpcr data with `tar -xvf gpcr_data.tar.gz`
-1. *(Optional)* install mamba with `conda install -n base -c conda-forge mamba`
-1. create the conda environment with `mamba env create -f workflow/envs/main.yml` (might take some time)
-1. activate the environment with `conda activate rindti`
-1. clone rinerator repository into your home dir with `git clone --branch perf https://wibi-git.helmholtz-hzi.de/ske18/rinerator/ ~/rinerator`
-1. install rinerator with `pip install ~/rinerator`
-
-### Pipeline
-
-Once everything is installed, obtaining the dataset should be as easy as running `snakemake -j <num_cores> --use-conda`, which should calculate the RINs for all structures in the `resources/strucures` folder and parse the interaction data in `resources/drugs` folder.
-
-A file in `results/prepare_all` folder will appear at the end of it, which is then used for the GNN training
-
-Configuration file in `config/config.yml` can be used to change the parameters of the pipeline, such as data splits, parsing etc.
 
 ### Training
 
