@@ -19,6 +19,10 @@ Pretraining models
 .. currentmodule:: rindti.models.pretrain
 .. autosummary::
 
+   {% for cls in rindti.models.pretrain.classes %}
+     {{ rindti.cls }}
+   {% endfor %}
+
 .. automodule:: rindti.models.pretrain
    :members:
    :undoc-members:
