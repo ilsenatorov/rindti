@@ -25,11 +25,15 @@ This is a collection of various models and utilities that are focused on using p
    :maxdepth: 1
    :caption: Package Reference
 
-   modules/models
-   modules/layers
-   modules/data
-   modules/losses
-   modules/utils
+   .. modules/models
+   .. modules/layers
+   .. modules/data
+   .. modules/losses
+   .. modules/utils
+
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
 
 Indices and tables
 ===================

@@ -1,13 +1,25 @@
 rindti.models
-====================
+=============
 
-.. currentmodule:: rindti.models
+DTI models
+--------------------
+
+.. currentmodule:: rindti.models.dti
 .. autosummary::
-   :nosignatures:
-   {% for cls in rindti.models.__all__ %}
-     {{ cls }}
-   {% endfor %}
 
-.. automodule:: rindti.models
-    :members:
-    :undoc-members:
+
+.. automodule:: rindti.models.dti
+   :members:
+   :undoc-members:
+   :exclude-members: training, shared_step
+
+Pretraining models
+------------------
+
+.. currentmodule:: rindti.models.pretrain
+.. autosummary::
+
+.. automodule:: rindti.models.pretrain
+   :members:
+   :undoc-members:
+   :exclude-members: training, shared_step
