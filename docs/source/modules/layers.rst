@@ -52,6 +52,8 @@ Pooling layers
 .. automodule:: rindti.layers.graphpool
    :members:
    :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
 
 
 Other layers
@@ -69,3 +71,5 @@ Other layers
 .. automodule:: rindti.layers.other
    :members:
    :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
