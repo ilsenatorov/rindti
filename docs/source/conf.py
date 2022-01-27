@@ -1,8 +1,4 @@
 import datetime
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath("../.."))
 
 import rindti
 
@@ -56,10 +52,10 @@ add_module_names = False
 
 
 def setup(app):
-    """Docs setup."""
+    """Setup automodules."""
 
     def skip(app, what, name, obj, skip, options):
-        """Ignore methods"""
+        """Skip automodule."""
         members = [
             "__init__",
             "__repr__",
@@ -70,7 +66,7 @@ def setup(app):
         return True if name in members else skip
 
     def rst_jinja_render(app, docname, source):
-        """Render Jinja templates."""
+        """Render our pages as a jinja template for fancy templating goodness."""
         src = source[0]
         rendered = app.builder.templates.render_string(src, rst_context)
         source[0] = rendered
