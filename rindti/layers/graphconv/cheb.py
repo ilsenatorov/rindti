@@ -9,7 +9,9 @@ from ..base_layer import BaseLayer
 
 
 class ChebConvNet(BaseLayer):
-    """Chebyshev Convolution
+    r"""Chebyshev Convolution
+
+    Refer to :class:`torch_geometric.nn.conv.ChebConv` for more details.
 
     Args:
         input_dim (int): Size of the input vector
@@ -34,7 +36,7 @@ class ChebConvNet(BaseLayer):
         self.out = ChebConv(hidden_dim, output_dim, K)
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

@@ -9,8 +9,17 @@ from ..base_layer import BaseLayer
 
 
 class FilmConvNet(BaseLayer):
-    """FiLMConv
-    https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.conv.FiLMConv
+    r"""FiLM Convolution
+
+    Refer to :class:`torch_geometric.nn.conv.FiLMConv` for more details.
+
+
+    Args:
+        input_dim (int): Size of the input vector
+        output_dim (int): Size of the output vector
+        hidden_dim (int, optional): Size of the hidden layer(s). Defaults to 32.
+        edge_dim (int, optional): Size of the edge input vector. Defaults to None.
+        num_layers (int, optional): Number of layers. Defaults to 10.
     """
 
     def __init__(
@@ -33,7 +42,7 @@ class FilmConvNet(BaseLayer):
         self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         if self.edge_dim <= 1:
             edge_feats = None
         x = self.inp(x, edge_index, edge_feats)

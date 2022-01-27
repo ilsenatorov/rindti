@@ -47,3 +47,4 @@ Testing
 
 In order to asses whether the installation of the packages was succesfull, please run ``pytest`` in the root directory.
 If the packages were not installed into path using pip, please use ``python -m pytest`` instead.
+`
