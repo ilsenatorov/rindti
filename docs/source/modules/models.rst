@@ -1,6 +1,27 @@
 rindti.models
 =============
 
+.. contents:: Contents
+    :local:
+
+Base Model
+----------
+
+.. autoclass:: rindti.models.base_model.BaseModel
+   :members:
+   :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
+
+Encoder
+----------
+
+.. autoclass:: rindti.models.encoder.Encoder
+   :members:
+   :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
+
 DTI models
 --------------------
 
@@ -16,6 +37,7 @@ DTI models
    :members:
    :undoc-members:
    :exclude-members: training, shared_step
+   :show-inheritance:
 
 Pretraining models
 ------------------
@@ -34,3 +56,4 @@ Pretraining models
    :members:
    :undoc-members:
    :exclude-members: training, shared_step, training_step, training_epoch_end
+   :show-inheritance:

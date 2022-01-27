@@ -42,7 +42,6 @@ poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 class BaseModel(LightningModule):
     """
     Base model, defines a lot of helper functions.
-    To subclass shared_step and __init__ need to be defined.
     """
 
     def __init__(self):

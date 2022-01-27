@@ -1,6 +1,21 @@
 rindti.layers
 =============
 
+
+.. contents:: Contents
+    :local:
+
+
+Base layer
+----------
+
+
+.. autoclass:: rindti.layers.base_layer.BaseLayer
+   :members:
+   :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
+
 Node layers
 --------------------
 
@@ -19,6 +34,8 @@ Node layers
 .. automodule:: rindti.layers.graphconv
    :members:
    :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
 
 Pooling layers
 ------------------

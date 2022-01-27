@@ -13,3 +13,4 @@ rindti.losses
 .. automodule:: rindti.losses
     :members:
     :exclude-members:
+    :show-inheritance:

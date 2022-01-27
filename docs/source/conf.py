@@ -41,6 +41,7 @@ intersphinx_mapping = {
     "pandas": ("http://pandas.pydata.org/pandas-docs/dev", None),
     "torch": ("https://pytorch.org/docs/master", None),
     "torch_geometric": ("https://pytorch-geometric.readthedocs.io/en/latest/", None),
+    "pytorch_lightning": ("https://pytorch-lightning.readthedocs.io/en/latest/", None),
 }
 
 html_theme_options = {
@@ -53,3 +54,4 @@ html_theme_options = {
 rst_context = {"rindti": rindti}
 
 add_module_names = False
+fail_on_warning = True

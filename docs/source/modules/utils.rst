@@ -19,3 +19,4 @@ rindti.utils
 .. automodule:: rindti.utils
     :members:
     :exclude-members:
+    :show-inheritance:

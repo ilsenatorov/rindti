@@ -1,18 +1,12 @@
-from argparse import ArgumentParser, _ArgumentGroup
-from typing import Union
-
 from pytorch_lightning import LightningModule
 
 
 class BaseLayer(LightningModule):
+    """Base class for all layers"""
+
     def __init__(self, *args, **kwargs):
         super().__init__()
 
     def forward(self, *args, **kwargs):
         """Forward pass of the module"""
         raise NotImplementedError()
-
-    @staticmethod
-    def add_arguments(parser: ArgumentParser) -> ArgumentParser:
-        """Generate arguments for this module"""
-        return parser

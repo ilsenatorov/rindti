@@ -61,9 +61,16 @@ def init_weights(m):
 
 
 class BGRLModel(BaseModel):
-    """Bootrstrapped Graph Representational learning
-    https://arxiv.org/pdf/2102.06514v1.pdf
+    r"""
+    Bootrstrapped graph representational learning  model
 
+    `[paper] <https://arxiv.org/pdf/2102.06514v1.pdf>`_
+
+    `[git repo] <https://github.com/Namkyeong/BGRL_Pytorch>`_
+
+    Args:
+        moving_average_decay (float): Decay rate of moving average
+        epochs (int): Number of epochs
     """
 
     def __init__(self, moving_average_decay: float = 0.99, epochs: int = 1000, **kwargs):
