@@ -54,9 +54,9 @@ class BaseTestGraphConv:
         assert output.size(0) == N_NODES
         assert output.size(1) == OUTPUT_DIM
 
-    def test_args(self):
-        parser = MyArgParser()
-        self.module.add_arguments(parser)
+    # def test_args(self):
+    #     parser = MyArgParser()
+    #     self.module.add_arguments(parser)
 
 
 class BaseLabelEdgeConv(BaseTestGraphConv):

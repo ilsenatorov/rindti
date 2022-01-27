@@ -105,7 +105,7 @@ class BGRLModel(BaseModel):
         update_moving_average(self.teacher_ema_updater, self.teacher_encoder, self.student_encoder)
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
-        """Forward pass"""
+        """"""
         teach_data = deepcopy(data)
         graph_student, node_student = self.student_encoder(data)
         node_pred = self.student_node_predictor(node_student)
@@ -115,7 +115,7 @@ class BGRLModel(BaseModel):
         return graph_teacher, graph_pred, node_teacher, node_pred
 
     def shared_step(self, data: Data) -> dict:
-        """Shared step"""
+        """"""
         a = self.corruptor(data)
         b = self.corruptor(data)
         a_graph_teacher, a_graph_pred, a_node_teacher, a_node_pred = self.forward(a)

@@ -64,7 +64,7 @@ class ClassificationModel(BaseModel):
         return encoder
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
-        """Forward pass of the model"""
+        """"""
         prot_embed = self.prot_encoder(prot)
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)

@@ -7,9 +7,12 @@ from ..base_layer import BaseLayer
 
 
 class MLP(BaseLayer):
-    """Lazy Multi-layer perceptron
+    """Simple Multi-layer perceptron
+
+    Refer to :class:`torch.nn.Sequential` for more details.
 
     Args:
+        input_dim (int): Size of the input vector
         output_dim (int): Size of the output vector
         hidden_dim (int, optional): Size of the hidden vector. Defaults to 32.
         num_layers (int, optional): Total Number of layers. Defaults to 2.
@@ -36,5 +39,5 @@ class MLP(BaseLayer):
         self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))
 
     def forward(self, x: Tensor) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         return self.mlp(x)

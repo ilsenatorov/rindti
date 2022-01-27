@@ -8,7 +8,7 @@ from ..layers import MLP
 
 
 class PfamCrossEntropyLoss(LightningModule):
-    """Simple cross=entropy loss with the added MLP to match dimensions"""
+    r"""Simple cross-entropy loss with the added MLP to match dimensions"""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -18,7 +18,7 @@ class PfamCrossEntropyLoss(LightningModule):
         self.label_encoder.fit(kwargs["fam_list"])
 
     def forward(self, x: Tensor, y: list) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         x = self.mlp(x)
         y = torch.tensor(self.label_encoder.transform(y), device=self.device, dtype=torch.long)
         loss = self.loss(x, y)

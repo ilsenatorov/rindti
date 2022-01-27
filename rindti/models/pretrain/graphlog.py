@@ -236,7 +236,7 @@ class GraphLogModel(BaseModel):
         return node_reps, graph_reps
 
     def forward(self, batch: Data) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Calculate node and graph reps for normal and masked batch"""
+        """"""
         batch_modify = deepcopy(batch)
         batch_modify = self.mask_nodes(batch)
         node_reps, graph_reps = self.embed_batch(batch)

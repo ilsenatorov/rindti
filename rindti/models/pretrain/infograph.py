@@ -26,7 +26,7 @@ class InfoGraphModel(BaseModel):
         self.node_loss = NodeLoss(**kwargs)
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor]:
-        """Forward pass of the module"""
+        """"""
         data = self.masker(data)
         node_index = torch.arange(data["x"].size(0), device=self.device)
         pair_index = torch.stack([data["batch"], node_index], dim=-1)
@@ -36,7 +36,7 @@ class InfoGraphModel(BaseModel):
         return mi, node_pred
 
     def shared_step(self, data: Data) -> dict:
-        """Shared step"""
+        """"""
         mi, node_preds = self.forward(data)
         node_metrics = self.node_loss(node_preds[data["x_idx"]], data["x_orig"] - 1)
         node_metrics.update(

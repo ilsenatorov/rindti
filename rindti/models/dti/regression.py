@@ -9,10 +9,7 @@ class RegressionModel(ClassificationModel):
     """Model for DTI prediction as a reg problem"""
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """Step that is the same for train, validation and test
-        Returns:
-            dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
-        """
+        """"""
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
         output = self.forward(prot, drug)["pred"]
