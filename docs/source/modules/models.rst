@@ -6,6 +6,10 @@ DTI models
 
 .. currentmodule:: rindti.models.dti
 .. autosummary::
+   :nosignatures:
+
+   ClassificationModel
+   RegressionModel
 
 
 .. automodule:: rindti.models.dti
@@ -18,12 +22,15 @@ Pretraining models
 
 .. currentmodule:: rindti.models.pretrain
 .. autosummary::
+   :nosignatures:
 
-   {% for cls in rindti.models.pretrain.classes %}
-     {{ rindti.cls }}
-   {% endfor %}
+
+   BGRLModel
+   GraphLogModel
+   InfoGraphModel
+   PfamModel
 
 .. automodule:: rindti.models.pretrain
    :members:
    :undoc-members:
-   :exclude-members: training, shared_step
+   :exclude-members: training, shared_step, training_step, training_epoch_end

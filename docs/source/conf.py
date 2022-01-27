@@ -53,27 +53,3 @@ html_theme_options = {
 rst_context = {"rindti": rindti}
 
 add_module_names = False
-
-
-def setup(app):
-    """Minor customization of Sphinx."""
-
-    def skip(app, what, name, obj, skip, options):
-        """Skip docstring of functions and classes."""
-        members = [
-            "__init__",
-            "__repr__",
-            "__weakref__",
-            "__dict__",
-            "__module__",
-        ]
-        return True if name in members else skip
-
-    def rst_jinja_render(app, docname, source):
-        """Render Jinja templates."""
-        src = source[0]
-        rendered = app.builder.templates.render_string(src, rst_context)
-        source[0] = rendered
-
-    app.connect("autodoc-skip-member", skip)
-    app.connect("source-read", rst_jinja_render)
