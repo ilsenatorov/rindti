@@ -18,6 +18,7 @@ This is a collection of various models and utilities that are focused on using p
 
    notes/installation
    notes/snakemake
+   notes/data
 
 
 .. toctree::

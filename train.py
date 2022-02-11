@@ -22,8 +22,11 @@ def train(**kwargs):
 
     kwargs.update(train.config)
     logger = TensorBoardLogger(
-        "tb_logs", name=kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
+        "tb_logs",
+        name=f'{kwargs["model"]}:{kwargs["data"].split("/")[-1].split(".")[0]}',
+        default_hp_metric=False,
     )
+
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
