@@ -31,15 +31,10 @@ def pretrain(**kwargs):
         logger=logger,
         max_epochs=kwargs["max_epochs"],
         num_sanity_val_steps=0,
-        deterministic=True,
+        deterministic=False,
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    # if kwargs["model"] == "pfam":
-    #     sampler = PfamSampler(dataset, **kwargs)
-    #     dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
-    #     model.sampler = sampler
-    # else:
     dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
     trainer.fit(model, dl)
 
