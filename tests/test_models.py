@@ -9,6 +9,7 @@ from rindti.utils import MyArgParser
 @pytest.fixture
 def default_config():
     return {
+        "alpha": 1,
         "corruption": "mask",
         "drug_alpha": 1,
         "drug_dropout": 0.2,
@@ -42,6 +43,7 @@ def default_config():
         "prot_ratio": 0.25,
         "reduce_lr_factor": 0.1,
         "reduce_lr_patience": 20,
+        "temperature": 1,
         "seed": 42,
         "weight_decay": 0.01,
         "weighted": 0,

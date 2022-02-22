@@ -36,6 +36,7 @@ def train(**kwargs):
         logger=logger,
         gradient_clip_val=kwargs["gradient_clip_val"],
         profiler=kwargs["profiler"],
+        log_every_n_steps=25,
     )
     model = models[kwargs["model"]](**kwargs)
     dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ["batch_size", "num_workers"]}

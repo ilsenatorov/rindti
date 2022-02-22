@@ -6,6 +6,6 @@ from .snnl import SoftNearestNeighborLoss
 __all__ = [
     "GeneralisedLiftedStructureLoss",
     "NodeLoss",
-    "CrossEntropyLoss",
+    "PfamCrossEntropyLoss",
     "SoftNearestNeighborLoss",
 ]

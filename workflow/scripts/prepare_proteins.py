@@ -41,10 +41,8 @@ class ProteinEncoder:
 
     def encode_residue(self, residue: str) -> np.array:
         """Fully encode residue - one-hot and node_feats
-
         Args:
             residue (str): One-letter residue name
-
         Returns:
             np.array: Concatenated node_feats and one-hot encoding of residue name
         """
@@ -58,10 +56,8 @@ class ProteinEncoder:
 
     def parse_sif(self, filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Parse a single sif file
-
         Args:
             filename (str): SIF file location
-
         Returns:
             Tuple[DataFrame, DataFrame]: nodes, edges DataFrames
         """
@@ -132,10 +128,8 @@ class ProteinEncoder:
 
     def encode_nodes(self, nodes: pd.DataFrame) -> torch.Tensor:
         """Given dataframe of nodes create node node_feats
-
         Args:
             nodes (pd.DataFrame): nodes dataframe from parse_sif
-
         Returns:
             torch.Tensor: Tensor of node node_feats [n_nodes, *]
         """
@@ -150,10 +144,8 @@ class ProteinEncoder:
 
     def encode_edges(self, edges: pd.DataFrame) -> Tuple[torch.Tensor, torch.Tensor]:
         """Given dataframe of edges, create edge index and edge node_feats
-
         Args:
             edges (pd.DataFrame): edges dataframe from parse_sif
-
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: edge index [2,n_edges], edge attributes [n_edges, *]
         """
@@ -176,10 +168,8 @@ class ProteinEncoder:
 
     def __call__(self, protein_sif: str) -> dict:
         """Fully process the protein
-
         Args:
             protein_sif (str): File location for sif file
-
         Returns:
             dict: standard format with x for node node_feats, edge_index for edges etc
         """

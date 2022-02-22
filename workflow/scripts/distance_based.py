@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 from torch_geometric.data import Data
 from utils import list_to_dict, onehot_encode
@@ -111,27 +110,24 @@ if __name__ == "__main__":
         df.set_index("ID", inplace=True)
         df.drop("filename", axis=1).to_pickle(snakemake.output.pickle)
     else:
-        import argparse
+        import os
+        import os.path as osp
 
-        parser = argparse.ArgumentParser(description="Prepare protein data")
-        parser.add_argument("--pdbs", nargs="+", required=True, help="PDB files")
-        parser.add_argument("--output", required=True, help="Output pickle file")
-        parser.add_argument("--threshold", type=float, default=5.0, help="Threshold for edge")
-        parser.add_argument(
-            "--node_feats",
-            type=str,
-            default="label",
-            help="Node features: label or onehot",
-        )
-        parser.add_argument("--threads", type=int, default=1, help="Number of threads to use")
-        args = parser.parse_args()
+        from jsonargparse import CLI
 
-        def get_graph(filename: str) -> Data:
-            return Structure(filename, args.node_feats).get_graph(args.threshold)
+        def run(pdb_dir: str, output: str, threads: int = 1, threshold: float = 5, node_feats: str = "label"):
+            """Run the pipeline"""
 
-        data = Parallel(n_jobs=args.threads)(delayed(get_graph)(i) for i in tqdm(args.pdbs))
-        df = pd.DataFrame(pd.Series(data, name="data"))
-        df["filename"] = args.pdbs
-        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
-        df.set_index("ID", inplace=True)
-        df.drop("filename", axis=1).to_pickle(args.output)
+            def get_graph(filename: str) -> Data:
+                """Calculate a single graph from a file"""
+                return Structure(filename, node_feats).get_graph(threshold)
+
+            pdbs = [osp.join(pdb_dir, x) for x in os.listdir(pdb_dir)]
+            data = Parallel(n_jobs=threads)(delayed(get_graph)(i) for i in tqdm(pdbs))
+            df = pd.DataFrame(pd.Series(data, name="data"))
+            df["filename"] = pdbs
+            df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+            df.set_index("ID", inplace=True)
+            df.drop("filename", axis=1).to_pickle(output)
+
+        cli = CLI(run)

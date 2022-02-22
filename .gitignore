@@ -4,6 +4,7 @@
 !.gitmodules
 !.pre-commit-config.yaml
 !.flake8
+!.readthedocs.yaml
 __*__/
 __pycache__/
 *.csv
@@ -16,3 +17,4 @@ results/
 *logs/
 *Untitled*
 *build*
+*egg-info*

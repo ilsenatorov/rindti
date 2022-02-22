@@ -16,8 +16,8 @@ from ..encoder import Encoder
 
 class GraphLogModel(BaseModel):
     """Work in progress
-    https://github.com/DeepGraphLearning/GraphLoG
-    https://arxiv.org/pdf/2106.04113.pdf
+    - https://github.com/DeepGraphLearning/GraphLoG
+    - https://arxiv.org/pdf/2106.04113.pdf
     """
 
     def __init__(self, **kwargs):

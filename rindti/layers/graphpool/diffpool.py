@@ -37,7 +37,7 @@ class DiffPoolNet(BaseLayer):
     ):
         super().__init__()
 
-        self.max_nodes = max_nodes
+        self.max_nodes = ceil(max_nodes * 1.2)
         self.dropout = dropout
 
         self.pool = {

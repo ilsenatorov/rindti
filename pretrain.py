@@ -35,12 +35,12 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    if kwargs["model"] == "pfam":
-        sampler = PfamSampler(dataset, **kwargs)
-        dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
-        model.sampler = sampler
-    else:
-        dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    # if kwargs["model"] == "pfam":
+    #     sampler = PfamSampler(dataset, **kwargs)
+    #     dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
+    #     model.sampler = sampler
+    # else:
+    dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
     trainer.fit(model, dl)
 
 
