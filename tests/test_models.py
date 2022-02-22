@@ -3,7 +3,6 @@ import torch
 
 from rindti.models import ClassificationModel, RegressionModel
 from rindti.models.base_model import node_embedders, poolers
-from rindti.utils import MyArgParser
 
 
 @pytest.fixture

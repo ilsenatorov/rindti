@@ -11,7 +11,7 @@ from ...losses import SoftNearestNeighborLoss
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 from ..encoder import Encoder
-from ..pretrain import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
+from ..pretrain import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel
 
 
 class ClassificationModel(BaseModel):
@@ -52,7 +52,7 @@ class ClassificationModel(BaseModel):
         elif "graphlog" in checkpoint_path:
             encoder = GraphLogModel.load_from_checkpoint(checkpoint_path).encoder
         elif "pfam" in checkpoint_path:
-            encoder = PfamModel.load_from_checkpoint(checkpoint_path).encoder
+            encoder = DistanceModel.load_from_checkpoint(checkpoint_path).encoder
         elif "bgrl" in checkpoint_path:
             encoder = BGRLModel.load_from_checkpoint(checkpoint_path).student_encoder
         else:

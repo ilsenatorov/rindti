@@ -1,4 +1,4 @@
 from .dti import ClassificationModel, RegressionModel
-from .pretrain import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
+from .pretrain import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel
 
-__all__ = ["ClassificationModel", "RegressionModel", "InfoGraphModel", "GraphLogModel", "PfamModel", "BGRLModel"]
+__all__ = ["ClassificationModel", "RegressionModel", "InfoGraphModel", "GraphLogModel", "DistanceModel", "BGRLModel"]
