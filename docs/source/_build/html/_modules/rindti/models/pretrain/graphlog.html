@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.models.pretrain.graphlog &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>rindti.models.pretrain.graphlog</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for rindti.models.pretrain.graphlog</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span>
+
+<span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">MyArgParser</span>
+<span class="kn">from</span> <span class="nn">..base_model</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">node_embedders</span><span class="p">,</span> <span class="n">poolers</span>
+<span class="kn">from</span> <span class="nn">..encoder</span> <span class="kn">import</span> <span class="n">Encoder</span>
+
+<span class="c1"># NCE loss between graphs and prototypes</span>
+
+
+<div class="viewcode-block" id="GraphLogModel"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel">[docs]</a><span class="k">class</span> <span class="nc">GraphLogModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Work in progress</span>
+<span class="sd">    - https://github.com/DeepGraphLearning/GraphLoG</span>
+<span class="sd">    - https://arxiv.org/pdf/2106.04113.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="n">return_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proto</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="mi">128</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="GraphLogModel.mask_nodes"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.mask_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">mask_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Mask the nodes according to self.mask_rate</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (Data): Graph batch</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Data: Masked graph batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">masked_node_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># select indices of masked nodes</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;batch&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">((</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;batch&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">num_node</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sample_size</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="n">num_node</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">mask_rate</span><span class="p">)</span>
+            <span class="n">masked_node_idx</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">sample_size</span><span class="p">)</span>
+            <span class="n">masked_node_idx</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+            <span class="n">masked_node_indices</span> <span class="o">+=</span> <span class="n">masked_node_idx</span>
+
+        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;masked_node_indices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">masked_node_indices</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># mask nodes&#39; features</span>
+        <span class="k">for</span> <span class="n">node_idx</span> <span class="ow">in</span> <span class="n">masked_node_indices</span><span class="p">:</span>
+            <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="n">node_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="n">node_idx</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">batch</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.intra_NCE_loss"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.intra_NCE_loss">[docs]</a>    <span class="k">def</span> <span class="nf">intra_NCE_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_reps</span><span class="p">,</span> <span class="n">node_modify_reps</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loss between nodes&quot;&quot;&quot;</span>
+        <span class="n">node_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">node_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">node_modify_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">node_modify_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">node_reps</span><span class="p">,</span> <span class="n">node_modify_reps</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">node_reps_norm</span><span class="p">,</span> <span class="n">node_modify_reps_norm</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">+</span> <span class="n">epsilon</span>
+        <span class="p">)</span>
+        <span class="n">exp_sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sim</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([(</span><span class="n">batch</span><span class="o">.</span><span class="n">batch</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">batch</span><span class="o">.</span><span class="n">tolist</span><span class="p">()],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">exp_sim_mask</span> <span class="o">=</span> <span class="n">exp_sim</span> <span class="o">*</span> <span class="n">mask</span>
+        <span class="n">exp_sim_all</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">exp_sim_mask</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">masked_node_indices</span><span class="p">)</span>
+        <span class="n">exp_sim_positive</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">exp_sim_all</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">batch</span><span class="o">.</span><span class="n">masked_node_indices</span><span class="p">)</span>
+        <span class="n">positive_ratio</span> <span class="o">=</span> <span class="n">exp_sim_positive</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">exp_sim_all</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">positive_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">batch</span><span class="o">.</span><span class="n">masked_node_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.inter_NCE_loss"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.inter_NCE_loss">[docs]</a>    <span class="k">def</span> <span class="nf">inter_NCE_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph_reps</span><span class="p">,</span> <span class="n">graph_modify_reps</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loss between graphs&quot;&quot;&quot;</span>
+        <span class="n">graph_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">graph_modify_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">graph_modify_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="n">graph_modify_reps</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">graph_reps_norm</span><span class="p">,</span> <span class="n">graph_modify_reps_norm</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">+</span> <span class="n">epsilon</span>
+        <span class="p">)</span>
+        <span class="n">exp_sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sim</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">graph_reps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">positive</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp_sim</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">negative</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp_sim</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mask</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">positive_ratio</span> <span class="o">=</span> <span class="n">positive</span> <span class="o">/</span> <span class="p">(</span><span class="n">positive</span> <span class="o">+</span> <span class="n">negative</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">positive_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">graph_reps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="c1"># NCE loss for global-local mutual information maximization</span>
+
+<div class="viewcode-block" id="GraphLogModel.gl_NCE_loss"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.gl_NCE_loss">[docs]</a>    <span class="k">def</span> <span class="nf">gl_NCE_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_reps</span><span class="p">,</span> <span class="n">graph_reps</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Don&#39;t even know what it&#39;s for&quot;&quot;&quot;</span>
+        <span class="n">node_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">node_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">graph_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">node_reps</span><span class="p">,</span> <span class="n">graph_reps</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">node_reps_norm</span><span class="p">,</span> <span class="n">graph_reps_norm</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="n">exp_sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sim</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([(</span><span class="n">batch</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">graph_reps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">positive</span> <span class="o">=</span> <span class="n">exp_sim</span> <span class="o">*</span> <span class="n">mask</span>
+        <span class="n">negative</span> <span class="o">=</span> <span class="n">exp_sim</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="n">positive_ratio</span> <span class="o">=</span> <span class="n">positive</span> <span class="o">/</span> <span class="p">(</span><span class="n">positive</span> <span class="o">+</span> <span class="n">negative</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">positive_ratio</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mask</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">node_reps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.proto_NCE_loss"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.proto_NCE_loss">[docs]</a>    <span class="k">def</span> <span class="nf">proto_NCE_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph_reps</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prototype loss&quot;&quot;&quot;</span>
+        <span class="c1"># similarity for original and modified graphs</span>
+        <span class="n">graph_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">exp_sim_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mask_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">NCE_loss</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">tmp_proto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">proto_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tmp_proto</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="n">tmp_proto</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">graph_reps_norm</span><span class="p">,</span> <span class="n">proto_norm</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+            <span class="n">exp_sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sim</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># apply the connection mask</span>
+                <span class="n">exp_sim_last</span> <span class="o">=</span> <span class="n">exp_sim_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">idx_last</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">exp_sim_last</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto_connection</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">connection_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">idx_last</span><span class="o">.</span><span class="n">float</span><span class="p">())</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+                <span class="n">exp_sim</span> <span class="o">=</span> <span class="n">exp_sim</span> <span class="o">*</span> <span class="n">connection_mask</span>
+
+                <span class="c1"># define NCE loss between prototypes from consecutive layers</span>
+                <span class="n">upper_proto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">upper_proto_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">upper_proto</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">proto_sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">tmp_proto</span><span class="p">,</span> <span class="n">upper_proto</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">proto_norm</span><span class="p">,</span> <span class="n">upper_proto_norm</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">+</span> <span class="n">epsilon</span>
+                <span class="p">)</span>
+                <span class="n">proto_exp_sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">proto_sim</span> <span class="o">/</span> <span class="n">tau</span><span class="p">)</span>
+
+                <span class="n">proto_positive_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">proto_exp_sim</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">connection</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="p">()]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">proto_exp_sim</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                <span class="n">proto_positive</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">proto_positive_list</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">proto_positive_ratio</span> <span class="o">=</span> <span class="n">proto_positive</span> <span class="o">/</span> <span class="p">(</span><span class="n">proto_exp_sim</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+                <span class="n">NCE_loss</span> <span class="o">+=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">proto_positive_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp_sim</span> <span class="o">==</span> <span class="n">exp_sim</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+
+            <span class="n">exp_sim_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exp_sim</span><span class="p">)</span>
+            <span class="n">mask_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="c1"># define NCE loss between graph embedding and prototypes</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">)):</span>
+            <span class="n">exp_sim</span> <span class="o">=</span> <span class="n">exp_sim_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">positive</span> <span class="o">=</span> <span class="n">exp_sim</span> <span class="o">*</span> <span class="n">mask</span>
+            <span class="n">negative</span> <span class="o">=</span> <span class="n">exp_sim</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mask</span><span class="p">)</span>
+            <span class="n">positive_ratio</span> <span class="o">=</span> <span class="n">positive</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">positive</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">negative</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+            <span class="n">NCE_loss</span> <span class="o">+=</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">positive_ratio</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">NCE_loss</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.update_proto_lowest"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.update_proto_lowest">[docs]</a>    <span class="k">def</span> <span class="nf">update_proto_lowest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph_reps</span><span class="p">,</span> <span class="n">decay_ratio</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update lowest prototypes&quot;&quot;&quot;</span>
+        <span class="n">graph_reps_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">proto_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">graph_reps_norm</span><span class="p">,</span> <span class="n">proto_norm</span><span class="o">.</span><span class="n">t</span><span class="p">())</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+
+        <span class="c1"># update states of prototypes</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">sim</span> <span class="o">==</span> <span class="n">sim</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">cnt</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proto_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">cnt</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+        <span class="c1"># update prototypes</span>
+        <span class="n">batch_cnt</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">t</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">cnt</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="n">batch_mean</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">batch_cnt</span><span class="p">,</span> <span class="n">graph_reps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">decay_ratio</span> <span class="o">+</span> <span class="n">batch_mean</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">decay_ratio</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.init_proto_lowest"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.init_proto_lowest">[docs]</a>    <span class="k">def</span> <span class="nf">init_proto_lowest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Intitalise lowest prototypes&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()):</span>
+                <span class="c1"># get node and graph representations</span>
+                <span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">graph_reps</span><span class="p">,</span> <span class="n">node_reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+                <span class="c1"># feature projection</span>
+                <span class="n">graph_reps_proj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">)</span>
+
+                <span class="c1"># update prototypes</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_proto_lowest</span><span class="p">(</span><span class="n">graph_reps_proj</span><span class="p">)</span>
+
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">proto_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">())</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.init_proto"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.init_proto">[docs]</a>    <span class="k">def</span> <span class="nf">init_proto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">num_iter</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise prototypes&quot;&quot;&quot;</span>
+        <span class="n">proto_connection</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="c1"># update the closest prototype</span>
+                <span class="n">sim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">sim</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">iter</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_iter</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">proto_state</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">proto_connection</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">decay_ratio</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span>
+                    <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">decay_ratio</span><span class="p">)</span>
+
+                <span class="c1"># penalize rivalndarray</span>
+                <span class="n">sim</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">rival_idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">sim</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">rival_idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">rival_idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="mi">2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">decay_ratio</span>
+                <span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">decay_ratio</span><span class="p">)</span>
+
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto_state</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">proto_selected</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">indices</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">idx_connection</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nonzero</span><span class="p">((</span><span class="n">proto_connection</span> <span class="o">==</span> <span class="n">idx</span><span class="o">.</span><span class="n">float</span><span class="p">())</span><span class="o">.</span><span class="n">float</span><span class="p">())</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">proto_connection</span><span class="p">[</span><span class="n">idx_connection</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="k">return</span> <span class="n">proto_selected</span><span class="p">,</span> <span class="n">proto_connection</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.embed_batch"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.embed_batch">[docs]</a>    <span class="k">def</span> <span class="nf">embed_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orig_batch</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Embed a single batch (normal or masked doesn&#39;t matter)&quot;&quot;&quot;</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">orig_batch</span><span class="p">)</span>
+        <span class="n">graph_reps</span><span class="p">,</span> <span class="n">node_reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">node_reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">node_reps</span><span class="p">)</span>
+        <span class="n">graph_reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">graph_reps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node_reps</span><span class="p">,</span> <span class="n">graph_reps</span></div>
+
+<div class="viewcode-block" id="GraphLogModel.forward"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.GraphLogModel.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">batch_modify</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">batch_modify</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_nodes</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">node_reps</span><span class="p">,</span> <span class="n">graph_reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embed_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">node_modify_reps</span><span class="p">,</span> <span class="n">graph_modify_reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embed_batch</span><span class="p">(</span><span class="n">batch_modify</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node_reps</span><span class="p">,</span> <span class="n">node_modify_reps</span><span class="p">,</span> <span class="n">graph_reps</span><span class="p">,</span> <span class="n">graph_modify_reps</span></div>
+
+    <span class="k">def</span> <span class="nf">shared_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculate all the losses&quot;&quot;&quot;</span>
+        <span class="p">(</span>
+            <span class="n">node_reps_proj</span><span class="p">,</span>
+            <span class="n">node_modify_reps_proj</span><span class="p">,</span>
+            <span class="n">graph_reps_proj</span><span class="p">,</span>
+            <span class="n">graph_modify_reps_proj</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">NCE_intra_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intra_NCE_loss</span><span class="p">(</span><span class="n">node_reps_proj</span><span class="p">,</span> <span class="n">node_modify_reps_proj</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+        <span class="n">NCE_inter_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inter_NCE_loss</span><span class="p">(</span><span class="n">graph_reps_proj</span><span class="p">,</span> <span class="n">graph_modify_reps_proj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">proto</span><span class="p">:</span>
+            <span class="n">NCE_proto_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto_NCE_loss</span><span class="p">(</span><span class="n">graph_reps_proj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">NCE_proto_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">NCE_loss</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">NCE_intra_loss</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="n">NCE_inter_loss</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">NCE_proto_loss</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">NCE_loss</span><span class="p">,</span>
+            <span class="s2">&quot;NCE_intra_loss&quot;</span><span class="p">:</span> <span class="n">NCE_intra_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="s2">&quot;NCE_inter_loss&quot;</span><span class="p">:</span> <span class="n">NCE_inter_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="s2">&quot;NCE_proto_loss&quot;</span><span class="p">:</span> <span class="n">NCE_proto_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Training step&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_step</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_step</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ss</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_&quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ss</span>
+
+    <span class="k">def</span> <span class="nf">training_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update prototypes and then do normal stuff&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span><span class="o">.</span><span class="n">current_epoch</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proto</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">num_proto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">hierarchy</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proto_state</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">num_proto</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">hierarchy</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proto_connection</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tmp_proto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_proto_lowest</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_proto</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">hierarchy</span><span class="p">):</span>
+                <span class="n">tmp_proto</span><span class="p">,</span> <span class="n">tmp_proto_connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_proto</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_proto</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proto_connection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_proto_connection</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">training_epoch_end</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

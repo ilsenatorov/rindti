@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.models.pretrain.bgrl &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>rindti.models.pretrain.bgrl</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for rindti.models.pretrain.bgrl</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span> <span class="nn">torch.functional</span> <span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span> <span class="nn">torch_geometric.data</span> <span class="kn">import</span> <span class="n">Data</span>
+
+<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">DataCorruptor</span>
+<span class="kn">from</span> <span class="nn">..base_model</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">..encoder</span> <span class="kn">import</span> <span class="n">Encoder</span>
+
+
+<span class="k">class</span> <span class="nc">EMA</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Exponential moving average&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_steps</span> <span class="o">=</span> <span class="n">epochs</span>
+
+    <span class="k">def</span> <span class="nf">update_average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">old</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_steps</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">old</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="n">new</span>
+
+
+<span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cosine similarity&quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">update_moving_average</span><span class="p">(</span><span class="n">ema_updater</span><span class="p">,</span> <span class="n">ma_model</span><span class="p">,</span> <span class="n">current_model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;User ema updater on all the weights&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">current_params</span><span class="p">,</span> <span class="n">ma_params</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">current_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">ma_model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()):</span>
+        <span class="n">old_weight</span><span class="p">,</span> <span class="n">up_weight</span> <span class="o">=</span> <span class="n">ma_params</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">current_params</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">ma_params</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">ema_updater</span><span class="o">.</span><span class="n">update_average</span><span class="p">(</span><span class="n">old_weight</span><span class="p">,</span> <span class="n">up_weight</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">set_requires_grad</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets grad as true or False&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="n">val</span>
+
+
+<span class="k">def</span> <span class="nf">init_weights</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize the weights&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">xavier_uniform_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>
+        <span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">fill_</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BGRLModel"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.BGRLModel">[docs]</a><span class="k">class</span> <span class="nc">BGRLModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Bootrstrapped graph representational learning  model</span>
+
+<span class="sd">    `[paper] &lt;https://arxiv.org/pdf/2102.06514v1.pdf&gt;`_</span>
+
+<span class="sd">    `[git repo] &lt;https://github.com/Namkyeong/BGRL_Pytorch&gt;`_</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        moving_average_decay (float): Decay rate of moving average</span>
+<span class="sd">        epochs (int): Number of epochs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">moving_average_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.99</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">student_encoder</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="n">return_nodes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">student_encoder</span><span class="p">)</span>
+        <span class="n">set_requires_grad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">teacher_ema_updater</span> <span class="o">=</span> <span class="n">EMA</span><span class="p">(</span><span class="n">moving_average_decay</span><span class="p">,</span> <span class="n">epochs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">student_node_predictor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">]),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">PReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">student_graph_predictor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">]),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">PReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;hidden_dim&quot;</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">student_node_predictor</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">init_weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">student_graph_predictor</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">init_weights</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corruptor</span> <span class="o">=</span> <span class="n">DataCorruptor</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;frac&quot;</span><span class="p">]),</span> <span class="nb">type</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;corruption&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="BGRLModel.reset_moving_average"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.BGRLModel.reset_moving_average">[docs]</a>    <span class="k">def</span> <span class="nf">reset_moving_average</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset moving avg&quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="BGRLModel.update_moving_average"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.BGRLModel.update_moving_average">[docs]</a>    <span class="k">def</span> <span class="nf">update_moving_average</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update moving avg&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;teacher encoder has not been created yet&quot;</span>
+        <span class="n">update_moving_average</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">teacher_ema_updater</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">student_encoder</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BGRLModel.forward"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.pretrain.BGRLModel.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">teach_data</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">graph_student</span><span class="p">,</span> <span class="n">node_student</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">student_encoder</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">node_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">student_node_predictor</span><span class="p">(</span><span class="n">node_student</span><span class="p">)</span>
+        <span class="n">graph_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">student_graph_predictor</span><span class="p">(</span><span class="n">graph_student</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">graph_teacher</span><span class="p">,</span> <span class="n">node_teacher</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">teacher_encoder</span><span class="p">(</span><span class="n">teach_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">graph_teacher</span><span class="p">,</span> <span class="n">graph_pred</span><span class="p">,</span> <span class="n">node_teacher</span><span class="p">,</span> <span class="n">node_pred</span></div>
+
+    <span class="k">def</span> <span class="nf">shared_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corruptor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corruptor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">a_graph_teacher</span><span class="p">,</span> <span class="n">a_graph_pred</span><span class="p">,</span> <span class="n">a_node_teacher</span><span class="p">,</span> <span class="n">a_node_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">b_graph_teacher</span><span class="p">,</span> <span class="n">b_graph_pred</span><span class="p">,</span> <span class="n">b_node_teacher</span><span class="p">,</span> <span class="n">b_node_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+        <span class="n">node_loss1</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">a_node_pred</span><span class="p">,</span> <span class="n">a_node_teacher</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+        <span class="n">node_loss2</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">b_node_pred</span><span class="p">,</span> <span class="n">b_node_teacher</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+        <span class="n">graph_loss1</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">a_graph_pred</span><span class="p">,</span> <span class="n">a_graph_teacher</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+        <span class="n">graph_loss2</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">b_graph_pred</span><span class="p">,</span> <span class="n">b_graph_teacher</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+
+        <span class="n">node_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">node_loss1</span> <span class="o">+</span> <span class="n">node_loss2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">graph_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">graph_loss1</span> <span class="o">+</span> <span class="n">graph_loss2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_moving_average</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">node_loss</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">graph_loss</span><span class="p">,</span>
+            <span class="s2">&quot;node_loss&quot;</span><span class="p">:</span> <span class="n">node_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="s2">&quot;graph_loss&quot;</span><span class="p">:</span> <span class="n">graph_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+        <span class="p">}</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>
