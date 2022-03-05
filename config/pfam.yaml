@@ -17,7 +17,7 @@ reduce_lr_patience: 100
 # Model
 dropout: 0.1
 hidden_dim: 300
-model: pfam
+model: class
 batch_per_epoch: 1000
 prot_per_fam: 16
 
