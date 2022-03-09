@@ -4,6 +4,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
 from rindti.data import PreTrainDataset
+from rindti.data.samplers import PfamSampler
 from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
 from rindti.utils import MyArgParser, read_config
 
@@ -41,7 +42,19 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    if kwargs["model"] == "distance":
+        sampler = PfamSampler(
+            dataset,
+            batch_size=kwargs["batch_size"],
+            prot_per_fam=kwargs["prot_per_fam"],
+        )
+        dl = DataLoader(
+            dataset,
+            batch_sampler=sampler,
+            num_workers=kwargs["num_workers"],
+        )
+    else:
+        dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
     trainer.fit(model, dl)
 
 

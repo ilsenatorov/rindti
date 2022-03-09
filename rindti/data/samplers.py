@@ -39,7 +39,7 @@ class PfamSampler(Sampler):
         self.fam_idx = defaultdict(set)
         self.prot_idx = {}
         for i, data in enumerate(self.dataset):
-            for fam in data.fam.rstrip(";").split(";"):
+            for fam in data.y.rstrip(";").split(";"):
                 self.fam_idx[fam].add(i)
                 self.prot_idx[data.id] = i
         self.fam_idx = pd.Series({k: list(v) for k, v in self.fam_idx.items()})
@@ -57,7 +57,7 @@ class PfamSampler(Sampler):
             anchor_fam = random.choice(subset.index)
             batchlet = list(np.random.choice(self.fam_idx[anchor_fam], size=self.prot_per_fam, replace=False))
             for idx in batchlet:
-                for fam in self.dataset[idx].fam.split(";"):
+                for fam in self.dataset[idx].y.split(";"):
                     blacklist.add(fam)
             batch += batchlet
         return batch
@@ -140,7 +140,7 @@ class WeightedPfamSampler(PfamSampler):
                 )
             )
             for idx in batchlet:
-                for fam in self.dataset[idx].fam.split(";"):
+                for fam in self.dataset[idx].y.split(";"):
                     blacklist.add(fam)
             batch += batchlet
         return batch
