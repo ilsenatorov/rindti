@@ -3,10 +3,10 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
-from rindti.data import PreTrainDataset
+from rindti.data import PreTrainDataModule
 from rindti.data.samplers import PfamSampler
 from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
-from rindti.utils import MyArgParser, read_config, split_random
+from rindti.utils import MyArgParser, read_config
 
 models = {
     "graphlog": GraphLogModel,
@@ -20,18 +20,18 @@ models = {
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
-    dataset = PreTrainDataset(kwargs["data"])
-    train, val = split_random(dataset, train_frac=0.8)
+    dm = PreTrainDataModule(kwargs["data"])
+    dm.setup()
     ## TODO need a more elegant solution for this
-    labels = {i.y for i in dataset}
+    labels = dm.get_labels()
     kwargs["label_list"] = list(labels)
-    kwargs.update(dataset.config)
+    kwargs.update(dm.config)
     kwargs["feat_dim"] = 20
     kwargs["edge_dim"] = 5
     logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
     callbacks = [
-        ModelCheckpoint(monitor="train_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="train_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
+        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
         RichModelSummary(),
         RichProgressBar(),
     ]
@@ -45,20 +45,20 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    if kwargs["model"] == "distance":
-        sampler = PfamSampler(
-            dataset,
-            batch_size=kwargs["batch_size"],
-            prot_per_fam=kwargs["prot_per_fam"],
-        )
-        dl = DataLoader(
-            dataset,
-            batch_sampler=sampler,
-            num_workers=kwargs["num_workers"],
-        )
-    else:
-        dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
-    trainer.fit(model, dl)
+    # if kwargs["model"] == "distance":
+    #     sampler = PfamSampler(
+    #         dataset,
+    #         batch_size=kwargs["batch_size"],
+    #         prot_per_fam=kwargs["prot_per_fam"],
+    #     )
+    #     dl = DataLoader(
+    #         dataset,
+    #         batch_sampler=sampler,
+    #         num_workers=kwargs["num_workers"],
+    #     )
+    # else:
+    #     dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    trainer.fit(model, dm)
 
 
 if __name__ == "__main__":
