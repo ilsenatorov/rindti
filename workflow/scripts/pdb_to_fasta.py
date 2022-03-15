@@ -1,5 +1,7 @@
 import os
 
+from tqdm import tqdm
+
 threetoone = {
     "CYS": "C",
     "ASP": "D",
@@ -34,24 +36,26 @@ def pdb_to_sequence(pdb_filename: str) -> str:
     return sequence
 
 
-def bulk_pdb_to_fasta(pdb_dir: str) -> str:
+def bulk_pdb_to_fasta(pdb_dir: str, max_length: int = None) -> str:
     """Extract sequences from all PDB files in a directory and return them as a FASTA string"""
     fasta = ""
-    for filename in os.listdir(pdb_dir):
+    for filename in tqdm(os.listdir(pdb_dir)):
         if filename.endswith(".pdb"):
             fasta += ">" + filename[:-4] + "\n"
-            fasta += pdb_to_sequence(os.path.join(pdb_dir, filename)) + "\n"
+            seq = pdb_to_sequence(os.path.join(pdb_dir, filename))
+            if max_length:
+                seq = seq[:max_length]
+            fasta += seq + "\n"
     return fasta
-
-
-def run(pdb_dir: str, output: str) -> None:
-    """Run the bulk_pdb_to_fasta function on all PDB files in a directory and write the result to a file."""
-    fasta = bulk_pdb_to_fasta(pdb_dir)
-    with open(output, "w") as file:
-        file.write(fasta)
 
 
 if __name__ == "__main__":
     from jsonargparse import CLI
+
+    def run(pdb_dir: str, output: str, max_length: int = None) -> None:
+        """Run the bulk_pdb_to_fasta function on all PDB files in a directory and write the result to a file."""
+        fasta = bulk_pdb_to_fasta(pdb_dir, max_length=max_length)
+        with open(output, "w") as file:
+            file.write(fasta)
 
     CLI(run)
