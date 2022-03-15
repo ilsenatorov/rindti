@@ -1,12 +1,12 @@
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
 from rindti.data import PreTrainDataset
 from rindti.data.samplers import PfamSampler
 from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
-from rindti.utils import MyArgParser, read_config
+from rindti.utils import MyArgParser, read_config, split_random
 
 models = {
     "graphlog": GraphLogModel,
@@ -21,6 +21,7 @@ def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
     dataset = PreTrainDataset(kwargs["data"])
+    train, val = split_random(dataset, train_frac=0.8)
     ## TODO need a more elegant solution for this
     labels = {i.y for i in dataset}
     kwargs["label_list"] = list(labels)
@@ -31,6 +32,8 @@ def pretrain(**kwargs):
     callbacks = [
         ModelCheckpoint(monitor="train_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="train_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        RichModelSummary(),
+        RichProgressBar(),
     ]
     trainer = Trainer(
         gpus=kwargs["gpus"],
