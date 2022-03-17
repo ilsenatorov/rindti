@@ -1,4 +1,4 @@
-data: /scratch/SCRATCH_NVME/ilya/pretrain_data/swissprot_ec3_label_none.pkl
+data: /scratch/SCRATCH_NVME/ilya/pretrain_data/esm_ec3.pkl
 # Hardware
 batch_size: 128
 gpus: 1

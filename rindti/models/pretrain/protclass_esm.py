@@ -20,7 +20,7 @@ class ProtClassESMModel(BaseModel):
 
     def forward(self, data: dict) -> Tensor:
         """"""
-        return self.encoder(data)
+        return self.encoder(data.x.view(-1, 1280))
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """"""

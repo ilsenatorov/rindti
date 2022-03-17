@@ -1,6 +1,3 @@
-from typing import List
-
-import torch
 from torch import Tensor
 
 from ...data import TwoGraphData
@@ -15,7 +12,11 @@ class ProtClassModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self.encoder = Encoder(return_nodes=False, **kwargs)
+        if kwargs.get("pretrain"):
+            self.encoder = self.load_from_checkpoint(kwargs["pretrain"]).encoder
+            self.hparams.lr *= 0.001
+        else:
+            self.encoder = Encoder(**kwargs)
         self.loss = CrossEntropyLoss(**kwargs)
 
     def forward(self, data: dict) -> Tensor:
