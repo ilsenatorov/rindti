@@ -1,5 +1,5 @@
 from .dti import ClassificationModel, RegressionModel
-from .pretrain import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
+from .pretrain import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
 
 __all__ = [
     "ClassificationModel",
@@ -9,4 +9,5 @@ __all__ = [
     "DistanceModel",
     "BGRLModel",
     "ProtClassModel",
+    "ProtClassESMModel",
 ]

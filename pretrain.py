@@ -1,11 +1,9 @@
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch_geometric.loader import DataLoader
 
 from rindti.data import PreTrainDataModule
-from rindti.data.samplers import PfamSampler
-from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
+from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
 from rindti.utils import MyArgParser, read_config
 
 models = {
@@ -14,6 +12,7 @@ models = {
     "class": ProtClassModel,
     "bgrl": BGRLModel,
     "distance": DistanceModel,
+    "esmclass": ProtClassESMModel,
 }
 
 

@@ -83,7 +83,7 @@ class Structure:
         edges = edges[edges[:, 0] != edges[:, 1]]
         return edges.t()
 
-    def get_graph(self, threshold: float) -> Data:
+    def get_graph(self, threshold: float) -> dict:
         """Get a graph using threshold as a cutoff"""
         nodes = self.get_nodes()
         edges = self.get_edges(threshold)

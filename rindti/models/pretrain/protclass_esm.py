@@ -7,10 +7,9 @@ from ...data import TwoGraphData
 from ...layers import MLP
 from ...losses import CrossEntropyLoss
 from ..base_model import BaseModel
-from ..encoder import Encoder
 
 
-class ProtClassModel(BaseModel):
+class ProtClassESMModel(BaseModel):
     """Model for basic protein classification with ESM. Data in self.forward has to contain data.y, which will be the label we aim to predict"""
 
     def __init__(self, **kwargs):

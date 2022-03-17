@@ -1,10 +1,10 @@
 import torch.nn.functional as F
 
-from ..data import TwoGraphData
-from ..layers import MLP
-from ..utils import remove_arg_prefix
-from .dti.classification import ClassificationModel
-from .encoder import Encoder
+from ...data import TwoGraphData
+from ...layers import MLP
+from ...utils import remove_arg_prefix
+from ..encoder import Encoder
+from .classification import ClassificationModel
 
 
 class ESMModel(ClassificationModel):
