@@ -3,7 +3,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DataLoader
 
-from rindti.data import DTIDataset
+from rindti.data import DTIDataModule
 from rindti.models import ClassificationModel, RegressionModel
 from rindti.utils import read_config
 
@@ -16,11 +16,9 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    train = DTIDataset(kwargs["data"], split="train").shuffle()
-    val = DTIDataset(kwargs["data"], split="val").shuffle()
-    test = DTIDataset(kwargs["data"], split="test").shuffle()
-
-    kwargs.update(train.config)
+    datamodule = DTIDataModule(kwargs["data"], kwargs["batch_size"], kwargs["num_workers"])
+    datamodule.setup()
+    kwargs.update(datamodule.config)
     logger = TensorBoardLogger(
         "tb_logs", name=kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
     )
@@ -39,13 +37,7 @@ def train(**kwargs):
         log_every_n_steps=25,
     )
     model = models[kwargs["model"]](**kwargs)
-    dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ["batch_size", "num_workers"]}
-    dataloader_kwargs["follow_batch"] = ["prot_x", "drug_x"]
-    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=False)
-    val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
-    test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
-    trainer.fit(model, train_dataloader, val_dataloader)
-    trainer.test(model, test_dataloader)
+    trainer.fit(model, datamodule)
 
 
 if __name__ == "__main__":
