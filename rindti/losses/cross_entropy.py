@@ -12,7 +12,13 @@ class CrossEntropyLoss(LightningModule):
 
     def __init__(self, **kwargs):
         super().__init__()
-        self.mlp = MLP(kwargs["hidden_dim"], len(kwargs["label_list"]))
+        self.mlp = MLP(
+            kwargs["hidden_dim"],
+            len(kwargs["label_list"]),
+            kwargs["hidden_dim"] * 2,
+            kwargs["num_layers"],
+            kwargs["dropout"],
+        )
         self.loss = torch.nn.CrossEntropyLoss()
         self.label_encoder = LabelEncoder()
         self.label_encoder.fit(kwargs["label_list"])

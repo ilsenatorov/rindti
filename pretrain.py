@@ -44,6 +44,7 @@ def pretrain(**kwargs):
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
+    print(model)
     # if kwargs["model"] == "distance":
     #     sampler = PfamSampler(
     #         dataset,
