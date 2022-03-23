@@ -2,7 +2,7 @@ import os
 import os.path as osp
 
 
-configfile: "config/snakemake.yaml"
+configfile: "config/snakemake/standard.yaml"
 
 
 targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.endswith(".pdb")]

@@ -1,6 +1,6 @@
-data: results/prepare_all/coldtarget_posneg_under_class_template_rinerator_label_none_label_none.pkl
+data: results/prepare_all/random_posneg_under_class_whole_distance_label_none_label_none.pkl
 # Hardware
-batch_size: 1024
+batch_size: 32
 gpus: 1
 max_epochs: 1000
 num_workers: 0
@@ -9,7 +9,7 @@ seed: 42
 # Optimisation + learning
 early_stop_patience: 60
 gradient_clip_val: 100
-lr: 0.00001
+lr: 0.001
 momentum: 0.3
 monitor: val_loss
 optimiser: adam

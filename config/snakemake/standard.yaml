@@ -54,6 +54,6 @@ parse_dataset:
   # class or reg
   task: class
   # threshold values for class problem
-  threshold: 100
+  threshold: 5000
   # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
   log: false
