@@ -1,3 +1,3 @@
 from .classification import ClassificationModel
-from .esm import ESMModel
+from .esm_classification import ESMClassModel
 from .regression import RegressionModel

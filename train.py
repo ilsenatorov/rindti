@@ -1,15 +1,16 @@
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataModule
-from rindti.models import ClassificationModel, RegressionModel
+from rindti.models import ClassificationModel, RegressionModel, ESMClassModel
 from rindti.utils import read_config
+from pprint import pprint
 
 models = {
     "class": ClassificationModel,
     "reg": RegressionModel,
+    "esm_class": ESMClassModel,
 }
 
 
@@ -18,6 +19,7 @@ def train(**kwargs):
     seed_everything(kwargs["seed"])
     datamodule = DTIDataModule(kwargs["data"], kwargs["batch_size"], kwargs["num_workers"])
     datamodule.setup()
+    pprint(datamodule.config)
     kwargs.update(datamodule.config)
     logger = TensorBoardLogger(
         "tb_logs", name=kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
@@ -37,6 +39,7 @@ def train(**kwargs):
         log_every_n_steps=25,
     )
     model = models[kwargs["model"]](**kwargs)
+    pprint(model)
     trainer.fit(model, datamodule)
 
 

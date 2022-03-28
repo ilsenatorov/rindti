@@ -75,7 +75,13 @@ class BaseModel(LightningModule):
     def _get_mlp(self, params: dict) -> MLP:
         return MLP(**params, input_dim=self.embed_dim, out_dim=1)
 
-    def _determine_feat_method(self, feat_method: str, drug_hidden_dim: int, prot_hidden_dim: int, **kwargs):
+    def _determine_feat_method(
+        self,
+        feat_method: str = None,
+        drug_hidden_dim: int = None,
+        prot_hidden_dim: int = None,
+        **kwargs,
+    ):
         """Which method to use for concatenating drug and protein representations"""
         if feat_method == "concat":
             self.merge_features = self._concat
@@ -118,16 +124,19 @@ class BaseModel(LightningModule):
         mae = mean_absolute_error(output, labels)
         expvar = explained_variance(output, labels)
         return {
-            "corr": corr,
-            "mae": mae,
-            "expvar": expvar,
+            "corr": corr.detach(),
+            "mae": mae.detach(),
+            "expvar": expvar.detach(),
         }
 
     def _get_class_metrics(self, output: Tensor, labels: LongTensor):
         """Calculate metrics common for class - accuracy, auroc and Matthews coefficient
         Returns dict of all"""
         acc = accuracy(output, labels)
-        _auroc = auroc(output, labels, pos_label=1)
+        try:
+            _auroc = auroc(output, labels, pos_label=1)
+        except:
+            _auroc = np.nan
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
         return {
             "acc": acc,

@@ -1,13 +1,12 @@
 import torch.nn.functional as F
-
+import torch
 from ...data import TwoGraphData
 from ...layers import MLP
 from ...utils import remove_arg_prefix
 from ..encoder import Encoder
-from .classification import ClassificationModel
+from ..base_model import BaseModel
 
-
-class ESMModel(ClassificationModel):
+class ESMClassModel(BaseModel):
     """
     ESM Model Class for DTI prediction
     """
@@ -24,6 +23,18 @@ class ESMModel(ClassificationModel):
         )
         self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
+    
+    def forward(self, prot: dict, drug: dict):
+        """Forward pass of the model"""
+        prot_embed = self.prot_encoder(prot["x"].view(-1, 1280))
+        drug_embed = self.drug_encoder(drug)
+        joint_embedding = self.merge_features(drug_embed, prot_embed)
+        return dict(
+            pred=torch.sigmoid(self.mlp(joint_embedding)),
+            prot_embed=prot_embed,
+            drug_embed=drug_embed,
+            joint_embed=joint_embedding,
+        )
 
     def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test
@@ -36,12 +47,9 @@ class ESMModel(ClassificationModel):
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
         metrics = self._get_class_metrics(fwd_dict["pred"], labels)
-        snnl = 1 / self.snnl(fwd_dict["joint_embed"], data.label)["graph_loss"]
         metrics.update(
             dict(
-                loss=bce_loss + self.hparams.alpha * snnl,
-                snn_loss=snnl.detach(),
-                bce_loss=bce_loss.detach(),
+                loss=bce_loss,
             )
         )
         return metrics

@@ -1,6 +1,6 @@
-data: results/prepare_all/test.pkl
+data: results/prepare_all/esm_class.pkl
 # Hardware
-batch_size: 64
+batch_size: 256
 gpus: 1
 max_epochs: 1000
 num_workers: 16
@@ -21,7 +21,7 @@ weighted: 0
 feat_method: concat
 mlp_dropout: 0.1
 mlp_hidden_dim: 128
-model: class
+model: esm_class
 # Drug encoder
 drug_dropout: 0.3
 drug_hidden_dim: 64
@@ -36,12 +36,7 @@ drug_ratio: 0.25
 prot_dropout: 0.3
 prot_hidden_dim: 64
 prot_lr: 0.001 # for protein encoder
-prot_node_embed: ginconv
-prot_num_heads: 4
 prot_num_layers: 3
-prot_pool: gmt
-prot_pretrain: null
-prot_ratio: 0.5
 
 temperature: 1
 alpha: 0
