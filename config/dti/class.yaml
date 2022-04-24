@@ -1,4 +1,4 @@
-data: results/prepare_all/test.pkl
+data: results/prepare_all/parsed_dti_split.pkl
 # Hardware
 batch_size: 64
 gpus: 1

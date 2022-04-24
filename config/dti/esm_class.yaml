@@ -1,6 +1,6 @@
-data: results/prepare_all/esm_class.pkl
+data: results/prepare_all/esm_dti_split.pkl
 # Hardware
-batch_size: 256
+batch_size: 128
 gpus: 1
 max_epochs: 1000
 num_workers: 16

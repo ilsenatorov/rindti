@@ -27,7 +27,7 @@ def pretrain(**kwargs):
     kwargs.update(dm.config)
     kwargs["feat_dim"] = 20
     kwargs["edge_dim"] = 5
-    logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
+    logger = TensorBoardLogger("tb_logs", name="prot_"+kwargs["model"], default_hp_metric=False)
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
         EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),

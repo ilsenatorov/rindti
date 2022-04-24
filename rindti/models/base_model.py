@@ -136,7 +136,7 @@ class BaseModel(LightningModule):
         try:
             _auroc = auroc(output, labels, pos_label=1)
         except:
-            _auroc = np.nan
+            _auroc = torch.tensor(np.nan, device=self.device)
         _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
         return {
             "acc": acc,

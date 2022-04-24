@@ -22,7 +22,7 @@ def train(**kwargs):
     pprint(datamodule.config)
     kwargs.update(datamodule.config)
     logger = TensorBoardLogger(
-        "tb_logs", name=kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
+        "tb_logs", name="dti" + kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
     )
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
@@ -59,5 +59,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = read_config(args.config)
-    pprint(config)
-    train(**config)
+    for split in ["coldtarget"]:
+        config["data"] = config["data"].replace("split", split)
+        pprint(config)
+        train(**config)

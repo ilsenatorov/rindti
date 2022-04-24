@@ -1,6 +1,6 @@
-data: results/prepare_all/test_reg.pkl
+data: results/prepare_all/parsed_dti_split.pkl
 # Hardware
-batch_size: 64
+batch_size: 256
 gpus: 1
 max_epochs: 1000
 num_workers: 16
@@ -21,7 +21,7 @@ weighted: 0
 feat_method: concat
 mlp_dropout: 0.1
 mlp_hidden_dim: 128
-model: reg
+model: class
 # Drug encoder
 drug_dropout: 0.3
 drug_hidden_dim: 64
@@ -40,7 +40,7 @@ prot_node_embed: ginconv
 prot_num_heads: 4
 prot_num_layers: 3
 prot_pool: gmt
-prot_pretrain: null
+prot_pretrain: tb_logs/class/version_1/checkpoints/epoch=359-step=669599.ckpt
 prot_ratio: 0.5
 
 temperature: 1

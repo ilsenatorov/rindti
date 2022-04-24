@@ -31,6 +31,9 @@ class BaseDataModule(LightningDataModule):
     def test_dataloader(self):
         return DataLoader(self.test, **self._dl_kwargs(False))
 
+    def predict_dataloader(self):
+        return DataLoader(self.test, **self._dl_kwargs(False))
+
     def __repr__(self):
         return "DataModule\n" + "\n".join(
             [repr(getattr(self, x)) for x in ["train", "val", "test"] if hasattr(self, x)]
