@@ -1,6 +1,3 @@
-from argparse import ArgumentParser
-from typing import Iterable
-
 import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
@@ -25,7 +22,7 @@ class ClassificationModel(BaseModel):
         self.prot_encoder = Encoder(**prot_param)
         self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
-        self.snnl = SoftNearestNeighborLoss(kwargs["temperature"])
+        self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """Forward pass of the model"""
@@ -49,13 +46,4 @@ class ClassificationModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
-        metrics = self._get_class_metrics(fwd_dict["pred"], labels)
-        snnl = 1 / self.snnl(fwd_dict["joint_embed"], data.label)["graph_loss"]
-        metrics.update(
-            dict(
-                loss=bce_loss + self.hparams.alpha * snnl,
-                snn_loss=snnl.detach(),
-                bce_loss=bce_loss.detach(),
-            )
-        )
-        return metrics
+        return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

@@ -1,11 +1,12 @@
+from pprint import pprint
+
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
-from rindti.models import ClassificationModel, RegressionModel, ESMClassModel
+from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
 from rindti.utils import read_config
-from pprint import pprint
 
 models = {
     "class": ClassificationModel,
@@ -22,7 +23,9 @@ def train(**kwargs):
     pprint(datamodule.config)
     kwargs.update(datamodule.config)
     logger = TensorBoardLogger(
-        "tb_logs", name="dti" + kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0], default_hp_metric=False
+        "tb_logs",
+        name="dti" + kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0],
+        default_hp_metric=False,
     )
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
@@ -45,7 +48,7 @@ def train(**kwargs):
 
 if __name__ == "__main__":
     import argparse
-    from pprint import pprint
+    import os
 
     from rindti.utils import MyArgParser
 
@@ -59,7 +62,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config = read_config(args.config)
-    for split in ["coldtarget"]:
-        config["data"] = config["data"].replace("split", split)
-        pprint(config)
+    fold = "results/prepare_all/"
+    for i in os.listdir(fold):
+        if i.startswith("."):
+            continue
+        config["data"] = os.path.join(fold, i)
         train(**config)

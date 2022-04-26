@@ -15,19 +15,17 @@ optimiser: adam
 reduce_lr_factor: 0.1
 reduce_lr_patience: 100
 # Model
-dropout: 0.1
+dropout: 0.5
 hidden_dim: 100
 model: class
-batch_per_epoch: 1000
-prot_per_fam: 16
-
+# Loss
 loss: crossentropy # lifted, crossentropy or snnl
 node_pred: True
 frac: 0.1
 alpha: 1
 # Encoder
 node_embed: ginconv
-num_heads: 1
+num_heads: 4
 num_layers: 3
 pool: gmt
 ratio: 0.25

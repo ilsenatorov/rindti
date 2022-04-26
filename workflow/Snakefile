@@ -61,7 +61,7 @@ final_output = "results/prepare_all/{split}_{filtering}_{sampling}_{task}_{struc
 )
 
 plot_output = final_output.split("/")[-1].split(".")[0]
-plot_output = "report/plot_summary/{out}.html".format(out=plot_output)
+plot_output = "results/report/plot_summary/{out}.html".format(out=plot_output)
 
 
 output = [final_output, plot_output]
