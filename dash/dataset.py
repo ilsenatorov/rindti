@@ -7,7 +7,7 @@ from dash import html
 app = dash.Dash(__name__)
 
 
-df = pd.read_csv("results/parse_dataset/posneg_none_inter.csv", sep="\t").head(1000)
+df = pd.read_csv("results/parse_dataset/posneg_none_inter.csv", sep="\t")
 edges = []
 drugs = []
 prots = []

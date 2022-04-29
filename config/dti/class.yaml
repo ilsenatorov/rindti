@@ -1,4 +1,4 @@
-data: LOCATION_OF_THE_DATA_FILE
+data: results/prepare_all/coldtarget_posneg_none_class_template_distance_label_none_label_none.pkl
 # Hardware
 batch_size: 1024
 gpus: 1
@@ -18,7 +18,7 @@ reduce_lr_patience: 20
 weight_decay: 0.01
 weighted: 0
 # Model
-feat_method: element_l2
+feat_method: [element_l1, concat, mult, element_l2]
 mlp_dropout: 0.2
 mlp_hidden_dim: 512
 model: class

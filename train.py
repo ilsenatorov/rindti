@@ -6,7 +6,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
 from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
-from rindti.utils import read_config
+from rindti.utils import hparams_config, read_config
 
 models = {
     "class": ClassificationModel,
@@ -61,10 +61,7 @@ if __name__ == "__main__":
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
 
-    config = read_config(args.config)
-    fold = "results/prepare_all/"
-    for i in os.listdir(fold):
-        if i.startswith("."):
-            continue
-        config["data"] = os.path.join(fold, i)
+    orig_config = read_config(args.config)
+    configs = hparams_config(orig_config)
+    for config in configs:
         train(**config)
