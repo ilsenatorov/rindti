@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.data.samplers &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>rindti.data.samplers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for rindti.data.samplers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">replace</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Sampler</span>
+
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">minmax_normalise</span><span class="p">,</span> <span class="n">to_prob</span>
+<span class="kn">from</span> <span class="nn">.datasets</span> <span class="kn">import</span> <span class="n">PreTrainDataset</span>
+
+
+<div class="viewcode-block" id="PfamSampler"><a class="viewcode-back" href="../../../modules/data.html#rindti.data.PfamSampler">[docs]</a><span class="k">class</span> <span class="nc">PfamSampler</span><span class="p">(</span><span class="n">Sampler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sampler for generating pfam-conforming batches.</span>
+<span class="sd">    Ensure that in each batch there are positive and negative matches for each protein</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (PreTrainDataset): dataset, each data point has to contain data.fam</span>
+<span class="sd">        batch_size (int, optional): Defaults to 64.</span>
+<span class="sd">        prot_per_fam (int, optional): Number of proteins per family. Defaults to 8</span>
+<span class="sd">        batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">PreTrainDataset</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="n">prot_per_fam</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">batch_per_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">assert</span> <span class="n">batch_size</span> <span class="o">%</span> <span class="n">prot_per_fam</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Batch size should be divisible by prot_per_fam!&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prot_per_fam</span> <span class="o">=</span> <span class="n">prot_per_fam</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_per_epoch</span> <span class="o">=</span> <span class="n">batch_per_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prot_idx</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">fam</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">fam</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="p">[</span><span class="n">fam</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prot_idx</span><span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+    <span class="k">def</span> <span class="nf">_construct_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a single batch. takes self.prot_per_fam families and samples them</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: Indices of the proteins from the main dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">blacklist</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">prot_per_fam</span><span class="p">):</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">blacklist</span><span class="p">)</span>
+            <span class="n">anchor_fam</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">batchlet</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="p">[</span><span class="n">anchor_fam</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prot_per_fam</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">batchlet</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fam</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">fam</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">):</span>
+                    <span class="n">blacklist</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
+            <span class="n">batch</span> <span class="o">+=</span> <span class="n">batchlet</span>
+        <span class="k">return</span> <span class="n">batch</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">iter</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns iterator over all the batches in the epoch</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            iter: over list of lists, each list is one batch of indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_per_epoch</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_batch</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_construct_batch</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_per_epoch</span><span class="p">)])</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_per_epoch</span>
+
+<div class="viewcode-block" id="PfamSampler.update_weights"><a class="viewcode-back" href="../../../modules/data.html#rindti.data.PfamSampler.update_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For consistency&quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="WeightedPfamSampler"><a class="viewcode-back" href="../../../modules/data.html#rindti.data.WeightedPfamSampler">[docs]</a><span class="k">class</span> <span class="nc">WeightedPfamSampler</span><span class="p">(</span><span class="n">PfamSampler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Weighted for generating pfam-conforming batches.</span>
+<span class="sd">    Ensure that in each batch there are positive and negative matches for each protein.</span>
+<span class="sd">    Picks families with certain probabilities, based on losses</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (PreTrainDataset): dataset, each data point has to contain data.fam</span>
+<span class="sd">        minprob (float, optional): lowest weighted probability. Defaults to 0.1</span>
+<span class="sd">        batch_size (int, optional): Defaults to 64.</span>
+<span class="sd">        prot_per_fam (int, optional): Number of proteins per family. Defaults to 8</span>
+<span class="sd">        batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">minprob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">minprob</span> <span class="o">=</span> <span class="n">minprob</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prot_weights</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">))}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="mi">1000</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+<div class="viewcode-block" id="WeightedPfamSampler.update_fam_weights"><a class="viewcode-back" href="../../../modules/data.html#rindti.data.WeightedPfamSampler.update_fam_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_fam_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get minmax normalised weights&quot;&quot;&quot;</span>
+        <span class="n">fam_weights</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fam_id</span><span class="p">,</span> <span class="n">fam</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">prot</span> <span class="ow">in</span> <span class="n">fam</span><span class="p">:</span>
+                <span class="n">fam_weights</span><span class="p">[</span><span class="n">fam_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prot_weights</span><span class="p">[</span><span class="n">prot</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fam_weights</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span> <span class="o">=</span> <span class="n">minmax_normalise</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">minprob</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_weights</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WeightedPfamSampler.update_weights"><a class="viewcode-back" href="../../../modules/data.html#rindti.data.WeightedPfamSampler.update_weights">[docs]</a>    <span class="k">def</span> <span class="nf">update_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">losses</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Update sampling weight of families</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            losses (Dict[str, Iterable]): family ids and their respective losses</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prot_weights</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">prot_idx</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">losses</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_fam_weights</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_construct_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a single batch. takes self.prot_per_fam families with</span>
+<span class="sd">        self.fam_weights probabilities and samples them</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: Indices of the proteins from the main dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">blacklist</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">prot_per_fam</span><span class="p">):</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">blacklist</span><span class="p">)</span>
+            <span class="n">anchor_fam</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">subset</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">batchlet</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="p">[</span><span class="n">anchor_fam</span><span class="p">],</span>
+                    <span class="n">p</span><span class="o">=</span><span class="n">to_prob</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">prot_weights</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fam_idx</span><span class="p">[</span><span class="n">anchor_fam</span><span class="p">]])),</span>
+                    <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prot_per_fam</span><span class="p">,</span>
+                    <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">batchlet</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fam</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">fam</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">):</span>
+                    <span class="n">blacklist</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
+            <span class="n">batch</span> <span class="o">+=</span> <span class="n">batchlet</span>
+        <span class="k">return</span> <span class="n">batch</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

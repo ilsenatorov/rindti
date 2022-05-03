@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.utils.math &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>rindti.utils.math</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for rindti.utils.math</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">FloatTensor</span><span class="p">,</span> <span class="n">LongTensor</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data.dataset</span> <span class="kn">import</span> <span class="n">random_split</span>
+
+
+<div class="viewcode-block" id="split_random"><a class="viewcode-back" href="../../../modules/utils.html#rindti.utils.split_random">[docs]</a><span class="k">def</span> <span class="nf">split_random</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">train_frac</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Randomly split dataset&quot;&quot;&quot;</span>
+    <span class="n">tot</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">train</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tot</span> <span class="o">*</span> <span class="n">train_frac</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tot</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">train_frac</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">random_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">[</span><span class="n">train</span><span class="p">,</span> <span class="n">val</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="minmax_normalise"><a class="viewcode-back" href="../../../modules/utils.html#rindti.utils.minmax_normalise">[docs]</a><span class="k">def</span> <span class="nf">minmax_normalise</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;MinMax normalisation of a pandas series&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="n">s</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">s</span><span class="o">.</span><span class="n">min</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="to_prob"><a class="viewcode-back" href="../../../modules/utils.html#rindti.utils.to_prob">[docs]</a><span class="k">def</span> <span class="nf">to_prob</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert to probabilities&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">s</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_type"><a class="viewcode-back" href="../../../modules/utils.html#rindti.utils.get_type">[docs]</a><span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Check which type of data we have</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): TwoGraphData or Data</span>
+<span class="sd">        key (str): &quot;x&quot; or &quot;prot_x&quot; or &quot;drug_x&quot; usually</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If not FloatTensor or LongTensor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: &quot;label&quot; for LongTensor, &quot;onehot&quot; for FloatTensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">feat</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="n">LongTensor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;label&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="n">FloatTensor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;onehot&quot;</span>
+    <span class="k">if</span> <span class="n">feat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;none&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown data type </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">])))</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

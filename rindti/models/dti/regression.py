@@ -8,13 +8,15 @@ from .classification import ClassificationModel
 class RegressionModel(ClassificationModel):
     """Model for DTI prediction as a reg problem"""
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._set_reg_metrics()
+
     def shared_step(self, data: TwoGraphData) -> dict:
         """"""
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
-        output = self.forward(prot, drug)["pred"]
-        labels = data.label.unsqueeze(1).float()
-        loss = F.mse_loss(output, labels)
-        metrics = self._get_reg_metrics(output, labels)
-        metrics.update(dict(loss=loss))
-        return metrics
+        fwd_dict = self.forward(prot, drug)
+        labels = data.label.unsqueeze(1)
+        mse_loss = F.mse_loss(fwd_dict["pred"], labels.float())
+        return dict(loss=mse_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

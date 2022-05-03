@@ -2,7 +2,7 @@
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
 # plddt works only for alphafold structures, since plddt is written in the b-factor there
-structures: whole
+structures: template
 # radius (in Angstroms) around ligands for which residues are considered to be part of the binding site
 bsite:
   radius: 5
@@ -47,13 +47,13 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: posneg
+  filtering: all
   # sampling
   # sampling can be over, under or none
-  sampling: under
+  sampling: none
   # class or reg
   task: class
   # threshold values for class problem
-  threshold: 100
+  threshold: 5000
   # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
   log: false

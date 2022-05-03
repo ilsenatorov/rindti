@@ -107,8 +107,8 @@ if __name__ == "__main__":
     fig["layout"]["xaxis4"]["title"] = "Drug popularity"
     fig["layout"]["yaxis4"]["title"] = "Count"
     fig.update_layout(
-        height=1080,
-        width=1920,
+        height=900,
+        width=1800,
         title={
             "text": "Data summary. Structure: {struct}. Filtering: {filt}.".format(
                 struct=snakemake.config["structures"], filt=snakemake.config["parse_dataset"]["filtering"]

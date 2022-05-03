@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="rindti.models" href="../modules/models.html" />
+    <link rel="prev" title="Snakemake workflows" href="snakemake.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="data">
+<h1>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h1>
+<section id="twographdata">
+<h2>TwoGraphData<a class="headerlink" href="#twographdata" title="Permalink to this headline">¶</a></h2>
+<p>A subclass of <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code></a>, that handles an entry of two graphs.</p>
+<p>The two graph are indicated by certain prefix, thus <cite>x</cite> and <cite>edge_index</cite> become <cite>drug_x</cite> and <cite>drug_edge_index</cite>.</p>
+<p>This has an effect on batching during training and prediction, since the <cite>prot_edge_index</cite> entry gets modified <cite>according to the standard processing rules of torch_geometric&lt;https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs&gt;_</cite></p>
+<p>Otherwise it is just a dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rindti.data</span> <span class="kn">import</span> <span class="n">TwoGraphData</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">num_prot_nodes</span><span class="p">,</span> <span class="n">num_drug_nodes</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">30</span>
+<span class="n">num_prot_edges</span><span class="p">,</span> <span class="n">num_drug_edges</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">30</span>
+<span class="n">prot_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_prot_nodes</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="n">drug_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_drug_nodes</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="n">prot_edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_prot_nodes</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_prot_edges</span><span class="p">))</span>
+<span class="n">drug_edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_drug_nodes</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_drug_edges</span><span class="p">))</span>
+<span class="n">tgd</span> <span class="o">=</span> <span class="n">TwoGraphData</span><span class="p">(</span><span class="n">prot_x</span><span class="o">=</span><span class="n">prot_x</span><span class="p">,</span> <span class="n">drug_x</span><span class="o">=</span><span class="n">drug_x</span><span class="p">,</span> <span class="n">prot_edge_index</span><span class="o">=</span><span class="n">prot_edge_index</span><span class="p">,</span> <span class="n">drug_edge_index</span><span class="o">=</span><span class="n">drug_edge_index</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tgd</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">TwoGraphData</span><span class="p">(</span><span class="n">prot_x</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">drug_x</span><span class="o">=</span><span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">prot_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">drug_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Then such objects can be given directly to the dataloader with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch_geometric.loader</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="n">dl</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">([</span><span class="n">tgd</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># just take 10 times the same graph for simplicity</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dl</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">TwoGraphDataBatch</span><span class="p">(</span><span class="n">prot_x</span><span class="o">=</span><span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">drug_x</span><span class="o">=</span><span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">prot_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span> <span class="n">drug_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">150</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
+<p>Custom datasets are also based on <cite>torch_geometric Datasets&lt;https://pytorch-geometric.readthedocs.io/en/latest/notes/create_dataset.html&gt;_</cite></p>
+<p>They are designed to take in the results of the snakemake workflows, and create a quick-to-load pytorch objects.</p>
+<p>Since the splits in DTI predictions are often non-random (scaffold split/cold target split), for each DTI pair a string indicating the split is provided.</p>
+<p>Thus to create DTI datasets one needs to specialize the split:</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snakemake.html" class="btn btn-neutral float-left" title="Snakemake workflows" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules/models.html" class="btn btn-neutral float-right" title="rindti.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>
