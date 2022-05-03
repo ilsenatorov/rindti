@@ -1,8 +1,12 @@
+# the two root directories to take the data from and to store the data in
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/test
+target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/test
+
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
 # plddt works only for alphafold structures, since plddt is written in the b-factor there
-structures: template
+structures: whole
 # radius (in Angstroms) around ligands for which residues are considered to be part of the binding site
 bsite:
   radius: 5
