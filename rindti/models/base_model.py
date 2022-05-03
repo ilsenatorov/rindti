@@ -91,7 +91,7 @@ class BaseModel(LightningModule):
 
     def _determine_feat_method(
         self,
-        feat_method: str = None,
+        feat_method: str,
         drug_hidden_dim: int = None,
         prot_hidden_dim: int = None,
         **kwargs,
