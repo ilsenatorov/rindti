@@ -1,3 +1,7 @@
+# the two root directories to take the data from and to store the data in
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/test
+target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/test
+
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
@@ -47,13 +51,13 @@ split:
 
 parse_dataset:
   # filtering can be posneg, balanced or all
-  filtering: posneg
+  filtering: all
   # sampling
   # sampling can be over, under or none
   sampling: under
   # class or reg
   task: class
   # threshold values for class problem
-  threshold: 100
+  threshold: 0
   # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
   log: false
