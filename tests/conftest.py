@@ -50,7 +50,7 @@ def create_fake_graph(
         edge_attr=create_features(edge_attr_type, n_edges, edge_dim),
     )
     if fam:
-        d["fam"] = choice(fam)
+        d["y"] = choice(fam)
     return d
 
 

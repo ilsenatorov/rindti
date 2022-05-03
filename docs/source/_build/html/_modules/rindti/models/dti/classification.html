@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.models.dti.classification &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>rindti.models.dti.classification</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for rindti.models.dti.classification</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span> <span class="nn">torch.functional</span> <span class="kn">import</span> <span class="n">Tensor</span>
+
+<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">TwoGraphData</span>
+<span class="kn">from</span> <span class="nn">...layers.base_layer</span> <span class="kn">import</span> <span class="n">BaseLayer</span>
+<span class="kn">from</span> <span class="nn">...losses</span> <span class="kn">import</span> <span class="n">SoftNearestNeighborLoss</span>
+<span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">remove_arg_prefix</span>
+<span class="kn">from</span> <span class="nn">..base_model</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">..encoder</span> <span class="kn">import</span> <span class="n">Encoder</span>
+<span class="kn">from</span> <span class="nn">..pretrain</span> <span class="kn">import</span> <span class="n">BGRLModel</span><span class="p">,</span> <span class="n">GraphLogModel</span><span class="p">,</span> <span class="n">InfoGraphModel</span><span class="p">,</span> <span class="n">PfamModel</span>
+
+
+<div class="viewcode-block" id="ClassificationModel"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.dti.ClassificationModel">[docs]</a><span class="k">class</span> <span class="nc">ClassificationModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Model for DTI prediction as a class problem&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_determine_feat_method</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">drug_param</span> <span class="o">=</span> <span class="n">remove_arg_prefix</span><span class="p">(</span><span class="s2">&quot;drug_&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">prot_param</span> <span class="o">=</span> <span class="n">remove_arg_prefix</span><span class="p">(</span><span class="s2">&quot;prot_&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">mlp_param</span> <span class="o">=</span> <span class="n">remove_arg_prefix</span><span class="p">(</span><span class="s2">&quot;mlp_&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prot_param</span><span class="p">[</span><span class="s2">&quot;pretrain&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prot_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_pretrained</span><span class="p">(</span><span class="n">prot_param</span><span class="p">[</span><span class="s2">&quot;pretrain&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">prot_lr</span> <span class="o">*=</span> <span class="mf">0.001</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prot_encoder</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="o">**</span><span class="n">prot_param</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">drug_param</span><span class="p">[</span><span class="s2">&quot;pretrain&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drug_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_pretrained</span><span class="p">(</span><span class="n">drug_param</span><span class="p">[</span><span class="s2">&quot;pretrain&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">drug_lr</span> <span class="o">*=</span> <span class="mf">0.001</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drug_encoder</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="o">**</span><span class="n">drug_param</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_mlp</span><span class="p">(</span><span class="n">mlp_param</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snnl</span> <span class="o">=</span> <span class="n">SoftNearestNeighborLoss</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_load_pretrained</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">BaseLayer</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Load pretrained model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            checkpoint_path (str): Path to checkpoint file.</span>
+<span class="sd">            Has to contain &#39;infograph&#39;, &#39;graphlog&#39;, &#39;pfam&#39; or &#39;bgrl&#39;, which will point to the type of model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterable[BaseLayer]: feat_embed, node_embed, pool of the pretrained model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;infograph&quot;</span> <span class="ow">in</span> <span class="n">checkpoint_path</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">InfoGraphModel</span><span class="o">.</span><span class="n">load_from_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span><span class="o">.</span><span class="n">encoder</span>
+        <span class="k">elif</span> <span class="s2">&quot;graphlog&quot;</span> <span class="ow">in</span> <span class="n">checkpoint_path</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">GraphLogModel</span><span class="o">.</span><span class="n">load_from_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span><span class="o">.</span><span class="n">encoder</span>
+        <span class="k">elif</span> <span class="s2">&quot;pfam&quot;</span> <span class="ow">in</span> <span class="n">checkpoint_path</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">PfamModel</span><span class="o">.</span><span class="n">load_from_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span><span class="o">.</span><span class="n">encoder</span>
+        <span class="k">elif</span> <span class="s2">&quot;bgrl&quot;</span> <span class="ow">in</span> <span class="n">checkpoint_path</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">BGRLModel</span><span class="o">.</span><span class="n">load_from_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span><span class="o">.</span><span class="n">student_encoder</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;Unknown pretraining model type!</span>
+<span class="sd">                Please ensure &#39;pfam&#39;, &#39;graphlog&#39;, &#39;bgrl&#39; or &#39;infograph&#39; are present in the model path&quot;&quot;&quot;</span>
+            <span class="p">)</span>
+        <span class="n">encoder</span><span class="o">.</span><span class="n">return_nodes</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">encoder</span>
+
+<div class="viewcode-block" id="ClassificationModel.forward"><a class="viewcode-back" href="../../../../modules/models.html#rindti.models.dti.ClassificationModel.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prot</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">drug</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+        <span class="n">prot_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prot_encoder</span><span class="p">(</span><span class="n">prot</span><span class="p">)</span>
+        <span class="n">drug_embed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drug_encoder</span><span class="p">(</span><span class="n">drug</span><span class="p">)</span>
+        <span class="n">joint_embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_features</span><span class="p">(</span><span class="n">drug_embed</span><span class="p">,</span> <span class="n">prot_embed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">pred</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">joint_embedding</span><span class="p">)),</span>
+            <span class="n">prot_embed</span><span class="o">=</span><span class="n">prot_embed</span><span class="p">,</span>
+            <span class="n">drug_embed</span><span class="o">=</span><span class="n">drug_embed</span><span class="p">,</span>
+            <span class="n">joint_embed</span><span class="o">=</span><span class="n">joint_embedding</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">shared_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">TwoGraphData</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Step that is the same for train, validation and test</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: dict with different metrics - losses, accuracies etc. Has to contain &#39;loss&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prot</span> <span class="o">=</span> <span class="n">remove_arg_prefix</span><span class="p">(</span><span class="s2">&quot;prot_&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">drug</span> <span class="o">=</span> <span class="n">remove_arg_prefix</span><span class="p">(</span><span class="s2">&quot;drug_&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">fwd_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">prot</span><span class="p">,</span> <span class="n">drug</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">bce_loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">binary_cross_entropy</span><span class="p">(</span><span class="n">fwd_dict</span><span class="p">[</span><span class="s2">&quot;pred&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_class_metrics</span><span class="p">(</span><span class="n">fwd_dict</span><span class="p">[</span><span class="s2">&quot;pred&quot;</span><span class="p">],</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">snnl</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">snnl</span><span class="p">(</span><span class="n">fwd_dict</span><span class="p">[</span><span class="s2">&quot;joint_embed&quot;</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">label</span><span class="p">)[</span><span class="s2">&quot;graph_loss&quot;</span><span class="p">]</span>
+        <span class="n">metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">loss</span><span class="o">=</span><span class="n">bce_loss</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">snnl</span><span class="p">,</span>
+                <span class="n">snn_loss</span><span class="o">=</span><span class="n">snnl</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+                <span class="n">bce_loss</span><span class="o">=</span><span class="n">bce_loss</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">metrics</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

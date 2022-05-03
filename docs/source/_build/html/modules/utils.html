@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.utils &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="rindti.losses" href="losses.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">rindti.losses</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>rindti.utils</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="rindti-utils">
+<h1>rindti.utils<a class="headerlink" href="#rindti-utils" title="Permalink to this headline">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.utils.MyArgParser" title="rindti.utils.MyArgParser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MyArgParser</span></code></a></p></td>
+<td><p>Custom argument parser</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.utils.add_arg_prefix" title="rindti.utils.add_arg_prefix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_arg_prefix</span></code></a></p></td>
+<td><p>Adds the prefix to all the args.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.utils.get_type" title="rindti.utils.get_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_type</span></code></a></p></td>
+<td><p>Check which type of data we have</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.utils.read_config" title="rindti.utils.read_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code></a></p></td>
+<td><p>Read in yaml config for training</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.utils.remove_arg_prefix" title="rindti.utils.remove_arg_prefix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_arg_prefix</span></code></a></p></td>
+<td><p>Removes the prefix from all the args :param prefix: prefix to remove (<cite>drug_</cite>, <cite>prot_</cite> or <cite>mlp_</cite> usually) :type prefix: str :param kwargs: dict of arguments :type kwargs: dict</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.utils.minmax_normalise" title="rindti.utils.minmax_normalise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">minmax_normalise</span></code></a></p></td>
+<td><p>MinMax normalisation of a pandas series</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.utils.split_random" title="rindti.utils.split_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_random</span></code></a></p></td>
+<td><p>Randomly split dataset</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.utils.to_prob" title="rindti.utils.to_prob"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_prob</span></code></a></p></td>
+<td><p>Convert to probabilities</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.utils.plot_loss_count_dist" title="rindti.utils.plot_loss_count_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_loss_count_dist</span></code></a></p></td>
+<td><p>Plot distribution of times sampled vs avg loss of families</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-rindti.utils"></span><dl class="py class">
+<dt class="sig sig-object py" id="rindti.utils.MyArgParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MyArgParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usage=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epilog=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents=[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatter_class=&lt;class</span> <span class="pre">'argparse.HelpFormatter'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_chars='-'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromfile_prefix_chars=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argument_default=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict_handler='error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_help=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_abbrev=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_on_error=True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/utils/cli.html#MyArgParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.MyArgParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></a></p>
+<p>Custom argument parser</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.utils.MyArgParser.add_argument_group">
+<span class="sig-name descname"><span class="pre">add_argument_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rindti.utils.cli._MyArgumentGroup</span></span></span><a class="reference internal" href="../_modules/rindti/utils/cli.html#MyArgParser.add_argument_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.MyArgParser.add_argument_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds an ArgumentsGroup with every argument starting with the prefix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Prefix to begin arguments from. Defaults to “”.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>group</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>_MyArgumentGroup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.utils.MyArgParser.get_arg_group">
+<span class="sig-name descname"><span class="pre">get_arg_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rindti.utils.cli._MyArgumentGroup</span></span></span><a class="reference internal" href="../_modules/rindti/utils/cli.html#MyArgParser.get_arg_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.MyArgParser.get_arg_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get arg group under this title</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.add_arg_prefix">
+<span class="sig-name descname"><span class="pre">add_arg_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/utils/cli.html#add_arg_prefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.add_arg_prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the prefix to all the args. Removes None values and “index_mapping”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – prefix to add (<cite>drug_</cite>, <cite>prot_</cite> or <cite>mlp_</cite> usually)</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – dict of arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sub-dict of arguments</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.get_type">
+<span class="sig-name descname"><span class="pre">get_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/rindti/utils/math.html#get_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check which type of data we have</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – TwoGraphData or Data</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – “x” or “prot_x” or “drug_x” usually</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If not FloatTensor or LongTensor</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>“label” for LongTensor, “onehot” for FloatTensor</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.read_config">
+<span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/utils/cli.html#read_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.read_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in yaml config for training</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.remove_arg_prefix">
+<span class="sig-name descname"><span class="pre">remove_arg_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/utils/cli.html#remove_arg_prefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.remove_arg_prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the prefix from all the args
+:param prefix: prefix to remove (<cite>drug_</cite>, <cite>prot_</cite> or <cite>mlp_</cite> usually)
+:type prefix: str
+:param kwargs: dict of arguments
+:type kwargs: dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Sub-dict of arguments</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.minmax_normalise">
+<span class="sig-name descname"><span class="pre">minmax_normalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0.dev0+330.gc24a3c8bb1)"><span class="pre">pandas.core.series.Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0.dev0+330.gc24a3c8bb1)"><span class="pre">pandas.core.series.Series</span></a></span></span><a class="reference internal" href="../_modules/rindti/utils/math.html#minmax_normalise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.minmax_normalise" title="Permalink to this definition">¶</a></dt>
+<dd><p>MinMax normalisation of a pandas series</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.split_random">
+<span class="sig-name descname"><span class="pre">split_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/utils/math.html#split_random"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.split_random" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomly split dataset</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.to_prob">
+<span class="sig-name descname"><span class="pre">to_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0.dev0+330.gc24a3c8bb1)"><span class="pre">pandas.core.series.Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.0.dev0+330.gc24a3c8bb1)"><span class="pre">pandas.core.series.Series</span></a></span></span><a class="reference internal" href="../_modules/rindti/utils/math.html#to_prob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.to_prob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert to probabilities</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.utils.plot_loss_count_dist">
+<span class="sig-name descname"><span class="pre">plot_loss_count_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">matplotlib.figure.Figure</span></span></span><a class="reference internal" href="../_modules/rindti/utils/vis.html#plot_loss_count_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.utils.plot_loss_count_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot distribution of times sampled vs avg loss of families</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="losses.html" class="btn btn-neutral float-left" title="rindti.losses" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

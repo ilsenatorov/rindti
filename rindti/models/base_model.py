@@ -7,13 +7,15 @@ from pytorch_lightning import LightningModule
 from torch import LongTensor, Tensor, nn
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torchmetrics.functional import (
-    accuracy,
-    auroc,
-    explained_variance,
-    matthews_corrcoef,
-    mean_absolute_error,
-    pearson_corrcoef,
+from torchmetrics import (
+    AUROC,
+    Accuracy,
+    ExplainedVariance,
+    MatthewsCorrcoef,
+    MeanAbsoluteError,
+    MeanSquaredError,
+    MetricCollection,
+    R2Score,
 )
 
 from ..data import TwoGraphData
@@ -47,6 +49,18 @@ class BaseModel(LightningModule):
     def __init__(self):
         super().__init__()
 
+    def _set_class_metrics(self):
+        metrics = MetricCollection([Accuracy(), AUROC(), MatthewsCorrcoef(num_classes=2)])
+        self.train_metrics = metrics.clone(prefix="train_")
+        self.val_metrics = metrics.clone(prefix="val_")
+        self.test_metrics = metrics.clone(prefix="test_")
+
+    def _set_reg_metrics(self):
+        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), R2Score(), ExplainedVariance()])
+        self.train_metrics = metrics.clone(prefix="train_")
+        self.val_metrics = metrics.clone(prefix="val_")
+        self.test_metrics = metrics.clone(prefix="test_")
+
     def _get_label_embed(self, params: dict) -> nn.Embedding:
         return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"])
 
@@ -74,7 +88,13 @@ class BaseModel(LightningModule):
     def _get_mlp(self, params: dict) -> MLP:
         return MLP(**params, input_dim=self.embed_dim, out_dim=1)
 
-    def _determine_feat_method(self, feat_method: str, drug_hidden_dim: int, prot_hidden_dim: int, **kwargs):
+    def _determine_feat_method(
+        self,
+        feat_method: str,
+        drug_hidden_dim: int = None,
+        prot_hidden_dim: int = None,
+        **kwargs,
+    ):
         """Which method to use for concatenating drug and protein representations"""
         if feat_method == "concat":
             self.merge_features = self._concat
@@ -110,42 +130,18 @@ class BaseModel(LightningModule):
         """Multiplication"""
         return drug_embed * prot_embed
 
-    def _get_reg_metrics(self, output: Tensor, labels: Tensor) -> dict:
-        """Calculate metrics common for reg - corrcoef, MAE and explained variance
-        Returns dict of all"""
-        corr = pearson_corrcoef(output, labels)
-        mae = mean_absolute_error(output, labels)
-        expvar = explained_variance(output, labels)
-        return {
-            "corr": corr,
-            "mae": mae,
-            "expvar": expvar,
-        }
-
-    def _get_class_metrics(self, output: Tensor, labels: LongTensor):
-        """Calculate metrics common for class - accuracy, auroc and Matthews coefficient
-        Returns dict of all"""
-        acc = accuracy(output, labels)
-        _auroc = auroc(output, labels, pos_label=1)
-        _mc = matthews_corrcoef(output, labels.squeeze(1), num_classes=2)
-        return {
-            "acc": acc,
-            "auroc": _auroc,
-            "matthews": _mc,
-        }
-
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step"""
         ss = self.shared_step(data)
-        for key, value in ss.items():
-            self.log("train_" + key, value)
+        self.train_metrics.update(ss["preds"], ss["labels"])
+        self.log("train_loss", ss["loss"])
         return ss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during validation step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
-        for key, value in ss.items():
-            self.log("val_" + key, value)
+        self.val_metrics.update(ss["preds"], ss["labels"])
+        self.log("val_loss", ss["loss"])
         return ss
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
@@ -157,30 +153,21 @@ class BaseModel(LightningModule):
         for name, param in self.named_parameters():
             self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
-    def shared_epoch_end(self, outputs: dict, prefix: str, log_hparams=False):
-        """Things that are the same for train, test and val"""
-        entries = outputs[0].keys()
-        metrics = {}
-        for i in entries:
-            val = torch.stack([x[i] for x in outputs])
-            val = val[~val.isnan()].mean()
-            self.logger.experiment.add_scalar(prefix + i, val, self.current_epoch)
-            metrics[i] = val
-        if log_hparams:
-            self.logger.log_hyperparams(self.hparams, metrics)
-
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything"""
         self.log_histograms()
-        self.shared_epoch_end(outputs, "train_epoch_")
+        metrics = self.train_metrics.compute()
+        self.log_dict(metrics)
 
     def validation_epoch_end(self, outputs: dict):
-        """What to do at the end of a validation epoch. Logs everything, saves hyperparameters"""
-        self.shared_epoch_end(outputs, "val_epoch_", log_hparams=True)
+        """What to do at the end of a validation epoch. Logs everything"""
+        self.log_histograms()
+        metrics = self.val_metrics.compute()
+        self.log_dict(metrics)
 
-    def test_epoch_end(self, outputs: dict):
-        """What to do at the end of a test epoch. Logs everything, saves hyperparameters"""
-        self.shared_epoch_end(outputs, "test_epoch_", log_hparams=True)
+    # def test_epoch_end(self, outputs: dict):
+    #     """What to do at the end of a test epoch. Logs everything, saves hyperparameters"""
+    #     self.shared_epoch_end(outputs, "test_epoch_", log_hparams=True)
 
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimiser and/or lr schedulers"""

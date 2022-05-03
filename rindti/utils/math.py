@@ -1,14 +1,17 @@
 import pandas as pd
-from torch import FloatTensor, LongTensor
+from torch import FloatTensor, Generator, LongTensor
 from torch.utils.data.dataset import random_split
 
 
-def split_random(dataset, train_frac: float = 0.8):
+def split_random(dataset, fracs: list) -> list:
     """Randomly split dataset"""
+    assert abs(sum(fracs) - 1) < 1e-6, "Sum of fractions must be 1"
     tot = len(dataset)
-    train = int(tot * train_frac)
-    val = int(tot * (1 - train_frac))
-    return random_split(dataset, [train, val])
+    values = []
+    for i in fracs[1:]:
+        values.append(int(i * tot))
+    values = [tot - sum(values)] + values
+    return random_split(dataset, values)
 
 
 def minmax_normalise(s: pd.Series) -> pd.Series:

@@ -1,5 +1,4 @@
 import torch
-from torch_geometric.data import Data
 from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(
@@ -84,11 +83,11 @@ class Structure:
         edges = edges[edges[:, 0] != edges[:, 1]]
         return edges.t()
 
-    def get_graph(self, threshold: float) -> Data:
+    def get_graph(self, threshold: float) -> dict:
         """Get a graph using threshold as a cutoff"""
         nodes = self.get_nodes()
         edges = self.get_edges(threshold)
-        return Data(x=nodes, edge_index=edges)
+        return dict(x=nodes, edge_index=edges)
 
 
 if __name__ == "__main__":
@@ -100,7 +99,7 @@ if __name__ == "__main__":
         all_structures = snakemake.input.pdbs
         threshold = snakemake.params.threshold
 
-        def get_graph(filename: str) -> Data:
+        def get_graph(filename: str) -> dict:
             return Structure(filename, snakemake.config["prepare_proteins"]["node_feats"]).get_graph(threshold)
 
         data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
@@ -118,7 +117,7 @@ if __name__ == "__main__":
         def run(pdb_dir: str, output: str, threads: int = 1, threshold: float = 5, node_feats: str = "label"):
             """Run the pipeline"""
 
-            def get_graph(filename: str) -> Data:
+            def get_graph(filename: str) -> dict:
                 """Calculate a single graph from a file"""
                 return Structure(filename, node_feats).get_graph(threshold)
 
