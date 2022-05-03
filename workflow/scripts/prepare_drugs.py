@@ -57,6 +57,8 @@ class DrugEncoder:
         Returns:
             dict: dict with x, edge_index etc or np.nan for bad entries
         """
+        if smiles != smiles:  # check for nans, i.e. missing smiles strings in dataset
+            return np.nan
         mol = Chem.MolFromSmiles(smiles)
         if not mol:  # when rdkit fails to read a molecule it returns None
             return np.nan
