@@ -1,9 +1,9 @@
-data: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle/prepare_all/random_all_none_class_whole_distance_label_none_label_none.pkl
+data: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle/prepare_all/random_all_none_class_whole_distance_label_none_glycan_none.pkl
 exp_name: glylec
-runs: 2
+runs: 1
 # Hardware
 batch_size: 64
-gpus: 1
+gpus: 0
 max_epochs: 2
 num_workers: 0
 profiler: null
@@ -33,6 +33,7 @@ drug_num_heads: 4
 drug_num_layers: 3
 drug_pool: gmt
 drug_ratio: 0.25
+drug_feat_dim: 6
 # Prot encoder
 prot_dropout: 0.1
 prot_hidden_dim: 128

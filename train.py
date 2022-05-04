@@ -34,7 +34,12 @@ def single_run(**kwargs):
     datamodule = DTIDataModule(kwargs["data"], kwargs["exp_name"], kwargs["batch_size"], kwargs["num_workers"])
     datamodule.setup()
     pprint(datamodule.config)
-    kwargs.update(datamodule.config)
+
+    # kwargs.update(datamodule.config)
+    for key, value in datamodule.config.items():
+        if key not in kwargs:
+            kwargs[key] = value
+
     logger = TensorBoardLogger(
         "tb_logs",
         name="dti" + kwargs["model"] + ":" + kwargs["exp_name"] + "/" + kwargs["data"].split("/")[-1].split(".")[0],

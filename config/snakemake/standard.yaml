@@ -39,7 +39,7 @@ prepare_proteins:
 
 prepare_drugs:
   max_num_atoms: 150
-  node_feats: label
+  node_feats: glycan
   edge_feats: none
 
 split:

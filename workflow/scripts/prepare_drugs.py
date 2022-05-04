@@ -6,11 +6,25 @@ import pandas as pd
 import torch
 from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
+from rdkit.Chem.rdchem import ChiralType
 from torch_geometric.utils import to_undirected
 from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(["other", 6, 7, 8, 9, 16, 17, 35, 15, 53, 5, 11, 14, 34])
 edge_encoding = list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"])
+glycan_encoding = {
+    "other": [0, 0, 0],
+    6: [1, 0, 0],  # carbon
+    7: [0, 1, 0],  # nitrogen
+    8: [0, 0, 1],  # oxygen
+}
+
+chirality_encoding = {
+    ChiralType.CHI_OTHER: [0, 0, 0],
+    ChiralType.CHI_TETRAHEDRAL_CCW: [1, 1, 0],  # counterclockwise rotation of polarized light -> rotate light to the left
+    ChiralType.CHI_TETRAHEDRAL_CW: [1, 0, 1],  # clockwise rotation of polarized light -> rotate light to the right
+    ChiralType.CHI_UNSPECIFIED: [0, 0, 0],
+}
 
 
 class DrugEncoder:
@@ -23,16 +37,23 @@ class DrugEncoder:
     """
 
     def __init__(self, node_feats: str, edge_feats: str, max_num_atoms: int = 150):
-        assert node_feats in {"label", "onehot"}
+        assert node_feats in {"label", "onehot", "glycan"}
         assert edge_feats in {"label", "onehot", "none"}
         self.node_feats = node_feats
         self.edge_feats = edge_feats
         self.max_num_atoms = max_num_atoms
 
-    def encode_node(self, atom_num):
+    def encode_node(self, atom_num, atom):
         """Encode single atom"""
         if atom_num not in node_encoding.keys():
             atom_num = "other"
+
+        if self.node_feats == "glycan":
+            if atom_num in glycan_encoding:
+                return glycan_encoding[atom_num] + chirality_encoding[atom.GetChiralTag()]
+            else:
+                return glycan_encoding["other"] + chirality_encoding[atom.GetChiralTag()]
+
         label = node_encoding[atom_num]
         if self.node_feats == "onehot":
             return onehot_encode(label, len(node_encoding))
@@ -80,7 +101,7 @@ class DrugEncoder:
         atom_features = []
         for atom in mol.GetAtoms():
             atom_num = atom.GetAtomicNum()
-            atom_features.append(self.encode_node(atom_num))
+            atom_features.append(self.encode_node(atom_num, atom))
         if len(atom_features) > self.max_num_atoms:
             return np.nan
         if self.node_feats == "label":
