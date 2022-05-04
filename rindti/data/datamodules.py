@@ -11,9 +11,10 @@ from .datasets import DTIDataset, PreTrainDataset
 class BaseDataModule(LightningDataModule):
     """Base data module, contains all the datasets for train, val and test"""
 
-    def __init__(self, filename: str, batch_size: int = 128, num_workers: int = 16, shuffle: bool = True):
+    def __init__(self, filename: str, exp_name: str, batch_size: int = 128, num_workers: int = 16, shuffle: bool = True):
         super().__init__()
         self.filename = filename
+        self.exp_name = exp_name
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.shuffle = shuffle
@@ -52,9 +53,9 @@ class DTIDataModule(BaseDataModule):
 
     def setup(self, stage: str = None):
         """Load the individual datasets"""
-        self.train = DTIDataset(self.filename, split="train").shuffle()
-        self.val = DTIDataset(self.filename, split="val").shuffle()
-        self.test = DTIDataset(self.filename, split="test").shuffle()
+        self.train = DTIDataset(self.filename, self.exp_name, split="train").shuffle()
+        self.val = DTIDataset(self.filename, self.exp_name, split="val").shuffle()
+        self.test = DTIDataset(self.filename, self.exp_name, split="test").shuffle()
         self.config = self.train.config
 
     def _dl_kwargs(self, shuffle: bool = False):

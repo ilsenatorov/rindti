@@ -1,8 +1,10 @@
 data: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle/prepare_all/random_all_none_class_whole_distance_label_none_label_none.pkl
+exp_name: glylec
+runs: 2
 # Hardware
 batch_size: 64
 gpus: 1
-max_epochs: 10
+max_epochs: 2
 num_workers: 0
 profiler: null
 seed: 42
