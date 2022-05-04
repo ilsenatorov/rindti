@@ -34,7 +34,7 @@ def del_index_mapping(x: dict) -> dict:
 
 def update_config(config: dict) -> dict:
     """Updates config with dims of everything"""
-    config["prot_feat_dim"] = len(prot_node_encoding)
+    config["prot_feat_dim"] = len(prot_node_encoding) + 1
     config["drug_feat_dim"] = len(drug_node_encoding)
     config["prot_edge_dim"] = len(prot_edge_encoding)
     config["drug_edge_dim"] = len(drug_edge_encoding)

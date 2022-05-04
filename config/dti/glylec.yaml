@@ -1,0 +1,42 @@
+data: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle/prepare_all/random_all_none_class_whole_distance_label_none_label_none.pkl
+# Hardware
+batch_size: 64
+gpus: 1
+max_epochs: 10
+num_workers: 0
+profiler: null
+seed: 42
+# Optimisation + learning
+early_stop_patience: 60
+gradient_clip_val: 100
+lr: 0.0001
+momentum: 0.01
+monitor: val_loss
+optimiser: adam
+reduce_lr_factor: 0.1
+reduce_lr_patience: 20
+weight_decay: 0.01
+weighted: 0
+# Model
+feat_method: element_l1
+mlp_dropout: 0.2
+mlp_hidden_dim: 512
+model: class
+# Drug encoder
+drug_dropout: 0.1
+drug_hidden_dim: 128
+drug_lr: 0.001 # for drug encoder
+drug_node_embed: ginconv
+drug_num_heads: 4
+drug_num_layers: 3
+drug_pool: gmt
+drug_ratio: 0.25
+# Prot encoder
+prot_dropout: 0.1
+prot_hidden_dim: 128
+prot_lr: 0.001 # for protein encoder
+prot_node_embed: ginconv
+prot_num_heads: 4
+prot_num_layers: 3
+prot_pool: gmt
+prot_ratio: 0.25

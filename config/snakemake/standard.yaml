@@ -1,6 +1,6 @@
 # the two root directories to take the data from and to store the data in
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/test
-target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/test
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle
+target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle
 
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
 # `plddt` means that the loops with low plddt are removed
@@ -44,7 +44,7 @@ prepare_drugs:
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: coldtarget
+  method: random
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
@@ -58,6 +58,6 @@ parse_dataset:
   # class or reg
   task: class
   # threshold values for class problem
-  threshold: 5000
+  threshold: 1.645
   # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
   log: false
