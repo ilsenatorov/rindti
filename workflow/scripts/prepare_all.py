@@ -82,6 +82,6 @@ if __name__ == "__main__":
         "prots": prots[["data", "count"] + snakemake.config["prot_cols"]],
         "drugs": drugs[["data", "count"] + snakemake.config["drug_cols"]],
     }
-    
+
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)
