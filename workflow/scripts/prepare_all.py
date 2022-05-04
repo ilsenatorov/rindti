@@ -1,3 +1,4 @@
+import os
 import pickle
 from typing import Iterable
 
@@ -50,6 +51,12 @@ if __name__ == "__main__":
 
     with open(snakemake.input.proteins, "rb") as file:
         prots = pickle.load(file)
+
+    if os.path.exists(snakemake.input.protseqs):
+        protseqs = pd.read_csv(snakemake.input.protseqs, sep='\t')
+    else:
+        protseqs = None
+
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
     drug_count = interactions["Drug_ID"].value_counts()
@@ -59,14 +66,22 @@ if __name__ == "__main__":
     prots["data"] = prots["data"].apply(del_index_mapping)
     prots = prots[prots.index.isin(interactions["Target_ID"])]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
+
+    if protseqs is not None:
+        seqs = []
+        for i, row in prots.iterrows():
+            seqs.append(protseqs[protseqs["Target_ID"] == i]["AASeq"].values[0])
+        prots["AASeq"] = seqs
+
     full_data = process_df(interactions)
     config = update_config(snakemake.config)
 
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data", "count"]],
-        "drugs": drugs[["data", "count"]],
+        "prots": prots[["data", "count"] + snakemake.config["prot_cols"]],
+        "drugs": drugs[["data", "count"] + snakemake.config["drug_cols"]],
     }
+    
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)

@@ -90,7 +90,7 @@ else:
     gnomad = []
 
 if osp.isdir(os.path.join(source, "drugs")):
-    drugs = {x: source + "/drugs/{x}.tsv".format(x=x) for x in ["inter", "lig"]}
+    drugs = {x: source + "/drugs/{x}.tsv".format(x=x) for x in ["inter", "lig", "prots"]}
 else:
     if not config["only_proteins"]:
         raise ValueError("No drug interaction data available, can't calculate final data!")
@@ -249,6 +249,7 @@ rule prepare_all:
         drugs=rules.prepare_drugs.output.drug_pickle,
         proteins=protein_output,
         inter=rules.split_data.output.split_data,
+        protseqs=drugs["prots"],
     output:
         combined_pickle=final_output,
     message:

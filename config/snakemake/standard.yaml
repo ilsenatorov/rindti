@@ -1,6 +1,8 @@
 # the two root directories to take the data from and to store the data in
 source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle
 target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle
+prot_cols: ["AASeq"]
+drug_cols: ["IUPAC"]
 
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
 # `plddt` means that the loops with low plddt are removed
@@ -44,7 +46,7 @@ prepare_drugs:
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: random
+  method: coldtarget
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
