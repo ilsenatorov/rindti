@@ -6,7 +6,7 @@ from .conftest import N_INTER, N_PROTS
 
 
 def test_dti_dataset(dti_pickle):
-    ds = DTIDataset(dti_pickle)
+    ds = DTIDataset(dti_pickle, "test")
     ds.process()
     assert len(ds) == N_INTER
 
