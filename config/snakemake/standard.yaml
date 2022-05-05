@@ -1,6 +1,6 @@
 # the two root directories to take the data from and to store the data in
 source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle
-target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle
+target: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec
 prot_cols: ["AASeq"]
 drug_cols: ["IUPAC"]
 
@@ -22,7 +22,7 @@ plddt:
 # how to compute the graphs
 # `rinerator` uses rinerator, also can produce edge labels
 # `distance` just uses a threshold distance between CA atoms
-graph: distance
+graph: rinerator
 
 distance:
   threshold: 7
@@ -34,19 +34,20 @@ only_proteins: false
 seed: 42
 
 prepare_proteins:
-  # can be label or onehot
-  node_feats: label
-  # can be label, onehot or none
+  # can be label, onehot, or esm
+  node_feats: esm
+  # can be label, onehot, or none
   edge_feats: none
 
 prepare_drugs:
   max_num_atoms: 150
+  # can be label, onehot, glycan, or glycanone
   node_feats: glycan
   edge_feats: none
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: coldtarget
+  method: colddrug
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val

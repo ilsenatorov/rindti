@@ -169,6 +169,7 @@ rule rinerator:
 rule prepare_proteins:
     input:
         rins=expand(rinerator_output, protein=targets),
+        seqs=drugs["prots"],
     output:
         protein_pickle=rinerator_protein_output,
     message:
