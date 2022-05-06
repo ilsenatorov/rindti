@@ -58,7 +58,7 @@ def tune_asha(num_samples=1000, num_epochs=100):
         "dru_node_embed": "transformer",
         "prot_pool": "gmt",
         "drug_pool": "gmt",
-        "optimiser": "adamw",
+        "optimizer": "adamw",
         "lr": 0.001,
         "weight_decay": 0.001,
         "reduce_lr_factor": 0.1,

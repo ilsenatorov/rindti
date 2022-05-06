@@ -34,9 +34,14 @@ class Encoder(BaseModel):
         self.return_nodes = return_nodes
 
     def update_params(self, kwargs: dict):
+        """Update the params to connect parts of the encoder together (hidden dims)."""
         data_params = kwargs.pop("data")
-        print(data_params)
-        pass
+        kwargs["pool"]["max_nodes"] = data_params.pop("max_nodes")
+        kwargs.update(data_params)
+        kwargs["node"]["input_dim"] = kwargs["hidden_dim"]
+        kwargs["node"]["output_dim"] = kwargs["hidden_dim"]
+        kwargs["pool"]["input_dim"] = kwargs["hidden_dim"]
+        kwargs["pool"]["output_dim"] = kwargs["hidden_dim"]
 
     def _get_node_embed(self, params: dict) -> nn.Module:
         return node_embedders[params["module"]](**params)
@@ -94,6 +99,7 @@ class Encoder(BaseModel):
         return embed
 
     def embed(self, data: Data, **kwargs):
+        """Generate an embedding for a graph."""
         self.return_nodes = False
         embed = self.forward(data)
         return embed.detach()

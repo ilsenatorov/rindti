@@ -40,8 +40,8 @@ class BaseModel(LightningModule):
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
 
-    def _get_mlp(self, params: dict) -> MLP:
-        return MLP(**params, input_dim=self.embed_dim, out_dim=1)
+    def _get_mlp(self, **params) -> MLP:
+        return MLP(input_dim=self.embed_dim, out_dim=1, **params)
 
     def _determine_feat_method(
         self,
@@ -125,21 +125,21 @@ class BaseModel(LightningModule):
     #     self.shared_epoch_end(outputs, "test_epoch_", log_hparams=True)
 
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
-        """Configure the optimiser and/or lr schedulers"""
-        optimiser = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[self.hparams.optimiser]
+        """Configure the optimizer and/or lr schedulers"""
+        opt_params = self.hparams.optimizer
+        optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[opt_params["module"]]
         params = [{"params": self.parameters()}]
         if hasattr(self, "prot_encoder"):
-            params.append({"params": self.prot_encoder.parameters(), "lr": self.hparams.prot_lr})
+            params.append({"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]})
         if hasattr(self, "drug_encoder"):
-            {"params": self.drug_encoder.parameters(), "lr": self.hparams.drug_lr}
-        optimiser = optimiser(params=self.parameters(), lr=self.hparams.lr)
+            {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
+        optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
         lr_scheduler = {
             "scheduler": ReduceLROnPlateau(
-                optimiser,
-                factor=self.hparams.reduce_lr_factor,
-                patience=self.hparams.reduce_lr_patience,
+                optimizer,
                 verbose=True,
+                **opt_params["reduce_lr"],
             ),
-            "monitor": self.hparams.monitor,
+            "monitor": "val_loss",
         }
-        return [optimiser], [lr_scheduler]
+        return [optimizer], [lr_scheduler]

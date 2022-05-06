@@ -38,7 +38,7 @@ def default_config():
         "num_layers": 3,
         "num_proto": 8,
         "num_workers": 4,
-        "optimiser": "adamw",
+        "optimizer": "adamw",
         "pooling_method": "mincut",
         "prot_per_fam": PROT_PER_FAM,
         "ratio": 0.25,

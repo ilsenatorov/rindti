@@ -68,11 +68,16 @@ class DTIDataModule(BaseDataModule):
         return "DTI " + super().__repr__()
 
     def update_config(self, config: dict) -> None:
-        config["model"]["prot"]["data"] = self.config["data"]["prot"]
-        config["model"]["drug"]["data"] = self.config["data"]["drug"]
+        """Update the main config with the config of the dataset."""
+        for i in ["prot", "drug"]:
+            config["model"][f"{i}"]["data"] = self.config["data"][f"{i}"]
+            config["model"][f"{i}"]["data"]["feat_dim"] = self.config["snakemake"][f"{i}_feat_dim"]
+            config["model"][f"{i}"]["data"]["edge_dim"] = self.config["snakemake"][f"{i}_edge_dim"]
 
 
 class PreTrainDataModule(BaseDataModule):
+    """DataModule for pretraining on proteins."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

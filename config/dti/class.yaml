@@ -1,7 +1,7 @@
 seed: 42
 datamodule:
   filename: results/prepare_all/coldtarget_posneg_none_class_template_distance_label_none_label_none.pkl
-  batch_size: 1024
+  batch_size: 128
   num_workers: 16
 trainer:
   gpus: 1
@@ -10,20 +10,11 @@ trainer:
   gradient_clip_val: 100
 early_stop:
   patience: 60
-optimiser:
-  module: adam
-  lr: 0.0001
-  weight_decay: 0.01
-  momentum: 0.01
-  reduce_lr:
-    factor: 0.1
-    patience: 20
-# Model
+
 model:
   module: class
   feat_method: element_l1
   drug:
-    lr: 0.001
     hidden_dim: 128
     node:
       module: ginconv
@@ -36,7 +27,6 @@ model:
       hidden_dim: 128
       ratio: 0.25
   prot:
-    lr: 0.001
     hidden_dim: 128
     node:
       module: ginconv
@@ -51,3 +41,13 @@ model:
   mlp:
     dropout: 0.2
     hidden_dim: 512
+  optimizer:
+    module: adam
+    lr: 0.0001
+    prot_lr: 0.0001
+    drug_lr: 0.0001
+    weight_decay: 0.01
+    momentum: 0.01
+    reduce_lr:
+      factor: 0.1
+      patience: 20

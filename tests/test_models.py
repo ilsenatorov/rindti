@@ -31,7 +31,7 @@ def default_config():
         "lr": 0.001,
         "mlp_dropout": 0.2,
         "momentum": 0.3,
-        "optimiser": "adamw",
+        "optimizer": "adamw",
         "prot_alpha": 1,
         "prot_dropout": 0.2,
         "prot_frac": 0.05,

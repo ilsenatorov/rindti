@@ -11,7 +11,7 @@ early_stop_patience: 200
 gradient_clip_val: 100
 lr: 0.001
 monitor: train_loss
-optimiser: adam
+optimizer: adam
 reduce_lr_factor: 0.1
 reduce_lr_patience: 100
 # Model

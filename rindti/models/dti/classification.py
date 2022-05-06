@@ -14,7 +14,7 @@ class ClassificationModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        self._determine_feat_method(**kwargs)
+        self._determine_feat_method(kwargs["feat_method"], kwargs["prot"]["hidden_dim"], kwargs["drug"]["hidden_dim"])
         self.prot_encoder = Encoder(**kwargs["prot"])
         self.drug_encoder = Encoder(**kwargs["drug"])
         self.mlp = self._get_mlp(**kwargs["mlp"])
