@@ -88,7 +88,7 @@ class ESMEncoder:
         self.esms = generate_esm_script(prot_ids, seqs, batch_size)
 
     def __call__(self, prot_id):
-        return [x.item() for x in self.esms[prot_id]]
+        return {"x": self.esms[prot_id]}
 
 
 class ProteinEncoder:

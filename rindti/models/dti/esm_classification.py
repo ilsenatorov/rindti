@@ -6,6 +6,7 @@ from ...utils import remove_arg_prefix
 from ..encoder import Encoder
 from ..base_model import BaseModel
 
+
 class ESMClassModel(BaseModel):
     """
     ESM Model Class for DTI prediction
@@ -23,6 +24,7 @@ class ESMClassModel(BaseModel):
         )
         self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
+        self._set_class_metrics()
     
     def forward(self, prot: dict, drug: dict):
         """Forward pass of the model"""
@@ -46,10 +48,11 @@ class ESMClassModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
-        metrics = self._get_class_metrics(fwd_dict["pred"], labels)
+        """metrics = self._get_class_metrics(fwd_dict["pred"], labels)
         metrics.update(
             dict(
                 loss=bce_loss,
             )
         )
-        return metrics
+        return metrics"""
+        return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

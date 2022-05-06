@@ -1,9 +1,9 @@
-data: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/oracle/prepare_all/random_all_none_class_whole_distance_label_none_glycan_none.pkl
+data: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_glycan_none.pkl
 exp_name: glylec
 runs: 1
 # Hardware
 batch_size: 64
-gpus: 0
+gpus: 1
 max_epochs: 2
 num_workers: 0
 profiler: null
@@ -23,7 +23,7 @@ weighted: 0
 feat_method: element_l1
 mlp_dropout: 0.2
 mlp_hidden_dim: 512
-model: class
+model: esm_class
 # Drug encoder
 drug_dropout: 0.1
 drug_hidden_dim: 128
