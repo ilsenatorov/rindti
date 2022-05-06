@@ -18,7 +18,7 @@ class BaseTestModel:
         pretrain_datamodule.setup()
         pretrain_datamodule.update_config(config)
         config["model"]["label_list"] = [0, 1, 2]
-        model = self.model_class(**config["model"])
+        model = self.model_class(**config)
         trainer = Trainer(
             gpus=0,
             fast_dev_run=True,
@@ -34,7 +34,7 @@ class BaseTestModel:
         pretrain_datamodule.setup()
         pretrain_datamodule.update_config(config)
         config["model"]["label_list"] = [0, 1, 2]
-        model = self.model_class(**config["model"])
+        model = self.model_class(**config)
         trainer = Trainer(
             gpus=1,
             fast_dev_run=True,
@@ -48,7 +48,7 @@ class BaseTestModel:
         pretrain_datamodule.setup()
         pretrain_datamodule.update_config(config)
         config["model"]["label_list"] = [0, 1, 2]
-        model = self.model_class(**config["model"])
+        model = self.model_class(**config)
         batch = next(iter(pretrain_datamodule.train_dataloader()))
         output = model.shared_step(batch)
         assert "loss" in output.keys()

@@ -6,7 +6,6 @@ from torch.functional import Tensor
 from torch_geometric.data import Data
 
 from ..layers import ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, TransformerNet
-from .base_model import BaseModel
 
 node_embedders = {
     "ginconv": GINConvNet,
@@ -18,7 +17,7 @@ node_embedders = {
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
-class Encoder(BaseModel):
+class Encoder(LightningModule):
     r"""Encoder for graphs
 
     Args:
@@ -35,8 +34,8 @@ class Encoder(BaseModel):
 
     def update_params(self, kwargs: dict):
         """Update the params to connect parts of the encoder together (hidden dims)."""
-        data_params = kwargs.pop("data")
-        kwargs["pool"]["max_nodes"] = data_params.pop("max_nodes")
+        data_params = kwargs["data"]
+        kwargs["pool"]["max_nodes"] = data_params["max_nodes"]
         kwargs.update(data_params)
         kwargs["node"]["input_dim"] = kwargs["hidden_dim"]
         kwargs["node"]["output_dim"] = kwargs["hidden_dim"]

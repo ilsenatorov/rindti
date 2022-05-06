@@ -41,7 +41,7 @@ def pretrain(**kwargs):
         deterministic=False,
         **kwargs["trainer"],
     )
-    model = models[kwargs["model"].pop("module")](**kwargs["model"])
+    model = models[kwargs["model"]["module"]](**kwargs["model"])
     trainer.fit(model, dm)
 
 

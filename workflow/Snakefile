@@ -5,21 +5,25 @@ import os.path as osp
 configfile: "config/snakemake/standard.yaml"
 
 
-source = config["source"][:-1] if config["source"][-1] == "/" else config["source"]  # resources
-target = config["target"][:-1] if config["target"][-1] == "/" else config["target"]  # results
-targets = [x.split(".")[0] for x in os.listdir(source + "/structures") if x.endswith(".pdb")]
+source = config["source"].rstrip("/")  # resources
+target = config["target"].rstrip("/")  # output
+targets = [x.split(".")[0] for x in os.listdir(source + "/structures") if x.endswith(".pdb")]  # list of structures
+
 
 if config["structures"] == "whole":
     structures = source + "/structures/{protein}.pdb"
     script_output = ""
 else:
-    structures = "{target}/parsed_structures_{structures}/{{protein}}.pdb".format(target=target, structures=config["structures"])
-    script_output = "{target}/pymol_{structures}/{{protein}}.pml".format(target=target, structures=config["structures"])
+    structures = "{target}/parsed_structures_{structures}/{{protein}}.pdb".format(
+        target=target, structures=config["structures"]
+    )
+    script_output = "{target}/pymol_{structures}/{{protein}}.pml".format(
+        target=target, structures=config["structures"]
+    )
 
 
 rinerator_output = "{target}/rinerator_{structures}/{{protein}}/{{protein}}_h.sif".format(
-    target=target,
-    structures=config["structures"]
+    target=target, structures=config["structures"]
 )
 rinerator_protein_output = "{target}/rinerator_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
     target=target,
@@ -50,8 +54,7 @@ split_data = "{target}/split_data/{split}_{filtering}_{sampling}_{task}_split.cs
 )
 
 transformer_output = "{target}/prepare_transformer/{node_feats}_transformer.pkl".format(
-    target=target,
-    node_feats=config["prepare_proteins"]["node_feats"]
+    target=target, node_feats=config["prepare_proteins"]["node_feats"]
 )
 
 final_output = "{target}/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_node_feats}_{prot_edge_feats}_{drug_node_feats}_{drug_edge_feats}.pkl".format(
@@ -77,7 +80,9 @@ output = [final_output, plot_output]
 ### CHECK IF FILES ARE PRESENT ###
 
 if osp.isdir(os.path.join(source, "templates")):
-    templates = expand("{resources}/templates/{template}", resources=source, template=os.listdir("resources/templates"))
+    templates = expand(
+        "{resources}/templates/{template}", resources=source, template=os.listdir(f"{source}/templates")
+    )
 else:
     if not config["only_proteins"] and config["structures"] not in ["whole", "plddt"]:
         raise ValueError("No templates available")
@@ -203,7 +208,9 @@ rule parse_dataset:
         inter=drugs["inter"],
     output:
         inter="{results}/parse_dataset/{filtering}_{sampling}_inter.csv".format(
-            results=target, filtering=config["parse_dataset"]["filtering"], sampling=config["parse_dataset"]["sampling"]
+            results=target,
+            filtering=config["parse_dataset"]["filtering"],
+            sampling=config["parse_dataset"]["sampling"],
         ),
     message:
         """Parsing the dataset
@@ -250,7 +257,6 @@ rule prepare_all:
         drugs=rules.prepare_drugs.output.drug_pickle,
         proteins=protein_output,
         inter=rules.split_data.output.split_data,
-        protseqs=drugs["prots"],
     output:
         combined_pickle=final_output,
     message:

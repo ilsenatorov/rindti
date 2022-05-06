@@ -12,8 +12,7 @@ class ClassificationModel(BaseModel):
     """Model for DTI prediction as a class problem."""
 
     def __init__(self, **kwargs):
-        super().__init__()
-        self.save_hyperparameters()
+        kwargs = super().__init__(**kwargs)
         self._determine_feat_method(kwargs["feat_method"], kwargs["prot"]["hidden_dim"], kwargs["drug"]["hidden_dim"])
         self.prot_encoder = Encoder(**kwargs["prot"])
         self.drug_encoder = Encoder(**kwargs["drug"])

@@ -23,8 +23,10 @@ from ..layers import MLP
 class BaseModel(LightningModule):
     """Base model, defines a lot of helper functions."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
+        self.save_hyperparameters()
+        return kwargs["model"]
 
     def _set_class_metrics(self, num_classes: int = 2):
         metrics = MetricCollection(
@@ -117,21 +119,20 @@ class BaseModel(LightningModule):
         """What to do at the end of a training epoch. Logs everything."""
         self.log_histograms()
         metrics = self.train_metrics.compute()
+        self.train_metrics.reset()
         self.log_dict(metrics)
 
     def validation_epoch_end(self, outputs: dict):
         """What to do at the end of a validation epoch. Logs everything."""
-        self.log_histograms()
         metrics = self.val_metrics.compute()
+        self.val_metrics.reset()
         self.log_dict(metrics)
-
-    # def test_epoch_end(self, outputs: dict):
-    #     """What to do at the end of a test epoch. Logs everything, saves hyperparameters"""
-    #     self.shared_epoch_end(outputs, "test_epoch_", log_hparams=True)
+        if self.logger:
+            self.logger.log_hyperparams(self.hparams, metrics)
 
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimizer and/or lr schedulers"""
-        opt_params = self.hparams.optimizer
+        opt_params = self.hparams.model["optimizer"]
         optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[opt_params["module"]]
         params = [{"params": self.parameters()}]
         if hasattr(self, "prot_encoder"):

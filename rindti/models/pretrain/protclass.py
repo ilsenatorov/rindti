@@ -10,8 +10,7 @@ class ProtClassModel(BaseModel):
     """Model for basic protein classification. Data in self.forward has to contain data.y, which will be the label we aim to predict."""
 
     def __init__(self, **kwargs):
-        super().__init__()
-        self.save_hyperparameters()
+        kwargs = super().__init__(**kwargs)
         self.encoder = Encoder(**kwargs["encoder"])
         self.mlp = MLP(input_dim=kwargs["hidden_dim"], out_dim=len(kwargs["label_list"]), **kwargs["mlp"])
         self.loss = nn.CrossEntropyLoss()

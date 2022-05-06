@@ -1,6 +1,5 @@
-from pprint import pprint
+import random
 
-import numpy as np
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -19,9 +18,7 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    tmp = np.arange(100)
-    np.random.shuffle(tmp)
-    seeds = tmp[: kwargs["runs"]]
+    seeds = random.sample(range(1, 1000), kwargs["runs"])
 
     for i, seed in enumerate(seeds):
         print(f"Run {i+1} of {kwargs['runs']} with seed {seed}")
@@ -49,8 +46,7 @@ def single_run(**kwargs):
         RichProgressBar(),
     ]
     trainer = Trainer(callbacks=callbacks, logger=logger, log_every_n_steps=25, **kwargs["trainer"])
-    model = models[kwargs["model"].pop("module")](**kwargs["model"])
-    pprint(model)
+    model = models[kwargs["model"]["module"]](**kwargs)
     trainer.fit(model, datamodule)
 
 

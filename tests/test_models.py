@@ -17,7 +17,7 @@ class BaseTestModel:
     def test_full(self, config, dti_datamodule):
         dti_datamodule.setup()
         dti_datamodule.update_config(config)
-        model = self.model_class(**config["model"])
+        model = self.model_class(**config)
         trainer = Trainer(
             gpus=0,
             fast_dev_run=True,
@@ -32,7 +32,7 @@ class BaseTestModel:
     def test_full_gpu(self, config, dti_datamodule):
         dti_datamodule.setup()
         dti_datamodule.update_config(config)
-        model = self.model_class(**config["model"])
+        model = self.model_class(**config)
         trainer = Trainer(
             gpus=1,
             fast_dev_run=True,
@@ -45,7 +45,7 @@ class BaseTestModel:
     def test_shared(self, config, dti_datamodule):
         dti_datamodule.setup()
         dti_datamodule.update_config(config)
-        model = self.model_class(**config["model"])
+        model = self.model_class(**config)
         batch = next(iter(dti_datamodule.train_dataloader()))
         output = model.shared_step(batch)
         assert "loss" in output.keys()
