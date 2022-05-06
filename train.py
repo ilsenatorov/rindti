@@ -1,5 +1,6 @@
 from pprint import pprint
 
+import numpy as np
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -15,26 +16,46 @@ models = {
 }
 
 
-def train(**cfg):
+def train(**kwargs):
     """Train the whole model"""
-    seed_everything(cfg["seed"])
-    datamodule = DTIDataModule(**cfg["datamodule"])
+    seed_everything(kwargs["seed"])
+    tmp = np.arange(100)
+    np.random.shuffle(tmp)
+    seeds = tmp[: kwargs["runs"]]
+
+    for i, seed in enumerate(seeds):
+        print(f"Run {i+1} of {kwargs['runs']} with seed {seed}")
+        kwargs["seed"] = seed
+        single_run(**kwargs)
+
+
+def single_run(**kwargs):
+    """Does a single run."""
+    seed_everything(kwargs["seed"])
+    datamodule = DTIDataModule(**kwargs["datamodule"])
     datamodule.setup()
-    datamodule.update_config(cfg)
-    pprint(cfg)
+    datamodule.update_config(kwargs)
+    pprint(datamodule.config)
+
+    # kwargs.update(datamodule.config)
+    for key, value in datamodule.config.items():
+        if key not in kwargs:
+            kwargs[key] = value
+
     logger = TensorBoardLogger(
         "tb_logs",
-        name="dti",  # FIXME fix naming of the model
+        name="dti",
         default_hp_metric=False,
     )
+
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", mode="min", **cfg["early_stop"]),
+        EarlyStopping(monitor="val_loss", mode="min", **kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
-    trainer = Trainer(callbacks=callbacks, logger=logger, log_every_n_steps=25, **cfg["trainer"])
-    model = models[cfg["model"].pop("module")](**cfg["model"])
+    trainer = Trainer(callbacks=callbacks, logger=logger, log_every_n_steps=25, **kwargs["trainer"])
+    model = models[kwargs["model"].pop("module")](**kwargs["model"])
     pprint(model)
     trainer.fit(model, datamodule)
 

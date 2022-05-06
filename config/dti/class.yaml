@@ -1,6 +1,8 @@
 seed: 42
+runs: 5
 datamodule:
   filename: results/prepare_all/coldtarget_posneg_none_class_template_distance_label_none_label_none.pkl
+  exp_name: test
   batch_size: 128
   num_workers: 16
 trainer:

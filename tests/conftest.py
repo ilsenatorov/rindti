@@ -171,7 +171,7 @@ def sharded_pretrain_pickle(tmpdir_factory, request):
 
 @pytest.fixture(scope="session")
 def dti_dataset(dti_pickle):
-    return DTIDataset(dti_pickle)
+    return DTIDataset(dti_pickle, "test")
 
 
 @pytest.fixture(scope="session")

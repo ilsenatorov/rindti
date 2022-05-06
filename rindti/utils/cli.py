@@ -59,6 +59,8 @@ def hparams_config(hparams: dict) -> List[dict]:
     """
     configs = []
     hparams_small = {k: v for k, v in hparams.items() if isinstance(v, list)}
+    if hparams_small == {}:
+        return [hparams]
     keys, values = zip(*hparams_small.items())
     for v in itertools.product(*values):
         config = hparams.copy()
