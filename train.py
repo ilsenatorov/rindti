@@ -6,7 +6,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
 from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
-from rindti.utils import hparams_config, read_config
+from rindti.utils import read_config
 
 models = {
     "class": ClassificationModel,
@@ -15,33 +15,26 @@ models = {
 }
 
 
-def train(**kwargs):
+def train(**cfg):
     """Train the whole model"""
-    seed_everything(kwargs["seed"])
-    datamodule = DTIDataModule(kwargs["data"], kwargs["batch_size"], kwargs["num_workers"])
+    seed_everything(cfg["seed"])
+    datamodule = DTIDataModule(**cfg["datamodule"])
     datamodule.setup()
-    pprint(datamodule.config)
-    kwargs.update(datamodule.config)
+    datamodule.update_config(cfg)
+    pprint(cfg)
     logger = TensorBoardLogger(
         "tb_logs",
-        name="dti" + kwargs["model"] + ":" + kwargs["data"].split("/")[-1].split(".")[0],
+        name="dti",  # FIXME fix naming of the model
         default_hp_metric=False,
     )
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        EarlyStopping(monitor="val_loss", mode="min", **cfg["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
-    trainer = Trainer(
-        gpus=kwargs["gpus"],
-        callbacks=callbacks,
-        logger=logger,
-        gradient_clip_val=kwargs["gradient_clip_val"],
-        profiler=kwargs["profiler"],
-        log_every_n_steps=25,
-    )
-    model = models[kwargs["model"]](**kwargs)
+    trainer = Trainer(callbacks=callbacks, logger=logger, log_every_n_steps=25, **cfg["trainer"])
+    model = models[cfg["model"].pop("module")](**cfg["model"])
     pprint(model)
     trainer.fit(model, datamodule)
 
@@ -62,6 +55,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     orig_config = read_config(args.config)
-    configs = hparams_config(orig_config)
-    for config in configs:
-        train(**config)
+    train(**orig_config)

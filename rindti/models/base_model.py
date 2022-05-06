@@ -4,7 +4,7 @@ from typing import Tuple, Union
 import numpy as np
 import torch
 from pytorch_lightning import LightningModule
-from torch import LongTensor, Tensor, nn
+from torch import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import (
@@ -19,26 +19,7 @@ from torchmetrics import (
 )
 
 from ..data import TwoGraphData
-from ..layers import (
-    MLP,
-    ChebConvNet,
-    DiffPoolNet,
-    FilmConvNet,
-    GatConvNet,
-    GINConvNet,
-    GMTNet,
-    MeanPool,
-    TransformerNet,
-)
-
-node_embedders = {
-    "ginconv": GINConvNet,
-    "chebconv": ChebConvNet,
-    "gatconv": GatConvNet,
-    "filmconv": FilmConvNet,
-    "transformer": TransformerNet,
-}
-poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
+from ..layers import MLP
 
 
 class BaseModel(LightningModule):
@@ -60,30 +41,6 @@ class BaseModel(LightningModule):
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
-
-    def _get_label_embed(self, params: dict) -> nn.Embedding:
-        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"])
-
-    def _get_onehot_embed(self, params: dict) -> nn.LazyLinear:
-        return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
-
-    def _get_feat_embed(self, params: dict) -> Union[nn.Embedding, nn.LazyLinear]:
-        if params["feat_type"] == "onehot":
-            return self._get_onehot_embed(params)
-        elif params["feat_type"] == "label":
-            return self._get_label_embed(params)
-        else:
-            raise ValueError("Unknown feature type!")
-
-    def _get_node_embed(self, params: dict, out_dim=None) -> LightningModule:
-        if params["edge_type"] == "none":
-            params["edge_dim"] = None
-        if out_dim:
-            return node_embedders[params["node_embed"]](params["hidden_dim"], out_dim, **params)
-        return node_embedders[params["node_embed"]](params["hidden_dim"], params["hidden_dim"], **params)
-
-    def _get_pooler(self, params: dict) -> LightningModule:
-        return poolers[params["pool"]](params["hidden_dim"], params["hidden_dim"], **params)
 
     def _get_mlp(self, params: dict) -> MLP:
         return MLP(**params, input_dim=self.embed_dim, out_dim=1)

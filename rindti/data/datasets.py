@@ -22,6 +22,18 @@ class DTIDataset(InMemoryDataset):
 
     splits = {"train": 0, "val": 1, "test": 2}
 
+    def __init__(
+        self,
+        filename: str,
+        split: str = "train",
+        transform: Callable = None,
+        pre_transform: Callable = None,
+        pre_filter: Callable = None,
+    ):
+        root = self._set_filenames(filename)
+        super().__init__(root, transform, pre_transform, pre_filter)
+        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
+
     def _set_filenames(self, filename: str) -> str:
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
@@ -30,10 +42,10 @@ class DTIDataset(InMemoryDataset):
 
     def _set_types(self, data: dict) -> dict:
         """Sets feat type in the self.config from snakemake self.config"""
-        self.config["prot_feat_type"] = get_type(data, "prot_x")
-        self.config["drug_feat_type"] = get_type(data, "drug_x")
-        self.config["prot_edge_type"] = get_type(data, "prot_edge_feats")
-        self.config["drug_edge_type"] = get_type(data, "drug_edge_feats")
+        self.config["data"]["prot"]["feat_type"] = get_type(data, "prot_x")
+        self.config["data"]["drug"]["feat_type"] = get_type(data, "drug_x")
+        self.config["data"]["prot"]["edge_type"] = get_type(data, "prot_edge_feats")
+        self.config["data"]["drug"]["edge_type"] = get_type(data, "drug_edge_feats")
         return self.config
 
     def process_(self, data_list: list, split: str):
@@ -64,25 +76,15 @@ class DTIDataset(InMemoryDataset):
         """Files that are created"""
         return [k + ".pt" for k in self.splits.keys()]
 
-    def __init__(
-        self,
-        filename: str,
-        split: str = "train",
-        transform: Callable = None,
-        pre_transform: Callable = None,
-        pre_filter: Callable = None,
-    ):
-        root = self._set_filenames(filename)
-        super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
-
     def process(self):
         """If the dataset was not seen before, process everything"""
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
-            self.config = all_data["config"]
-            self.config["prot_max_nodes"] = 0
-            self.config["drug_max_nodes"] = 0
+            self.config = {}
+            self.config["snakemake"] = all_data["config"]
+            self.config["data"] = {"prot": {}, "drug": {}}
+            self.config["data"]["prot"]["max_nodes"] = 0
+            self.config["data"]["drug"]["max_nodes"] = 0
             for split in self.splits.keys():
                 data_list = []
                 for i in all_data["data"]:
@@ -93,8 +95,12 @@ class DTIDataset(InMemoryDataset):
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
                     two_graph_data.num_nodes = 1  # supresses the warning
-                    self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
-                    self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
+                    self.config["data"]["prot"]["max_nodes"] = max(
+                        self.config["data"]["prot"]["max_nodes"], two_graph_data.n_nodes("prot_")
+                    )
+                    self.config["data"]["drug"]["max_nodes"] = max(
+                        self.config["data"]["drug"]["max_nodes"], two_graph_data.n_nodes("drug_")
+                    )
                     data_list.append(two_graph_data)
                     self.config = self._set_types(data_list[0])
                 if data_list:

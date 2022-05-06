@@ -1,9 +1,21 @@
 from typing import Tuple, Union
 
+from pytorch_lightning import LightningModule
+from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
+from ..layers import ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, TransformerNet
 from .base_model import BaseModel
+
+node_embedders = {
+    "ginconv": GINConvNet,
+    "chebconv": ChebConvNet,
+    "gatconv": GatConvNet,
+    "filmconv": FilmConvNet,
+    "transformer": TransformerNet,
+}
+poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
 class Encoder(BaseModel):
@@ -14,17 +26,43 @@ class Encoder(BaseModel):
 
     def __init__(self, return_nodes: bool = False, **kwargs):
         super().__init__()
+        self.update_params(kwargs)
         self.feat_embed = self._get_feat_embed(kwargs)
-        self.node_embed = self._get_node_embed(kwargs)
-        self.pool = self._get_pooler(kwargs)
+        self.node_embed = self._get_node_embed(kwargs["node"])
+        self.pool = self._get_pooler(kwargs["pool"])
         self.return_nodes = return_nodes
+
+    def update_params(self, kwargs: dict):
+        data_params = kwargs.pop("data")
+        print(data_params)
+        pass
+
+    def _get_node_embed(self, params: dict) -> nn.Module:
+        return node_embedders[params["module"]](**params)
+
+    def _get_pooler(self, params: dict) -> nn.Module:
+        return poolers[params["module"]](**params)
+
+    def _get_label_embed(self, params: dict) -> nn.Embedding:
+        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"])
+
+    def _get_onehot_embed(self, params: dict) -> nn.Linear:
+        return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
+
+    def _get_feat_embed(self, params: dict) -> Union[nn.Embedding, nn.Linear]:
+        if params["feat_type"] == "onehot":
+            return self._get_onehot_embed(params)
+        elif params["feat_type"] == "label":
+            return self._get_label_embed(params)
+        else:
+            raise ValueError("Unknown feature type!")
 
     def forward(
         self,
         data: Union[dict, Data],
         **kwargs,
     ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-        """Encode a graph
+        r"""Encode a graph
 
         Args:
             data (Union[dict, Data]): Graph to encode. Must contain the following keys:

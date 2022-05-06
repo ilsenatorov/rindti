@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from typing import Tuple
 
 import torch
@@ -8,7 +7,7 @@ from torch_geometric.data import Data
 from ...data import DataCorruptor
 from ...layers import MutualInformation
 from ...losses import NodeLoss
-from ..base_model import BaseModel, node_embedders, poolers
+from ..base_model import BaseModel
 from ..encoder import Encoder
 
 

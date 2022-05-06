@@ -3,7 +3,6 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 
 from ...data import TwoGraphData
-from ...losses import SoftNearestNeighborLoss
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 from ..encoder import Encoder
@@ -16,12 +15,9 @@ class ClassificationModel(BaseModel):
         super().__init__()
         self.save_hyperparameters()
         self._determine_feat_method(**kwargs)
-        drug_param = remove_arg_prefix("drug_", kwargs)
-        prot_param = remove_arg_prefix("prot_", kwargs)
-        mlp_param = remove_arg_prefix("mlp_", kwargs)
-        self.prot_encoder = Encoder(**prot_param)
-        self.drug_encoder = Encoder(**drug_param)
-        self.mlp = self._get_mlp(mlp_param)
+        self.prot_encoder = Encoder(**kwargs["prot"])
+        self.drug_encoder = Encoder(**kwargs["drug"])
+        self.mlp = self._get_mlp(**kwargs["mlp"])
         self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:

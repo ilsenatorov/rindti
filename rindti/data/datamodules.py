@@ -18,9 +18,8 @@ class BaseDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.shuffle = shuffle
 
-    def get_config(self, prefix: str = "") -> dict:
-        """Get the config for a single prefix"""
-        return {k.strip(prefix): v for k, v in self.config.items() if k.startswith(prefix)}
+    def update_config(self, config: dict) -> None:
+        raise NotImplementedError
 
     def train_dataloader(self):
         return DataLoader(self.train, **self._dl_kwargs(True))
@@ -67,6 +66,10 @@ class DTIDataModule(BaseDataModule):
 
     def __repr__(self):
         return "DTI " + super().__repr__()
+
+    def update_config(self, config: dict) -> None:
+        config["model"]["prot"]["data"] = self.config["data"]["prot"]
+        config["model"]["drug"]["data"] = self.config["data"]["drug"]
 
 
 class PreTrainDataModule(BaseDataModule):
