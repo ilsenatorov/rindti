@@ -8,7 +8,7 @@ bsite:
   radius: 5
 # radius (in Angstroms) around residues from template to match residues from the query structure
 template:
-  radius: 2
+  radius: 5
 # cutoff for plddt score to remove flailing loops and whatnot
 plddt:
   threshold: 50
