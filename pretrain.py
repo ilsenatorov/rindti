@@ -4,7 +4,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import PreTrainDataModule
 from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
-from rindti.utils import MyArgParser, read_config
+from rindti.utils import read_config
 
 models = {
     "graphlog": GraphLogModel,
@@ -62,9 +62,10 @@ def pretrain(**kwargs):
 
 
 if __name__ == "__main__":
+    from argparse import ArgumentParser
     from pprint import pprint
 
-    parser = MyArgParser(prog="Model Trainer")
+    parser = ArgumentParser(prog="Model Trainer")
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
 

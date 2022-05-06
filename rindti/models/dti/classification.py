@@ -9,7 +9,7 @@ from ..encoder import Encoder
 
 
 class ClassificationModel(BaseModel):
-    """Model for DTI prediction as a class problem"""
+    """Model for DTI prediction as a class problem."""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -33,7 +33,8 @@ class ClassificationModel(BaseModel):
         )
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """Step that is the same for train, validation and test
+        """Step that is the same for train, validation and test.
+
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """

@@ -12,8 +12,10 @@ from ..encoder import Encoder
 
 
 class InfoGraphModel(BaseModel):
-    """Maximise mutual information between node and graph representations
-    https://arxiv.org/pdf/1808.06670.pdf"""
+    """Maximise mutual information between node and graph representations.
+
+    https://arxiv.org/pdf/1808.06670.pdf
+    """
 
     def __init__(self, **kwargs):
         super().__init__()

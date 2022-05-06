@@ -14,7 +14,8 @@ from ..encoder import Encoder
 
 
 class GraphLogModel(BaseModel):
-    """Work in progress
+    """Work in progress.
+
     - https://github.com/DeepGraphLearning/GraphLoG
     - https://arxiv.org/pdf/2106.04113.pdf
     """
@@ -29,7 +30,7 @@ class GraphLogModel(BaseModel):
         )
 
     def mask_nodes(self, batch: Data) -> Data:
-        """Mask the nodes according to self.mask_rate
+        """Mask the nodes according to self.mask_rate.
 
         Args:
             batch (Data): Graph batch
@@ -56,7 +57,7 @@ class GraphLogModel(BaseModel):
         return batch
 
     def intra_NCE_loss(self, node_reps, node_modify_reps, batch, tau=0.04, epsilon=1e-6):
-        """Loss between nodes"""
+        """Loss between nodes."""
         node_reps_norm = torch.norm(node_reps, dim=1).unsqueeze(-1)
         node_modify_reps_norm = torch.norm(node_modify_reps, dim=1).unsqueeze(-1)
         sim = torch.mm(node_reps, node_modify_reps.t()) / (
@@ -73,7 +74,7 @@ class GraphLogModel(BaseModel):
         return -torch.log(positive_ratio).sum() / batch.masked_node_indices.shape[0]
 
     def inter_NCE_loss(self, graph_reps, graph_modify_reps, tau=0.04, epsilon=1e-6):
-        """Loss between graphs"""
+        """Loss between graphs."""
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         graph_modify_reps_norm = torch.norm(graph_modify_reps, dim=1).unsqueeze(-1)
         sim = torch.mm(graph_reps, graph_modify_reps.t()) / (
@@ -91,7 +92,7 @@ class GraphLogModel(BaseModel):
     # NCE loss for global-local mutual information maximization
 
     def gl_NCE_loss(self, node_reps, graph_reps, batch, tau=0.04, epsilon=1e-6):
-        """Don't even know what it's for"""
+        """Don't even know what it's for."""
         node_reps_norm = torch.norm(node_reps, dim=1).unsqueeze(-1)
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         sim = torch.mm(node_reps, graph_reps.t()) / (torch.mm(node_reps_norm, graph_reps_norm.t()) + epsilon)
@@ -105,7 +106,7 @@ class GraphLogModel(BaseModel):
         return -torch.log(positive_ratio + (1 - mask)).sum() / node_reps.shape[0]
 
     def proto_NCE_loss(self, graph_reps, tau=0.04, epsilon=1e-6):
-        """Prototype loss"""
+        """Prototype loss."""
         # similarity for original and modified graphs
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         exp_sim_list = []
@@ -158,7 +159,7 @@ class GraphLogModel(BaseModel):
         return torch.tensor(NCE_loss, device=self.device, dtype=torch.float32)
 
     def update_proto_lowest(self, graph_reps, decay_ratio=0.7, epsilon=1e-6):
-        """Update lowest prototypes"""
+        """Update lowest prototypes."""
         graph_reps_norm = torch.norm(graph_reps, dim=1).unsqueeze(-1)
         proto_norm = torch.norm(self.proto[0], dim=1).unsqueeze(-1)
         sim = torch.mm(graph_reps, self.proto[0].t()) / (torch.mm(graph_reps_norm, proto_norm.t()) + epsilon)
@@ -177,7 +178,7 @@ class GraphLogModel(BaseModel):
         ).detach()
 
     def init_proto_lowest(self, num_iter=5):
-        """Intitalise lowest prototypes"""
+        """Intitalise lowest prototypes."""
         self.eval()
         for _ in range(num_iter):
             for step, batch in enumerate(self.train_dataloader()):
@@ -195,7 +196,7 @@ class GraphLogModel(BaseModel):
         return torch.index_select(self.proto[0], 0, idx)
 
     def init_proto(self, index, num_iter=20):
-        """Initialise prototypes"""
+        """Initialise prototypes."""
         proto_connection = torch.zeros(self.proto[index - 1].shape[0], device=self.device)
 
         for iter in range(num_iter):
@@ -227,7 +228,7 @@ class GraphLogModel(BaseModel):
         return proto_selected, proto_connection
 
     def embed_batch(self, orig_batch: Data) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Embed a single batch (normal or masked doesn't matter)"""
+        """Embed a single batch (normal or masked doesn't matter)."""
         batch = deepcopy(orig_batch)
         graph_reps, node_reps = self.encoder(batch)
         node_reps = self.proj(node_reps)
@@ -243,7 +244,7 @@ class GraphLogModel(BaseModel):
         return node_reps, node_modify_reps, graph_reps, graph_modify_reps
 
     def shared_step(self, batch: Data, proto: bool = True) -> dict:
-        """Calculate all the losses"""
+        """Calculate all the losses."""
         (
             node_reps_proj,
             node_modify_reps_proj,
@@ -269,7 +270,7 @@ class GraphLogModel(BaseModel):
         }
 
     def training_step(self, data: Data, data_idx: int):
-        """Training step"""
+        """Training step."""
         if self.trainer.current_epoch == 0:
             ss = self.shared_step(data, proto=False)
         else:
@@ -279,7 +280,7 @@ class GraphLogModel(BaseModel):
         return ss
 
     def training_epoch_end(self, outputs: dict):
-        """Update prototypes and then do normal stuff"""
+        """Update prototypes and then do normal stuff."""
         if self.trainer.current_epoch == 0:
             self.proto = [
                 torch.rand((self.hparams.num_proto, self.hparams.hidden_dim), device=self.device)

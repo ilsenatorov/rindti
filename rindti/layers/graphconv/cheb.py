@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class ChebConvNet(BaseLayer):
-    r"""Chebyshev Convolution
+    r"""Chebyshev Convolution.
 
     Refer to :class:`torch_geometric.nn.conv.ChebConv` for more details.
 

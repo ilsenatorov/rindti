@@ -7,7 +7,7 @@ from ..encoder import Encoder
 
 
 class ProtClassModel(BaseModel):
-    """Model for basic protein classification. Data in self.forward has to contain data.y, which will be the label we aim to predict"""
+    """Model for basic protein classification. Data in self.forward has to contain data.y, which will be the label we aim to predict."""
 
     def __init__(self, **kwargs):
         super().__init__()

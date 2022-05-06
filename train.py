@@ -40,17 +40,9 @@ def train(**cfg):
 
 
 if __name__ == "__main__":
-    import argparse
-    import os
+    from argparse import ArgumentParser
 
-    from rindti.utils import MyArgParser
-
-    tmp_parser = argparse.ArgumentParser(add_help=False)
-    tmp_parser.add_argument("--model", type=str, default="class")
-    args = tmp_parser.parse_known_args()[0]
-    model_type = args.model
-
-    parser = MyArgParser(prog="Model Trainer")
+    parser = ArgumentParser(prog="Model Trainer")
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
 

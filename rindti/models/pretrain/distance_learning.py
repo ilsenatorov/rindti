@@ -16,7 +16,8 @@ class DistanceModel(BaseModel):
     r"""Model for distance learning problem.
 
     It is assumed that each entry graph (protein or protein fragment) belongs to a certain class.
-    Thus using either :class:`CrossEntropyLoss` or :class:`GeneralisedLiftedStructureLoss` we can use distance learning with these labels."""
+    Thus using either :class:`CrossEntropyLoss` or :class:`GeneralisedLiftedStructureLoss` we can use distance learning with these labels.
+    """
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -31,7 +32,7 @@ class DistanceModel(BaseModel):
 
     @property
     def fam_idx(self) -> List[int]:
-        """Using batch_size and prot_per_fam, get idx of each family
+        """Using batch_size and prot_per_fam, get idx of each family.
 
         Returns:
             List[List]: First list is families, second list is entries in the family
@@ -66,7 +67,7 @@ class DistanceModel(BaseModel):
         return {k: v.detach() if k != "loss" else v for k, v in metrics.items()}
 
     def log_node_confusionmatrix(self, confmatrix: Tensor):
-        """Saves the confusion matrix of node prediction
+        """Saves the confusion matrix of node prediction.
 
         Args:
             confmatrix (Tensor): 20x20 matrix

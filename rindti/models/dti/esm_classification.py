@@ -1,15 +1,15 @@
-import torch.nn.functional as F
 import torch
+import torch.nn.functional as F
+
 from ...data import TwoGraphData
 from ...layers import MLP
 from ...utils import remove_arg_prefix
-from ..encoder import Encoder
 from ..base_model import BaseModel
+from ..encoder import Encoder
+
 
 class ESMClassModel(BaseModel):
-    """
-    ESM Model Class for DTI prediction
-    """
+    """ESM Model Class for DTI prediction."""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -23,9 +23,9 @@ class ESMClassModel(BaseModel):
         )
         self.drug_encoder = Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
-    
+
     def forward(self, prot: dict, drug: dict):
-        """Forward pass of the model"""
+        """Forward pass of the model."""
         prot_embed = self.prot_encoder(prot["x"].view(-1, 1280))
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
@@ -37,7 +37,8 @@ class ESMClassModel(BaseModel):
         )
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """Step that is the same for train, validation and test
+        """Step that is the same for train, validation and test.
+
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """

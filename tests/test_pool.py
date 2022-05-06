@@ -3,7 +3,6 @@ from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
 from rindti.layers import DiffPoolNet, GMTNet, MeanPool
-from rindti.utils import MyArgParser
 
 default_config = {
     "K": 1,

@@ -22,7 +22,8 @@ class Encoder(BaseModel):
     r"""Encoder for graphs
 
     Args:
-        return_nodes (bool, optional): Return node embeddings as well. Defaults to False."""
+        return_nodes (bool, optional): Return node embeddings as well. Defaults to False.
+    """
 
     def __init__(self, return_nodes: bool = False, **kwargs):
         super().__init__()
@@ -62,7 +63,7 @@ class Encoder(BaseModel):
         data: Union[dict, Data],
         **kwargs,
     ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
-        r"""Encode a graph
+        r"""Encode a graph.
 
         Args:
             data (Union[dict, Data]): Graph to encode. Must contain the following keys:

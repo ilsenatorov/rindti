@@ -1,7 +1,7 @@
 import pytest
 
 from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel
-from rindti.models.base_model import node_embedders, poolers
+from rindti.models.encoder import node_embedders, poolers
 
 from .conftest import BATCH_SIZE, PROT_EDGE_DIM, PROT_FEAT_DIM, PROT_PER_FAM
 
@@ -71,7 +71,6 @@ class BaseTestModel:
 
 
 class TestGraphLogModel(BaseTestModel):
-
     model = GraphLogModel
 
 

@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class GINConvNet(BaseLayer):
-    """Graph Isomorphism Network
+    """Graph Isomorphism Network.
 
     Refer to :class:`torch_geometric.nn.conv.GINConv` for more details.
 

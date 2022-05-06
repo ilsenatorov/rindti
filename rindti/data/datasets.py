@@ -11,7 +11,7 @@ from .data import TwoGraphData
 
 
 class DTIDataset(InMemoryDataset):
-    """Dataset class for proteins and drugs
+    """Dataset class for proteins and drugs.
 
     Args:
         filename (str): Pickle file that stores the data
@@ -41,7 +41,7 @@ class DTIDataset(InMemoryDataset):
         return os.path.join("data", basefilename)
 
     def _set_types(self, data: dict) -> dict:
-        """Sets feat type in the self.config from snakemake self.config"""
+        """Set feat type in the self.config from snakemake self.config."""
         self.config["data"]["prot"]["feat_type"] = get_type(data, "prot_x")
         self.config["data"]["drug"]["feat_type"] = get_type(data, "drug_x")
         self.config["data"]["prot"]["edge_type"] = get_type(data, "prot_edge_feats")
@@ -49,7 +49,7 @@ class DTIDataset(InMemoryDataset):
         return self.config
 
     def process_(self, data_list: list, split: str):
-        """Process the datalist
+        """Process the datalist.
 
         Args:
             data_list (list): List of TwoGraphData entries
@@ -65,7 +65,7 @@ class DTIDataset(InMemoryDataset):
         torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
 
     def _get_datum(self, all_data: dict, id: str, which: str) -> dict:
-        """Get either prot or drug data"""
+        """Get either prot or drug data."""
         graph = all_data[which].loc[id, "data"]
         graph["count"] = float(all_data[which].loc[id, "count"])
         graph["id"] = id
@@ -73,11 +73,11 @@ class DTIDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> Iterable[str]:
-        """Files that are created"""
+        """Files that are created."""
         return [k + ".pt" for k in self.splits.keys()]
 
     def process(self):
-        """If the dataset was not seen before, process everything"""
+        """If the dataset was not seen before, process everything."""
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
             self.config = {}
@@ -108,7 +108,7 @@ class DTIDataset(InMemoryDataset):
 
 
 class PreTrainDataset(InMemoryDataset):
-    """Dataset class for pre-training
+    """Dataset class for pre-training.
 
     Args:
         filename (str): Pickle file that stores the data
@@ -126,12 +126,12 @@ class PreTrainDataset(InMemoryDataset):
         self.data, self.slices, self.config = torch.load(self.processed_paths[0])
 
     def index(self, id: str):
-        """Find protein by id"""
+        """Find protein by id."""
         return self[self.data.id.index(id)]
 
     @property
     def processed_file_names(self) -> Iterable[str]:
-        """Which files have to be in the dir to consider dataset processed
+        """Which files have to be in the dir to consider dataset processed.
 
         Returns:
             Iterable[str]: list of files
@@ -139,7 +139,7 @@ class PreTrainDataset(InMemoryDataset):
         return ["data.pt"]
 
     def process(self):
-        """If the dataset was not seen before, process everything"""
+        """If the dataset was not seen before, process everything."""
         self.config = dict(max_nodes=0)
         df = pd.read_pickle(self.filename)
         data_list = []
@@ -162,7 +162,7 @@ class PreTrainDataset(InMemoryDataset):
 
 
 class LargePreTrainDataset(Dataset):
-    """Dataset that doesn't fit in the memory"""
+    """Dataset that doesn't fit in the memory."""
 
     def __init__(self, rawdir, transform=None, pre_transform=None):
         self.rawdir = rawdir
@@ -173,21 +173,21 @@ class LargePreTrainDataset(Dataset):
 
     @property
     def raw_file_names(self):
-        """Sharded pickles"""
+        """Shard pickles."""
         return os.listdir(self.rawdir)
 
     @property
     def config_file(self):
-        """Saved self.config file"""
+        """Save self.config file."""
         return os.path.join(self.processed_dir, "self.config.pt")
 
     @property
     def processed_file_names(self):
-        """Saved graphs"""
+        """Save graphs."""
         return [os.path.join(self.processed_dir, x) for x in ["self.config.pt", "data_0.pt"]]
 
     def process(self):
-        """Save each graph as a file"""
+        """Save each graph as a file."""
         i = 0
         self.config = dict(max_nodes=0)
         for shard in os.listdir(self.rawdir):
@@ -214,5 +214,5 @@ class LargePreTrainDataset(Dataset):
         return self.config["count"]
 
     def get(self, idx):
-        """Load graph"""
+        """Load graph."""
         return torch.load(os.path.join(self.processed_dir, "data_{}.pt".format(idx)))

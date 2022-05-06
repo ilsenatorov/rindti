@@ -23,9 +23,7 @@ from ..layers import MLP
 
 
 class BaseModel(LightningModule):
-    """
-    Base model, defines a lot of helper functions.
-    """
+    """Base model, defines a lot of helper functions."""
 
     def __init__(self):
         super().__init__()
@@ -52,7 +50,7 @@ class BaseModel(LightningModule):
         prot_hidden_dim: int = None,
         **kwargs,
     ):
-        """Which method to use for concatenating drug and protein representations"""
+        """Which method to use for concatenating drug and protein representations."""
         if feat_method == "concat":
             self.merge_features = self._concat
             self.embed_dim = drug_hidden_dim + prot_hidden_dim
@@ -72,23 +70,23 @@ class BaseModel(LightningModule):
             raise ValueError("unsupported feature method")
 
     def _concat(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """Concatenation"""
+        """Concatenation."""
         return torch.cat((drug_embed, prot_embed), dim=1)
 
     def _element_l2(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """L2 distance"""
+        """L2 distance."""
         return torch.sqrt(((drug_embed - prot_embed) ** 2) + 1e-6).float()
 
     def _element_l1(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """L1 distance"""
+        """L1 distance."""
         return (drug_embed - prot_embed).abs()
 
     def _mult(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """Multiplication"""
+        """Multiplication."""
         return drug_embed * prot_embed
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
-        """What to do during training step"""
+        """What to do during training step."""
         ss = self.shared_step(data)
         self.train_metrics.update(ss["preds"], ss["labels"])
         self.log("train_loss", ss["loss"])
@@ -102,22 +100,22 @@ class BaseModel(LightningModule):
         return ss
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
-        """What to do during test step"""
+        """What to do during test step."""
         return self.shared_step(data)
 
     def log_histograms(self):
-        """Logs the histograms of all the available parameters"""
+        """Logs the histograms of all the available parameters."""
         for name, param in self.named_parameters():
             self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
     def training_epoch_end(self, outputs: dict):
-        """What to do at the end of a training epoch. Logs everything"""
+        """What to do at the end of a training epoch. Logs everything."""
         self.log_histograms()
         metrics = self.train_metrics.compute()
         self.log_dict(metrics)
 
     def validation_epoch_end(self, outputs: dict):
-        """What to do at the end of a validation epoch. Logs everything"""
+        """What to do at the end of a validation epoch. Logs everything."""
         self.log_histograms()
         metrics = self.val_metrics.compute()
         self.log_dict(metrics)

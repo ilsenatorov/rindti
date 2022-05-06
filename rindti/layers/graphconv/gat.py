@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class GatConvNet(BaseLayer):
-    """Graph Attention Layer
+    """Graph Attention Layer.
 
     Refer to :class:`torch_geometric.nn.conv.GATConv` for more details.
 
