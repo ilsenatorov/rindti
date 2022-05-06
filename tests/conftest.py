@@ -135,7 +135,7 @@ def pretrain_pickle(tmpdir_factory, request):
                 PROT_FEAT_DIM,
                 params["edge_type"],
                 PROT_EDGE_DIM,
-                fam=["a", "b", "c", "a;b"],
+                fam=[0, 1, 2],
             )
             for _ in range(N_PROTS)
         ],
