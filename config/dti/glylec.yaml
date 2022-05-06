@@ -1,15 +1,15 @@
 data: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_IUPAC_none.pkl
 exp_name: glylec
-runs: 1
+runs: 3
 # Hardware
 batch_size: 64
 gpus: 1
-max_epochs: 2
+max_epochs: 200
 num_workers: 0
 profiler: null
 seed: 42
 # Optimisation + learning
-early_stop_patience: 60
+early_stop_patience: 40
 gradient_clip_val: 100
 lr: 0.0001
 momentum: 0.01
@@ -20,7 +20,7 @@ reduce_lr_patience: 20
 weight_decay: 0.01
 weighted: 0
 # Model
-feat_method: element_l1
+feat_method: concat
 mlp_dropout: 0.2
 mlp_hidden_dim: 512
 model: esm_class
