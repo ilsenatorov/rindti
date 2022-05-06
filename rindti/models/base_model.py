@@ -1,17 +1,15 @@
-from argparse import ArgumentParser
 from typing import Tuple, Union
 
-import numpy as np
 import torch
 from pytorch_lightning import LightningModule
-from torch import LongTensor, Tensor, nn
+from torch import Tensor, nn
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import (
     AUROC,
     Accuracy,
     ExplainedVariance,
-    MatthewsCorrcoef,
+    MatthewsCorrCoef,
     MeanAbsoluteError,
     MeanSquaredError,
     MetricCollection,
@@ -50,7 +48,7 @@ class BaseModel(LightningModule):
         super().__init__()
 
     def _set_class_metrics(self):
-        metrics = MetricCollection([Accuracy(), AUROC(), MatthewsCorrcoef(num_classes=2)])
+        metrics = MetricCollection([Accuracy(), AUROC(), MatthewsCorrCoef(num_classes=2)])
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
