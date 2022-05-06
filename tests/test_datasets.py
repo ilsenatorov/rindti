@@ -15,9 +15,3 @@ def test_pretrain_dataset(pretrain_pickle):
     ds = PreTrainDataset(pretrain_pickle)
     ds.process()
     assert len(ds) == N_PROTS
-
-
-def test_large_pretrain_dataset(sharded_pretrain_pickle):
-    ds = LargePreTrainDataset(sharded_pretrain_pickle)
-    ds.process()
-    assert len(ds) == N_PROTS

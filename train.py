@@ -7,7 +7,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
 from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
-from rindti.utils import read_config
+from rindti.utils import get_git_hash, read_config
 
 models = {
     "class": ClassificationModel,
@@ -35,7 +35,6 @@ def single_run(**kwargs):
     datamodule = DTIDataModule(**kwargs["datamodule"])
     datamodule.setup()
     datamodule.update_config(kwargs)
-    pprint(datamodule.config)
 
     logger = TensorBoardLogger(
         "tb_logs",
@@ -63,4 +62,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     orig_config = read_config(args.config)
+    orig_config["git_hash"] = get_git_hash()  # to know the version of the code
     train(**orig_config)

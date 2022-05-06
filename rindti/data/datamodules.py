@@ -94,3 +94,7 @@ class PreTrainDataModule(BaseDataModule):
             shuffle=self.shuffle if shuffle else False,
             num_workers=self.num_workers,
         )
+
+    def update_config(self, config: dict) -> None:
+        """Update the main config with the config of the dataset."""
+        config["model"]["encoder"]["data"] = self.config.copy()

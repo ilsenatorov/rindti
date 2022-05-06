@@ -1,6 +1,7 @@
 import collections
 import itertools
 
+import git
 import yaml
 
 
@@ -93,3 +94,9 @@ class IterDict:
         self._flatten(d)
         variants = self._get_variants()
         return [self._unflatten(v) for v in variants]
+
+
+def get_git_hash():
+    """Get the git hash of the current repository."""
+    repo = git.Repo(search_parent_directories=True)
+    return repo.head.object.hexsha

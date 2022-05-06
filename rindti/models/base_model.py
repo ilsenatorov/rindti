@@ -26,8 +26,14 @@ class BaseModel(LightningModule):
     def __init__(self):
         super().__init__()
 
-    def _set_class_metrics(self):
-        metrics = MetricCollection([Accuracy(), AUROC(), MatthewsCorrCoef(num_classes=2)])
+    def _set_class_metrics(self, num_classes: int = 2):
+        metrics = MetricCollection(
+            [
+                Accuracy(num_classes=None if num_classes == 2 else num_classes),
+                AUROC(num_classes=None if num_classes == 2 else num_classes),
+                MatthewsCorrCoef(num_classes=num_classes),
+            ]
+        )
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
