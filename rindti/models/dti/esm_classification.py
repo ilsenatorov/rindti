@@ -1,5 +1,7 @@
 import torch.nn.functional as F
 import torch
+
+from ..SweetNetEncoder import SweetNetEncoder
 from ...data import TwoGraphData
 from ...layers import MLP
 from ...utils import remove_arg_prefix
@@ -22,7 +24,7 @@ class ESMClassModel(BaseModel):
         self.prot_encoder = MLP(
             1280, prot_param["hidden_dim"], prot_param["hidden_dim"], prot_param["num_layers"], prot_param["dropout"]
         )
-        self.drug_encoder = Encoder(**drug_param)
+        self.drug_encoder = SweetNetEncoder(**drug_param) if drug_param["node_embed"] == "SweetNet" else Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
         self._set_class_metrics()
     
@@ -48,11 +50,4 @@ class ESMClassModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
-        """metrics = self._get_class_metrics(fwd_dict["pred"], labels)
-        metrics.update(
-            dict(
-                loss=bce_loss,
-            )
-        )
-        return metrics"""
         return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

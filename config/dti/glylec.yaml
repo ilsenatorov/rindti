@@ -1,4 +1,4 @@
-data: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_glycan_none.pkl
+data: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_IUPAC_none.pkl
 exp_name: glylec
 runs: 1
 # Hardware
@@ -28,7 +28,7 @@ model: esm_class
 drug_dropout: 0.1
 drug_hidden_dim: 128
 drug_lr: 0.001 # for drug encoder
-drug_node_embed: ginconv
+drug_node_embed: SweetNet
 drug_num_heads: 4
 drug_num_layers: 3
 drug_pool: gmt

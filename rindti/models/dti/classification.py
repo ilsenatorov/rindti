@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
+from ..SweetNetEncoder import SweetNetEncoder
 from ...data import TwoGraphData
 from ...losses import SoftNearestNeighborLoss
 from ...utils import remove_arg_prefix
@@ -20,7 +21,7 @@ class ClassificationModel(BaseModel):
         prot_param = remove_arg_prefix("prot_", kwargs)
         mlp_param = remove_arg_prefix("mlp_", kwargs)
         self.prot_encoder = Encoder(**prot_param)
-        self.drug_encoder = Encoder(**drug_param)
+        self.drug_encoder = SweetNetEncoder(**drug_param) if drug_param["node_embed"] == "SweetNet" else Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
         self._set_class_metrics()
 

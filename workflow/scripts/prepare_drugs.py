@@ -37,7 +37,7 @@ class DrugEncoder:
     """
 
     def __init__(self, node_feats: str, edge_feats: str, max_num_atoms: int = 150):
-        assert node_feats in {"label", "onehot", "glycan", "glycanone"}
+        assert node_feats in {"label", "onehot", "glycan", "glycanone", "IUPAC"}
         assert edge_feats in {"label", "onehot", "none"}
         self.node_feats = node_feats
         self.edge_feats = edge_feats

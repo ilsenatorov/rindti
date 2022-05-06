@@ -35,14 +35,14 @@ seed: 42
 
 prepare_proteins:
   # can be label, onehot, or esm
-  node_feats: esm
+  node_feats: label
   # can be label, onehot, or none
   edge_feats: none
 
 prepare_drugs:
   max_num_atoms: 150
   # can be label, onehot, glycan, or glycanone
-  node_feats: glycan
+  node_feats: IUPAC
   edge_feats: none
 
 split:
