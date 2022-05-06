@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.data &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="rindti.losses" href="losses.html" />
+    <link rel="prev" title="rindti.layers" href="layers.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>rindti.data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="rindti-data">
+<h1>rindti.data<a class="headerlink" href="#rindti-data" title="Permalink to this headline">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.data.TwoGraphData" title="rindti.data.TwoGraphData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TwoGraphData</span></code></a></p></td>
+<td><p>Subclass of torch_geometric.data.Data for protein and drug data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.data.DTIDataset" title="rindti.data.DTIDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DTIDataset</span></code></a></p></td>
+<td><p>Dataset class for proteins and drugs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.data.LargePreTrainDataset" title="rindti.data.LargePreTrainDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LargePreTrainDataset</span></code></a></p></td>
+<td><p>Dataset that doesn't fit in the memory</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.data.PreTrainDataset" title="rindti.data.PreTrainDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PreTrainDataset</span></code></a></p></td>
+<td><p>Dataset class for pre-training</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.data.PfamSampler" title="rindti.data.PfamSampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PfamSampler</span></code></a></p></td>
+<td><p>Sampler for generating pfam-conforming batches.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.data.WeightedPfamSampler" title="rindti.data.WeightedPfamSampler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">WeightedPfamSampler</span></code></a></p></td>
+<td><p>Weighted for generating pfam-conforming batches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.data.DataCorruptor" title="rindti.data.DataCorruptor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataCorruptor</span></code></a></p></td>
+<td><p>Corrupt or mask the nodes in a graph (or graph pair)</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.data.GnomadTransformer" title="rindti.data.GnomadTransformer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GnomadTransformer</span></code></a></p></td>
+<td><p>Transformer of TwoGraphData entries</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.data.SizeFilter" title="rindti.data.SizeFilter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SizeFilter</span></code></a></p></td>
+<td><p>Filters out graph that are too big/small</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.data.corrupt_features" title="rindti.data.corrupt_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">corrupt_features</span></code></a></p></td>
+<td><p>Return corrupt features</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.data.mask_features" title="rindti.data.mask_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_features</span></code></a></p></td>
+<td><p>Return masked features</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-rindti.data"></span><dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.TwoGraphData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TwoGraphData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/data.html#TwoGraphData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.TwoGraphData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclass of torch_geometric.data.Data for protein and drug data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.TwoGraphData.n_nodes">
+<span class="sig-name descname"><span class="pre">n_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/rindti/data/data.html#TwoGraphData.n_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.TwoGraphData.n_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of nodes for graph with prefix</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.TwoGraphData.n_edges">
+<span class="sig-name descname"><span class="pre">n_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/rindti/data/data.html#TwoGraphData.n_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.TwoGraphData.n_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of edges for graph with prefix</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.TwoGraphData.n_node_feats">
+<span class="sig-name descname"><span class="pre">n_node_feats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/rindti/data/data.html#TwoGraphData.n_node_feats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.TwoGraphData.n_node_feats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the feature dimension of one of the graphs.
+If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
+then return the max. Otherwise return size(1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.TwoGraphData.n_edge_feats">
+<span class="sig-name descname"><span class="pre">n_edge_feats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/rindti/data/data.html#TwoGraphData.n_edge_feats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.TwoGraphData.n_edge_feats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of different edges for graph with prefix</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.DTIDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DTIDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'train'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#DTIDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.DTIDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataset class for proteins and drugs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Pickle file that stores the data</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Split type (‘train’, ‘val’, ‘test). Defaults to “train”.</p></li>
+<li><p><strong>transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – transformer to apply on each access. Defaults to None.</p></li>
+<li><p><strong>pre_transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – pre-transformer to apply once before. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.DTIDataset.process_">
+<span class="sig-name descname"><span class="pre">process_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#DTIDataset.process_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.DTIDataset.process_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the datalist</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) – List of TwoGraphData entries</p></li>
+<li><p><strong>s</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – index of train, val or test</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rindti.data.DTIDataset.processed_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processed_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rindti.data.DTIDataset.processed_file_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Files that are created</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.DTIDataset.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#DTIDataset.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.DTIDataset.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the dataset was not seen before, process everything</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LargePreTrainDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rawdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#LargePreTrainDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.LargePreTrainDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataset that doesn’t fit in the memory</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset.raw_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_file_names</span></span><a class="headerlink" href="#rindti.data.LargePreTrainDataset.raw_file_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sharded pickles</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset.config_file">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">config_file</span></span><a class="headerlink" href="#rindti.data.LargePreTrainDataset.config_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saved self.config file</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset.processed_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processed_file_names</span></span><a class="headerlink" href="#rindti.data.LargePreTrainDataset.processed_file_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saved graphs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#LargePreTrainDataset.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.LargePreTrainDataset.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save each graph as a file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset.len">
+<span class="sig-name descname"><span class="pre">len</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#LargePreTrainDataset.len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.LargePreTrainDataset.len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of graphs stored in the dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.LargePreTrainDataset.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#LargePreTrainDataset.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.LargePreTrainDataset.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load graph</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.PreTrainDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreTrainDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><span class="pre">Callable</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#PreTrainDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.PreTrainDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataset class for pre-training</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Pickle file that stores the data</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Split type (‘train’, ‘val’, ‘test). Defaults to “train”.</p></li>
+<li><p><strong>transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – transformer to apply on each access. Defaults to None.</p></li>
+<li><p><strong>pre_transform</strong> (<em>Callable</em><em>, </em><em>optional</em>) – pre-transformer to apply once before. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.PreTrainDataset.index">
+<span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#PreTrainDataset.index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.PreTrainDataset.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find protein by id</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rindti.data.PreTrainDataset.processed_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processed_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rindti.data.PreTrainDataset.processed_file_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Which files have to be in the dir to consider dataset processed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of files</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Iterable[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.PreTrainDataset.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/datasets.html#PreTrainDataset.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.PreTrainDataset.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the dataset was not seen before, process everything</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.PfamSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PfamSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rindti.data.PreTrainDataset" title="rindti.data.datasets.PreTrainDataset"><span class="pre">rindti.data.datasets.PreTrainDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prot_per_fam</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_per_epoch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/samplers.html#PfamSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.PfamSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sampler for generating pfam-conforming batches.
+Ensure that in each batch there are positive and negative matches for each protein</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="#rindti.data.PreTrainDataset" title="rindti.data.PreTrainDataset"><em>PreTrainDataset</em></a>) – dataset, each data point has to contain data.fam</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Defaults to 64.</p></li>
+<li><p><strong>prot_per_fam</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of proteins per family. Defaults to 8</p></li>
+<li><p><strong>batch_per_epoch</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of batches per epoch. Defaults to 1000</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.PfamSampler.update_weights">
+<span class="sig-name descname"><span class="pre">update_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/samplers.html#PfamSampler.update_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.PfamSampler.update_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>For consistency</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.WeightedPfamSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WeightedPfamSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minprob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/samplers.html#WeightedPfamSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.WeightedPfamSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weighted for generating pfam-conforming batches.
+Ensure that in each batch there are positive and negative matches for each protein.
+Picks families with certain probabilities, based on losses</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="#rindti.data.PreTrainDataset" title="rindti.data.PreTrainDataset"><em>PreTrainDataset</em></a>) – dataset, each data point has to contain data.fam</p></li>
+<li><p><strong>minprob</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – lowest weighted probability. Defaults to 0.1</p></li>
+<li><p><strong>batch_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Defaults to 64.</p></li>
+<li><p><strong>prot_per_fam</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of proteins per family. Defaults to 8</p></li>
+<li><p><strong>batch_per_epoch</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Number of batches per epoch. Defaults to 1000</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.WeightedPfamSampler.update_fam_weights">
+<span class="sig-name descname"><span class="pre">update_fam_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/samplers.html#WeightedPfamSampler.update_fam_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.WeightedPfamSampler.update_fam_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get minmax normalised weights</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.WeightedPfamSampler.update_weights">
+<span class="sig-name descname"><span class="pre">update_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.10)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/samplers.html#WeightedPfamSampler.update_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.WeightedPfamSampler.update_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update sampling weight of families</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>losses</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>Iterable</em><em>]</em>) – family ids and their respective losses</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.DataCorruptor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataCorruptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.10)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mask'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/transforms.html#DataCorruptor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.DataCorruptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Corrupt or mask the nodes in a graph (or graph pair)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frac</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>]</em>) – dict of which attributes to corrupt ({‘x’ : 0.05} or {‘prot_x’ : 0.1, ‘drug_x’ : 0.2})</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – ‘corrupt’ or ‘mask’. Corrupt puts new values sampled from old, mask puts zeroes. Defaults to ‘mask’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.GnomadTransformer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GnomadTransformer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gnomad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoded_residues</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_mut</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/transforms.html#GnomadTransformer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.GnomadTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transformer of TwoGraphData entries</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gnomad</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – Dict of gnomad DataFrames for each protein</p></li>
+<li><p><strong>index_mapping</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – Dict of index mappings for each protein</p></li>
+<li><p><strong>encoded_residues</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – Dict of encoded tensors for each residue</p></li>
+<li><p><strong>max_num_mut</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Upper limit of number of mutations</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.data.GnomadTransformer.from_pickle">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_mut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/transforms.html#GnomadTransformer.from_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.GnomadTransformer.from_pickle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load transformer from pickle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Pickle file location</p></li>
+<li><p><strong>max_num_mut</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Maximal number of mutation to apply. Defaults to 50.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Transformer</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#rindti.data.GnomadTransformer" title="rindti.data.GnomadTransformer">GnomadTransformer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.data.SizeFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SizeFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_nnodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_nnodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/data/transforms.html#SizeFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.SizeFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters out graph that are too big/small</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.data.corrupt_features">
+<span class="sig-name descname"><span class="pre">corrupt_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/data/transforms.html#corrupt_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.corrupt_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return corrupt features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><em>torch.Tensor</em></a>) – Node features</p></li>
+<li><p><strong>frac</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Fraction of nodes to corrupt</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New corrupt features, idx of masked nodes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))">torch.Tensor</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rindti.data.mask_features">
+<span class="sig-name descname"><span class="pre">mask_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/data/transforms.html#mask_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.data.mask_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return masked features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> (<a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><em>torch.Tensor</em></a>) – Node features</p></li>
+<li><p><strong>frac</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Fraction of nodes to mask</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New masked features, idx of masked nodes</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))">torch.Tensor</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="layers.html" class="btn btn-neutral float-left" title="rindti.layers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="losses.html" class="btn btn-neutral float-right" title="rindti.losses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

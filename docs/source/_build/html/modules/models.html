@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.models &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="rindti.layers" href="layers.html" />
+    <link rel="prev" title="Data" href="../notes/data.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>rindti.models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="rindti-models">
+<h1>rindti.models<a class="headerlink" href="#rindti-models" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#base-model" id="id1">Base Model</a></p></li>
+<li><p><a class="reference internal" href="#encoder" id="id2">Encoder</a></p></li>
+<li><p><a class="reference internal" href="#dti-models" id="id3">DTI models</a></p></li>
+<li><p><a class="reference internal" href="#pretraining-models" id="id4">Pretraining models</a></p></li>
+</ul>
+</div>
+<section id="base-model">
+<h2><a class="toc-backref" href="#id1">Base Model</a><a class="headerlink" href="#base-model" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BaseModel</span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/latest/api/pytorch_lightning.core.lightning.html#pytorch_lightning.core.lightning.LightningModule" title="(in PyTorch Lightning v1.6.0dev)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pytorch_lightning.core.lightning.LightningModule</span></code></a></p>
+<p>Base model, defines a lot of helper functions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.training_step">
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">rindti.data.data.TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.training_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>What to do during training step</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.validation_step">
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">rindti.data.data.TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.validation_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.validation_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>What to do during validation step. Also logs the values for various callbacks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.test_step">
+<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">rindti.data.data.TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.test_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>What to do during test step</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.log_histograms">
+<span class="sig-name descname"><span class="pre">log_histograms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.log_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.log_histograms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs the histograms of all the available parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.shared_epoch_end">
+<span class="sig-name descname"><span class="pre">shared_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_hparams</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.shared_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.shared_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Things that are the same for train, test and val</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.training_epoch_end">
+<span class="sig-name descname"><span class="pre">training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.training_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.training_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>What to do at the end of a training epoch. Logs everything</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.validation_epoch_end">
+<span class="sig-name descname"><span class="pre">validation_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.validation_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.validation_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>What to do at the end of a validation epoch. Logs everything, saves hyperparameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.test_epoch_end">
+<span class="sig-name descname"><span class="pre">test_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.test_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.test_epoch_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>What to do at the end of a test epoch. Logs everything, saves hyperparameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.configure_optimizers">
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">torch.optim.optimizer.Optimizer</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.optim.lr_scheduler._LRScheduler</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.configure_optimizers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.configure_optimizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the optimiser and/or lr schedulers</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="encoder">
+<h2><a class="toc-backref" href="#id2">Encoder</a><a class="headerlink" href="#encoder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.encoder.Encoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/encoder.html#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.encoder.Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.base_model.BaseModel</span></code></a></p>
+<p>Encoder for graphs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>return_nodes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Return node embeddings as well. Defaults to False.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.encoder.Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/encoder.html#Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.encoder.Encoder.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encode a graph</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>Data</em><em>]</em>) – Graph to encode. Must contain the following keys:
+- x: Node features
+- edge_index: Edge indices
+- batch: Batch indices</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Either graph of graph+node embeddings</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Union[Tensor, Tuple[Tensor, Tensor]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.encoder.Encoder.embed">
+<span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/encoder.html#Encoder.embed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.encoder.Encoder.embed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="dti-models">
+<h2><a class="toc-backref" href="#id3">DTI models</a><a class="headerlink" href="#dti-models" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.models.dti.ClassificationModel" title="rindti.models.dti.ClassificationModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p></td>
+<td><p>Model for DTI prediction as a class problem</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.models.dti.RegressionModel" title="rindti.models.dti.RegressionModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RegressionModel</span></code></a></p></td>
+<td><p>Model for DTI prediction as a reg problem</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-rindti.models.dti"></span><dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.dti.ClassificationModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ClassificationModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/classification.html#ClassificationModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.ClassificationModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.base_model.BaseModel</span></code></a></p>
+<p>Model for DTI prediction as a class problem</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.ClassificationModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">drug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/classification.html#ClassificationModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.ClassificationModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.dti.RegressionModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RegressionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/regression.html#RegressionModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.RegressionModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.dti.ClassificationModel" title="rindti.models.dti.classification.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.dti.classification.ClassificationModel</span></code></a></p>
+<p>Model for DTI prediction as a reg problem</p>
+</dd></dl>
+
+</section>
+<section id="pretraining-models">
+<h2><a class="toc-backref" href="#id4">Pretraining models</a><a class="headerlink" href="#pretraining-models" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.models.pretrain.BGRLModel" title="rindti.models.pretrain.BGRLModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BGRLModel</span></code></a></p></td>
+<td><p>Bootrstrapped graph representational learning  model</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.models.pretrain.GraphLogModel" title="rindti.models.pretrain.GraphLogModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GraphLogModel</span></code></a></p></td>
+<td><p>Work in progress - <a class="reference external" href="https://github.com/DeepGraphLearning/GraphLoG">https://github.com/DeepGraphLearning/GraphLoG</a> - <a class="reference external" href="https://arxiv.org/pdf/2106.04113.pdf">https://arxiv.org/pdf/2106.04113.pdf</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rindti.models.pretrain.InfoGraphModel" title="rindti.models.pretrain.InfoGraphModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoGraphModel</span></code></a></p></td>
+<td><p>Maximise mutual information between node and graph representations <a class="reference external" href="https://arxiv.org/pdf/1808.06670.pdf">https://arxiv.org/pdf/1808.06670.pdf</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rindti.models.pretrain.PfamModel" title="rindti.models.pretrain.PfamModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PfamModel</span></code></a></p></td>
+<td><p>Model for Pfam class comparison problem</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-rindti.models.pretrain"></span><dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.pretrain.BGRLModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BGRLModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">moving_average_decay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epochs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/bgrl.html#BGRLModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.BGRLModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.base_model.BaseModel</span></code></a></p>
+<p>Bootrstrapped graph representational learning  model</p>
+<p><a class="reference external" href="https://arxiv.org/pdf/2102.06514v1.pdf">[paper]</a></p>
+<p><a class="reference external" href="https://github.com/Namkyeong/BGRL_Pytorch">[git repo]</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>moving_average_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Decay rate of moving average</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Number of epochs</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.BGRLModel.reset_moving_average">
+<span class="sig-name descname"><span class="pre">reset_moving_average</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/bgrl.html#BGRLModel.reset_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.BGRLModel.reset_moving_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset moving avg</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.BGRLModel.update_moving_average">
+<span class="sig-name descname"><span class="pre">update_moving_average</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/bgrl.html#BGRLModel.update_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.BGRLModel.update_moving_average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update moving avg</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.BGRLModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/pretrain/bgrl.html#BGRLModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.BGRLModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GraphLogModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.base_model.BaseModel</span></code></a></p>
+<p>Work in progress
+- <a class="reference external" href="https://github.com/DeepGraphLearning/GraphLoG">https://github.com/DeepGraphLearning/GraphLoG</a>
+- <a class="reference external" href="https://arxiv.org/pdf/2106.04113.pdf">https://arxiv.org/pdf/2106.04113.pdf</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.mask_nodes">
+<span class="sig-name descname"><span class="pre">mask_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.mask_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.mask_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask the nodes according to self.mask_rate</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>Data</em>) – Graph batch</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Masked graph batch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.intra_NCE_loss">
+<span class="sig-name descname"><span class="pre">intra_NCE_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_modify_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.intra_NCE_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.intra_NCE_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss between nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.inter_NCE_loss">
+<span class="sig-name descname"><span class="pre">inter_NCE_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_modify_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.inter_NCE_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.inter_NCE_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loss between graphs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.gl_NCE_loss">
+<span class="sig-name descname"><span class="pre">gl_NCE_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.gl_NCE_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.gl_NCE_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Don’t even know what it’s for</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.proto_NCE_loss">
+<span class="sig-name descname"><span class="pre">proto_NCE_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.proto_NCE_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.proto_NCE_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prototype loss</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.update_proto_lowest">
+<span class="sig-name descname"><span class="pre">update_proto_lowest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">graph_reps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decay_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.update_proto_lowest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.update_proto_lowest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update lowest prototypes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.init_proto_lowest">
+<span class="sig-name descname"><span class="pre">init_proto_lowest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.init_proto_lowest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.init_proto_lowest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intitalise lowest prototypes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.init_proto">
+<span class="sig-name descname"><span class="pre">init_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.init_proto"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.init_proto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise prototypes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.embed_batch">
+<span class="sig-name descname"><span class="pre">embed_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orig_batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.embed_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.embed_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Embed a single batch (normal or masked doesn’t matter)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.GraphLogModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/pretrain/graphlog.html#GraphLogModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.GraphLogModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.pretrain.InfoGraphModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InfoGraphModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/infograph.html#InfoGraphModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.InfoGraphModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.base_model.BaseModel</span></code></a></p>
+<p>Maximise mutual information between node and graph representations
+<a class="reference external" href="https://arxiv.org/pdf/1808.06670.pdf">https://arxiv.org/pdf/1808.06670.pdf</a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.InfoGraphModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.0.4)"><span class="pre">torch_geometric.data.data.Data</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/pretrain/infograph.html#InfoGraphModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.InfoGraphModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.pretrain.PfamModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PfamModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/pfam.html#PfamModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.PfamModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">rindti.models.base_model.BaseModel</span></code></a></p>
+<p>Model for Pfam class comparison problem</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="rindti.models.pretrain.PfamModel.fam_idx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fam_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#rindti.models.pretrain.PfamModel.fam_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using batch_size and prot_per_fam, get idx of each family</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>First list is families, second list is entries in the family</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[List]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.PfamModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/pretrain/pfam.html#PfamModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.PfamModel.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.PfamModel.log_node_confusionmatrix">
+<span class="sig-name descname"><span class="pre">log_node_confusionmatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">confmatrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/pfam.html#PfamModel.log_node_confusionmatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.PfamModel.log_node_confusionmatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the confusion matrix of node prediction</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>confmatrix</strong> (<em>Tensor</em>) – 20x20 matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.pretrain.PfamModel.log_distmap">
+<span class="sig-name descname"><span class="pre">log_distmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">rindti.data.data.TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">embeds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch vmaster (1.12.0a0+gita2e545e ))"><span class="pre">torch.Tensor</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/pretrain/pfam.html#PfamModel.log_distmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.pretrain.PfamModel.log_distmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot and save distance matrix of this batch</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../notes/data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="layers.html" class="btn btn-neutral float-right" title="rindti.layers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snakemake workflows &mdash; RINDTI 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data" href="data.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+</head>
+
+<body class="wy-body-for-nav">
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> RINDTI
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#rinerator">Rinerator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#encoder">Encoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#pretraining-models">Pretraining models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#other-layers">Other layers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data.html">rindti.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/losses.html">rindti.losses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">rindti.utils</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Snakemake workflows</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/snakemake.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <section id="snakemake-workflows">
+<h1>Snakemake workflows<a class="headerlink" href="#snakemake-workflows" title="Permalink to this headline">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>A workflow is a collection of rules that define the construction both the DTI and the protein pretraining datasets.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">snakemake -j 1 --use-conda</span>
+</pre></div>
+</div>
+</section>
+<section id="confuguration">
+<h2>Confuguration<a class="headerlink" href="#confuguration" title="Permalink to this headline">¶</a></h2>
+<p>The config file for the snakemake workflow is located in the <code class="docutils literal notranslate"><span class="pre">config/snakemake.yaml</span></code> file.
+For most of the parameters changing the value and rerunning the pipeline from command line should be enough to generate a new file.</p>
+</section>
+<section id="dti-dataset-creation">
+<h2>DTI dataset creation<a class="headerlink" href="#dti-dataset-creation" title="Permalink to this headline">¶</a></h2>
+<p>In order to create the DTI dataset, the following requirements have to be met:</p>
+<ul class="simple">
+<li><p>PDB structures, located in the <code class="docutils literal notranslate"><span class="pre">resources/structures</span></code> directory</p></li>
+<li><p>Drug interaction data, two tsv files labelled <code class="docutils literal notranslate"><span class="pre">resources/drugs/inter.tsv</span></code> and <code class="docutils literal notranslate"><span class="pre">resources/drugs/ligs.tsv</span></code>. The interactions has to contain <em>Drug_ID</em>, <em>Target_ID</em> and <em>Y</em> columns, while the ligand one has to contain <em>Drug_ID</em> and <em>Drug</em> columns, where <em>Drug</em> contains SMILES representation of the drug.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">only_proteins</span></code> entry in the <code class="docutils literal notranslate"><span class="pre">config/snakemake.yaml</span></code> has to be <em>false</em></p></li>
+</ul>
+<p>After running the pipeline with <code class="docutils literal notranslate"><span class="pre">snakemake</span> <span class="pre">-j</span> <span class="pre">16</span> <span class="pre">--use-conda</span></code>, the pickle file should be created in <code class="docutils literal notranslate"><span class="pre">results/prepare_all/</span></code> folder.</p>
+</section>
+<section id="protein-dataset-creation">
+<h2>Protein dataset creation<a class="headerlink" href="#protein-dataset-creation" title="Permalink to this headline">¶</a></h2>
+<p>In order to create the protein-only dataset (for pretraining), the following requirements have to be met:</p>
+<ul class="simple">
+<li><p>PDB structures, located in the <code class="docutils literal notranslate"><span class="pre">resources/structures</span></code> directory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">only_proteins</span></code> entry in the <code class="docutils literal notranslate"><span class="pre">config/snakemake.yaml</span></code> has to be <em>true</em></p></li>
+</ul>
+<p>After running the pipeline with <code class="docutils literal notranslate"><span class="pre">snakemake</span> <span class="pre">-j</span> <span class="pre">16</span> <span class="pre">--use-conda</span></code>, the pickle file should be created in <code class="docutils literal notranslate"><span class="pre">results/prepare_proteins/</span></code> folder.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data.html" class="btn btn-neutral float-right" title="Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+</body>
+</html>

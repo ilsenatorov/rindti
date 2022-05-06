@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RINDTI",
-    version="1.0.0",
+    version="1.1.0",
     author="Ilya Senatorov",
     author_email="ilya.senatorov@helmholtz-hips.de",
     description="Drug-Target prediction using residue interaction networks",
@@ -19,5 +19,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.9",
+    python_requires=">=3.8",
 )

@@ -1,16 +1,16 @@
-data: results/prepare_all/coldtarget_posneg_under_class_template_rinerator_label_none_label_none.pkl
+data: results/prepare_all/coldtarget_posneg_none_class_template_distance_label_none_label_none.pkl
 # Hardware
 batch_size: 1024
 gpus: 1
 max_epochs: 1000
-num_workers: 0
+num_workers: 16
 profiler: null
 seed: 42
 # Optimisation + learning
 early_stop_patience: 60
 gradient_clip_val: 100
-lr: 0.00001
-momentum: 0.3
+lr: 0.0001
+momentum: 0.01
 monitor: val_loss
 optimiser: adam
 reduce_lr_factor: 0.1
@@ -18,30 +18,25 @@ reduce_lr_patience: 20
 weight_decay: 0.01
 weighted: 0
 # Model
-feat_method: concat
-mlp_dropout: 0.1
-mlp_hidden_dim: 128
+feat_method: [element_l1, concat, mult, element_l2]
+mlp_dropout: 0.2
+mlp_hidden_dim: 512
 model: class
 # Drug encoder
-drug_dropout: 0.3
-drug_hidden_dim: 64
+drug_dropout: 0.1
+drug_hidden_dim: 128
 drug_lr: 0.001 # for drug encoder
 drug_node_embed: ginconv
 drug_num_heads: 4
 drug_num_layers: 3
 drug_pool: gmt
-drug_pretrain: null
 drug_ratio: 0.25
 # Prot encoder
-prot_dropout: 0.3
-prot_hidden_dim: 64
+prot_dropout: 0.1
+prot_hidden_dim: 128
 prot_lr: 0.001 # for protein encoder
 prot_node_embed: ginconv
 prot_num_heads: 4
 prot_num_layers: 3
 prot_pool: gmt
-prot_pretrain: null
-prot_ratio: 0.5
-
-temperature: 1
-alpha: 0.01
+prot_ratio: 0.25

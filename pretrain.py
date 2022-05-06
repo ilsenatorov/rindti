@@ -1,29 +1,38 @@
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch_geometric.loader import DataLoader
 
-from rindti.data import PfamSampler, PreTrainDataset
-from rindti.models import BGRLModel, GraphLogModel, InfoGraphModel, PfamModel
+from rindti.data import PreTrainDataModule
+from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
 from rindti.utils import MyArgParser, read_config
 
-models = {"graphlog": GraphLogModel, "infograph": InfoGraphModel, "pfam": PfamModel, "bgrl": BGRLModel}
+models = {
+    "graphlog": GraphLogModel,
+    "infograph": InfoGraphModel,
+    "class": ProtClassModel,
+    "bgrl": BGRLModel,
+    "distance": DistanceModel,
+    "esmclass": ProtClassESMModel,
+}
 
 
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
-    dataset = PreTrainDataset(kwargs["data"])
+    dm = PreTrainDataModule(kwargs["data"])
+    dm.setup()
     ## TODO need a more elegant solution for this
-    fams = {i.fam for i in dataset}
-    kwargs["fam_list"] = list(fams)
-    kwargs.update(dataset.config)
+    labels = dm.get_labels()
+    kwargs["label_list"] = list(labels)
+    kwargs.update(dm.config)
     kwargs["feat_dim"] = 20
     kwargs["edge_dim"] = 5
-    logger = TensorBoardLogger("tb_logs", name=kwargs["model"], default_hp_metric=False)
+    logger = TensorBoardLogger("tb_logs", name="prot_" + kwargs["model"], default_hp_metric=False)
     callbacks = [
-        ModelCheckpoint(monitor="train_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="train_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
+        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        RichModelSummary(),
+        RichProgressBar(),
     ]
     trainer = Trainer(
         gpus=kwargs["gpus"],
@@ -31,17 +40,25 @@ def pretrain(**kwargs):
         logger=logger,
         max_epochs=kwargs["max_epochs"],
         num_sanity_val_steps=0,
-        deterministic=True,
+        deterministic=False,
         profiler=kwargs["profiler"],
     )
     model = models[kwargs["model"]](**kwargs)
-    # if kwargs["model"] == "pfam":
-    #     sampler = PfamSampler(dataset, **kwargs)
-    #     dl = DataLoader(dataset, batch_sampler=sampler, num_workers=kwargs["num_workers"])
-    #     model.sampler = sampler
+    print(model)
+    # if kwargs["model"] == "distance":
+    #     sampler = PfamSampler(
+    #         dataset,
+    #         batch_size=kwargs["batch_size"],
+    #         prot_per_fam=kwargs["prot_per_fam"],
+    #     )
+    #     dl = DataLoader(
+    #         dataset,
+    #         batch_sampler=sampler,
+    #         num_workers=kwargs["num_workers"],
+    #     )
     # else:
-    dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
-    trainer.fit(model, dl)
+    #     dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    trainer.fit(model, dm)
 
 
 if __name__ == "__main__":

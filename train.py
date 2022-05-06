@@ -1,29 +1,30 @@
+from pprint import pprint
+
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
-from torch_geometric.loader import DataLoader
 
-from rindti.data import DTIDataset
-from rindti.models import ClassificationModel, RegressionModel
-from rindti.utils import read_config
+from rindti.data import DTIDataModule
+from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
+from rindti.utils import hparams_config, read_config
 
 models = {
     "class": ClassificationModel,
     "reg": RegressionModel,
+    "esm_class": ESMClassModel,
 }
 
 
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    train = DTIDataset(kwargs["data"], split="train").shuffle()
-    val = DTIDataset(kwargs["data"], split="val").shuffle()
-    test = DTIDataset(kwargs["data"], split="test").shuffle()
-
-    kwargs.update(train.config)
+    datamodule = DTIDataModule(kwargs["data"], kwargs["batch_size"], kwargs["num_workers"])
+    datamodule.setup()
+    pprint(datamodule.config)
+    kwargs.update(datamodule.config)
     logger = TensorBoardLogger(
         "tb_logs",
-        name=f'{kwargs["model"]}:{kwargs["data"].split("/")[-1].split(".")[0]}',
+        name="dti",
         default_hp_metric=False,
     )
 
@@ -42,18 +43,13 @@ def train(**kwargs):
         log_every_n_steps=25,
     )
     model = models[kwargs["model"]](**kwargs)
-    dataloader_kwargs = {k: v for (k, v) in kwargs.items() if k in ["batch_size", "num_workers"]}
-    dataloader_kwargs["follow_batch"] = ["prot_x", "drug_x"]
-    train_dataloader = DataLoader(train, **dataloader_kwargs, shuffle=False)
-    val_dataloader = DataLoader(val, **dataloader_kwargs, shuffle=False)
-    test_dataloader = DataLoader(test, **dataloader_kwargs, shuffle=False)
-    trainer.fit(model, train_dataloader, val_dataloader)
-    trainer.test(model, test_dataloader)
+    pprint(model)
+    trainer.fit(model, datamodule)
 
 
 if __name__ == "__main__":
     import argparse
-    from pprint import pprint
+    import os
 
     from rindti.utils import MyArgParser
 
@@ -66,6 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
 
-    config = read_config(args.config)
-    pprint(config)
-    train(**config)
+    orig_config = read_config(args.config)
+    configs = hparams_config(orig_config)
+    for config in configs:
+        train(**config)
