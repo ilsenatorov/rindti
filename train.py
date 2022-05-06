@@ -40,10 +40,17 @@ def single_run(**kwargs):
         if key not in kwargs:
             kwargs[key] = value
 
+    folder = os.path.join("tb_logs", f"dti{kwargs['model']}:{kwargs['exp_name']}", kwargs["data"].split("/")[-1].split(".")[0])
+    if not os.path.exists(folder):
+        os.makedirs(folder, exist_ok=True)
+
+    if len(os.listdir(folder)) == 0:
+        next_version = 0
+    else:
+        next_version = str(int([d for d in os.listdir(folder) if "version" in d and os.path.isdir(os.path.join(folder, d))][-1].split("_")[1]) + 1)
+
     logger = TensorBoardLogger(
-        "tb_logs",
-        name="dti" + kwargs["model"] + ":" + kwargs["exp_name"] + "/" + kwargs["data"].split("/")[-1].split(".")[0],
-        default_hp_metric=False,
+        save_dir=os.path.join("tb_logs", f"dti{kwargs['model']}:{kwargs['exp_name']}", kwargs["data"].split("/")[-1].split(".")[0]), name=f"version_{next_version}", version=kwargs["seed"], default_hp_metric=False,
     )
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
