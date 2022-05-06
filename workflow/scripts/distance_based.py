@@ -23,6 +23,7 @@ node_encoding = list_to_dict(
         "trp",
         "tyr",
         "val",
+        "unk",
     ]
 )
 
@@ -31,6 +32,8 @@ def encode_residue(residue: str, node_feats: str):
     """Encode a residue"""
     residue = residue.lower()
     if node_feats == "label":
+        if residue not in node_encoding:
+            return node_encoding['unk']
         return node_encoding[residue] + 1
     elif node_feats == "onehot":
         return onehot_encode(node_encoding[residue], len(node_encoding))

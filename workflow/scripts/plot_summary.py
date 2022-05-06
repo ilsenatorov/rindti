@@ -6,17 +6,18 @@ from pandas.core.frame import DataFrame
 from plotly.subplots import make_subplots
 
 
-def calculate_nnodes_nedges(df: DataFrame) -> DataFrame:
+def calculate_nnodes_nedges(df: DataFrame, esm=False) -> DataFrame:
     """Add columns for number of nodes and number of edges
 
     Args:
         df (DataFrame): [description]
+        esm (bool): [description]
 
     Returns:
         DataFrame: [description]
     """
-    df["nnodes"] = df["data"].apply(lambda x: x["x"].size(0))
-    df["nedges"] = df["data"].apply(lambda x: x["edge_index"].size(1))
+    df["nnodes"] = 0 if esm else df["data"].apply(lambda x: x["x"].size(0))
+    df["nedges"] = 0 if esm else df["data"].apply(lambda x: x["edge_index"].size(1))
     return df
 
 
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     inter = pd.DataFrame(all_data["data"])
     struct_info = pd.read_csv(snakemake.input.struct_info, sep="\t", squeeze=True, index_col=0)
 
-    prot = calculate_nnodes_nedges(prot)
+    prot = calculate_nnodes_nedges(prot, snakemake.config["prepare_proteins"]["node_feats"] == "esm")
     prot["plddt"] = struct_info
     drug = calculate_nnodes_nedges(drug)
 

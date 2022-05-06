@@ -22,11 +22,11 @@ class DTIDataset(InMemoryDataset):
 
     splits = {"train": 0, "val": 1, "test": 2}
 
-    def _set_filenames(self, filename: str) -> str:
+    def _set_filenames(self, filename: str, exp_name: str) -> str:
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         self.filename = filename
-        return os.path.join("data", basefilename)
+        return os.path.join("data", exp_name, basefilename)
 
     def _set_types(self, data: dict) -> dict:
         """Sets feat type in the self.config from snakemake self.config"""
@@ -67,12 +67,13 @@ class DTIDataset(InMemoryDataset):
     def __init__(
         self,
         filename: str,
+        exp_name: str,
         split: str = "train",
         transform: Callable = None,
         pre_transform: Callable = None,
         pre_filter: Callable = None,
     ):
-        root = self._set_filenames(filename)
+        root = self._set_filenames(filename, exp_name)
         super().__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
 

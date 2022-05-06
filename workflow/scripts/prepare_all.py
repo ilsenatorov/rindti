@@ -1,3 +1,4 @@
+import os
 import pickle
 from typing import Iterable
 
@@ -34,7 +35,7 @@ def del_index_mapping(x: dict) -> dict:
 
 def update_config(config: dict) -> dict:
     """Updates config with dims of everything"""
-    config["prot_feat_dim"] = len(prot_node_encoding)
+    config["prot_feat_dim"] = len(prot_node_encoding) + 1
     config["drug_feat_dim"] = len(drug_node_encoding)
     config["prot_edge_dim"] = len(prot_edge_encoding)
     config["drug_edge_dim"] = len(drug_edge_encoding)
@@ -50,8 +51,15 @@ if __name__ == "__main__":
 
     with open(snakemake.input.proteins, "rb") as file:
         prots = pickle.load(file)
+
+    if os.path.exists(snakemake.input.protseqs):
+        protseqs = pd.read_csv(snakemake.input.protseqs, sep='\t')
+    else:
+        protseqs = None
+
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
+
     drug_count = interactions["Drug_ID"].value_counts()
     prot_count = interactions["Target_ID"].value_counts()
     prots["count"] = prot_count
@@ -59,14 +67,22 @@ if __name__ == "__main__":
     prots["data"] = prots["data"].apply(del_index_mapping)
     prots = prots[prots.index.isin(interactions["Target_ID"])]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
+
+    if protseqs is not None:
+        seqs = []
+        for i, row in prots.iterrows():
+            seqs.append(protseqs[protseqs["Target_ID"] == i]["AASeq"].values[0])
+        prots["AASeq"] = seqs
+
     full_data = process_df(interactions)
     config = update_config(snakemake.config)
 
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data", "count"]],
-        "drugs": drugs[["data", "count"]],
+        "prots": prots[["data", "count"] + snakemake.config["prot_cols"]],
+        "drugs": drugs[["data", "count"] + snakemake.config["drug_cols"]],
     }
+
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)
