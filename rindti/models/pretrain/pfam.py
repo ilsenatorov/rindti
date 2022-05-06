@@ -41,21 +41,14 @@ class PfamModel(BaseModel):
         return res
 
     def forward(self, data: dict) -> Tensor:
-        """Forward pass of the model"""
+        """"""
         data = self.masker(data)
         embeds, node_embeds = self.encoder(data)
         node_preds = self.node_pred(node_embeds, data.edge_index)
         return embeds, node_preds
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """Step that is the same for train, validation and test
-
-        Args:
-            data (TwoGraphData): Input data
-
-        Returns:
-            dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
-        """
+        """"""
         embeds, node_preds = self.forward(data)
         fam_idx = torch.tensor(
             self.fam_idx,

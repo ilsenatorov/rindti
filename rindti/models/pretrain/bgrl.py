@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from copy import deepcopy
 from typing import Tuple
 
@@ -10,8 +9,7 @@ from torch.functional import Tensor
 from torch_geometric.data import Data
 
 from ...data import DataCorruptor
-from ...utils import MyArgParser
-from ..base_model import BaseModel, node_embedders, poolers
+from ..base_model import BaseModel
 from ..encoder import Encoder
 
 
@@ -61,9 +59,16 @@ def init_weights(m):
 
 
 class BGRLModel(BaseModel):
-    """Bootrstrapped Graph Representational learning
-    https://arxiv.org/pdf/2102.06514v1.pdf
+    r"""
+    Bootrstrapped graph representational learning  model
 
+    `[paper] <https://arxiv.org/pdf/2102.06514v1.pdf>`_
+
+    `[git repo] <https://github.com/Namkyeong/BGRL_Pytorch>`_
+
+    Args:
+        moving_average_decay (float): Decay rate of moving average
+        epochs (int): Number of epochs
     """
 
     def __init__(self, moving_average_decay: float = 0.99, epochs: int = 1000, **kwargs):
@@ -100,7 +105,7 @@ class BGRLModel(BaseModel):
         update_moving_average(self.teacher_ema_updater, self.teacher_encoder, self.student_encoder)
 
     def forward(self, data: Data) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
-        """Forward pass"""
+        """"""
         teach_data = deepcopy(data)
         graph_student, node_student = self.student_encoder(data)
         node_pred = self.student_node_predictor(node_student)
@@ -110,7 +115,7 @@ class BGRLModel(BaseModel):
         return graph_teacher, graph_pred, node_teacher, node_pred
 
     def shared_step(self, data: Data) -> dict:
-        """Shared step"""
+        """"""
         a = self.corruptor(data)
         b = self.corruptor(data)
         a_graph_teacher, a_graph_pred, a_node_teacher, a_node_pred = self.forward(a)

@@ -9,12 +9,14 @@ from ..base_layer import BaseLayer
 
 
 class MeanPool(BaseLayer):
-    """Mean Pooling module"""
+    """Mean Pooling module
+    Simply averages the node features.
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__()
 
     def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         pool = global_mean_pool(x, batch)
         return F.normalize(pool, dim=1)

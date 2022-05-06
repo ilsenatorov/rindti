@@ -14,8 +14,13 @@ def shifted_softplus(input):
 
 
 class MutualInformation(BaseLayer):
-    """Estimate MI between two entries. Uses MLP
-    https://arxiv.org/pdf/1808.06670.pdf"""
+    r"""Estimate MI between two entries. Uses MLP
+
+    `[paper] <https://arxiv.org/pdf/1808.06670.pdf>_`
+
+    Args:
+        input_dim (int): Size of the input vector
+        hidden_dim (int): Size of the hidden vector"""
 
     def __init__(self, input_dim: int, hidden_dim: int):
         super().__init__()
@@ -23,7 +28,7 @@ class MutualInformation(BaseLayer):
         self.y_mlp = MLP(input_dim, hidden_dim, hidden_dim)
 
     def forward(self, x: Tensor, y: Tensor, pair_index=None) -> Tuple[Tensor, Tensor]:
-        """Forward pass of the module"""
+        """"""
         x = self.x_mlp(x)
         y = self.y_mlp(y)
         score = x @ y.t()

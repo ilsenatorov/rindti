@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import pytest
 import torch
 
@@ -25,7 +27,7 @@ def default_config():
         "drug_pretrain": False,
         "drug_ratio": 0.25,
         "early_stop_patience": 60,
-        "feat_method": "element_l1",
+        "feat_method": "element_l2",
         "lr": 0.001,
         "mlp_dropout": 0.2,
         "momentum": 0.3,
@@ -65,8 +67,8 @@ class BaseTestModel:
         default_config.update(dti_dataset.config)
         default_config["prot_edge_type"] = "none"
         default_config["drug_edge_type"] = "none"
+        pprint(default_config)
         model = self.model(**default_config)
-        print(default_config)
         if default_config["prot_pool"] == "filmconv" and default_config["prot_edge_type"] == "onehot":
             with pytest.raises(AssertionError):
                 model.shared_step(dti_batch)

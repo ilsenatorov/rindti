@@ -3,10 +3,19 @@ rindti.data
 
 .. currentmodule:: rindti.data
 .. autosummary::
-   :nosignatures:
-   {% for cls in rindti.data.__all__ %}
-     {{ cls }}
-   {% endfor %}
+    :nosignatures:
+
+    TwoGraphData
+    DTIDataset
+    LargePreTrainDataset
+    PreTrainDataset
+    PfamSampler
+    WeightedPfamSampler
+    DataCorruptor
+    GnomadTransformer
+    SizeFilter
+    corrupt_features
+    mask_features
 
 .. automodule:: rindti.data
     :members:

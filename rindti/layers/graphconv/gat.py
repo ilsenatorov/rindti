@@ -11,10 +11,14 @@ from ..base_layer import BaseLayer
 class GatConvNet(BaseLayer):
     """Graph Attention Layer
 
+    Refer to :class:`torch_geometric.nn.conv.GATConv` for more details.
+
     Args:
+        input_dim (int): Size of the input vector
         output_dim (int): Size of the output vector
         hidden_dim (int, optional): Size of the hidden vector. Defaults to 32.
         heads (int, optional): Number of heads for multi-head attention. Defaults to 4.
+        num_layers (int, optional): Number of layers. Defaults to 4.
     """
 
     def __init__(
@@ -35,7 +39,7 @@ class GatConvNet(BaseLayer):
         self.out = GATConv(hidden_dim, output_dim, concat=False)
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

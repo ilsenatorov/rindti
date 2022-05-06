@@ -11,6 +11,8 @@ from ..base_layer import BaseLayer
 class GINConvNet(BaseLayer):
     """Graph Isomorphism Network
 
+    Refer to :class:`torch_geometric.nn.conv.GINConv` for more details.
+
     Args:
         input_dim (int): Size of the input vector
         output_dim (int): Size of the output vector
@@ -50,7 +52,7 @@ class GINConvNet(BaseLayer):
         )
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

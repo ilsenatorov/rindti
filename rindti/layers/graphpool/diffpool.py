@@ -14,6 +14,8 @@ from ..base_layer import BaseLayer
 class DiffPoolNet(BaseLayer):
     """Differential Pooling module
 
+    Refer to :class:`torch_geometric.nn.dense.dense_diff_pool` and :class:`torch_geometric.nn.dense.dense_mincut_pool` for more details.
+
     Args:
         input_dim (int): Size of the input vector
         output_dim (int): Size of the output vector
@@ -56,7 +58,7 @@ class DiffPoolNet(BaseLayer):
         self.lin1 = torch.nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """Forward pass of the module"""
+        """"""
 
         x, _ = torch_geometric.utils.to_dense_batch(x, batch, max_num_nodes=self.max_nodes)
         adj = torch_geometric.utils.to_dense_adj(edge_index, batch, max_num_nodes=self.max_nodes)

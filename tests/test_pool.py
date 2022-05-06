@@ -36,9 +36,9 @@ class BaseTestGraphPool:
         assert output.size(0) == 5
         assert output.size(1) == 32
 
-    def test_args(self):
-        parser = MyArgParser()
-        self.module.add_arguments(parser)
+    # def test_args(self):
+    #     parser = MyArgParser()
+    #     self.module.add_arguments(parser)
 
     def test_norm(self):
         """Pooling should return vector of length 1 for each graph"""

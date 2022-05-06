@@ -7,7 +7,17 @@ from torch import Tensor
 
 
 class SoftNearestNeighborLoss(LightningModule):
-    """https://arxiv.org/pdf/1902.01889.pdf"""
+    """Soft Nearest Neighbor Loss
+
+
+
+    `[paper] <https://arxiv.org/pdf/1902.01889.pdf>_`
+
+    Args:
+        temperature (float, optional): Temperature. Defaults to 1.
+        eps (float, optional): Epsilon. Defaults to 1e-6.
+        optim_temperature (bool, optional): Whether to optimise temperature. Defaults to False.
+        grad_step (float, optional): Gradient step for temperature optimisation. Defaults to 0.2."""
 
     def __init__(
         self,
@@ -35,7 +45,7 @@ class SoftNearestNeighborLoss(LightningModule):
         return dict(graph_loss=loss.mean())
 
     def forward(self, embeds: Tensor, fam_idx: List[int]) -> Tensor:
-        """Calculate the soft nearest neighbor loss, optimise temperature if necessary"""
+        """"""
         if not self.optim_temperature:
             return self._forward(embeds, fam_idx, 1.0)
 

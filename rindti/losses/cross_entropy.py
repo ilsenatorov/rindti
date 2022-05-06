@@ -12,10 +12,16 @@ class CrossEntropyLoss(LightningModule):
 
     def __init__(self, **kwargs):
         super().__init__()
-        self.mlp = MLP(kwargs["hidden_dim"], len(kwargs["fam_list"]))
+        self.mlp = MLP(
+            kwargs["hidden_dim"],
+            len(kwargs["label_list"]),
+            kwargs["hidden_dim"] * 2,
+            kwargs["num_layers"],
+            kwargs["dropout"],
+        )
         self.loss = torch.nn.CrossEntropyLoss()
         self.label_encoder = LabelEncoder()
-        self.label_encoder.fit(kwargs["fam_list"])
+        self.label_encoder.fit(kwargs["label_list"])
 
     def forward(self, x: Tensor, y: list) -> Tensor:
         """"""
@@ -23,6 +29,6 @@ class CrossEntropyLoss(LightningModule):
         y = torch.tensor(self.label_encoder.transform(y), device=self.device, dtype=torch.long)
         loss = self.loss(x, y)
         return dict(
-            graph_loss=loss,
-            graph_acc=accuracy(x, y),
+            loss=loss,
+            acc=accuracy(x, y),
         )

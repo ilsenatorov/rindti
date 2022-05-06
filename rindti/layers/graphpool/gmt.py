@@ -9,7 +9,17 @@ from ..base_layer import BaseLayer
 
 
 class GMTNet(BaseLayer):
-    """https://pytorch-geometric.readthedocs.io/en/latest/modules/nn.html#torch_geometric.nn.glob.GraphMultisetTransformer"""
+    """Graph Multiset Transformer pooling
+
+    Refer to :class:`torch_geometric.nn.glob.GraphMultisetTransformer` for more details.
+
+    Args:
+        input_dim (int): Size of the input vector
+        output_dim (int): Size of the output vector
+        hidden_dim (int, optional): Size of the hidden layer(s). Defaults to 128.
+        ratio (float, optional): Ratio of the number of nodes to be pooled. Defaults to 0.25.
+        max_nodes (int, optional): Maximal number of nodes in a graph. Defaults to 600.
+        num_heads (int, optional): Number of heads. Defaults to 4."""
 
     def __init__(
         self,
@@ -26,7 +36,7 @@ class GMTNet(BaseLayer):
             input_dim,
             hidden_dim,
             output_dim,
-            num_nodes=max_nodes * 1.2,
+            num_nodes=max_nodes * 1.5,
             pooling_ratio=ratio,
             num_heads=num_heads,
             pool_sequences=["GMPool_G", "SelfAtt", "SelfAtt", "GMPool_I"],
@@ -34,6 +44,6 @@ class GMTNet(BaseLayer):
         )
 
     def forward(self, x: Tensor, edge_index: Adj, batch: LongTensor) -> Tensor:
-        """Forward pass"""
+        """"""
         embeds = self.pool(x, batch, edge_index)
         return F.normalize(embeds, dim=1)

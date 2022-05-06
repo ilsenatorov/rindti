@@ -31,6 +31,10 @@ This is a collection of various models and utilities that are focused on using p
    modules/losses
    modules/utils
 
+.. autosummary::
+   :toctree: _autosummary
+   :recursive:
+
 Indices and tables
 ===================
 

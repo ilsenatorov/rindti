@@ -6,7 +6,7 @@ from ..base_layer import BaseLayer
 
 
 class SequenceEmbedding(BaseLayer):
-    """Embed the sequence data
+    """Embed the sequence data. Currently not working
 
     Args:
         input_dim (int): Size of the input vector
@@ -23,14 +23,7 @@ class SequenceEmbedding(BaseLayer):
         self.fc = nn.Linear(16 * 18, out_dim)
 
     def forward(self, x: Tensor, **kwargs) -> Tensor:
-        """Forward pass of the module
-
-        Args:
-            x (Tensor): Input features
-
-        Returns:
-            Tensor: Updated features
-        """
+        """"""
         x = kwargs["x"]  # (batch_size, 600)
         batch_size = x.size(0)
         x = self.embedding(x)  # (batch_size, 600, 21)

@@ -1,7 +1,5 @@
-from argparse import ArgumentParser
 from typing import Tuple, Union
 
-from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
@@ -9,7 +7,10 @@ from .base_model import BaseModel
 
 
 class Encoder(BaseModel):
-    """Encoder for graphs"""
+    r"""Encoder for graphs
+
+    Args:
+        return_nodes (bool, optional): Return node embeddings as well. Defaults to False."""
 
     def __init__(self, return_nodes: bool = False, **kwargs):
         super().__init__()
@@ -20,14 +21,16 @@ class Encoder(BaseModel):
 
     def forward(
         self,
-        data: dict,
+        data: Union[dict, Data],
         **kwargs,
     ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         """Encode a graph
 
         Args:
-            data (Data): torch_geometric - 'x', 'edge_index' etc
-
+            data (Union[dict, Data]): Graph to encode. Must contain the following keys:
+                - x: Node features
+                - edge_index: Edge indices
+                - batch: Batch indices
         Returns:
             Union[Tensor, Tuple[Tensor, Tensor]]: Either graph of graph+node embeddings
         """
