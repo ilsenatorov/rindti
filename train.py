@@ -37,11 +37,6 @@ def single_run(**kwargs):
     datamodule.update_config(kwargs)
     pprint(datamodule.config)
 
-    # kwargs.update(datamodule.config)
-    for key, value in datamodule.config.items():
-        if key not in kwargs:
-            kwargs[key] = value
-
     logger = TensorBoardLogger(
         "tb_logs",
         name="dti",

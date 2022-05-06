@@ -103,8 +103,9 @@ class BaseModel(LightningModule):
 
     def log_histograms(self):
         """Logs the histograms of all the available parameters."""
-        for name, param in self.named_parameters():
-            self.logger.experiment.add_histogram(name, param, self.current_epoch)
+        if self.logger:
+            for name, param in self.named_parameters():
+                self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything."""

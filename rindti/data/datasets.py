@@ -43,10 +43,9 @@ class DTIDataset(InMemoryDataset):
 
     def _set_types(self, data: dict) -> dict:
         """Set feat type in the self.config from snakemake self.config."""
-        self.config["data"]["prot"]["feat_type"] = get_type(data, "prot_x")
-        self.config["data"]["drug"]["feat_type"] = get_type(data, "drug_x")
-        self.config["data"]["prot"]["edge_type"] = get_type(data, "prot_edge_feats")
-        self.config["data"]["drug"]["edge_type"] = get_type(data, "drug_edge_feats")
+        for i in ["prot", "drug"]:
+            self.config["data"][f"{i}"]["feat_type"] = get_type(data, f"{i}_x")
+            self.config["data"][f"{i}"]["edge_type"] = get_type(data, f"{i}_edge_feats")
         return self.config
 
     def process_(self, data_list: list, split: str):
