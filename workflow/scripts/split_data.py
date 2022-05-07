@@ -11,7 +11,7 @@ def split_groups(
     val_frac: float = 0.2,
 ) -> pd.DataFrame:
     """Split data by protein (cold-target)
-    Tries to ensure good size of all sets by sorting the proteins by number of interactions
+    Tries to ensure good size of all sets by sorting the prots by number of interactions
     and performing splits within bins of 10
 
     Args:

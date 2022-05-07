@@ -29,9 +29,9 @@ if __name__ == "__main__":
     prot = all_data["prots"]
     drug = all_data["drugs"]
     inter = pd.DataFrame(all_data["data"])
-    struct_info = pd.read_csv(snakemake.input.struct_info, sep="\t", squeeze=True, index_col=0)
+    struct_info = pd.read_csv(snakemake.input.struct_info, sep="\t", index_col=0).squeeze("columns")
 
-    prot = calculate_nnodes_nedges(prot, snakemake.config["prepare_proteins"]["node_feats"] == "esm")
+    prot = calculate_nnodes_nedges(prot, snakemake.config["prepare_prots"]["node_feats"] == "esm")
     prot["plddt"] = struct_info
     drug = calculate_nnodes_nedges(drug)
 

@@ -77,7 +77,7 @@ class DTIDataModule(BaseDataModule):
 
 
 class PreTrainDataModule(BaseDataModule):
-    """DataModule for pretraining on proteins."""
+    """DataModule for pretraining on prots."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

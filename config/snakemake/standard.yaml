@@ -2,6 +2,7 @@
 source: datasets/gpcr/resources
 target: datasets/gpcr/results
 
+
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
@@ -26,12 +27,12 @@ distance:
   threshold: 7
 
 # If set to true, only computes the proteins data, skips drugs (for pretraining)
-only_proteins: false
+only_prots: false
 
 # Seed for reproducibility of random processes
 seed: 42
 
-prepare_proteins:
+prepare_prots:
   # can be label, onehot, or esm
   node_feats: label
   # can be label, onehot, or none
@@ -56,7 +57,7 @@ parse_dataset:
   # sampling
   # sampling can be over, under or none
   sampling: none
-  # class or reg
+  # classification or regression
   task: class
   # threshold values for class problem
   threshold: 1.645

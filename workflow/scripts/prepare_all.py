@@ -6,8 +6,8 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 from prepare_drugs import edge_encoding as drug_edge_encoding
 from prepare_drugs import node_encoding as drug_node_encoding
-from prepare_proteins import edge_encoding as prot_edge_encoding
-from prepare_proteins import node_encoding as prot_node_encoding
+from prepare_prots import edge_encoding as prot_edge_encoding
+from prepare_prots import node_encoding as prot_node_encoding
 
 
 def process(row: pd.Series) -> dict:
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     with open(snakemake.input.drugs, "rb") as file:
         drugs = pickle.load(file)
 
-    with open(snakemake.input.proteins, "rb") as file:
+    with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
     protseqs = None

@@ -18,7 +18,7 @@ class PfamSampler(Sampler):
     Args:
         dataset (PreTrainDataset): dataset, each data point has to contain data.fam
         batch_size (int, optional): Defaults to 64.
-        prot_per_fam (int, optional): Number of proteins per family. Defaults to 8
+        prot_per_fam (int, optional): Number of prots per family. Defaults to 8
         batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000
     """
 
@@ -47,7 +47,7 @@ class PfamSampler(Sampler):
         """Creates a single batch. takes self.prot_per_fam families and samples them
 
         Returns:
-            List[int]: Indices of the proteins from the main dataset
+            List[int]: Indices of the prots from the main dataset
         """
         batch = []
         blacklist: Set[str] = set()
@@ -89,7 +89,7 @@ class WeightedPfamSampler(PfamSampler):
         dataset (PreTrainDataset): dataset, each data point has to contain data.fam
         minprob (float, optional): lowest weighted probability. Defaults to 0.1
         batch_size (int, optional): Defaults to 64.
-        prot_per_fam (int, optional): Number of proteins per family. Defaults to 8
+        prot_per_fam (int, optional): Number of prots per family. Defaults to 8
         batch_per_epoch (int, optional): Number of batches per epoch. Defaults to 1000
 
     """
@@ -123,7 +123,7 @@ class WeightedPfamSampler(PfamSampler):
         """Creates a single batch. takes self.prot_per_fam families with self.fam_weights probabilities and samples them.
 
         Returns:
-            List[int]: Indices of the proteins from the main dataset
+            List[int]: Indices of the prots from the main dataset
         """
         batch = []
         blacklist = set()

@@ -5,45 +5,42 @@ import os.path as osp
 configfile: "config/snakemake/standard.yaml"
 
 
+acrs = {
+    "structures": {"template": "T", "whole": "W", "bsite": "B", "plddt": "P"},
+    "graph": {"distance": "D", "rinerator": "R"},
+    "node_feats": {"label": "L", "onehot": "O", "esm": "E"},
+    "edge_feats": {"label": "L", "onehot": "O", "none": "N"},
+    "split": {"random": "R", "colddrug": "D", "coldtarget": "P"},
+    "filtering": {"all": "A", "balanced": "B", "posneg": "P"},
+    "sampling": {"none": "N", "over": "O", "under": "U"},
+    "task": {"classification": "C", "regression": "R"},
+}
+
 source = config["source"].rstrip("/")  # resources
 target = config["target"].rstrip("/")  # output
 targets = [x.split(".")[0] for x in os.listdir(source + "/structures") if x.endswith(".pdb")]  # list of structures
+prot_settings = f"{config['prepare_prots']['node_feats']}_{config['prepare_prots']['edge_feats']}"
+drug_settings = f"{config['prepare_drugs']['node_feats']}_{config['prepare_drugs']['edge_feats']}"
 
 
 if config["structures"] == "whole":
-    structures = source + "/structures/{protein}.pdb"
+    structures = source + "/structures/{prot}.pdb"
     script_output = ""
 else:
-    structures = "{target}/parsed_structures_{structures}/{{protein}}.pdb".format(
-        target=target, structures=config["structures"]
-    )
-    script_output = "{target}/pymol_{structures}/{{protein}}.pml".format(
-        target=target, structures=config["structures"]
-    )
+    structures = f"{target}/parsed_structures_{config['structures']}/{{protein}}.pdb"
+    script_output = f"{target}/pymol_{config['structures']}/{{protein}}.pml"
 
 
-rinerator_output = "{target}/rinerator_{structures}/{{protein}}/{{protein}}_h.sif".format(
-    target=target, structures=config["structures"]
-)
-rinerator_protein_output = "{target}/rinerator_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
-    target=target,
-    structures=config["structures"],
-    node_feats=config["prepare_proteins"]["node_feats"],
-    edge_feats=config["prepare_proteins"]["edge_feats"],
-)
+rinerator_output = f"{target}/rinerator_{config['structures']}/{{protein}}/{{protein}}_h.sif"
+rinerator_protein_output = f"{target}/rinerator_based/protein_data_{config['structures']}_{prot_settings}.pkl"
 
-distance_protein_output = "{target}/distance_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
-    target=target,
-    structures=config["structures"],
-    node_feats=config["prepare_proteins"]["node_feats"],
-    edge_feats=config["prepare_proteins"]["edge_feats"],
-)
+distance_protein_output = f"{target}/distance_based/protein_data_{config['structures']}_{prot_settings}.pkl"
 if config["graph"] == "distance":
     protein_output = distance_protein_output
 else:
     protein_output = rinerator_protein_output
 
-drug_output = target + "/prepare_drugs/drug_data_{node_feats}_{edge_feats}.pkl".format(**config["prepare_drugs"])
+drug_output = target + f"/prepare_drugs/drug_data_{drug_settings}.pkl"
 
 split_data = "{target}/split_data/{split}_{filtering}_{sampling}_{task}_split.csv".format(
     target=target,
@@ -54,10 +51,10 @@ split_data = "{target}/split_data/{split}_{filtering}_{sampling}_{task}_split.cs
 )
 
 transformer_output = "{target}/prepare_transformer/{node_feats}_transformer.pkl".format(
-    target=target, node_feats=config["prepare_proteins"]["node_feats"]
+    target=target, node_feats=config["prepare_prots"]["node_feats"]
 )
 
-final_output = "{target}/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_node_feats}_{prot_edge_feats}_{drug_node_feats}_{drug_edge_feats}.pkl".format(
+final_output = "{target}/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_settings}_{drug_settings}.pkl".format(
     target=target,
     split=config["split"]["method"],
     filtering=config["parse_dataset"]["filtering"],
@@ -65,10 +62,8 @@ final_output = "{target}/prepare_all/{split}_{filtering}_{sampling}_{task}_{stru
     task=config["parse_dataset"]["task"],
     structures=config["structures"],
     graph=config["graph"],
-    prot_node_feats=config["prepare_proteins"]["node_feats"],
-    prot_edge_feats=config["prepare_proteins"]["edge_feats"],
-    drug_node_feats=config["prepare_drugs"]["node_feats"],
-    drug_edge_feats=config["prepare_drugs"]["edge_feats"],
+    prot_settings=prot_settings,
+    drug_settings=drug_settings,
 )
 
 plot_output = final_output.split("/")[-1].split(".")[0]
@@ -84,7 +79,7 @@ if osp.isdir(os.path.join(source, "templates")):
         "{resources}/templates/{template}", resources=source, template=os.listdir(f"{source}/templates")
     )
 else:
-    if not config["only_proteins"] and config["structures"] not in ["whole", "plddt"]:
+    if not config["only_prots"] and config["structures"] not in ["whole", "plddt"]:
         raise ValueError("No templates available")
     templates = []
 
@@ -97,11 +92,11 @@ else:
 if osp.isdir(os.path.join(source, "drugs")):
     drugs = {x: source + "/drugs/{x}.tsv".format(x=x) for x in ["inter", "lig", "prots"]}
 else:
-    if not config["only_proteins"]:
+    if not config["only_prots"]:
         raise ValueError("No drug interaction data available, can't calculate final data!")
     drugs = {x: [] for x in ["inter", "lig"]}
 
-if config["only_proteins"]:  # Only calculate the data for the proteins
+if config["only_prots"]:  # Only calculate the data for the prots
     output = [protein_output]
 
 
@@ -132,7 +127,7 @@ rule run_pymol:
     output:
         structures=structures,
     log:
-        source + "/logs/run_pymol/{protein}.log",
+        target + "/logs/run_pymol/{protein}.log",
     conda:
         "envs/pymol.yml"
     message:
@@ -171,7 +166,7 @@ rule rinerator:
         """
 
 
-rule prepare_proteins:
+rule prepare_prots:
     input:
         rins=expand(rinerator_output, protein=targets),
         seqs=drugs["prots"],
@@ -181,11 +176,11 @@ rule prepare_proteins:
         """
         Creating protein data.
         Structures config is {config[structures]}
-        Node feature type is {config[prepare_proteins][node_feats]}.
-        Edge feature type is {config[prepare_proteins][edge_feats]}.
+        Node feature type is {config[prepare_prots][node_feats]}.
+        Edge feature type is {config[prepare_prots][edge_feats]}.
         """
     script:
-        "scripts/prepare_proteins.py"
+        "scripts/prepare_prots.py"
 
 
 rule distance_based:
@@ -255,7 +250,7 @@ rule prepare_drugs:
 rule prepare_all:
     input:
         drugs=rules.prepare_drugs.output.drug_pickle,
-        proteins=protein_output,
+        prots=protein_output,
         inter=rules.split_data.output.split_data,
     output:
         combined_pickle=final_output,
@@ -270,7 +265,7 @@ rule prepare_all:
 rule prepare_transformer:
     input:
         gnomad=gnomad,
-        prots=rules.prepare_proteins.output.protein_pickle,
+        prots=rules.prepare_prots.output.protein_pickle,
     output:
         transformer_pickle=transformer_output,
     script:

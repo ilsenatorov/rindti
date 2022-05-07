@@ -1,12 +1,13 @@
 import os
 from typing import Tuple
-import esm
 
+import esm
 import numpy as np
 import pandas as pd
 import torch
+from extract_esm import create_parser
+from extract_esm import main as extract_main
 from utils import list_to_dict, onehot_encode
-from extract_esm import create_parser, main as extract_main
 
 node_encoding = list_to_dict(
     [
@@ -46,7 +47,7 @@ def generate_esm_python(prot_ids, seqs, batch_size):
     seq_data = [(pid, seq[:1022]) for pid, seq in zip(prot_ids, seqs)]
     for b in range(0, len(seq_data), batch_size):
         print(f"\r{b}/{len(seq_data)}", end="")
-        batch_labels, batch_strs, batch_tokens = batch_converter(seq_data[b:b + batch_size])
+        batch_labels, batch_strs, batch_tokens = batch_converter(seq_data[b : b + batch_size])
 
         with torch.no_grad():
             results = model(batch_tokens, repr_layers=[33], return_contacts=True)
@@ -54,22 +55,23 @@ def generate_esm_python(prot_ids, seqs, batch_size):
 
         # Generate per-sequence representations via averaging
         # NOTE: token 0 is always a beginning-of-sequence token, so the first residue is token 1.
-        for i, (pid, seq) in enumerate(seq_data[b:b + batch_size]):
-            esms[pid] = token_representations[i, 1: len(seq) + 1].mean(0)
+        for i, (pid, seq) in enumerate(seq_data[b : b + batch_size]):
+            esms[pid] = token_representations[i, 1 : len(seq) + 1].mean(0)
     print()
     return esms
 
 
 def generate_esm_script(prot_ids, seqs, batch_size):
-    if not os.path.exists('./esms'):
+    if not os.path.exists("./esms"):
         os.makedirs("./esms", exist_ok=True)
         with open("./esms/prots.fasta", "w") as fasta:
             for prot_id, seq in zip(prot_ids, seqs):
                 fasta.write(f">{prot_id}\n{seq[:1022]}\n")
 
         esm_parser = create_parser()
-        esm_args = esm_parser.parse_args(["esm1b_t33_650M_UR50S", "esms/prots.fasta", "esms/",
-                                          "--repr_layers", "33", "--include", "mean"])
+        esm_args = esm_parser.parse_args(
+            ["esm1b_t33_650M_UR50S", "esms/prots.fasta", "esms/", "--repr_layers", "33", "--include", "mean"]
+        )
         print("start")
         extract_main(esm_args)
         print("finish")
@@ -255,21 +257,21 @@ def extract_name(protein_sif: str) -> str:
 
 if __name__ == "__main__":
     if "snakemake" in globals():
-        if snakemake.config["prepare_proteins"]["node_feats"] == "esm":
-            proteins = pd.read_csv(snakemake.input.seqs, sep="\t")
-            esm_encoder = ESMEncoder(proteins["Target_ID"], proteins["AASeq"])
-            proteins["data"] = proteins["Target_ID"].apply(esm_encoder)
-            proteins.set_index("Target_ID", inplace=True)
+        if snakemake.config["prepare_prots"]["node_feats"] == "esm":
+            prots = pd.read_csv(snakemake.input.seqs, sep="\t")
+            esm_encoder = ESMEncoder(prots["Target_ID"], prots["AASeq"])
+            prots["data"] = prots["Target_ID"].apply(esm_encoder)
+            prots.set_index("Target_ID", inplace=True)
         else:
-            proteins = pd.Series(list(snakemake.input.rins), name="sif")
-            proteins = pd.DataFrame(proteins)
-            proteins["ID"] = proteins["sif"].apply(extract_name)
-            proteins.set_index("ID", inplace=True)
+            prots = pd.Series(list(snakemake.input.rins), name="sif")
+            prots = pd.DataFrame(prots)
+            prots["ID"] = prots["sif"].apply(extract_name)
+            prots.set_index("ID", inplace=True)
             prot_encoder = ProteinEncoder(
-                snakemake.config["prepare_proteins"]["node_feats"], snakemake.config["prepare_proteins"]["edge_feats"]
+                snakemake.config["prepare_prots"]["node_feats"], snakemake.config["prepare_prots"]["edge_feats"]
             )
-            proteins["data"] = proteins["sif"].apply(prot_encoder)
-        proteins.to_pickle(snakemake.output.protein_pickle)
+            prots["data"] = prots["sif"].apply(prot_encoder)
+        prots.to_pickle(snakemake.output.protein_pickle)
     else:
         import argparse
 
@@ -284,10 +286,10 @@ if __name__ == "__main__":
         parser.add_argument("--threads", type=int, default=1, help="Number of threads to use")
         args = parser.parse_args()
 
-        proteins = pd.DataFrame(pd.Series(args.sifs, name="sif"))
-        proteins["ID"] = proteins["sif"].apply(extract_name)
-        proteins.set_index("ID", inplace=True)
+        prots = pd.DataFrame(pd.Series(args.sifs, name="sif"))
+        prots["ID"] = prots["sif"].apply(extract_name)
+        prots.set_index("ID", inplace=True)
         prot_encoder = ProteinEncoder(args.node_feats, args.edge_feats)
-        data = Parallel(n_jobs=args.threads)(delayed(prot_encoder)(i) for i in tqdm(proteins["sif"]))
-        proteins["data"] = data
-        proteins.to_pickle(args.output)
+        data = Parallel(n_jobs=args.threads)(delayed(prot_encoder)(i) for i in tqdm(prots["sif"]))
+        prots["data"] = data
+        prots.to_pickle(args.output)

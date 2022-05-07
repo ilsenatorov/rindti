@@ -11,7 +11,7 @@ from .data import TwoGraphData
 
 
 class DTIDataset(InMemoryDataset):
-    """Dataset class for proteins and drugs.
+    """Dataset class for prots and drugs.
 
     Args:
         filename (str): Pickle file that stores the data
