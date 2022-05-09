@@ -80,12 +80,13 @@ class DatasetFetcher:
 
     def get_pdb(self, pdb_id: str) -> None:
         """Download PDB structure from AlphaFoldDB."""
-        response = requests.get(f"https://alphafold.ebi.ac.uk/files/AF-{pdb_id}-F1-model_v2.pdb")
-        if response:
-            n_res = count_residues(response.text)
-            if n_res > self.min_number_aa:
-                with open(f"{self.structures_folder}/{pdb_id}.pdb", "w") as file:
-                    file.write(response.text)
+        if not os.path.exists(f"{self.structures_folder}/{pdb_id}.pdb"):
+            response = requests.get(f"https://alphafold.ebi.ac.uk/files/AF-{pdb_id}-F1-model_v2.pdb")
+            if response:
+                n_res = count_residues(response.text)
+                if n_res > self.min_number_aa:
+                    with open(f"{self.structures_folder}/{pdb_id}.pdb", "w") as file:
+                        file.write(response.text)
 
     def run(self):
         """Run the script."""
