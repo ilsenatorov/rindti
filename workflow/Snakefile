@@ -13,7 +13,7 @@ drug_settings = f"{config['prepare_drugs']['node_feats']}_{config['prepare_drugs
 
 
 if config["structures"] == "whole":
-    structures = source + "/structures/{prot}.pdb"
+    structures = source + "/structures/{protein}.pdb"
     script_output = ""
 else:
     structures = f"{target}/parsed_structures_{config['structures']}/{{protein}}.pdb"
