@@ -1,3 +1,4 @@
+import os
 import random
 
 from pytorch_lightning import Trainer, seed_everything
@@ -32,10 +33,9 @@ def single_run(**kwargs):
     datamodule = DTIDataModule(**kwargs["datamodule"])
     datamodule.setup()
     datamodule.update_config(kwargs)
-
     logger = TensorBoardLogger(
-        "tb_logs",
-        name="dti",
+        save_dir="tb_logs",
+        name=f"dti{kwargs['exp_name']}_{kwargs['datamodule']['filename'].split('/')[-1].split('.')[0]}",
         default_hp_metric=False,
     )
 
@@ -45,7 +45,13 @@ def single_run(**kwargs):
         RichModelSummary(),
         RichProgressBar(),
     ]
-    trainer = Trainer(callbacks=callbacks, logger=logger, log_every_n_steps=25, **kwargs["trainer"])
+    trainer = Trainer(
+        callbacks=callbacks,
+        logger=logger,
+        log_every_n_steps=25,
+        enable_model_summary=False,
+        **kwargs["trainer"],
+    )
     model = models[kwargs["model"]["module"]](**kwargs)
     trainer.fit(model, datamodule)
 

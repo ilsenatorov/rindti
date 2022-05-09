@@ -1,9 +1,10 @@
 seed: 42
 runs: 5
+exp_name: glass
 datamodule:
   filename: datasets/gpcr/results/prepare_all/colddrug_posneg_none_class_template_distance_label_none_label_none.pkl
   exp_name: test
-  batch_size: 128
+  batch_size: 512
   num_workers: 4
 trainer:
   gpus: 1
@@ -12,33 +13,32 @@ trainer:
   gradient_clip_val: 100
 early_stop:
   patience: 60
-
 model:
   module: class
   feat_method: element_l1
   drug:
-    hidden_dim: 128
+    hidden_dim: 16
     node:
       module: ginconv
       dropout: 0.1
-      hidden_dim: 128
+      hidden_dim: 16
       num_layers: 3
     pool:
       module: gmt
       num_heads: 4
-      hidden_dim: 128
+      hidden_dim: 16
       ratio: 0.25
   prot:
-    hidden_dim: 128
+    hidden_dim: 16
     node:
       module: ginconv
       dropout: 0.1
-      hidden_dim: 128
+      hidden_dim: 16
       num_layers: 3
     pool:
       module: gmt
       num_heads: 4
-      hidden_dim: 128
+      hidden_dim: 16
       ratio: 0.25
   mlp:
     dropout: 0.2
