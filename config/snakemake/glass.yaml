@@ -1,6 +1,6 @@
 # the two root directories to take the data from and to store the data in
-source: datasets/gpcr/resources
-target: datasets/gpcr/results
+source: datasets/glass/resources
+target: datasets/glass/results
 
 
 # structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
@@ -60,6 +60,6 @@ parse_dataset:
   # classification or regression
   task: class
   # threshold values for class problem
-  threshold: 1.645
+  threshold: 1000
   # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
   log: false
