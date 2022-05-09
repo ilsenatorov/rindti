@@ -1,12 +1,9 @@
 from typing import List
 
-import matplotlib.pyplot as plt
-import seaborn as sns
 import torch
 from torch import Tensor
 
 from ...data import DataCorruptor, TwoGraphData
-from ...layers import MLP
 from ...losses import GeneralisedLiftedStructureLoss, NodeLoss, SoftNearestNeighborLoss
 from ..base_model import BaseModel
 from ..encoder import Encoder
@@ -65,20 +62,3 @@ class DistanceModel(BaseModel):
         metrics.update(node_metrics)
         metrics["loss"] = metrics["graph_loss"] + metrics["node_loss"] * self.hparams.alpha
         return {k: v.detach() if k != "loss" else v for k, v in metrics.items()}
-
-    def log_node_confusionmatrix(self, confmatrix: Tensor):
-        """Saves the confusion matrix of node prediction.
-
-        Args:
-            confmatrix (Tensor): 20x20 matrix
-        """
-        fig = plt.figure()
-        sns.heatmap(confmatrix.detach().cpu())
-        self.logger.experiment.add_figure("confmatrix", fig, global_step=self.global_step)
-
-    def log_distmap(self, data: TwoGraphData, embeds: Tensor):
-        """Plot and save distance matrix of this batch"""
-        fig = plt.figure()
-        sns.heatmap(torch.cdist(embeds, embeds).detach().cpu())
-        self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)
-        self.logger.experiment.add_embedding(embeds, metadata=data.fam, global_step=self.global_step)
