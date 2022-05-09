@@ -5,17 +5,6 @@ import os.path as osp
 configfile: "config/snakemake/standard.yaml"
 
 
-acrs = {
-    "structures": {"template": "T", "whole": "W", "bsite": "B", "plddt": "P"},
-    "graph": {"distance": "D", "rinerator": "R"},
-    "node_feats": {"label": "L", "onehot": "O", "esm": "E"},
-    "edge_feats": {"label": "L", "onehot": "O", "none": "N"},
-    "split": {"random": "R", "colddrug": "D", "coldtarget": "P"},
-    "filtering": {"all": "A", "balanced": "B", "posneg": "P"},
-    "sampling": {"none": "N", "over": "O", "under": "U"},
-    "task": {"classification": "C", "regression": "R"},
-}
-
 source = config["source"].rstrip("/")  # resources
 target = config["target"].rstrip("/")  # output
 targets = [x.split(".")[0] for x in os.listdir(source + "/structures") if x.endswith(".pdb")]  # list of structures
