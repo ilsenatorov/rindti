@@ -1,17 +1,22 @@
 import os
+import random
 import subprocess
 
 import yaml
 
-with open("config/snakemake/standard.yaml", "r") as file:
-    og_config = yaml.safe_load(file)
+from rindti.utils import IterDict, read_config
 
-for split in ["random", "colddrug", "coldtarget"]:
-    for filtering in ["posneg"]:
-        new_config = og_config.copy()
-        new_config["split"]["method"] = split
-        new_config["parse_dataset"]["filtering"] = filtering
-        with open("config/snakemake/tmp.yaml", "w") as file:
-            yaml.dump(new_config, file)
-            subprocess.run("snakemake -j 16 --configfile config/snakemake/tmp.yaml --use-conda", shell=True)
-os.remove("config/snakemake/tmp.yaml")
+
+def run(config_path: str, threads: int = 1) -> None:
+    """Run multiple snakemake instances using subprocess with different configs."""
+    tmp_config_path = os.path.join(*config_path.split("/")[:-1], f"tmp_config{random.randint(1,100)}.yaml")
+    orig_config = read_config(config_path)
+    all_configs = IterDict()(orig_config)
+    for config in all_configs:
+        with open(tmp_config_path, "w") as file:
+            yaml.dump(config, file)
+        subprocess.run(f"snakemake -j {threads} --configfile {tmp_config_path} --use-conda", shell=True)
+    os.remove(tmp_config_path)
+
+
+run("config/snakemake/glass.yaml")

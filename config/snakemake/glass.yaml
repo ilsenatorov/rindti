@@ -7,7 +7,7 @@ target: datasets/glass/results
 # `plddt` means that the loops with low plddt are removed
 # resources/templates has to be present and contain valid structures for last 2 to work
 # plddt works only for alphafold structures, since plddt is written in the b-factor there
-structures: whole
+structures: bsite
 # radius (in Angstroms) around ligands for which residues are considered to be part of the binding site
 bsite:
   radius: 5
@@ -16,7 +16,7 @@ template:
   radius: 5
 # cutoff for plddt score to remove flailing loops and whatnot
 plddt:
-  threshold: 50
+  threshold: 60
 
 # how to compute the graphs
 # `rinerator` uses rinerator, also can produce edge labels
@@ -46,7 +46,7 @@ prepare_drugs:
 
 split:
   # available methods: random, coldtarget, colddrug
-  method: colddrug
+  method: coldtarget
   train: 0.7
   val: 0.2
   # test is created as a remainder of train and val
