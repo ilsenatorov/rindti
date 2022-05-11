@@ -49,6 +49,7 @@ def train(kwargs: dict, datamodule: DTIDataModule):
 
 
 def list_to_tune(l):
+    """Convert object to tune object if it is a list."""
     if isinstance(l, list):
         return tune.choice(l)
     else:

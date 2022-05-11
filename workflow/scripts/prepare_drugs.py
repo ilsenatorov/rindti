@@ -1,5 +1,4 @@
 import pickle
-from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -8,7 +7,8 @@ from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
 from rdkit.Chem.rdchem import ChiralType
 from torch_geometric.utils import to_undirected
-from utils import list_to_dict, onehot_encode
+
+from .utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(["other", 6, 7, 8, 9, 16, 17, 35, 15, 53, 5, 11, 14, 34])
 edge_encoding = list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"])
@@ -21,7 +21,11 @@ glycan_encoding = {
 
 chirality_encoding = {
     ChiralType.CHI_OTHER: [0, 0, 0],
-    ChiralType.CHI_TETRAHEDRAL_CCW: [1, 1, 0],  # counterclockwise rotation of polarized light -> rotate light to the left
+    ChiralType.CHI_TETRAHEDRAL_CCW: [
+        1,
+        1,
+        0,
+    ],  # counterclockwise rotation of polarized light -> rotate light to the left
     ChiralType.CHI_TETRAHEDRAL_CW: [1, 0, 1],  # clockwise rotation of polarized light -> rotate light to the right
     ChiralType.CHI_UNSPECIFIED: [0, 0, 0],
 }

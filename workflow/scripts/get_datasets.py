@@ -27,10 +27,17 @@ def count_residues(pdb: str) -> int:
 
 
 class DatasetFetcher:
-    def __init__(self, dataset_name: str, dataset_dir: str = "datasets", min_number_aa: int = 150):
+    def __init__(
+        self,
+        dataset_name: str,
+        dataset_dir: str = "datasets",
+        min_number_aa: int = 0,
+        max_number_aa: int = float("inf"),
+    ):
         self.dataset_name = dataset_name
         self.dataset_dir = dataset_dir
         self.min_number_aa = min_number_aa
+        self.max_number_aa = max_number_aa
         self.dataset_folder = f"{dataset_dir}/{dataset_name}/resources"
         self.structures_folder = f"{self.dataset_folder}/structures"
         self.drugs_folder = f"{self.dataset_folder}/drugs"
@@ -38,7 +45,7 @@ class DatasetFetcher:
 
     def _create_dirs(self):
         """Create necessary directories."""
-        Path(self.dataset_folder).mkdir(parents=True, exist_ok=True)
+        Path(self.drugs_folder).mkdir(parents=True, exist_ok=True)
         Path(self.structures_folder).mkdir(parents=True, exist_ok=True)
 
     def _get_glass(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -84,7 +91,7 @@ class DatasetFetcher:
             response = requests.get(f"https://alphafold.ebi.ac.uk/files/AF-{pdb_id}-F1-model_v2.pdb")
             if response:
                 n_res = count_residues(response.text)
-                if n_res > self.min_number_aa:
+                if n_res >= self.min_number_aa and n_res <= self.max_number_aa:
                     with open(f"{self.structures_folder}/{pdb_id}.pdb", "w") as file:
                         file.write(response.text)
 
@@ -106,8 +113,13 @@ class DatasetFetcher:
 if __name__ == "__main__":
     from jsonargparse import CLI
 
-    def run(dataset_name: str, dataset_dir: str = "datasets", min_number_aa: int = 150):
+    def run(
+        dataset_name: str,
+        dataset_dir: str = "datasets",
+        min_number_aa: int = 0,
+        max_number_aa: int = float("inf"),
+    ):
         """Run the script."""
-        DatasetFetcher(dataset_name, dataset_dir, min_number_aa).run()
+        DatasetFetcher(dataset_name, dataset_dir, min_number_aa, max_number_aa).run()
 
     cli = CLI(run)
