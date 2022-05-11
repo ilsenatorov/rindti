@@ -1,5 +1,6 @@
 import collections
 import itertools
+from typing import Any, Callable, Dict, Union
 
 import git
 import yaml
@@ -46,9 +47,9 @@ def read_config(filename: str) -> dict:
     return config
 
 
-def tree():
+def _tree():
     """Defaultdict of defaultdicts"""
-    return collections.defaultdict(tree)
+    return collections.defaultdict(_tree)
 
 
 class IterDict:
@@ -80,7 +81,7 @@ class IterDict:
         return configs
 
     def _unflatten(self, d: dict):
-        root = tree()
+        root = _tree()
         for k, v in d.items():
             parts = k.split(",")
             curr = root
@@ -94,6 +95,14 @@ class IterDict:
         self._flatten(d)
         variants = self._get_variants()
         return [self._unflatten(v) for v in variants]
+
+
+def recursive_apply(ob: Union[Dict, Any], func: Callable) -> Union[Dict, Any]:
+    """Apply a function to the nested dict recursively."""
+    if isinstance(ob, dict):
+        return {k: recursive_apply(v, func) for k, v in ob.items()}
+    else:
+        return func(ob)
 
 
 def get_git_hash():
