@@ -17,4 +17,4 @@ jobs:
     - name: Test with pytest
       run: |
         $CONDA/bin/conda install pytest
-        $CONDA/bin/python -m pytest
+        $CONDA/bin/python -m pytest -m "not gpu"
