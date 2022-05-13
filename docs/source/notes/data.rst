@@ -10,7 +10,7 @@ A subclass of :class:`torch_geometric.data.Data`, that handles an entry of two g
 
 The two graph are indicated by certain prefix, thus `x` and `edge_index` become `drug_x` and `drug_edge_index`.
 
-This has an effect on batching during training and prediction, since the `prot_edge_index` entry gets modified `according to the standard processing rules of torch_geometric<https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs>_`
+This has an effect on batching during training and prediction, since the `prot_edge_index` entry gets modified `according to the standard processing rules of torch_geometric <https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs>`_
 
 Otherwise it is just a dictionary.
 
@@ -44,7 +44,7 @@ Datasets
 
 
 
-Custom datasets are based on `torch_geometric Datasets<https://pytorch-geometric.readthedocs.io/en/latest/notes/create_dataset.html>_`
+Custom datasets are based on `torch_geometric Datasets <https://pytorch-geometric.readthedocs.io/en/latest/notes/create_dataset.html>`_
 
 They are designed to take in the results of the snakemake workflows, and create a quick-to-load pytorch objects.
 
@@ -73,3 +73,18 @@ The datasets for pretraining are also obtained from the snakemake workflow, howe
 
         pickle_file = "filename.pkl"
         dataset = PreTrainDataset(pickle_file)
+
+
+DataModules
+-----------
+
+Datamodules are based on `pytorch_lightning DataModules <https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html>`_ and aim to put all data-related functionality (dataloaders, splitting, sampling) into a single object.
+Can be invoked simply with:
+
+.. code:: python
+
+        from rindti.data import DTIDataModule, PreTrainDataModule
+        dti_pickle_file = "dti.pkl"
+        dti_dm = DTIDataModule(dti_pickle_file)
+        pretrain_pickle_file = "pretrain.pkl"
+        pretrain_dm = PreTrainDataModule(pretrain_pickle_file)

@@ -30,12 +30,12 @@ It is recommended to organise your datasets folder as following::
         │   └── resources
         │       ├── drugs
         │       ├── structures
-        │       └── templates
+        │       └── templates[optional]
         └── dataset2
         └── resources
                 ├── drugs
                 ├── structures
-                └── templates
+                └── templates[optional]
 
 After running the snakemake workflow for dataset1 and dataset2, the following files and directories will be generated (the actual directories might differ, depending on your config)::
 
