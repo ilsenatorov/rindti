@@ -7,8 +7,7 @@ from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
 from rdkit.Chem.rdchem import ChiralType
 from torch_geometric.utils import to_undirected
-
-from .utils import list_to_dict, onehot_encode
+from utils import list_to_dict, onehot_encode
 
 node_encoding = list_to_dict(["other", 6, 7, 8, 9, 16, 17, 35, 15, 53, 5, 11, 14, 34])
 edge_encoding = list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"])

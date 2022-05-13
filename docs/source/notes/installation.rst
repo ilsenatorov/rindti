@@ -12,15 +12,8 @@ One can install the packages necessary through conda (mamba) using the following
         conda install -c conda-forge mamba # mamba is much faster than conda
         mamba env create --quiet --name rindti --file workflow/envs/main.yml
 
-Alternatively one can install only the packages for the neural network (without the snakemake pipeline) through
 
-.. code:: console
-
-        conda install -c conda-forge mamba # mamba is much faster than conda
-        mamba env create --quiet --name rindti --file workflow/envs/torch.yml
-
-
-Then one can run `pip install .` in the root directory of the repository to install rindti as a package.
+Then one can run optionally run `pip install .` in the root directory of the repository to install rindti as a package.
 
 Manual installation
 -------------------
@@ -35,7 +28,7 @@ In order to use this module, you must first install the following packages (pref
     - seaborn
     - plotly
 
-Then one can run ``pip install .`` in the root directory of the repository to install rindti as a package.
+Then one can run optionally ``pip install .`` in the root directory of the repository to install rindti as a package.
 
 Rinerator
 ---------
