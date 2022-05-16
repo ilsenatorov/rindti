@@ -33,10 +33,10 @@ def del_index_mapping(x: dict) -> dict:
     return x
 
 
-def update_config(config: dict) -> dict:
+def update_config(config: dict, prot_size=None, drug_size=None) -> dict:
     """Updates config with dims of everything"""
-    config["prot_feat_dim"] = len(prot_node_encoding) + 1
-    config["drug_feat_dim"] = len(drug_node_encoding)
+    config["prot_feat_dim"] = len(prot_node_encoding) if prot_size is None else prot_size
+    config["drug_feat_dim"] = len(drug_node_encoding) if drug_size is None else drug_size
     config["prot_edge_dim"] = len(prot_edge_encoding)
     config["drug_edge_dim"] = len(drug_edge_encoding)
     return config
@@ -72,13 +72,17 @@ if __name__ == "__main__":
         prots["AASeq"] = seqs
 
     full_data = process_df(interactions)
-    config = update_config(snakemake.config)
+    config = update_config(
+        snakemake.config,
+        prot_size=prots.iloc[0]["data"]["x"].size(0),
+        drug_size=drugs.iloc[0]["data"]["x"].size(0),
+    )
 
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data", "count"]],
-        "drugs": drugs[["data", "count"]],
+        "prots": prots[["data", "count"] + snakemake.config["prot_cols"]],
+        "drugs": drugs[["data", "count"] + snakemake.config["drug_cols"]],
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:

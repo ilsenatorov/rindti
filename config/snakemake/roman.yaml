@@ -1,0 +1,66 @@
+# the two root directories to take the data from and to store the data in
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle
+target: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec
+prot_cols: ["AASeq"]
+drug_cols: ["IUPAC"]
+
+# structures parameter decides whether to calculate `whole` structure, substructure aligned with `template` or `bsite`.
+# `plddt` means that the loops with low plddt are removed
+# resources/templates has to be present and contain valid structures for last 2 to work
+# plddt works only for alphafold structures, since plddt is written in the b-factor there
+structures: whole
+# radius (in Angstroms) around ligands for which residues are considered to be part of the binding site
+bsite:
+  radius: 5
+# radius (in Angstroms) around residues from template to match residues from the query structure
+template:
+  radius: 2
+# cutoff for plddt score to remove flailing loops and whatnot
+plddt:
+  threshold: 50
+
+# how to compute the graphs
+# `rinerator` uses rinerator, also can produce edge labels
+# `distance` just uses a threshold distance between CA atoms
+graph: rinerator
+
+distance:
+  threshold: 7
+
+# If set to true, only computes the proteins data, skips drugs (for pretraining)
+only_prots: false
+
+# Seed for reproducibility of random processes
+seed: 42
+
+prepare_prots:
+  # can be label, onehot, or esm
+  node_feats: esm
+  # can be label, onehot, or none
+  edge_feats: none
+
+prepare_drugs:
+  max_num_atoms: 150
+  # can be label, onehot, glycan, or glycanone
+  node_feats: IUPAC
+  edge_feats: none
+
+split:
+  # available methods: random, coldtarget, colddrug
+  method: random
+  train: 0.7
+  val: 0.2
+  # test is created as a remainder of train and val
+
+parse_dataset:
+  # filtering can be posneg, balanced or all
+  filtering: all
+  # sampling
+  # sampling can be over, under or none
+  sampling: none
+  # class or reg
+  task: class
+  # threshold values for class problem
+  threshold: 1.645
+  # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )
+  log: false
