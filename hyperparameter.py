@@ -77,7 +77,7 @@ def tune_asha(configfile: str, num_samples: int = 1000, num_epochs: int = 100):
     )
 
     print("Best hyperparameters found were: ", analysis.best_config)
-    with open("config/dti/best_hparams.yml", "w") as file:
+    with open("config/dti/best_hparams.yaml", "w") as file:
         yaml.dump(analysis.best_config, file)
 
 

@@ -55,7 +55,3 @@ class BaseTestModel:
 
 class TestClassificationModel(BaseTestModel):
     model_class = ClassificationModel
-
-
-# class TestRegressionModel(BaseTestModel):
-#     model_class = RegressionModel

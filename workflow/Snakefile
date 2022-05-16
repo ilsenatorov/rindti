@@ -129,7 +129,7 @@ rule run_pymol:
     log:
         target + "/logs/run_pymol/{protein}.log",
     conda:
-        "envs/pymol.yml"
+        "envs/pymol.yaml"
     message:
         "Running PyMOL script for {wildcards.protein}, logs are in {log}"
     shell:
