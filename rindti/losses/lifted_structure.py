@@ -6,13 +6,14 @@ from torch import Tensor
 
 
 class GeneralisedLiftedStructureLoss(LightningModule):
-    r"""Gerneralised lifted structure loss
+    r"""Gerneralised lifted structure loss.
 
     `[paper] <https://arxiv.org/abs/1511.06452>`_
 
     Args:
         pos_margin (int, optional): Positive margin. Defaults to 0.
-        neg_margin (int, optional): Negative margin. Defaults to 1."""
+        neg_margin (int, optional): Negative margin. Defaults to 1.
+    """
 
     def __init__(self, pos_margin: int = 0, neg_margin: int = 1, **kwargs) -> None:
         super().__init__()

@@ -14,7 +14,7 @@ from ..encoder import Encoder
 
 
 class EMA:
-    """Exponential moving average"""
+    """Exponential moving average."""
 
     def __init__(self, beta, epochs):
         super().__init__()
@@ -23,7 +23,7 @@ class EMA:
         self.total_steps = epochs
 
     def update_average(self, old, new):
-        """Update"""
+        """Update."""
         if old is None:
             return new
         beta = 1 - (1 - self.beta) * (np.cos(np.pi * self.step / self.total_steps) + 1) / 2.0
@@ -32,27 +32,27 @@ class EMA:
 
 
 def loss_fn(x, y):
-    """Cosine similarity"""
+    """Cosine similarity."""
     x = F.normalize(x, dim=-1, p=2)
     y = F.normalize(y, dim=-1, p=2)
     return 2 - 2 * (x * y).sum(dim=-1)
 
 
 def update_moving_average(ema_updater, ma_model, current_model):
-    """User ema updater on all the weights"""
+    """User ema updater on all the weights."""
     for current_params, ma_params in zip(current_model.parameters(), ma_model.parameters()):
         old_weight, up_weight = ma_params.data, current_params.data
         ma_params.data = ema_updater.update_average(old_weight, up_weight)
 
 
 def set_requires_grad(model, val):
-    """Sets grad as true or False"""
+    """Sets grad as true or False."""
     for p in model.parameters():
         p.requires_grad = val
 
 
 def init_weights(m):
-    """Initialize the weights"""
+    """Initialize the weights."""
     if type(m) == nn.Linear:
         torch.nn.init.xavier_uniform_(m.weight)
         m.bias.data.fill_(0.01)
@@ -60,7 +60,7 @@ def init_weights(m):
 
 class BGRLModel(BaseModel):
     r"""
-    Bootrstrapped graph representational learning  model
+    Bootrstrapped graph representational learning  model.
 
     `[paper] <https://arxiv.org/pdf/2102.06514v1.pdf>`_
 

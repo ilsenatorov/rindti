@@ -6,7 +6,6 @@ rindti.utils
 .. autosummary::
     :nosignatures:
 
-    MyArgParser
     add_arg_prefix
     get_type
     read_config
@@ -15,6 +14,7 @@ rindti.utils
     split_random
     to_prob
     plot_loss_count_dist
+    IterDict
 
 .. automodule:: rindti.utils
     :members:

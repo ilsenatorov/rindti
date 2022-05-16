@@ -13,7 +13,7 @@ from ..encoder import Encoder
 
 
 class PfamModel(BaseModel):
-    """Model for Pfam class comparison problem"""
+    """Model for Pfam class comparison problem."""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -30,7 +30,7 @@ class PfamModel(BaseModel):
 
     @property
     def fam_idx(self) -> List[int]:
-        """Using batch_size and prot_per_fam, get idx of each family
+        """Using batch_size and prot_per_fam, get idx of each family.
 
         Returns:
             List[List]: First list is families, second list is entries in the family
@@ -65,7 +65,7 @@ class PfamModel(BaseModel):
         return {k: v.detach() if k != "loss" else v for k, v in metrics.items()}
 
     def log_node_confusionmatrix(self, confmatrix: Tensor):
-        """Saves the confusion matrix of node prediction
+        """Saves the confusion matrix of node prediction.
 
         Args:
             confmatrix (Tensor): 20x20 matrix
@@ -75,7 +75,7 @@ class PfamModel(BaseModel):
         self.logger.experiment.add_figure("confmatrix", fig, global_step=self.global_step)
 
     def log_distmap(self, data: TwoGraphData, embeds: Tensor):
-        """Plot and save distance matrix of this batch"""
+        """Plot and save distance matrix of this batch."""
         fig = plt.figure()
         sns.heatmap(torch.cdist(embeds, embeds).detach().cpu())
         self.logger.experiment.add_figure("distmap", fig, global_step=self.global_step)

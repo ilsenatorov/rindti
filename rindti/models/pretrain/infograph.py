@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from typing import Tuple
 
 import torch
@@ -8,13 +7,15 @@ from torch_geometric.data import Data
 from ...data import DataCorruptor
 from ...layers import MutualInformation
 from ...losses import NodeLoss
-from ..base_model import BaseModel, node_embedders, poolers
+from ..base_model import BaseModel
 from ..encoder import Encoder
 
 
 class InfoGraphModel(BaseModel):
-    """Maximise mutual information between node and graph representations
-    https://arxiv.org/pdf/1808.06670.pdf"""
+    """Maximise mutual information between node and graph representations.
+
+    https://arxiv.org/pdf/1808.06670.pdf
+    """
 
     def __init__(self, **kwargs):
         super().__init__()

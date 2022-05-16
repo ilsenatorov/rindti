@@ -4,7 +4,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import PreTrainDataModule
 from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
-from rindti.utils import MyArgParser, read_config
+from rindti.utils import read_config
 
 models = {
     "graphlog": GraphLogModel,
@@ -19,52 +19,37 @@ models = {
 def pretrain(**kwargs):
     """Run pretraining pipeline"""
     seed_everything(kwargs["seed"])
-    dm = PreTrainDataModule(kwargs["data"])
+    dm = PreTrainDataModule(**kwargs["datamodule"])
     dm.setup()
+    dm.update_config(kwargs)
     ## TODO need a more elegant solution for this
     labels = dm.get_labels()
-    kwargs["label_list"] = list(labels)
-    kwargs.update(dm.config)
-    kwargs["feat_dim"] = 20
-    kwargs["edge_dim"] = 5
-    logger = TensorBoardLogger("tb_logs", name="prot_" + kwargs["model"], default_hp_metric=False)
+    kwargs["model"]["label_list"] = list(labels)
+    kwargs["model"]["encoder"]["data"]["feat_dim"] = 20
+    kwargs["model"]["encoder"]["data"]["edge_dim"] = 5
+    logger = TensorBoardLogger("tb_logs", name="prot_test", default_hp_metric=False)
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        EarlyStopping(monitor="val_loss", mode="min", **kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
     trainer = Trainer(
-        gpus=kwargs["gpus"],
         callbacks=callbacks,
         logger=logger,
-        max_epochs=kwargs["max_epochs"],
         num_sanity_val_steps=0,
         deterministic=False,
-        profiler=kwargs["profiler"],
+        **kwargs["trainer"],
     )
-    model = models[kwargs["model"]](**kwargs)
-    print(model)
-    # if kwargs["model"] == "distance":
-    #     sampler = PfamSampler(
-    #         dataset,
-    #         batch_size=kwargs["batch_size"],
-    #         prot_per_fam=kwargs["prot_per_fam"],
-    #     )
-    #     dl = DataLoader(
-    #         dataset,
-    #         batch_sampler=sampler,
-    #         num_workers=kwargs["num_workers"],
-    #     )
-    # else:
-    #     dl = DataLoader(dataset, batch_size=kwargs["batch_size"], num_workers=kwargs["num_workers"], shuffle=True)
+    model = models[kwargs["model"]["module"]](**kwargs["model"])
     trainer.fit(model, dm)
 
 
 if __name__ == "__main__":
+    from argparse import ArgumentParser
     from pprint import pprint
 
-    parser = MyArgParser(prog="Model Trainer")
+    parser = ArgumentParser(prog="Model Trainer")
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
 

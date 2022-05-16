@@ -4,7 +4,6 @@ import pytest
 import torch
 
 from rindti.layers import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, PNAConvNet, TransformerNet
-from rindti.utils import MyArgParser
 
 N_NODES = 10
 N_EDGES = 50

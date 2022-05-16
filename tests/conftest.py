@@ -8,19 +8,19 @@ from pytorch_lightning.utilities.seed import seed_everything
 from torch.functional import Tensor
 from torch_geometric.loader import DataLoader
 
-from rindti.data import DTIDataset, PfamSampler, PreTrainDataset
+from rindti.data import DTIDataModule, DTIDataset, PfamSampler, PreTrainDataModule, PreTrainDataset
 
 PROT_FEAT_DIM = 20
 PROT_EDGE_DIM = 5
 DRUG_FEAT_DIM = 14
 DRUG_EDGE_DIM = 3
-MIN_NODES = 100
-MAX_NODES = 200
-MIN_EDGES = 200
-MAX_EDGES = 400
-N_PROTS = 100
-N_DRUGS = 100
-N_INTER = 200
+MIN_NODES = 50
+MAX_NODES = 100
+MIN_EDGES = 50
+MAX_EDGES = 100
+N_PROTS = 50
+N_DRUGS = 50
+N_INTER = 100
 BATCH_SIZE = 16
 PROT_PER_FAM = 8
 BATCH_PER_EPOCH = 10
@@ -41,6 +41,7 @@ def create_fake_graph(
     edge_attr_type: str,
     edge_dim: int,
     fam: list = None,
+    split: list = None,
 ):
     n_nodes = randint(MIN_NODES, MAX_NODES)
     n_edges = randint(MIN_EDGES, MAX_EDGES)
@@ -93,7 +94,7 @@ def fake_dataset(params):
         {
             "prot_id": randint(0, N_PROTS - 1),
             "drug_id": randint(0, N_DRUGS - 1),
-            "split": "train",
+            "split": choice(["train", "val", "test"]),
             "label": randint(0, 1),
         }
         for _ in range(N_INTER)
@@ -119,6 +120,7 @@ def dti_pickle(tmpdir_factory, request):
     fn = tmpdir_factory.mktemp("data").join("temp_data.pkl")
     with open(fn, "wb") as file:
         pickle.dump(ds, file)
+    print(fn)
     return fn
 
 
@@ -133,7 +135,7 @@ def pretrain_pickle(tmpdir_factory, request):
                 PROT_FEAT_DIM,
                 params["edge_type"],
                 PROT_EDGE_DIM,
-                fam=["a", "b", "c", "a;b"],
+                fam=[0, 1, 2],
             )
             for _ in range(N_PROTS)
         ],
@@ -145,36 +147,17 @@ def pretrain_pickle(tmpdir_factory, request):
     return fn
 
 
-@pytest.fixture(scope="session", params=generate_params())
-def sharded_pretrain_pickle(tmpdir_factory, request):
-    """Create a collection of pickled files with fake protein dataset"""
-    params = request.param
-    ds = pd.Series(
-        [
-            create_fake_graph(
-                params["node_type"],
-                PROT_FEAT_DIM,
-                params["edge_type"],
-                PROT_EDGE_DIM,
-                fam=["a", "b"],
-            )
-            for _ in range(N_PROTS)
-        ],
-        name="data",
-    )
-    ds = pd.DataFrame(ds)
-    fn = tmpdir_factory.mktemp("shards")
-    for i in range(0, len(ds), N_PROTS // 2):
-        ds.iloc[i : i + N_PROTS // 2].to_pickle(fn.join("data{}.pkl".format(i)))
-    return str(fn)
-
-
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def dti_dataset(dti_pickle):
     return DTIDataset(dti_pickle, "test")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
+def dti_datamodule(dti_pickle):
+    return DTIDataModule(dti_pickle, "test", batch_size=BATCH_SIZE)
+
+
+@pytest.fixture()
 def dti_dataloader(dti_dataset):
     return DataLoader(dti_dataset, batch_size=BATCH_SIZE, follow_batch=["prot_x", "drug_x"])
 
@@ -184,12 +167,17 @@ def dti_batch(dti_dataloader):
     return next(iter(dti_dataloader))
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def pretrain_dataset(pretrain_pickle):
     return PreTrainDataset(pretrain_pickle)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
+def pretrain_datamodule(pretrain_pickle):
+    return PreTrainDataModule(pretrain_pickle, "test")
+
+
+@pytest.fixture()
 def pfam_sampler(pretrain_dataset):
     return PfamSampler(
         pretrain_dataset,
@@ -199,7 +187,7 @@ def pfam_sampler(pretrain_dataset):
     )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def pretrain_dataloader(pretrain_dataset, pfam_sampler):
     return DataLoader(pretrain_dataset, batch_sampler=pfam_sampler)
 

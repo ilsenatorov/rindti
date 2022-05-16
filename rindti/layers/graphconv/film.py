@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class FilmConvNet(BaseLayer):
-    r"""FiLM Convolution
+    r"""FiLM Convolution.
 
     Refer to :class:`torch_geometric.nn.conv.FiLMConv` for more details.
 

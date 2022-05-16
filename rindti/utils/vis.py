@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 
 
 def plot_loss_count_dist(losses: dict) -> Figure:
-    """Plot distribution of times sampled vs avg loss of families"""
+    """Plot distribution of times sampled vs avg loss of families."""
     fig = plt.figure()
     plt.xlabel("Times sampled")
     plt.ylabel("Avg loss")

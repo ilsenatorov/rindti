@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pytorch_lightning import LightningDataModule
 from torch.utils.data.sampler import Sampler
 from torch_geometric.loader import DataLoader
@@ -9,9 +7,11 @@ from .datasets import DTIDataset, PreTrainDataset
 
 
 class BaseDataModule(LightningDataModule):
-    """Base data module, contains all the datasets for train, val and test"""
+    """Base data module, contains all the datasets for train, val and test."""
 
-    def __init__(self, filename: str, exp_name: str, batch_size: int = 128, num_workers: int = 16, shuffle: bool = True):
+    def __init__(
+        self, filename: str, exp_name: str, batch_size: int = 128, num_workers: int = 1, shuffle: bool = True
+    ):
         super().__init__()
         self.filename = filename
         self.exp_name = exp_name
@@ -19,9 +19,8 @@ class BaseDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.shuffle = shuffle
 
-    def get_config(self, prefix: str = "") -> dict:
-        """Get the config for a single prefix"""
-        return {k.strip(prefix): v for k, v in self.config.items() if k.startswith(prefix)}
+    def update_config(self, config: dict) -> None:
+        raise NotImplementedError
 
     def train_dataloader(self):
         return DataLoader(self.train, **self._dl_kwargs(True))
@@ -49,7 +48,7 @@ class BaseDataModule(LightningDataModule):
 
 
 class DTIDataModule(BaseDataModule):
-    """Data module for the DTI dataset"""
+    """Data module for the DTI dataset."""
 
     def setup(self, stage: str = None):
         """Load the individual datasets"""
@@ -69,14 +68,22 @@ class DTIDataModule(BaseDataModule):
     def __repr__(self):
         return "DTI " + super().__repr__()
 
+    def update_config(self, config: dict) -> None:
+        """Update the main config with the config of the dataset."""
+        for i in ["prot", "drug"]:
+            config["model"][f"{i}"]["data"] = self.config["data"][f"{i}"]
+            config["model"][f"{i}"]["data"]["feat_dim"] = self.config["snakemake"][f"{i}_feat_dim"]
+            config["model"][f"{i}"]["data"]["edge_dim"] = self.config["snakemake"][f"{i}_edge_dim"]
+
 
 class PreTrainDataModule(BaseDataModule):
+    """DataModule for pretraining on prots."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def setup(self, stage: str = None):
-        """Load the individual datasets"""
-
+        """Load the individual datasets."""
         ds = PreTrainDataset(self.filename)
         self.train, self.val, self.test = split_random(ds, [0.7, 0.2, 0.1])
         self.config = ds.config
@@ -87,3 +94,7 @@ class PreTrainDataModule(BaseDataModule):
             shuffle=self.shuffle if shuffle else False,
             num_workers=self.num_workers,
         )
+
+    def update_config(self, config: dict) -> None:
+        """Update the main config with the config of the dataset."""
+        config["model"]["encoder"]["data"] = self.config.copy()

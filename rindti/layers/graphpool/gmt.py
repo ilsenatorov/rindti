@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class GMTNet(BaseLayer):
-    """Graph Multiset Transformer pooling
+    """Graph Multiset Transformer pooling.
 
     Refer to :class:`torch_geometric.nn.glob.GraphMultisetTransformer` for more details.
 
@@ -19,7 +19,8 @@ class GMTNet(BaseLayer):
         hidden_dim (int, optional): Size of the hidden layer(s). Defaults to 128.
         ratio (float, optional): Ratio of the number of nodes to be pooled. Defaults to 0.25.
         max_nodes (int, optional): Maximal number of nodes in a graph. Defaults to 600.
-        num_heads (int, optional): Number of heads. Defaults to 4."""
+        num_heads (int, optional): Number of heads. Defaults to 4.
+    """
 
     def __init__(
         self,
