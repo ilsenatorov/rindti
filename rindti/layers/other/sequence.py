@@ -6,7 +6,7 @@ from ..base_layer import BaseLayer
 
 
 class SequenceEmbedding(BaseLayer):
-    """Embed the sequence data. Currently not working
+    """Embed the sequence data. Currently not working.
 
     Args:
         input_dim (int): Size of the input vector

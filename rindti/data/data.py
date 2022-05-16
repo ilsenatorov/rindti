@@ -4,15 +4,13 @@ from torch_geometric.data import Data
 
 
 class TwoGraphData(Data):
-    """
-    Subclass of torch_geometric.data.Data for protein and drug data.
-    """
+    """Subclass of torch_geometric.data.Data for protein and drug data."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def __inc__(self, key: str, value: Any, *args, **kwargs) -> dict:
-        """How to increment values during batching"""
+        """How to increment values during batching."""
         if not key.endswith("edge_index"):
             return super().__inc__(key, value, *args, **kwargs)
         lenedg = len("edge_index")
@@ -20,15 +18,16 @@ class TwoGraphData(Data):
         return self[prefix + "x"].size(0)
 
     def n_nodes(self, prefix: str) -> int:
-        """Number of nodes for graph with prefix"""
+        """Return number of nodes for graph with prefix."""
         return self[prefix + "x"].size(0)
 
     def n_edges(self, prefix: str) -> int:
-        """Returns number of edges for graph with prefix"""
+        """Return number of edges for graph with prefix."""
         return self[prefix + "edge_index"].size(1)
 
     def n_node_feats(self, prefix: str) -> int:
         """Calculate the feature dimension of one of the graphs.
+
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
         then return the max. Otherwise return size(1)
         """
@@ -40,7 +39,7 @@ class TwoGraphData(Data):
         raise ValueError("Too many dimensions in input features")
 
     def n_edge_feats(self, prefix: str) -> int:
-        """Returns number of different edges for graph with prefix"""
+        """Return number of different edges for graph with prefix."""
         if prefix + "edge_feats" not in self._store:
             return 1
         if self[prefix + "edge_feats"] is None:

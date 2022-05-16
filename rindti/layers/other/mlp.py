@@ -7,7 +7,7 @@ from ..base_layer import BaseLayer
 
 
 class MLP(BaseLayer):
-    """Simple Multi-layer perceptron
+    """Simple Multi-layer perceptron.
 
     Refer to :class:`torch.nn.Sequential` for more details.
 

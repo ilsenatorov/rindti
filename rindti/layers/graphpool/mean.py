@@ -9,9 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class MeanPool(BaseLayer):
-    """Mean Pooling module
-    Simply averages the node features.
-    """
+    """Mean Pooling module. Simply averages the node features."""
 
     def __init__(self, *args, **kwargs):
         super().__init__()

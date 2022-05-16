@@ -4,25 +4,23 @@ from torch.functional import Tensor
 
 from ..SweetNetEncoder import SweetNetEncoder
 from ...data import TwoGraphData
-from ...losses import SoftNearestNeighborLoss
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 from ..encoder import Encoder
 
 
 class ClassificationModel(BaseModel):
-    """Model for DTI prediction as a class problem"""
+    """Model for DTI prediction as a class problem."""
 
     def __init__(self, **kwargs):
-        super().__init__()
-        self.save_hyperparameters()
-        self._determine_feat_method(**kwargs)
-        drug_param = remove_arg_prefix("drug_", kwargs)
-        prot_param = remove_arg_prefix("prot_", kwargs)
-        mlp_param = remove_arg_prefix("mlp_", kwargs)
-        self.prot_encoder = Encoder(**prot_param)
-        self.drug_encoder = SweetNetEncoder(**drug_param) if drug_param["node_embed"] == "SweetNet" else Encoder(**drug_param)
-        self.mlp = self._get_mlp(mlp_param)
+        kwargs = super().__init__(**kwargs)
+        self._determine_feat_method(kwargs["feat_method"], kwargs["prot"]["hidden_dim"], kwargs["drug"]["hidden_dim"])
+        self.prot_encoder = Encoder(**kwargs["prot"])
+        if kwargs["drug"]["node_embed"] == "SweetNet":
+            self.drug_encoder = SweetNetEncoder(**kwargs["drug"])
+        else:
+            self.drug_encoder = Encoder(**kwargs["drug"])
+        self.mlp = self._get_mlp(**kwargs["mlp"])
         self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
@@ -38,7 +36,8 @@ class ClassificationModel(BaseModel):
         )
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """Step that is the same for train, validation and test
+        """Step that is the same for train, validation and test.
+
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """

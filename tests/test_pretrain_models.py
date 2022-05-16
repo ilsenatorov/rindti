@@ -1,90 +1,60 @@
 import pytest
+from pytorch_lightning import Trainer
 
-from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel
-from rindti.models.base_model import node_embedders, poolers
+from rindti.models import ProtClassModel
+from rindti.utils import IterDict, read_config
 
-from .conftest import BATCH_SIZE, PROT_EDGE_DIM, PROT_FEAT_DIM, PROT_PER_FAM
+CONFIG_FILE = "tests/configs/default_pfam.yaml"
 
 
-@pytest.fixture
-def default_config():
-    return {
-        "alpha": 1.0,
-        "beta": 1.0,
-        "batch_size": BATCH_SIZE,
-        "corruption": "mask",
-        "edge_type": "none",
-        "decay_ratio": 0.5,
-        "dropout": 0.2,
-        "early_stop_patience": 60,
-        "edge_dim": 5,
-        "feat_dim": 20,
-        "feat_type": "label",
-        "feat_method": "element_l1",
-        "frac": 0.15,
-        "gamma": 0.1,
-        "gpus": 1,
-        "gradient_clip_val": 10,
-        "hidden_dim": 32,
-        "hierarchy": 3,
-        "lr": 0.0005,
-        "margin": 1.0,
-        "mask_rate": 0.3,
-        "max_epochs": 1000,
-        "loss": "snnl",
-        "temp": 1,
-        "optim_temp": True,
-        "momentum": 0.3,
-        "num_layers": 3,
-        "num_proto": 8,
-        "num_workers": 4,
-        "optimiser": "adamw",
-        "pooling_method": "mincut",
-        "prot_per_fam": PROT_PER_FAM,
-        "ratio": 0.25,
-        "reduce_lr_factor": 0.1,
-        "reduce_lr_patience": 20,
-        "seed": 42,
-        "weight_decay": 0.01,
-        "weighted": 1,
-    }
+default_config = read_config(CONFIG_FILE)
+all_configs = IterDict()(default_config)
 
 
 class BaseTestModel:
-    @pytest.mark.parametrize("node_embed", list(node_embedders.keys()))
-    @pytest.mark.parametrize("pool", list(poolers.keys()))
-    def test_init(self, node_embed, pool, default_config):
-        default_config["node_embed"] = node_embed
-        default_config["pool"] = pool
-        self.model(**default_config)
+    @pytest.mark.parametrize("config", all_configs)
+    @pytest.mark.slow
+    def test_full(self, config, pretrain_datamodule):
+        pretrain_datamodule.setup()
+        pretrain_datamodule.update_config(config)
+        config["model"]["label_list"] = [0, 1, 2]
+        model = self.model_class(**config)
+        trainer = Trainer(
+            gpus=0,
+            fast_dev_run=True,
+            enable_checkpointing=False,
+            logger=None,
+        )
+        trainer.fit(model, pretrain_datamodule)
 
-    @pytest.mark.parametrize("node_embed", list(node_embedders.keys()))
-    @pytest.mark.parametrize("pool", list(poolers.keys()))
-    def test_shared_step(self, node_embed, pool, pretrain_batch, default_config, pretrain_dataset):
-        default_config["node_embed"] = node_embed
-        default_config["pool"] = pool
-        default_config["feat_dim"] = PROT_FEAT_DIM
-        default_config["edge_dim"] = PROT_EDGE_DIM
-        default_config.update(pretrain_dataset.config)
-        model = self.model(**default_config)
-        model.shared_step(pretrain_batch)
+    @pytest.mark.parametrize("config", all_configs)
+    @pytest.mark.slow
+    @pytest.mark.gpu
+    def test_full_gpu(self, config, pretrain_datamodule):
+        pretrain_datamodule.setup()
+        pretrain_datamodule.update_config(config)
+        config["model"]["label_list"] = [0, 1, 2]
+        model = self.model_class(**config)
+        trainer = Trainer(
+            gpus=1,
+            fast_dev_run=True,
+            enable_checkpointing=False,
+            logger=None,
+        )
+        trainer.fit(model, pretrain_datamodule)
+
+    @pytest.mark.parametrize("config", all_configs)
+    def test_shared(self, config, pretrain_datamodule):
+        pretrain_datamodule.setup()
+        pretrain_datamodule.update_config(config)
+        config["model"]["label_list"] = [0, 1, 2]
+        model = self.model_class(**config)
+        batch = next(iter(pretrain_datamodule.train_dataloader()))
+        output = model.shared_step(batch)
+        assert "loss" in output.keys()
+        assert "preds" in output.keys()
+        assert "labels" in output.keys()
 
 
-class TestGraphLogModel(BaseTestModel):
-
-    model = GraphLogModel
-
-
-class TestInfoGraphModel(BaseTestModel):
-
-    model = InfoGraphModel
-
-
-class TestBGRLModel(BaseTestModel):
-
-    model = BGRLModel
-
-
-class TestDistanceModel(BaseTestModel):
-
-    model = DistanceModel
+class TestPfamClassModel(BaseTestModel):
+    model_class = ProtClassModel

@@ -8,7 +8,7 @@ from ..layers import MLP
 
 
 class PfamCrossEntropyLoss(LightningModule):
-    r"""Simple cross-entropy loss with the added MLP to match dimensions"""
+    r"""Simple cross-entropy loss with the added MLP to match dimensions."""
 
     def __init__(self, **kwargs):
         super().__init__()

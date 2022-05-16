@@ -12,7 +12,7 @@ from ..base_layer import BaseLayer
 
 
 class DiffPoolNet(BaseLayer):
-    """Differential Pooling module
+    """Differential Pooling module.
 
     Refer to :class:`torch_geometric.nn.dense.dense_diff_pool` and :class:`torch_geometric.nn.dense.dense_mincut_pool` for more details.
 
@@ -81,7 +81,7 @@ class DiffPoolNet(BaseLayer):
 
 
 class DiffPoolBlock(torch.nn.Module):
-    """Block of DiffPool"""
+    """Block of DiffPool."""
 
     def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
@@ -90,7 +90,7 @@ class DiffPoolBlock(torch.nn.Module):
         self.bn1 = torch.nn.BatchNorm1d(out_channels)
 
     def bn(self, i: int, x: Tensor) -> Tensor:
-        """Apply batch normalisation
+        """Apply batch normalisation.
 
         Args:
             i (int): layer idx
@@ -99,7 +99,6 @@ class DiffPoolBlock(torch.nn.Module):
         Returns:
             Tensor: Updated node features
         """
-
         batch_size, num_nodes, num_channels = x.size()
 
         x = x.view(-1, num_channels)
@@ -108,6 +107,6 @@ class DiffPoolBlock(torch.nn.Module):
         return x
 
     def forward(self, x: Tensor, adj: Adj) -> Tensor:
-        """Forward pass of the module"""
+        """"""
         x = self.bn(1, F.relu(self.conv1(x, adj)))
         return x

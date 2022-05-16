@@ -34,3 +34,7 @@ follow_imports = "silent"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+markers = [
+    "slow",
+    "gpu",
+]

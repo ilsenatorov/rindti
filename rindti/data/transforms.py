@@ -11,7 +11,7 @@ from .data import TwoGraphData
 
 
 class GnomadTransformer:
-    """Transformer of TwoGraphData entries
+    """Transformer of TwoGraphData entries.
 
     Args:
         gnomad (dict): Dict of gnomad DataFrames for each protein
@@ -33,7 +33,7 @@ class GnomadTransformer:
         self.max_num_mut = max_num_mut
 
     def __call__(self, data: TwoGraphData) -> TwoGraphData:
-        """Called within the Dataset class during loading the data
+        """Called within the Dataset class during loading the data.
 
         Args:
             data (TwoGraphData): Prot + Drug entry
@@ -62,7 +62,7 @@ class GnomadTransformer:
 
     @staticmethod
     def from_pickle(filename: str, max_num_mut=50):
-        """Load transformer from pickle
+        """Load transformer from pickle.
 
         Args:
             filename (str): Pickle file location
@@ -82,20 +82,20 @@ class GnomadTransformer:
 
 
 class SizeFilter:
-    """Filters out graph that are too big/small"""
+    """Filters out graph that are too big/small."""
 
     def __init__(self, max_nnodes: int, min_nnodes: int = 0):
         self.max_nnodes = max_nnodes
         self.min_nnodes = min_nnodes
 
     def __call__(self, data: Data) -> bool:
-        """Returns True if number of nodes in given graph is within required values else False"""
+        """Returns True if number of nodes in given graph is within required values else False."""
         nnodes = data.x.size(0)
         return nnodes > self.min_nnodes and nnodes < self.max_nnodes
 
 
 class DataCorruptor:
-    """Corrupt or mask the nodes in a graph (or graph pair)
+    """Corrupt or mask the nodes in a graph (or graph pair).
 
     Args:
         frac (Dict[str, float]): dict of which attributes to corrupt ({'x' : 0.05} or {'prot_x' : 0.1, 'drug_x' : 0.2})
@@ -117,7 +117,7 @@ class DataCorruptor:
             raise ValueError("Unknown corruption function type, should be 'mask' or 'corrupt'!")
 
     def __call__(self, data: Union[Data, TwoGraphData]) -> TwoGraphData:
-        """Apply corruption
+        """Apply corruption.
 
         Args:
             orig_data (Union[Data, TwoGraphData]): data, has to have attributes that match ones from self.frac
@@ -134,7 +134,7 @@ class DataCorruptor:
 
 
 def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
-    """Return corrupt features
+    """Return corrupt features.
 
     Args:
         features (torch.Tensor): Node features
@@ -152,7 +152,7 @@ def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor,
 
 
 def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
-    """Return masked features
+    """Return masked features.
 
     Args:
         features (torch.Tensor): Node features

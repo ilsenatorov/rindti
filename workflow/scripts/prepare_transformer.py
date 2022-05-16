@@ -1,10 +1,9 @@
 import pickle
 
 import pandas as pd
-from prepare_proteins import aa_encoding
+from prepare_prots import aa_encoding
 
-
-if snakemake.config["prepare_proteins"]["node_feats"] != "esm":
+if snakemake.config["prepare_prots"]["node_feats"] != "esm":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
     index_mapping = {i: row["data"]["index_mapping"] for i, row in prots.iterrows()}

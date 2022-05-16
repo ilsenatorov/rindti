@@ -5,14 +5,12 @@ from ..SweetNetEncoder import SweetNetEncoder
 from ...data import TwoGraphData
 from ...layers import MLP
 from ...utils import remove_arg_prefix
-from ..encoder import Encoder
 from ..base_model import BaseModel
+from ..encoder import Encoder
 
 
 class ESMClassModel(BaseModel):
-    """
-    ESM Model Class for DTI prediction
-    """
+    """ESM Model Class for DTI prediction."""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -26,10 +24,9 @@ class ESMClassModel(BaseModel):
         )
         self.drug_encoder = SweetNetEncoder(**drug_param) if drug_param["node_embed"] == "SweetNet" else Encoder(**drug_param)
         self.mlp = self._get_mlp(mlp_param)
-        self._set_class_metrics()
-    
+
     def forward(self, prot: dict, drug: dict):
-        """Forward pass of the model"""
+        """Forward pass of the model."""
         prot_embed = self.prot_encoder(prot["x"].view(-1, 1280))
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
@@ -41,7 +38,8 @@ class ESMClassModel(BaseModel):
         )
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """Step that is the same for train, validation and test
+        """Step that is the same for train, validation and test.
+
         Returns:
             dict: dict with different metrics - losses, accuracies etc. Has to contain 'loss'.
         """
@@ -50,4 +48,10 @@ class ESMClassModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
-        return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
+        metrics = self._get_class_metrics(fwd_dict["pred"], labels)
+        metrics.update(
+            dict(
+                loss=bce_loss,
+            )
+        )
+        return metrics

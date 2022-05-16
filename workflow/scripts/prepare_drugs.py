@@ -1,5 +1,4 @@
 import pickle
-from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -21,7 +20,11 @@ glycan_encoding = {
 
 chirality_encoding = {
     ChiralType.CHI_OTHER: [0, 0, 0],
-    ChiralType.CHI_TETRAHEDRAL_CCW: [1, 1, 0],  # counterclockwise rotation of polarized light -> rotate light to the left
+    ChiralType.CHI_TETRAHEDRAL_CCW: [
+        1,
+        1,
+        0,
+    ],  # counterclockwise rotation of polarized light -> rotate light to the left
     ChiralType.CHI_TETRAHEDRAL_CW: [1, 0, 1],  # clockwise rotation of polarized light -> rotate light to the right
     ChiralType.CHI_UNSPECIFIED: [0, 0, 0],
 }

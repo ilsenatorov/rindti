@@ -1,13 +1,13 @@
-from pprint import pprint
+import os
+import random
 
-import numpy as np
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
 from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
-from rindti.utils import hparams_config, read_config
+from rindti.utils import get_git_hash, read_config
 
 models = {
     "class": ClassificationModel,
@@ -19,9 +19,7 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    tmp = np.arange(100)
-    np.random.shuffle(tmp)
-    seeds = tmp[:kwargs["runs"]]
+    seeds = random.sample(range(1, 1000), kwargs["runs"])
 
     folder = os.path.join("tb_logs", f"dti{kwargs['model']}:{kwargs['exp_name']}", kwargs["data"].split("/")[-1].split(".")[0])
     if not os.path.exists(folder):
@@ -38,9 +36,10 @@ def train(**kwargs):
         single_run(folder, next_version, **kwargs)
 
 
-def single_run(folder, version, **kwargs):
+def single_run(**kwargs):
+    """Does a single run."""
     seed_everything(kwargs["seed"])
-    datamodule = DTIDataModule(kwargs["data"], kwargs["exp_name"], kwargs["batch_size"], kwargs["num_workers"])
+    datamodule = DTIDataModule(**kwargs["datamodule"])
     datamodule.setup()
     pprint(datamodule.config)
 
@@ -50,48 +49,38 @@ def single_run(folder, version, **kwargs):
             kwargs[key] = value
 
     logger = TensorBoardLogger(
-        save_dir=folder, 
-        name=f"version_{version}", 
-        version=kwargs["seed"], 
+        save_dir="tb_logs",
+        name=f"dti{kwargs['datamodule']['exp_name']}_{kwargs['datamodule']['filename'].split('/')[-1].split('.')[0]}",
+        save_dir=folder,
+        name=f"version_{version}",
+        version=kwargs["seed"],
         default_hp_metric=False,
     )
+
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
-        EarlyStopping(monitor="val_loss", patience=kwargs["early_stop_patience"], mode="min"),
+        EarlyStopping(monitor="val_loss", mode="min", **kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
     trainer = Trainer(
-        gpus=kwargs["gpus"],
         callbacks=callbacks,
         logger=logger,
-        gradient_clip_val=kwargs["gradient_clip_val"],
-        profiler=kwargs["profiler"],
         log_every_n_steps=25,
-        max_epochs=kwargs["max_epochs"]
+        enable_model_summary=False,
+        **kwargs["trainer"],
     )
-    model = models[kwargs["model"]](**kwargs)
-    pprint(model)
+    model = models[kwargs["model"]["module"]](**kwargs)
     trainer.fit(model, datamodule)
-    trainer.test(model, datamodule)
 
 
 if __name__ == "__main__":
-    import argparse
-    import os
+    from argparse import ArgumentParser
 
-    from rindti.utils import MyArgParser
-
-    tmp_parser = argparse.ArgumentParser(add_help=False)
-    tmp_parser.add_argument("--model", type=str, default="class")
-    args = tmp_parser.parse_known_args()[0]
-    model_type = args.model
-
-    parser = MyArgParser(prog="Model Trainer")
+    parser = ArgumentParser(prog="Model Trainer")
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
 
     orig_config = read_config(args.config)
-    configs = hparams_config(orig_config)
-    for config in configs:
-        train(**config)
+    orig_config["git_hash"] = get_git_hash()  # to know the version of the code
+    train(**orig_config)

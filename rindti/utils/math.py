@@ -4,7 +4,7 @@ from torch.utils.data.dataset import random_split
 
 
 def split_random(dataset, fracs: list) -> list:
-    """Randomly split dataset"""
+    """Randomly split dataset."""
     assert abs(sum(fracs) - 1) < 1e-6, "Sum of fractions must be 1"
     tot = len(dataset)
     values = []
@@ -15,17 +15,17 @@ def split_random(dataset, fracs: list) -> list:
 
 
 def minmax_normalise(s: pd.Series) -> pd.Series:
-    """MinMax normalisation of a pandas series"""
+    """MinMax normalisation of a pandas series."""
     return (s - s.min()) / (s.max() - s.min())
 
 
 def to_prob(s: pd.Series) -> pd.Series:
-    """Convert to probabilities"""
+    """Convert to probabilities."""
     return s / s.sum()
 
 
 def get_type(data: dict, key: str) -> str:
-    """Check which type of data we have
+    """Check which type of data we have.
 
     Args:
         data (dict): TwoGraphData or Data

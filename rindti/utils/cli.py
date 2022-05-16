@@ -1,12 +1,14 @@
+import collections
 import itertools
-from argparse import ArgumentParser, _ArgumentGroup
-from typing import List
+from typing import Any, Callable, Dict, Union
 
+import git
 import yaml
 
 
 def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
-    """Removes the prefix from all the args
+    """Removes the prefix from all the args.
+
     Args:
         prefix (str): prefix to remove (`drug_`, `prot_` or `mlp_` usually)
         kwargs (dict): dict of arguments
@@ -26,7 +28,7 @@ def remove_arg_prefix(prefix: str, kwargs: dict) -> dict:
 
 
 def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
-    """Adds the prefix to all the args. Removes None values and "index_mapping"
+    """Adds the prefix to all the args. Removes None values and "index_mapping".
 
     Args:
         prefix (str): prefix to add (`drug_`, `prot_` or `mlp_` usually)
@@ -38,75 +40,72 @@ def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
     return {prefix + k: v for (k, v) in kwargs.items() if k != "index_mapping" and v is not None}
 
 
-class _MyArgumentGroup(_ArgumentGroup):
-    """Custom arguments group
-
-    Args:
-        prefix (str, optional): Prefix to begin arguments from. Defaults to "".
-
-    """
-
-    def __init__(self, *args, prefix="", **kwargs):
-        self.prefix = prefix
-        super().__init__(*args, **kwargs)
-
-    def add_argument(self, name: str, **kwargs):
-        """Add argument with prefix before it
-
-        Args:
-            name (str): [description]
-        """
-        name = self.prefix + name
-        super().add_argument(name, **kwargs)
-
-
-class MyArgParser(ArgumentParser):
-    """Custom argument parser"""
-
-    def add_argument_group(self, *args, prefix="", **kwargs) -> _MyArgumentGroup:
-        """Adds an ArgumentsGroup with every argument starting with the prefix
-
-        Args:
-            prefix (str, optional): Prefix to begin arguments from. Defaults to "".
-
-        Returns:
-            _MyArgumentGroup: group
-        """
-        group = _MyArgumentGroup(self, *args, prefix=prefix, conflict_handler="resolve", **kwargs)
-        self._action_groups.append(group)
-        return group
-
-    def get_arg_group(self, group_title: str) -> _MyArgumentGroup:
-        """Get arg group under this title"""
-        for group in self._action_groups:
-            if group.title == group_title:
-                return group
-
-
 def read_config(filename: str) -> dict:
-    """Read in yaml config for training"""
+    """Read in yaml config for training."""
     with open(filename, "r") as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
     return config
 
 
-def hparams_config(hparams: dict) -> List[dict]:
-    """Get all possible combinations of hyperparameters.
-    If any entry is a list, it will be expanded to all possible combinations.
+def _tree():
+    """Defaultdict of defaultdicts"""
+    return collections.defaultdict(_tree)
 
-    Args:
-        hparams (dict): Hyperparameters
 
-    Returns:
-        list: List of hyperparameter configurations
-    """
-    configs = []
-    hparams_small = {k: v for k, v in hparams.items() if isinstance(v, list)}
-    if hparams_small == {}:
-        return [hparams]
-    keys, values = zip(*hparams_small.items())
-    for v in itertools.product(*values):
-        config = hparams.copy()
-        config.update(dict(zip(keys, v)))
-        configs.append(config)
-    return configs
+class IterDict:
+    """Returns a list of dicts with all possible combinations of hyperparameters."""
+
+    def __init__(self):
+        self.current_path = []
+        self.flat = {}
+
+    def _flatten(self, d: dict):
+        for k, v in d.items():
+            self.current_path.append(k)
+            if isinstance(v, dict):
+                self._flatten(v)
+            else:
+                self.flat[",".join(self.current_path)] = v
+            self.current_path.pop()
+
+    def _get_variants(self):
+        configs = []
+        hparams_small = {k: v for k, v in self.flat.items() if isinstance(v, list)}
+        if hparams_small == {}:
+            return [self.flat]
+        keys, values = zip(*hparams_small.items())
+        for v in itertools.product(*values):
+            config = self.flat.copy()
+            config.update(dict(zip(keys, v)))
+            configs.append(config)
+        return configs
+
+    def _unflatten(self, d: dict):
+        root = _tree()
+        for k, v in d.items():
+            parts = k.split(",")
+            curr = root
+            for part in parts[:-1]:
+                curr = curr[part]
+            part = parts[-1]
+            curr[part] = v
+        return root
+
+    def __call__(self, d: dict):
+        self._flatten(d)
+        variants = self._get_variants()
+        return [self._unflatten(v) for v in variants]
+
+
+def recursive_apply(ob: Union[Dict, Any], func: Callable) -> Union[Dict, Any]:
+    """Apply a function to the nested dict recursively."""
+    if isinstance(ob, dict):
+        return {k: recursive_apply(v, func) for k, v in ob.items()}
+    else:
+        return func(ob)
+
+
+def get_git_hash():
+    """Get the git hash of the current repository."""
+    repo = git.Repo(search_parent_directories=True)
+    return repo.head.object.hexsha
