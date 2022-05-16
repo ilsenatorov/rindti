@@ -4,7 +4,7 @@ runs: 3
 # Hardware
 batch_size: 64
 gpus: 1
-max_epochs: 200
+max_epochs: 1000
 num_workers: 0
 profiler: null
 seed: 42

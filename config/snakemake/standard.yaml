@@ -1,6 +1,6 @@
 # the two root directories to take the data from and to store the data in
 source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle
-target: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec
+target: /scratch/SCRATCH_SAS/roman/rindti/datasets/master_results/glylec
 prot_cols: ["AASeq"]
 drug_cols: ["IUPAC"]
 
@@ -22,7 +22,7 @@ plddt:
 # how to compute the graphs
 # `rinerator` uses rinerator, also can produce edge labels
 # `distance` just uses a threshold distance between CA atoms
-graph: rinerator
+graph: distance
 
 distance:
   threshold: 7
