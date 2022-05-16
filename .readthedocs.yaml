@@ -6,4 +6,4 @@ build:
     python: "mambaforge-4.10"
 
 conda:
-  environment: workflow/envs/torch.yml
+  environment: workflow/envs/main.yml

@@ -56,7 +56,6 @@ dependencies:
   - debugpy=1.5.1=py38h295c915_0
   - decorator=5.1.1=pyhd3eb1b0_0
   - defusedxml=0.7.1=pyhd3eb1b0_0
-  - docutils=0.18.1=py38h06a4308_2
   - dropbox=11.14.0=py38h06a4308_0
   - entrypoints=0.4=py38h06a4308_0
   - executing=0.8.3=pyhd3eb1b0_0
@@ -327,15 +326,19 @@ dependencies:
   - zstd=1.5.2=ha95c52a_0
   - pip:
     - absl-py==1.0.0
+    - alabaster==0.7.12
+    - babel==2.10.1
     - black==22.3.0
     - cfgv==3.3.1
     - click==8.1.3
     - distlib==0.3.4
+    - docutils==0.17.1
     - fair-esm==0.4.2
     - fsspec==2022.3.0
     - fuzzywuzzy==0.18.0
     - google-auth-oauthlib==0.4.6
     - identify==2.5.0
+    - imagesize==1.3.0
     - jsonargparse==4.7.3
     - markdown==3.3.7
     - mypy-extensions==0.4.3
@@ -354,6 +357,15 @@ dependencies:
     - requests-oauthlib==1.3.1
     - seaborn==0.11.2
     - smmap==5.0.0
+    - snowballstemmer==2.2.0
+    - sphinx==4.5.0
+    - sphinx-rtd-theme==1.0.0
+    - sphinxcontrib-applehelp==1.0.2
+    - sphinxcontrib-devhelp==1.0.2
+    - sphinxcontrib-htmlhelp==2.0.0
+    - sphinxcontrib-jsmath==1.0.1
+    - sphinxcontrib-qthelp==1.0.3
+    - sphinxcontrib-serializinghtml==1.1.5
     - tenacity==8.0.1
     - tensorboard==2.9.0
     - tensorboard-data-server==0.6.1
@@ -362,4 +374,3 @@ dependencies:
     - torchmetrics==0.8.2
     - virtualenv==20.14.1
     - werkzeug==2.1.2
-prefix: /home/ilya/miniconda3/envs/rindti
