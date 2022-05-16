@@ -13,8 +13,8 @@ jobs:
         python-version: 3.8
     - name: Install dependencies
       run: |
-        $CONDA/bin/conda env update --file workflow/envs/torch.yml --name base
+        $CONDA/bin/conda env update --file workflow/envs/main.yml --name base
     - name: Test with pytest
       run: |
         $CONDA/bin/conda install pytest
-        $CONDA/bin/python -m pytest
+        $CONDA/bin/python -m pytest -m "not gpu"

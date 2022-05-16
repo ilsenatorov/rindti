@@ -1,10 +1,9 @@
 seed: 42
-runs: 5
 exp_name: glass
 datamodule:
-  filename: datasets/glass/results/prepare_all/colddrug_posneg_none_class_template_distance_label_none_label_none.pkl
+  filename: /home/ilya/Projects/rindti/datasets/glass/results/prepare_all/colddrug_posneg_none_class_template_distance_label_none_label_none.pkl
   exp_name: test
-  batch_size: 512
+  batch_size: 256
   num_workers: 4
 trainer:
   gpus: 1
@@ -15,9 +14,9 @@ early_stop:
   patience: 60
 model:
   module: class
-  feat_method: element_l1
+  feat_method: concat
   drug:
-    hidden_dim: 16
+    hidden_dim: [16, 32, 64, 128, 256, 512]
     node:
       module: ginconv
       dropout: 0.1

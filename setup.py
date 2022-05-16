@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="RINDTI",
-    version="1.1.0",
+    version="1.2.0",
     author="Ilya Senatorov",
     author_email="ilya.senatorov@helmholtz-hips.de",
     description="Drug-Target prediction using residue interaction networks",

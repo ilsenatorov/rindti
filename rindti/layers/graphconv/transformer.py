@@ -8,7 +8,7 @@ from ..base_layer import BaseLayer
 
 
 class TransformerNet(BaseLayer):
-    """Transformer Network
+    """Transformer Network.
 
     Refer to :class:`torch_geometric.nn.conv.TransformerConv` for more details.
 

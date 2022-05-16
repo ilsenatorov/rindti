@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class PNAConvNet(BaseLayer):
-    r"""Principal Neighborhood Aggregation
+    r"""Principal Neighborhood Aggregation.
 
     Refer to :class:`torch_geometric.nn.conv.PNAConv` for more details.
 

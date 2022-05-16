@@ -14,13 +14,14 @@ def shifted_softplus(input):
 
 
 class MutualInformation(BaseLayer):
-    r"""Estimate MI between two entries. Uses MLP
+    r"""Estimate MI between two entries. Uses MLP.
 
     `[paper] <https://arxiv.org/pdf/1808.06670.pdf>_`
 
     Args:
         input_dim (int): Size of the input vector
-        hidden_dim (int): Size of the hidden vector"""
+        hidden_dim (int): Size of the hidden vector
+    """
 
     def __init__(self, input_dim: int, hidden_dim: int):
         super().__init__()

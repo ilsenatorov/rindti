@@ -7,9 +7,7 @@ from torch import Tensor
 
 
 class SoftNearestNeighborLoss(LightningModule):
-    """Soft Nearest Neighbor Loss
-
-
+    """Soft Nearest Neighbor Loss.
 
     `[paper] <https://arxiv.org/pdf/1902.01889.pdf>_`
 
@@ -17,7 +15,8 @@ class SoftNearestNeighborLoss(LightningModule):
         temperature (float, optional): Temperature. Defaults to 1.
         eps (float, optional): Epsilon. Defaults to 1e-6.
         optim_temperature (bool, optional): Whether to optimise temperature. Defaults to False.
-        grad_step (float, optional): Gradient step for temperature optimisation. Defaults to 0.2."""
+        grad_step (float, optional): Gradient step for temperature optimisation. Defaults to 0.2.
+    """
 
     def __init__(
         self,
@@ -34,7 +33,7 @@ class SoftNearestNeighborLoss(LightningModule):
         self.grad_step = grad_step
 
     def _forward(self, embeds: Tensor, fam_idx: List[int], temp_frac: Union[int, Tensor]) -> Tensor:
-        """Calculate the soft nearest neighbor loss for a given temp denominator"""
+        """Calculate the soft nearest neighbor loss for a given temp denominator."""
         embeds = F.normalize(embeds)
         sim = 1 - torch.matmul(embeds, embeds.t())
         expsim = torch.exp(-sim / (self.temperature / temp_frac)) * (1 - torch.eye(sim.size(0), device=self.device))

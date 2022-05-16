@@ -11,7 +11,7 @@ from .data import TwoGraphData
 
 
 class DTIDataset(InMemoryDataset):
-    """Dataset class for proteins and drugs
+    """Dataset class for prots and drugs.
 
     Args:
         filename (str): Pickle file that stores the data
@@ -22,22 +22,34 @@ class DTIDataset(InMemoryDataset):
 
     splits = {"train": 0, "val": 1, "test": 2}
 
-    def _set_filenames(self, filename: str) -> str:
+    def __init__(
+        self,
+        filename: str,
+        exp_name: str,
+        split: str = "train",
+        transform: Callable = None,
+        pre_transform: Callable = None,
+        pre_filter: Callable = None,
+    ):
+        root = self._set_filenames(filename, exp_name)
+        super().__init__(root, transform, pre_transform, pre_filter)
+        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
+
+    def _set_filenames(self, filename: str, exp_name: str) -> str:
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         self.filename = filename
-        return os.path.join("data", basefilename)
+        return os.path.join("data", exp_name, basefilename)
 
     def _set_types(self, data: dict) -> dict:
-        """Sets feat type in the self.config from snakemake self.config"""
-        self.config["prot_feat_type"] = get_type(data, "prot_x")
-        self.config["drug_feat_type"] = get_type(data, "drug_x")
-        self.config["prot_edge_type"] = get_type(data, "prot_edge_feats")
-        self.config["drug_edge_type"] = get_type(data, "drug_edge_feats")
+        """Set feat type in the self.config from snakemake self.config."""
+        for i in ["prot", "drug"]:
+            self.config["data"][f"{i}"]["feat_type"] = get_type(data, f"{i}_x")
+            self.config["data"][f"{i}"]["edge_type"] = get_type(data, f"{i}_edge_feats")
         return self.config
 
     def process_(self, data_list: list, split: str):
-        """Process the datalist
+        """Process the datalist.
 
         Args:
             data_list (list): List of TwoGraphData entries
@@ -53,7 +65,7 @@ class DTIDataset(InMemoryDataset):
         torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
 
     def _get_datum(self, all_data: dict, id: str, which: str) -> dict:
-        """Get either prot or drug data"""
+        """Get either prot or drug data."""
         graph = all_data[which].loc[id, "data"]
         graph["count"] = float(all_data[which].loc[id, "count"])
         graph["id"] = id
@@ -61,28 +73,18 @@ class DTIDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> Iterable[str]:
-        """Files that are created"""
+        """Files that are created."""
         return [k + ".pt" for k in self.splits.keys()]
 
-    def __init__(
-        self,
-        filename: str,
-        split: str = "train",
-        transform: Callable = None,
-        pre_transform: Callable = None,
-        pre_filter: Callable = None,
-    ):
-        root = self._set_filenames(filename)
-        super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
-
     def process(self):
-        """If the dataset was not seen before, process everything"""
+        """If the dataset was not seen before, process everything."""
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
-            self.config = all_data["config"]
-            self.config["prot_max_nodes"] = 0
-            self.config["drug_max_nodes"] = 0
+            self.config = {}
+            self.config["snakemake"] = all_data["config"]
+            self.config["data"] = {"prot": {}, "drug": {}}
+            self.config["data"]["prot"]["max_nodes"] = 0
+            self.config["data"]["drug"]["max_nodes"] = 0
             for split in self.splits.keys():
                 data_list = []
                 for i in all_data["data"]:
@@ -93,8 +95,12 @@ class DTIDataset(InMemoryDataset):
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
                     two_graph_data.num_nodes = 1  # supresses the warning
-                    self.config["prot_max_nodes"] = max(self.config["prot_max_nodes"], two_graph_data.n_nodes("prot_"))
-                    self.config["drug_max_nodes"] = max(self.config["drug_max_nodes"], two_graph_data.n_nodes("drug_"))
+                    self.config["data"]["prot"]["max_nodes"] = max(
+                        self.config["data"]["prot"]["max_nodes"], two_graph_data.n_nodes("prot_")
+                    )
+                    self.config["data"]["drug"]["max_nodes"] = max(
+                        self.config["data"]["drug"]["max_nodes"], two_graph_data.n_nodes("drug_")
+                    )
                     data_list.append(two_graph_data)
                     self.config = self._set_types(data_list[0])
                 if data_list:
@@ -102,7 +108,7 @@ class DTIDataset(InMemoryDataset):
 
 
 class PreTrainDataset(InMemoryDataset):
-    """Dataset class for pre-training
+    """Dataset class for pre-training.
 
     Args:
         filename (str): Pickle file that stores the data
@@ -120,12 +126,12 @@ class PreTrainDataset(InMemoryDataset):
         self.data, self.slices, self.config = torch.load(self.processed_paths[0])
 
     def index(self, id: str):
-        """Find protein by id"""
+        """Find protein by id."""
         return self[self.data.id.index(id)]
 
     @property
     def processed_file_names(self) -> Iterable[str]:
-        """Which files have to be in the dir to consider dataset processed
+        """Which files have to be in the dir to consider dataset processed.
 
         Returns:
             Iterable[str]: list of files
@@ -133,7 +139,7 @@ class PreTrainDataset(InMemoryDataset):
         return ["data.pt"]
 
     def process(self):
-        """If the dataset was not seen before, process everything"""
+        """If the dataset was not seen before, process everything."""
         self.config = dict(max_nodes=0)
         df = pd.read_pickle(self.filename)
         data_list = []
@@ -156,7 +162,7 @@ class PreTrainDataset(InMemoryDataset):
 
 
 class LargePreTrainDataset(Dataset):
-    """Dataset that doesn't fit in the memory"""
+    """Dataset that doesn't fit in the memory."""
 
     def __init__(self, rawdir, transform=None, pre_transform=None):
         self.rawdir = rawdir
@@ -167,21 +173,21 @@ class LargePreTrainDataset(Dataset):
 
     @property
     def raw_file_names(self):
-        """Sharded pickles"""
+        """Shard pickles."""
         return os.listdir(self.rawdir)
 
     @property
     def config_file(self):
-        """Saved self.config file"""
+        """Save self.config file."""
         return os.path.join(self.processed_dir, "self.config.pt")
 
     @property
     def processed_file_names(self):
-        """Saved graphs"""
+        """Save graphs."""
         return [os.path.join(self.processed_dir, x) for x in ["self.config.pt", "data_0.pt"]]
 
     def process(self):
-        """Save each graph as a file"""
+        """Save each graph as a file."""
         i = 0
         self.config = dict(max_nodes=0)
         for shard in os.listdir(self.rawdir):
@@ -208,5 +214,5 @@ class LargePreTrainDataset(Dataset):
         return self.config["count"]
 
     def get(self, idx):
-        """Load graph"""
+        """Load graph."""
         return torch.load(os.path.join(self.processed_dir, "data_{}.pt".format(idx)))

@@ -1,95 +1,105 @@
 import os
 import os.path as osp
 
+source = config["source"].rstrip("/")  # resources
+target = config["target"].rstrip("/")  # output
+targets = [x.split(".")[0] for x in os.listdir(source + "/structures") if x.endswith(".pdb")]  # list of structures
+prot_settings = f"{config['prepare_prots']['node_feats']}_{config['prepare_prots']['edge_feats']}"
 
-configfile: "config/snakemake/standard.yaml"
+drug_settings = (
+    f"{config['prepare_drugs']['node_feats']}_{config['prepare_drugs']['edge_feats']}"
+    if not config["only_prots"]
+    else ""
+)
 
-
-targets = [x.split(".")[0] for x in os.listdir("resources/structures") if x.endswith(".pdb")]
 
 if config["structures"] == "whole":
-    structures = "resources/structures/{protein}.pdb"
+    structures = source + "/structures/{protein}.pdb"
     script_output = ""
 else:
-    structures = "results/parsed_structures_{structures}/{{protein}}.pdb".format(structures=config["structures"])
-    script_output = "results/pymol_{structures}/{{protein}}.pml".format(structures=config["structures"])
+    structures = f"{target}/parsed_structures_{config['structures']}/{{protein}}.pdb"
+    script_output = f"{target}/pymol_{config['structures']}/{{protein}}.pml"
 
 
-rinerator_output = "results/rinerator_{structures}/{{protein}}/{{protein}}_h.sif".format(
-    structures=config["structures"]
-)
-rinerator_protein_output = "results/rinerator_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
-    structures=config["structures"],
-    node_feats=config["prepare_proteins"]["node_feats"],
-    edge_feats=config["prepare_proteins"]["edge_feats"],
-)
+rinerator_output = f"{target}/rinerator_{config['structures']}/{{protein}}/{{protein}}_h.sif"
+rinerator_protein_output = f"{target}/rinerator_based/protein_data_{config['structures']}_{prot_settings}.pkl"
 
-distance_protein_output = "results/distance_based/protein_data_{structures}_{node_feats}_{edge_feats}.pkl".format(
-    structures=config["structures"],
-    node_feats=config["prepare_proteins"]["node_feats"],
-    edge_feats=config["prepare_proteins"]["edge_feats"],
-)
+distance_protein_output = f"{target}/distance_based/protein_data_{config['structures']}_{prot_settings}.pkl"
 if config["graph"] == "distance":
     protein_output = distance_protein_output
 else:
     protein_output = rinerator_protein_output
 
-drug_output = "results/prepare_drugs/drug_data_{node_feats}_{edge_feats}.pkl".format(**config["prepare_drugs"])
+if config["only_prots"]:  # Only calculate the data for the prots
+    output = [protein_output]
+    drug_output = ""
+    final_output = ""
+    transformer_output = ""
+    plot_output = ""
+else:
 
-split_data = "results/split_data/{split}_{filtering}_{sampling}_{task}_split.csv".format(
-    split=config["split"]["method"],
-    filtering=config["parse_dataset"]["filtering"],
-    sampling=config["parse_dataset"]["sampling"],
-    task=config["parse_dataset"]["task"],
-)
+    drug_output = target + f"/prepare_drugs/drug_data_{drug_settings}.pkl"
 
-transformer_output = "results/prepare_transformer/{node_feats}_transformer.pkl".format(
-    node_feats=config["prepare_proteins"]["node_feats"]
-)
+    split_data = (
+        "{target}/split_data/{split}_{filtering}_{sampling}_{task}_split.csv".format(
+            target=target,
+            split=config["split"]["method"],
+            filtering=config["parse_dataset"]["filtering"],
+            sampling=config["parse_dataset"]["sampling"],
+            task=config["parse_dataset"]["task"],
+        )
+        if not config["only_prots"]
+        else ""
+    )
 
-final_output = "results/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_node_feats}_{prot_edge_feats}_{drug_node_feats}_{drug_edge_feats}.pkl".format(
-    split=config["split"]["method"],
-    filtering=config["parse_dataset"]["filtering"],
-    sampling=config["parse_dataset"]["sampling"],
-    task=config["parse_dataset"]["task"],
-    structures=config["structures"],
-    graph=config["graph"],
-    prot_node_feats=config["prepare_proteins"]["node_feats"],
-    prot_edge_feats=config["prepare_proteins"]["edge_feats"],
-    drug_node_feats=config["prepare_drugs"]["node_feats"],
-    drug_edge_feats=config["prepare_drugs"]["edge_feats"],
-)
+    transformer_output = "{target}/prepare_transformer/{node_feats}_transformer.pkl".format(
+        target=target, node_feats=config["prepare_prots"]["node_feats"]
+    )
 
-plot_output = final_output.split("/")[-1].split(".")[0]
-plot_output = "results/report/plot_summary/{out}.html".format(out=plot_output)
+    final_output = "{target}/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_settings}_{drug_settings}.pkl".format(
+        target=target,
+        split=config["split"]["method"],
+        filtering=config["parse_dataset"]["filtering"],
+        sampling=config["parse_dataset"]["sampling"],
+        task=config["parse_dataset"]["task"],
+        structures=config["structures"],
+        graph=config["graph"],
+        prot_settings=prot_settings,
+        drug_settings=drug_settings,
+    )
 
+    plot_output = final_output.split("/")[-1].split(".")[0]
+    plot_output = f"{target}/report/plot_summary/{plot_output}.html"
 
-output = [final_output, plot_output]
+    output = [final_output, plot_output]
 
 ### CHECK IF FILES ARE PRESENT ###
 
-if osp.isdir("resources/templates"):
-    templates = expand("resources/templates/{template}", template=os.listdir("resources/templates"))
+### CHECK IF templates ARE PRESENT ###
+if osp.isdir(os.path.join(source, "templates")):
+    templates = expand(
+        "{resources}/templates/{template}", resources=source, template=os.listdir(f"{source}/templates")
+    )
 else:
-    if not config["only_proteins"] and config["structures"] not in ["whole", "plddt"]:
+    if not config["only_prots"] and config["structures"] not in ["whole", "plddt"]:
         raise ValueError("No templates available")
     templates = []
 
-if osp.isfile("resources/gnomad.csv"):
-    gnomad = "resources/gnomad.csv"
+### CHECK IF gnomad is available ###
+if osp.isfile(os.path.join(source, "gnomad.csv")):
+    gnomad = source + "/gnomad.csv"
     output.append(transformer_output)
 else:
     gnomad = []
 
-if osp.isdir("resources/drugs"):
-    drugs = {x: "resources/drugs/{x}.tsv".format(x=x) for x in ["inter", "lig"]}
+### CHECK IF drug data is available ###
+
+if osp.isdir(os.path.join(source, "drugs")):
+    drugs = {x: source + "/drugs/{x}.tsv".format(x=x) for x in ["inter", "lig", "prots"]}
 else:
-    if not config["only_proteins"]:
+    if not config["only_prots"]:
         raise ValueError("No drug interaction data available, can't calculate final data!")
     drugs = {x: [] for x in ["inter", "lig"]}
-
-if config["only_proteins"]:  # Only calculate the data for the proteins
-    output = [protein_output]
 
 
 rule all:
@@ -99,13 +109,11 @@ rule all:
 
 rule create_pymol_scripts:
     input:
-        expand("resources/structures/{protein}.pdb", protein=targets),
+        expand("{resources}/structures/{protein}.pdb", resources=source, protein=targets),
     output:
         scripts=expand(script_output, protein=targets),
     log:
-        "results/logs/pymol_bsite.log",
-    params:
-        radius=config["bsite"]["radius"],
+        expand("{results}/logs/pymol_bsite.log", results=target),
     message:
         "Creating bsite PyMOL scripts for all protein, logs are in {log}"
     script:
@@ -115,11 +123,11 @@ rule create_pymol_scripts:
 rule run_pymol:
     input:
         script=script_output,
-        struct="resources/structures/{protein}.pdb",
+        struct=source + "/structures/{protein}.pdb",
     output:
         structures=structures,
     log:
-        "results/logs/run_pymol/{protein}.log",
+        target + "/logs/run_pymol/{protein}.log",
     conda:
         "envs/pymol.yml"
     message:
@@ -134,7 +142,7 @@ rule save_structure_info:
     input:
         structs=expand(structures, protein=targets),
     output:
-        tsv="results/structure_info/{type}_info.tsv".format(type=config["structures"]),
+        tsv="{results}/structure_info/{type}_info.tsv".format(results=target, type=config["structures"]),
     script:
         "scripts/save_structure_info.py"
 
@@ -145,18 +153,20 @@ rule rinerator:
     output:
         sif=rinerator_output,
     log:
-        "results/logs/rinerator/{protein}.log",
+        target + "/logs/rinerator/{protein}.log",
     params:
-        dir="results/rinerator_{structures}".format(structures=config["structures"]),
+        dir="{results}/rinerator_{structures}".format(results=target, structures=config["structures"]),
     message:
         "Running RINerator for {wildcards.protein}, logs are in {log}"
     shadow:
         "shallow"
     shell:
-        """rinerator {input.pdb} {params.dir}/{wildcards.protein} > {log} 2>&1"""
+        """
+        rinerator {input.pdb} {params.dir}/{wildcards.protein} > {log} 2>&1
+        """
 
 
-rule prepare_proteins:
+rule prepare_prots:
     input:
         rins=expand(rinerator_output, protein=targets),
     output:
@@ -165,11 +175,11 @@ rule prepare_proteins:
         """
         Creating protein data.
         Structures config is {config[structures]}
-        Node feature type is {config[prepare_proteins][node_feats]}.
-        Edge feature type is {config[prepare_proteins][edge_feats]}.
+        Node feature type is {config[prepare_prots][node_feats]}.
+        Edge feature type is {config[prepare_prots][edge_feats]}.
         """
     script:
-        "scripts/prepare_proteins.py"
+        "scripts/prepare_prots.py"
 
 
 rule distance_based:
@@ -178,7 +188,7 @@ rule distance_based:
     output:
         pickle=distance_protein_output,
     log:
-        "results/logs/distance_based.log",
+        expand("{results}/logs/distance_based.log", results=target),
     params:
         threshold=config["distance"]["threshold"],
     message:
@@ -191,8 +201,10 @@ rule parse_dataset:
     input:
         inter=drugs["inter"],
     output:
-        inter="results/parse_dataset/{filtering}_{sampling}_inter.csv".format(
-            filtering=config["parse_dataset"]["filtering"], sampling=config["parse_dataset"]["sampling"]
+        inter="{results}/parse_dataset/{filtering}_{sampling}_inter.csv".format(
+            results=target,
+            filtering=config["parse_dataset"]["filtering"] if not config["only_prots"] else "",
+            sampling=config["parse_dataset"]["sampling"] if not config["only_prots"] else "",
         ),
     message:
         """Parsing the dataset
@@ -211,10 +223,11 @@ rule split_data:
     input:
         inter=rules.parse_dataset.output.inter,
     output:
-        split_data="results/split_data/{split}_{filtering}_{sampling}_split.csv".format(
-            split=config["split"]["method"],
-            filtering=config["parse_dataset"]["filtering"],
-            sampling=config["parse_dataset"]["sampling"],
+        split_data="{results}/split_data/{split}_{filtering}_{sampling}_split.csv".format(
+            results=target,
+            split=config["split"]["method"] if not config["only_prots"] else "",
+            filtering=config["parse_dataset"]["filtering"] if not config["only_prots"] else "",
+            sampling=config["parse_dataset"]["sampling"] if not config["only_prots"] else "",
         ),
     message:
         "Splitting the dataset with {config[split][method]} method"
@@ -236,7 +249,7 @@ rule prepare_drugs:
 rule prepare_all:
     input:
         drugs=rules.prepare_drugs.output.drug_pickle,
-        proteins=protein_output,
+        prots=protein_output,
         inter=rules.split_data.output.split_data,
     output:
         combined_pickle=final_output,
@@ -251,7 +264,7 @@ rule prepare_all:
 rule prepare_transformer:
     input:
         gnomad=gnomad,
-        prots=rules.prepare_proteins.output.protein_pickle,
+        prots=rules.prepare_prots.output.protein_pickle,
     output:
         transformer_pickle=transformer_output,
     script:

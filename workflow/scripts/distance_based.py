@@ -23,6 +23,7 @@ node_encoding = list_to_dict(
         "trp",
         "tyr",
         "val",
+        "unk",
     ]
 )
 
@@ -31,6 +32,8 @@ def encode_residue(residue: str, node_feats: str):
     """Encode a residue"""
     residue = residue.lower()
     if node_feats == "label":
+        if residue not in node_encoding:
+            return node_encoding["unk"]
         return node_encoding[residue] + 1
     elif node_feats == "onehot":
         return onehot_encode(node_encoding[residue], len(node_encoding))
@@ -100,7 +103,7 @@ if __name__ == "__main__":
         threshold = snakemake.params.threshold
 
         def get_graph(filename: str) -> dict:
-            return Structure(filename, snakemake.config["prepare_proteins"]["node_feats"]).get_graph(threshold)
+            return Structure(filename, snakemake.config["prepare_prots"]["node_feats"]).get_graph(threshold)
 
         data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
         df = pd.DataFrame(pd.Series(data, name="data"))

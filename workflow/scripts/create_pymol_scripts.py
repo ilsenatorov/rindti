@@ -1,16 +1,19 @@
 import os
+import resource
 
 
 def create_script(protein, config):
     """
     Create pymol parsing script for a protein according to the config
     """
-    fmt_keywords = {"protein": protein}
+    resources = config["source"]
+    results = config["target"]
+    fmt_keywords = {"protein": protein, "resources": resources, "results": results}
     script = """
 import psico.fullinit
 from glob import glob
 
-cmd.load("resources/structures/{protein}.pdb")
+cmd.load("{resources}/structures/{protein}.pdb")
 """
 
     if config["structures"] == "plddt":
@@ -20,9 +23,9 @@ cmd.load("resources/structures/{protein}.pdb")
         fmt_keywords["threshold"] = config["plddt"]["threshold"]
     else:
         # template-based
-        assert os.path.isdir("resources/templates")
+        assert os.path.isdir(f"{resources}/templates")
         script += """
-            lst = glob("resources/templates/*.pdb")
+            lst = glob("{resources}/templates/*.pdb")
             templates = [x.split('/')[-1].split('.')[0] for x in lst]
             for i in lst:cmd.load(i)
             scores = {{x : cmd.tmalign("{protein}", x) for x in templates}}
@@ -42,7 +45,7 @@ cmd.load("resources/structures/{protein}.pdb")
                 cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")
                 """
     script += """
-        cmd.save("results/parsed_structures_{structures}/{protein}.pdb", "result")"""
+        cmd.save("{results}/parsed_structures_{structures}/{protein}.pdb", "result")"""
     fmt_keywords["structures"] = config["structures"]
 
     return script.format(**fmt_keywords)
