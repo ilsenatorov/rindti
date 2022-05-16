@@ -1,14 +1,14 @@
 seed: 42
-runs: 5
+runs: 1
 exp_name: glass
 datamodule:
-  filename: datasets/glass/results/prepare_all/colddrug_posneg_none_class_template_distance_label_none_label_none.pkl
+  filename: datasets/glass/results/prepare_all/coldtarget_posneg_none_class_template_distance_label_none_label_none.pkl
   exp_name: test
   batch_size: 512
   num_workers: 4
 trainer:
   gpus: 1
-  max_epochs: 1000
+  max_epochs: 5
   profiler: null
   gradient_clip_val: 100
 early_stop:

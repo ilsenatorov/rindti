@@ -26,6 +26,7 @@ class BaseModel(LightningModule):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
+        self.batch_size = kwargs["datamodule"]["batch_size"]
         return kwargs["model"]
 
     def _set_class_metrics(self, num_classes: int = 2):
@@ -95,19 +96,22 @@ class BaseModel(LightningModule):
         """What to do during training step."""
         ss = self.shared_step(data)
         self.train_metrics.update(ss["preds"], ss["labels"])
-        self.log("train_loss", ss["loss"])
+        self.log("train_loss", ss["loss"], batch_size=self.batch_size)
         return ss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during validation step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
         self.val_metrics.update(ss["preds"], ss["labels"])
-        self.log("val_loss", ss["loss"])
+        self.log("val_loss", ss["loss"], batch_size=self.batch_size)
         return ss
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
-        """What to do during test step."""
-        return self.shared_step(data)
+        """What to do during test step. Also logs the values for various callbacks."""
+        ss = self.shared_step(data)
+        self.test_metrics.update(ss["preds"], ss["labels"])
+        self.log("test_loss", ss["loss"], batch_size=self.batch_size)
+        return ss
 
     def log_histograms(self):
         """Logs the histograms of all the available parameters."""
@@ -115,20 +119,35 @@ class BaseModel(LightningModule):
             for name, param in self.named_parameters():
                 self.logger.experiment.add_histogram(name, param, self.current_epoch)
 
+    def log_all(self, metrics: dict, hparams: bool = False):
+        """Log all metrics."""
+        if self.logger:
+            for k, v in metrics.items():
+                self.logger.experiment.add_scalar(
+                    k,
+                    v,
+                    self.current_epoch,
+                )
+            if hparams:
+                self.logger.log_hyperparams(self.hparams, metrics)
+
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything."""
-        self.log_histograms()
         metrics = self.train_metrics.compute()
         self.train_metrics.reset()
-        self.log_dict(metrics)
+        self.log_all(metrics)
 
     def validation_epoch_end(self, outputs: dict):
         """What to do at the end of a validation epoch. Logs everything."""
         metrics = self.val_metrics.compute()
         self.val_metrics.reset()
-        self.log_dict(metrics)
-        if self.logger:
-            self.logger.log_hyperparams(self.hparams, metrics)
+        self.log_all(metrics, hparams=True)
+
+    def test_epoch_end(self, outputs: dict):
+        """What to do at the end of a test epoch. Logs everything."""
+        metrics = self.test_metrics.compute()
+        self.test_metrics.reset()
+        self.log_all(metrics)
 
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimizer and/or lr schedulers"""

@@ -54,6 +54,7 @@ def single_run(**kwargs):
     )
     model = models[kwargs["model"]["module"]](**kwargs)
     trainer.fit(model, datamodule)
+    trainer.test(model, datamodule)
 
 
 if __name__ == "__main__":
