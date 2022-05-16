@@ -123,16 +123,13 @@ class BaseModel(LightningModule):
         """Log all metrics."""
         if self.logger:
             for k, v in metrics.items():
-                self.logger.experiment.add_scalar(
-                    k,
-                    v,
-                    self.current_epoch,
-                )
+                self.logger.experiment.add_scalar(k, v, self.current_epoch)
             if hparams:
                 self.logger.log_hyperparams(self.hparams, metrics)
 
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything."""
+        self.log_histograms()
         metrics = self.train_metrics.compute()
         self.train_metrics.reset()
         self.log_all(metrics)
