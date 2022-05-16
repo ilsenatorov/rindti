@@ -33,7 +33,8 @@ model:
     reduce_lr:
       factor: 0.1
       patience: 20
+      monitor: train_loss
 trainer:
   gpus: 0
-  max_epochs: 1000
+  max_epochs: 10
   profiler: null
