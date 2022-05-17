@@ -1,6 +1,6 @@
 datamodule:
   batch_size: 8
-  num_workers: 1
+  num_workers: 0
 model:
   feat_method: [element_l1, concat]
   drug:
@@ -35,6 +35,4 @@ model:
       patience: 20
       monitor: train_loss
 trainer:
-  gpus: 0
   max_epochs: 10
-  profiler: null

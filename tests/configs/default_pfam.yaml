@@ -4,12 +4,9 @@ datamodule:
   filename: test.pkl
   exp_name: test
   batch_size: 128
-  num_workers: 4
+  num_workers: 0
 trainer:
-  gpus: 1
-  max_epochs: 1000
-  profiler: null
-  gradient_clip_val: 100
+  max_epochs: 10
 early_stop:
   patience: 60
 
@@ -41,3 +38,4 @@ model:
     reduce_lr:
       factor: 0.1
       patience: 20
+      monitor: train_loss

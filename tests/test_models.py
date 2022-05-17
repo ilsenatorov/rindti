@@ -23,6 +23,7 @@ class BaseTestModel:
             fast_dev_run=True,
             enable_checkpointing=False,
             logger=None,
+            **config["trainer"],
         )
         trainer.fit(model, dti_datamodule)
 
@@ -38,6 +39,7 @@ class BaseTestModel:
             fast_dev_run=True,
             enable_checkpointing=False,
             logger=None,
+            **config["trainer"],
         )
         trainer.fit(model, dti_datamodule)
 

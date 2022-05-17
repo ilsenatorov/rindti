@@ -157,11 +157,12 @@ class BaseModel(LightningModule):
             {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
         optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
         lr_scheduler = {
-            "monitor": opt_params["reduce_lr"].pop("monitor"),
+            "monitor": opt_params["reduce_lr"]["monitor"],
             "scheduler": ReduceLROnPlateau(
                 optimizer,
                 verbose=True,
-                **opt_params["reduce_lr"],
+                factor=opt_params["reduce_lr"]["factor"],
+                patience=opt_params["reduce_lr"]["patience"],
             ),
         }
         return [optimizer], [lr_scheduler]
