@@ -17,12 +17,14 @@ jobs:
             miniforge-version: latest
             activate-environment: rindti
             use-mamba: true
+      - name: which conda
+        run: which conda; which mamba; which python; which pytest
 
       - name: Set cache date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
       - uses: actions/cache@v2
         with:
-          path: $CONDA/envs/rindti
+          path: /usr/share/miniconda3/envs/rindti
           key: linux-64-conda-${{ hashFiles('workflow/envs/main.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
 
@@ -32,4 +34,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          mamba activate rindti; pytest -m "not gpu"
+          conda activate rindti; pytest -m "not gpu"
