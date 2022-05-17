@@ -32,4 +32,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest -m "not gpu"
+          mamba activate rindti; pytest -m "not gpu"
