@@ -1,5 +1,5 @@
 seed: 42
-exp_name: glass
+runs: 1
 datamodule:
   filename: /home/ilya/Projects/rindti/datasets/glass/results/prepare_all/colddrug_posneg_none_class_template_distance_label_none_label_none.pkl
   exp_name: test

@@ -26,7 +26,6 @@ class BaseModel(LightningModule):
     def __init__(self, **kwargs):
         super().__init__()
         self.save_hyperparameters()
-        return kwargs["model"]
 
     def _set_class_metrics(self, num_classes: int = 2):
         metrics = MetricCollection(

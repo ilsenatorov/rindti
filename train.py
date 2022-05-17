@@ -19,23 +19,34 @@ models = {
 def train(**kwargs):
     """Train the whole model"""
     seed_everything(kwargs["seed"])
-    seeds = random.sample(range(1, 1000), kwargs["runs"])
+    seeds = random.sample(range(1, 100), kwargs["runs"])
+
+    folder = os.path.join("tb_logs", f"dti_{kwargs['datamodule']['exp_name']}", f"{kwargs['datamodule']['filename'].split('/')[-1].split('.')[0]}")
+    if not os.path.exists(folder):
+        os.makedirs(folder, exist_ok=True)
+
+    if len(os.listdir(folder)) == 0:
+        next_version = 0
+    else:
+        next_version = str(int([d for d in os.listdir(folder) if "version" in d and os.path.isdir(os.path.join(folder, d))][-1].split("_")[1]) + 1)
 
     for i, seed in enumerate(seeds):
         print(f"Run {i+1} of {kwargs['runs']} with seed {seed}")
         kwargs["seed"] = seed
-        single_run(**kwargs)
+        single_run(folder, next_version, **kwargs)
 
 
-def single_run(**kwargs):
+def single_run(folder, version, **kwargs):
     """Does a single run."""
     seed_everything(kwargs["seed"])
     datamodule = DTIDataModule(**kwargs["datamodule"])
     datamodule.setup()
     datamodule.update_config(kwargs)
+
     logger = TensorBoardLogger(
-        save_dir="tb_logs",
-        name=f"dti{kwargs['exp_name']}_{kwargs['datamodule']['filename'].split('/')[-1].split('.')[0]}",
+        save_dir=folder,
+        name=f"version_{version}",
+        version=kwargs["seed"],
         default_hp_metric=False,
     )
 
