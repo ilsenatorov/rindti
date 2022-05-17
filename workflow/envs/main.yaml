@@ -37,7 +37,7 @@ dependencies:
   - ca-certificates=2022.4.26=h06a4308_0
   - cachetools=4.2.2=pyhd3eb1b0_0
   - cairo=1.16.0=ha12eb4b_1010
-  - certifi=2021.10.8=py38h06a4308_2
+  - certifi=2021.10.8=py38h578d9bd_2
   - cffi=1.15.0=py38hd667e15_1
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
   - coin-or-cbc=2.10.8=h3786ebc_0
@@ -92,7 +92,7 @@ dependencies:
   - google-resumable-media=1.3.1=pyhd3eb1b0_1
   - googleapis-common-protos=1.53.0=py38h06a4308_0
   - greenlet=1.1.1=py38h295c915_0
-  - grpcio=1.42.0=py38hce63b2e_0
+  - grpcio=1.46.1=py38h2e9ca35_0
   - gst-plugins-base=1.18.5=hf529b03_3
   - gstreamer=1.18.5=ha1a6a79_0
   - httplib2=0.20.4=pyhd8ed1ab_0
@@ -124,8 +124,9 @@ dependencies:
   - jupyter_nbextensions_configurator=0.4.1=py38h578d9bd_2
   - jupyterlab_pygments=0.1.2=py_0
   - jupyterlab_widgets=1.0.0=pyhd3eb1b0_1
+  - keyutils=1.6.1=h166bdaf_0
   - kiwisolver=1.3.2=py38h295c915_0
-  - krb5=1.19.2=hac12032_0
+  - krb5=1.19.3=h08a2579_0
   - lame=3.100=h7b6447c_0
   - lcms2=2.12=h3be6417_0
   - ld_impl_linux-64=2.36.1=hea4e1c9_2
@@ -136,7 +137,7 @@ dependencies:
   - libcrc32c=1.1.1=he6710b0_2
   - libdeflate=1.10=h7f98852_0
   - libedit=3.1.20210910=h7f8727e_0
-  - libevent=2.1.10=h9b69904_4
+  - libevent=2.1.10=h28343ad_4
   - libffi=3.4.2=h295c915_2
   - libgcc-ng=11.2.0=h1d223b6_16
   - libgfortran-ng=11.2.0=h69a702a_16
@@ -152,7 +153,7 @@ dependencies:
   - libogg=1.3.5=h27cfd23_1
   - libopus=1.3.1=h7b6447c_0
   - libpng=1.6.37=hbc83047_0
-  - libpq=14.2=hd57d9b9_0
+  - libpq=14.3=he2d8382_0
   - libprotobuf=3.19.1=h4ff587b_0
   - libsodium=1.0.18=h7b6447c_0
   - libstdcxx-ng=11.2.0=he4da1e4_16
@@ -183,8 +184,8 @@ dependencies:
   - mkl_random=1.2.2=py38h51133e4_0
   - multidict=5.2.0=py38h7f8727e_2
   - munkres=1.1.4=py_0
-  - mysql-common=8.0.29=haf5c9bc_0
-  - mysql-libs=8.0.29=h28c427c_0
+  - mysql-common=8.0.29=h26416b9_0
+  - mysql-libs=8.0.29=hbc51c84_0
   - nbclient=0.5.13=py38h06a4308_0
   - nbconvert=6.4.4=py38h06a4308_0
   - nbformat=5.3.0=py38h06a4308_0
@@ -200,7 +201,7 @@ dependencies:
   - numpy-base=1.21.5=py38hf524024_2
   - oauth2client=4.1.3=py_0
   - openh264=2.1.1=h4ff587b_0
-  - openssl=1.1.1o=h7f8727e_0
+  - openssl=3.0.3=h166bdaf_0
   - packaging=21.3=pyhd3eb1b0_0
   - pandas=1.4.2=py38h295c915_0
   - pandocfilters=1.5.0=pyhd3eb1b0_0
@@ -241,7 +242,7 @@ dependencies:
   - pyrsistent=0.18.0=py38heee7806_0
   - pysftp=0.2.9=pyhd3eb1b0_1
   - pysocks=1.7.1=py38h06a4308_0
-  - python=3.8.13=h582c2e5_0_cpython
+  - python=3.8.13=ha86cf86_0_cpython
   - python-dateutil=2.8.2=pyhd3eb1b0_0
   - python-fastjsonschema=2.15.1=pyhd3eb1b0_0
   - python-irodsclient=1.1.3=pyhd8ed1ab_0
@@ -267,8 +268,7 @@ dependencies:
   - retry=0.9.2=py_0
   - rsa=4.7.2=pyhd3eb1b0_1
   - s3transfer=0.5.0=pyhd3eb1b0_0
-  - scikit-learn=1.0.2=py38h51133e4_1
-  - scipy=1.8.0=py38h56a6a73_1
+  - scikit-learn=1.1.0=py38hf80bbf7_0
   - send2trash=1.8.0=pyhd3eb1b0_1
   - setuptools=61.2.0=py38h06a4308_0
   - six=1.16.0=pyhd3eb1b0_1
@@ -332,20 +332,24 @@ dependencies:
     - cfgv==3.3.1
     - click==8.1.3
     - commonmark==0.9.1
+    - coverage==6.3.3
     - distlib==0.3.4
     - docutils==0.17.1
     - fair-esm==0.4.2
     - fsspec==2022.3.0
     - fuzzywuzzy==0.18.0
+    - glycowork==0.4.0
     - google-auth-oauthlib==0.4.6
     - identify==2.5.0
     - imagesize==1.3.0
     - jsonargparse==4.7.3
     - markdown==3.3.7
+    - mpld3==0.5.7
     - mypy-extensions==0.4.3
     - nodeenv==1.6.0
     - oauthlib==3.2.0
     - pathspec==0.9.0
+    - patsy==0.5.2
     - platformdirs==2.5.2
     - plotly==5.8.0
     - pre-commit==2.19.0
@@ -354,10 +358,17 @@ dependencies:
     - pydeprecate==0.3.2
     - pytdc==0.3.6
     - pytest==7.1.2
+    - pytest-cov==3.0.0
+    - pytest-cover==3.0.0
     - pytorch-lightning==1.6.3
+    - regex==2022.4.24
     - requests-oauthlib==1.3.1
     - rich==12.4.1
+    - rindti==1.2.0
+    - rinerator==0.99
+    - scipy==1.7.3
     - seaborn==0.11.2
+    - sklearn==0.0
     - smmap==5.0.0
     - snowballstemmer==2.2.0
     - sphinx==4.5.0
@@ -368,6 +379,7 @@ dependencies:
     - sphinxcontrib-jsmath==1.0.1
     - sphinxcontrib-qthelp==1.0.3
     - sphinxcontrib-serializinghtml==1.1.5
+    - statsmodels==0.13.2
     - tenacity==8.0.1
     - tensorboard==2.9.0
     - tensorboard-data-server==0.6.1
@@ -376,4 +388,4 @@ dependencies:
     - torchmetrics==0.8.2
     - virtualenv==20.14.1
     - werkzeug==2.1.2
-prefix: /home/ilya/miniconda3/envs/rindti
+    - xgboost==1.6.1

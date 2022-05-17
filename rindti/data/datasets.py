@@ -64,11 +64,13 @@ class DTIDataset(InMemoryDataset):
         data, slices = self.collate(data_list)
         torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
 
-    def _get_datum(self, all_data: dict, id: str, which: str) -> dict:
+    def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
         graph = all_data[which].loc[id, "data"]
         graph["count"] = float(all_data[which].loc[id, "count"])
         graph["id"] = id
+        if which == "drugs" and "prepare_drugs" in kwargs["snakemake"] and kwargs["snakemake"]["prepare_drugs"]["node_feats"] == "IUPAC":
+            graph["IUPAC"] = all_data[which].loc[id, "IUPAC"]
         return {which.rstrip("s") + "_" + k: v for k, v in graph.items()}
 
     @property
@@ -90,8 +92,8 @@ class DTIDataset(InMemoryDataset):
                 for i in all_data["data"]:
                     if i["split"] != split:
                         continue
-                    data = self._get_datum(all_data, i["prot_id"], "prots")
-                    data.update(self._get_datum(all_data, i["drug_id"], "drugs"))
+                    data = self._get_datum(all_data, i["prot_id"], "prots", **self.config)
+                    data.update(self._get_datum(all_data, i["drug_id"], "drugs", **self.config))
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
                     two_graph_data.num_nodes = 1  # supresses the warning

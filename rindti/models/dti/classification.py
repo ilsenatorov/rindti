@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
+from ..SweetNetEncoder import SweetNetEncoder
 from ...data import TwoGraphData
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
@@ -12,11 +13,14 @@ class ClassificationModel(BaseModel):
     """Model for DTI prediction as a class problem."""
 
     def __init__(self, **kwargs):
-        kwargs = super().__init__(**kwargs)
-        self._determine_feat_method(kwargs["feat_method"], kwargs["prot"]["hidden_dim"], kwargs["drug"]["hidden_dim"])
-        self.prot_encoder = Encoder(**kwargs["prot"])
-        self.drug_encoder = Encoder(**kwargs["drug"])
-        self.mlp = self._get_mlp(**kwargs["mlp"])
+        super().__init__()
+        self._determine_feat_method(kwargs["model"]["feat_method"], kwargs["model"]["prot"]["hidden_dim"], kwargs["model"]["drug"]["hidden_dim"])
+        self.prot_encoder = Encoder(**kwargs["model"]["prot"])
+        if kwargs["model"]["drug"]["node"]["module"] == "SweetNet":
+            self.drug_encoder = SweetNetEncoder(**kwargs["model"]["drug"])
+        else:
+            self.drug_encoder = Encoder(**kwargs["model"]["drug"])
+        self.mlp = self._get_mlp(**kwargs["model"]["mlp"])
         self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
