@@ -4,20 +4,19 @@ from typing import Tuple, Union
 import torch
 import torch.nn.functional as F
 from glycowork.glycan_data.loader import lib
-from glycowork.ml.models import SweetNet, init_weights
 from glycowork.motif.graph import glycan_to_graph
 from torch.functional import Tensor
 from torch_geometric.data import Data
 from torch_geometric.nn import global_max_pool as gmp
 from torch_geometric.nn import global_mean_pool as gap
 
+from rindti.models.base_model import BaseModel
+
 if torch.cuda.is_available():
     from glycowork.ml.models import SweetNet, init_weights, trained_SweetNet
 else:
-    trained_SweetNet, SweetNet, init_weights = None, None, None
+    trained_SweetNet, SweetNet, init_weights = torch.nn.Module, torch.nn.Module, torch.nn.Module
     warnings.warn("GPU not available")
-
-from rindti.models.base_model import BaseModel
 
 
 class SweetNetEncoder(BaseModel):
