@@ -2,19 +2,35 @@ name: Testing
 
 on: [pull_request, push]
 
+env:
+  CACHE_NUMBER: 0  # increase to reset cache manually
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        $CONDA/bin/conda env update --file workflow/envs/main.yaml --name base
-    - name: Test with pytest
-      run: |
-        $CONDA/bin/conda install pytest
-        $CONDA/bin/python -m pytest -m "not gpu"
+      - uses: actions/checkout@v2
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            miniforge-variant: Mambaforge
+            miniforge-version: latest
+            activate-environment: rindti
+            use-mamba: true
+
+      - name: Set cache date
+        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+      - uses: actions/cache@v2
+        with:
+          path: $CONDA/envs/rindti
+          key: linux-64-conda-${{ hashFiles('workflow/envs/main.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - name: Update environment
+        run: mamba env update -n rindti -f workflow/envs/main.yaml
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Test with pytest
+        run: |
+          $CONDA/bin/mamba install pytest
+          $CONDA/bin/python -m pytest -m "not gpu"
