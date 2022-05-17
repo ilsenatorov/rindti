@@ -1,15 +1,43 @@
 name: Testing
 
-on: [pull_request, push]
+on:
+  push:
+    branches:
+      - '*'
+
+  pull_request:
+    branches:
+      - '*'
+
+  # schedule:
+  #   - cron: '0 0 * * *'
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-64
+            prefix: /usr/share/miniconda3/envs/rindti
+
+          # - os: macos-latest
+          #   label: osx-64
+          #   prefix: /Users/runner/miniconda3/envs/rindti
+
+          # - os: windows-latest
+          #   label: win-64
+          #   prefix: C:\Miniconda3\envs\rindti
+
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -17,21 +45,20 @@ jobs:
             miniforge-version: latest
             activate-environment: rindti
             use-mamba: true
-      - name: conda env list
-        run: conda env list
 
       - name: Set cache date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+
       - uses: actions/cache@v2
         with:
-          path: /usr/share/miniconda3/envs/rindti
-          key: linux-64-conda-${{ hashFiles('workflow/envs/main.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+          path: ${{ matrix.prefix }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
         id: cache
 
       - name: Update environment
         run: mamba env update -n rindti -f workflow/envs/main.yaml
         if: steps.cache.outputs.cache-hit != 'true'
 
-      - name: Test with pytest
-        run: |
-          conda activate rindti; pytest -m "not gpu"
+      - name: Run tests
+        shell: bash -l {0}
+        run: pytest -m "not gpu"
