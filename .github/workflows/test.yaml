@@ -17,8 +17,8 @@ jobs:
             miniforge-version: latest
             activate-environment: rindti
             use-mamba: true
-      - name: which conda
-        run: which conda; which mamba; which python; which pytest
+      - name: conda env list
+        run: conda env list
 
       - name: Set cache date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
