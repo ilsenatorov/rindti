@@ -253,6 +253,7 @@ rule prepare_all:
         drugs=rules.prepare_drugs.output.drug_pickle,
         prots=protein_output,
         inter=rules.split_data.output.split_data,
+        protseqs=drugs["prots"]
     output:
         combined_pickle=final_output,
     message:

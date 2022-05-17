@@ -21,7 +21,7 @@ def train(**kwargs):
     seed_everything(kwargs["seed"])
     seeds = random.sample(range(1, 100), kwargs["runs"])
 
-    folder = os.path.join("tb_logs", f"dti{kwargs['datamodule']['exp_name']}_{kwargs['datamodule']['filename'].split('/')[-1].split('.')[0]}")
+    folder = os.path.join("tb_logs", f"dti_{kwargs['datamodule']['exp_name']}", f"{kwargs['datamodule']['filename'].split('/')[-1].split('.')[0]}")
     if not os.path.exists(folder):
         os.makedirs(folder, exist_ok=True)
 

@@ -52,7 +52,10 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-    protseqs = None
+    if os.path.exists(snakemake.input.protseqs):
+        protseqs = pd.read_csv(snakemake.input.protseqs, sep='\t')
+    else:
+        protseqs = None
 
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
@@ -75,7 +78,7 @@ if __name__ == "__main__":
     config = update_config(
         snakemake.config,
         prot_size=prots.iloc[0]["data"]["x"].size(0),
-        drug_size=drugs.iloc[0]["data"]["x"].size(0),
+        drug_size=drugs.iloc[0]["data"]["x"].shape[1],
     )
 
     final_data = {
