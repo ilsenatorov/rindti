@@ -25,7 +25,7 @@ class TwoGraphData(Data):
         """Return number of edges for graph with prefix."""
         return self[prefix + "edge_index"].size(1)
 
-    def n_node_feats(self, prefix: str) -> int:  # TODO add tests
+    def n_node_feats(self, prefix: str) -> int:
         """Calculate the feature dimension of one of the graphs.
 
         If the features are index-encoded (dtype long, single number for each node, for use with Embedding),
