@@ -6,7 +6,7 @@ from ...data import TwoGraphData
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 from ..encoder import Encoder
-from ..SweetNetEncoder import SweetNetEncoder
+from ..sweet_net_encoder import SweetNetEncoder
 
 
 class ClassificationModel(BaseModel):
