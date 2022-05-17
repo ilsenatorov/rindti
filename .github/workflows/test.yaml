@@ -32,5 +32,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          $CONDA/bin/mamba install pytest
-          $CONDA/bin/python -m pytest -m "not gpu"
+          pytest -m "not gpu"
