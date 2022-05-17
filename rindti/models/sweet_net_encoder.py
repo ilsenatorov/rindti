@@ -4,7 +4,6 @@ from typing import Tuple, Union
 import torch
 import torch.nn.functional as F
 from glycowork.glycan_data.loader import lib
-from glycowork.ml.models import SweetNet, init_weights
 from glycowork.motif.graph import glycan_to_graph
 from torch.functional import Tensor
 from torch_geometric.data import Data
