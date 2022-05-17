@@ -65,7 +65,7 @@ class DTIDataset(InMemoryDataset):
         torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
-        """Get either prot or drug data"""
+        """Get either prot or drug data."""
         graph = all_data[which].loc[id, "data"]
         graph["count"] = float(all_data[which].loc[id, "count"])
         graph["id"] = id
