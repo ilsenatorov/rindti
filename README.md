@@ -1,6 +1,6 @@
 # RINDTI
 
-![testing](https://github.com/ilsenatorov/rindti/actions/workflows/test.yml/badge.svg)
+![testing](https://github.com/ilsenatorov/rindti/actions/workflows/test.yaml/badge.svg)
 
 This repository aims to simplify the drug-target interaction prediction process which is based on protein residue interaction networks (RINs)
 
@@ -13,7 +13,7 @@ The repository aims to go from a simple collections of inputs - structures of pr
 1. clone the repository with `git clone https://github.com/ilsenatorov/rindti`
 2. change in the root directory with `cd rindti`
 3. *(Optional)* install mamba with `conda install -n base -c conda-forge mamba`
-4. create the conda environment with `mamba env create -f workflow/envs/main.yml` (might take some time)
+4. create the conda environment with `mamba env create -f workflow/envs/main.yaml` (might take some time)
 5. activate the environment with `conda activate rindti`
 6. clone rinerator repository into your home dir with `git clone --branch perf https://wibi-git.helmholtz-hzi.de/ske18/rinerator/ ~/rinerator`
 7. install rinerator with `pip install ~/rinerator`

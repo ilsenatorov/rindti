@@ -10,7 +10,7 @@ One can install the packages necessary through conda (mamba) using the following
 .. code:: console
 
         conda install -c conda-forge mamba # mamba is much faster than conda
-        mamba env create --quiet --name rindti --file workflow/envs/main.yml
+        mamba env create --quiet --name rindti --file workflow/envs/main.yaml
 
 
 Then one can run optionally run `pip install .` in the root directory of the repository to install rindti as a package.
