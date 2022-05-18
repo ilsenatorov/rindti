@@ -21,7 +21,7 @@ class ClassificationModel(BaseModel):
         )
         self.prot_encoder = Encoder(**kwargs["model"]["prot"])
         if kwargs["model"]["drug"]["node"]["module"] == "SweetNet":
-            self.drug_encoder = SweetNetEncoder(**kwargs["model"]["drug"])
+            self.drug_encoder = SweetNetEncoder(**kwargs)
         else:
             self.drug_encoder = Encoder(**kwargs["model"]["drug"])
         self.mlp = self._get_mlp(**kwargs["model"]["mlp"])

@@ -13,7 +13,7 @@ class ESMClassModel(BaseModel):
     """ESM Model Class for DTI prediction."""
 
     def __init__(self, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
         self._determine_feat_method(
             kwargs["model"]["feat_method"],
             kwargs["model"]["prot"]["hidden_dim"],
@@ -27,7 +27,7 @@ class ESMClassModel(BaseModel):
             kwargs["model"]["prot"]["node"]["dropout"],
         )
         if kwargs["model"]["drug"]["node"]["module"] == "SweetNet":
-            self.drug_encoder = SweetNetEncoder(**kwargs["model"]["drug"])
+            self.drug_encoder = SweetNetEncoder(**kwargs)
         else:
             self.drug_encoder = Encoder(**kwargs["model"]["drug"])
         self.mlp = self._get_mlp(**kwargs["model"]["mlp"])
