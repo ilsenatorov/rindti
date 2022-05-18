@@ -1,25 +1,33 @@
-import torch.nn.functional as F
 import torch
+import torch.nn.functional as F
 
-from ..SweetNetEncoder import SweetNetEncoder
 from ...data import TwoGraphData
 from ...layers import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 from ..encoder import Encoder
+from ..sweet_net_encoder import SweetNetEncoder
 
 
 class ESMClassModel(BaseModel):
     """ESM Model Class for DTI prediction."""
 
     def __init__(self, **kwargs):
-        super().__init__()
-        self._determine_feat_method(kwargs["model"]["feat_method"], kwargs["model"]["prot"]["hidden_dim"], kwargs["model"]["drug"]["hidden_dim"])
+        super().__init__(**kwargs)
+        self._determine_feat_method(
+            kwargs["model"]["feat_method"],
+            kwargs["model"]["prot"]["hidden_dim"],
+            kwargs["model"]["drug"]["hidden_dim"],
+        )
         self.prot_encoder = MLP(
-            1280, kwargs["model"]["prot"]["hidden_dim"], kwargs["model"]["prot"]["hidden_dim"], kwargs["model"]["prot"]["node"]["num_layers"], kwargs["model"]["prot"]["node"]["dropout"]
+            1280,
+            kwargs["model"]["prot"]["hidden_dim"],
+            kwargs["model"]["prot"]["hidden_dim"],
+            kwargs["model"]["prot"]["node"]["num_layers"],
+            kwargs["model"]["prot"]["node"]["dropout"],
         )
         if kwargs["model"]["drug"]["node"]["module"] == "SweetNet":
-            self.drug_encoder = SweetNetEncoder(**kwargs["model"]["drug"])
+            self.drug_encoder = SweetNetEncoder(**kwargs)
         else:
             self.drug_encoder = Encoder(**kwargs["model"]["drug"])
         self.mlp = self._get_mlp(**kwargs["model"]["mlp"])

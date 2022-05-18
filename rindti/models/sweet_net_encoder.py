@@ -1,29 +1,30 @@
+import warnings
 from typing import Tuple, Union
 
 import torch
+import torch.nn.functional as F
+from glycowork.glycan_data.loader import lib
 from glycowork.motif.graph import glycan_to_graph
 from torch.functional import Tensor
 from torch_geometric.data import Data
+from torch_geometric.nn import global_max_pool as gmp
+from torch_geometric.nn import global_mean_pool as gap
 
 from rindti.models.base_model import BaseModel
-from rindti.models.encoder import Encoder
-from glycowork.ml.models import SweetNet, init_weights, trained_SweetNet
-from glycowork.glycan_data.loader import lib
 
-import torch.nn.functional as F
-from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
+if torch.cuda.is_available():
+    from glycowork.ml.models import SweetNet, init_weights, trained_SweetNet
+else:
+    trained_SweetNet, SweetNet, init_weights = torch.nn.Module, torch.nn.Module, torch.nn.Module
+    warnings.warn("GPU not available")
 
 
 class SweetNetEncoder(BaseModel):
     def __init__(self, trainable=False, **kwargs):
-        super().__init__()
-        self.sweetnet = SweetNetAdapter(trainable, **kwargs).cuda()
+        super().__init__(**kwargs)
+        self.sweetnet = SweetNetAdapter(trainable, **kwargs["model"]["drug"]).cuda()
 
-    def forward(
-            self,
-            data: Union[dict, Data],
-            **kwargs,
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def forward(self, data: Union[dict, Data], **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         if not isinstance(data, dict):
             data = data.to_dict()
 
@@ -38,7 +39,7 @@ class SweetNetAdapter(SweetNet):
     def __init__(self, trainable=False, **kwargs):
         super().__init__(len(lib), 970)
         self.trainable = trainable
-        self.apply(lambda module: init_weights(module, mode='sparse'))
+        self.apply(lambda module: init_weights(module, mode="sparse"))
         self.load_state_dict(trained_SweetNet)
         self.lin4 = torch.nn.Linear(256, kwargs["hidden_dim"])
 

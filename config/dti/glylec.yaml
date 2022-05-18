@@ -1,7 +1,7 @@
 runs: 1
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_label_none_glycan_none.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_IUPAC_none.pkl
   exp_name: glylec
   batch_size: 64
   num_workers: 0
@@ -13,12 +13,12 @@ trainer:
 early_stop:
   patience: 40
 model:
-  module: class
+  module: esm_class
   feat_method: concat
   drug:
     hidden_dim: 128
     node:
-      module: ginconv
+      module: SweetNet
       dropout: 0.1
       hidden_dim: 16
       num_layers: 3
@@ -52,5 +52,4 @@ model:
     reduce_lr:
       factor: 0.1
       patience: 20
-# monitor: val_loss ??
-# weighted: 0 ??
+      monitor: val_loss
