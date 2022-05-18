@@ -7,14 +7,14 @@ only_prots: false
 seed: 42
 
 prots:
-  structures:
-    method: template # whole, template, bsite, plddt
+  structs:
+    method: plddt # whole, template, bsite, plddt
     bsite:
       radius: 5
     template:
       radius: 2
     plddt:
-      threshold: 50
+      threshold: 70
 
   features:
     method: graph # graph, esm or sequence
