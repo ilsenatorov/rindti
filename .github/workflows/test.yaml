@@ -9,15 +9,8 @@ on:
     branches:
       - '*'
 
-  # schedule:
-  #   - cron: '0 0 * * *'
-
-env:
-  CACHE_NUMBER: 0  # increase to reset cache manually
-
 jobs:
   test:
-
     strategy:
       matrix:
         include:
@@ -46,13 +39,10 @@ jobs:
             activate-environment: rindti
             use-mamba: true
 
-      - name: Set cache date
-        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}
         id: cache
 
       - name: Update environment
