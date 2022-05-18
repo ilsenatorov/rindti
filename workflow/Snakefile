@@ -1,3 +1,7 @@
+from snakemake.utils import validate
+
+validate(config, schema="schemas/config.schema.yaml")
+
 
 configfile: "config/snakemake/default.yaml"
 
