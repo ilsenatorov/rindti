@@ -1,10 +1,9 @@
-# the two root directories to take the data from and to store the data in
-source: datasets/glass/resources
+seed: 42
+source: null
 prot_cols: ["AASeq"]
 drug_cols: ["IUPAC"]
 
 only_prots: false
-seed: 42
 
 prots:
   structs:
@@ -25,8 +24,8 @@ prots:
 
 drugs:
   max_num_atoms: 150
-  node_feats: label
-  edge_feats: none
+  node_feats: label # label, onehot, glycan or glycanone
+  edge_feats: none # label, onehot, or none
 
 split_data:
   method: random # random, target, drug
