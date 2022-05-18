@@ -11,6 +11,7 @@ early_stop:
   patience: 60
 
 model:
+  monitor: train_loss
   module: class
   hidden_dim: 128
   encoder:
