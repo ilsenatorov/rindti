@@ -1,28 +1,87 @@
 import os
 import os.path as osp
+import hashlib
+import json
+import pandas as pd
 
 
-configfile: "config/snakemake/roman.yaml"
+configfile: "config/snakemake/default.yaml"
 
 
-source = config["source"].rstrip("/")  # resources
-target = config["target"].rstrip("/")  # output
-targets = [x.split(".")[0] for x in os.listdir(source + "/structures") if x.endswith(".pdb")]  # list of structures
-prot_settings = f"{config['prepare_prots']['node_feats']}_{config['prepare_prots']['edge_feats']}"
+class Namer:
+    def __init__(self, cutoff: int = None):
+        self.cutoff = cutoff
 
-drug_settings = (
-    f"{config['prepare_drugs']['node_feats']}_{config['prepare_drugs']['edge_feats']}"
-    if not config["only_prots"]
-    else ""
-)
+    def hash_config(self, config: dict) -> str:
+        """Hash a config dictionary."""
+        as_json = json.dumps(config, sort_keys=True).encode("utf-8")
+        return hashlib.md5(as_json).hexdigest()[: self.cutoff]
+
+    def flatten_config(self, config: dict) -> dict:
+        """Flatten a config dictionary."""
+        return pd.json_normalize(config).T[0].to_dict()
+
+    def get_name(self, config: dict) -> str:
+        """Get the name of a config."""
+        flat = self.flatten_config(config)
+        res = ""
+        for k, v in flat.items():
+            if k in ["source", "target"]:
+                continue
+            elif isinstance(v, str):
+                res += v[0]
+        return res + "_" + self.hash_config(config)
+
+    def __call__(self, config: dict) -> str:
+        return self.get_name(config)
 
 
-if config["structures"] == "whole":
-    structures = source + "/structures/{protein}.pdb"
-    script_output = ""
-else:
-    structures = f"{target}/parsed_structures_{config['structures']}/{{protein}}.pdb"
-    script_output = f"{target}/pymol_{config['structures']}/{{protein}}.pml"
+class SnakeMakeRule:
+    def __init__(self, inp: list = [], out: list = []):
+        self.inp = inp
+        self.out = out
+
+
+class SnakemakeHelper:
+    def __init__(self, config: dict, namer_cutoff: int = None):
+        self.source = config["source"]
+        self.config = config
+        self.target = "/".join(self.source.split("/")[:-1] + ["results"])
+        self.prots = [x.split(".")[0] for x in os.listdir(self.source + "/structures") if x.endswith(".pdb")]
+        self.namer = Namer(namer_cutoff)
+
+    def _source(self, *args) -> str:
+        return os.path.join(self.source, *args)
+
+    def _target(self, *args) -> str:
+        return os.path.join(self.target, *args)
+
+    def create_pymol_scripts(self):
+        """Get the pymol scripts."""
+        if self.config["prots"]["structures"]["method"] == "whole":
+            return SnakeMakeRule([], [])
+        else:
+            return SnakeMakeRule(
+                self._target(
+                    "pymol_scripts",
+                    self.namer(self.config["prots"]["structures"]),
+                    "{prot}.pml",
+                ),
+                self._target("pymol_scripts"),
+            )
+
+    def prot_structures(self):
+        if self.config["prots"]["structures"]["method"] == "whole":
+            return self._source("structures/{prot}.pdb")
+        else:
+            return self._target(
+                "parsed_structures",
+                self.namer(self.config["prots"]["structures"]),
+                "{prot}.pdb",
+            )
+
+
+sh = SnakemakeHelper(config, 8)
 
 
 rinerator_output = f"{target}/rinerator_{config['structures']}/{{protein}}/{{protein}}_h.sif"
@@ -113,7 +172,7 @@ rule all:
 
 rule create_pymol_scripts:
     input:
-        expand("{resources}/structures/{protein}.pdb", resources=source, protein=targets),
+        expand(sh.pymol_scripts(), prot=sh.targets),
     output:
         scripts=expand(script_output, protein=targets),
     log:
@@ -170,6 +229,21 @@ rule rinerator:
         """
 
 
+rule distance_based:
+    input:
+        pdbs=expand(structures, protein=targets),
+    output:
+        pickle=distance_protein_output,
+    log:
+        expand("{results}/logs/distance_based.log", results=target),
+    params:
+        threshold=config["distance"]["threshold"],
+    message:
+        "Running distance based network calculation, logs are in {log}"
+    script:
+        "scripts/distance_based.py"
+
+
 rule prepare_prots:
     input:
         rins=expand(rinerator_output, protein=targets),
@@ -184,21 +258,6 @@ rule prepare_prots:
         """
     script:
         "scripts/prepare_prots.py"
-
-
-rule distance_based:
-    input:
-        pdbs=expand(structures, protein=targets),
-    output:
-        pickle=distance_protein_output,
-    log:
-        expand("{results}/logs/distance_based.log", results=target),
-    params:
-        threshold=config["distance"]["threshold"],
-    message:
-        "Running distance based network calculation, logs are in {log}"
-    script:
-        "scripts/distance_based.py"
 
 
 rule parse_dataset:
