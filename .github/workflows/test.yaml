@@ -3,11 +3,11 @@ name: Testing
 on:
   push:
     branches:
-      - '*'
+      - "*"
 
   pull_request:
     branches:
-      - '*'
+      - "*"
 
 jobs:
   test:
@@ -34,16 +34,19 @@ jobs:
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
-            miniforge-variant: Mambaforge
-            miniforge-version: latest
-            activate-environment: rindti
-            use-mamba: true
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: rindti
+          use-mamba: true
 
       - uses: actions/cache@v3
+        id: cache
         with:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}
-        id: cache
+          restore-keys: |
+            ${{ matrix.label }}-conda-
+            ${{ matrix.label }}-
 
       - name: Update environment
         run: mamba env update -n rindti -f workflow/envs/main.yaml
