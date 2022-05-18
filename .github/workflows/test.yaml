@@ -48,9 +48,9 @@ jobs:
             ${{ matrix.label }}-conda-
             ${{ matrix.label }}-
 
-      - name: Update environment
+      - if: ${{ steps.cache.outputs.cache-hit == false }}
+        name: Update environment
         run: mamba env update -n rindti -f workflow/envs/main.yaml
-        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Run tests
         shell: bash -l {0}
