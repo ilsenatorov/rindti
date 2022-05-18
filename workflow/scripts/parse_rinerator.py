@@ -269,7 +269,7 @@ if __name__ == "__main__":
             prots.set_index("ID", inplace=True)
             prot_encoder = ProteinEncoder(snakemake.params.node_feats, snakemake.params.edge_feats)
             prots["data"] = prots["sif"].apply(prot_encoder)
-        prots.to_pickle(snakemake.output.protein_pickle)
+        prots.to_pickle(snakemake.output.pickle)
     else:
         import argparse
 
