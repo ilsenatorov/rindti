@@ -48,27 +48,3 @@ class SnakemakeHelper:
 
     def _target(self, *args) -> str:
         return os.path.join(self.target, *args)
-# ### CHECK IF templates ARE PRESENT ###
-# if osp.isdir(os.path.join(source, "templates")):
-#     templates = expand(
-#         "{resources}/templates/{template}",
-#         resources=source,
-#         template=os.listdir(f"{source}/templates"),
-#     )
-# else:
-#     if not config["only_prots"] and config["structures"] not in ["whole", "plddt"]:
-#         raise ValueError("No templates available")
-#     templates = []
-# ### CHECK IF gnomad is available ###
-# if osp.isfile(os.path.join(source, "gnomad.csv")):
-#     gnomad = source + "/gnomad.csv"
-#     output.append(transformer_output)
-# else:
-#     gnomad = []
-# ### CHECK IF drug data is available ###
-# if osp.isdir(os.path.join(source, "drugs")):
-#     drugs = {x: source + "/drugs/{x}.tsv".format(x=x) for x in ["inter", "lig", "prots"]}
-# else:
-#     if not config["only_prots"]:
-#         raise ValueError("No drug interaction data available, can't calculate final data!")
-#     drugs = {x: [] for x in ["inter", "lig"]}

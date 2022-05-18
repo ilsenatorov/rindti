@@ -4,10 +4,10 @@ from typing import Iterable
 
 import pandas as pd
 from pandas.core.frame import DataFrame
+from parse_rinerator import edge_encoding as prot_edge_encoding
+from parse_rinerator import node_encoding as prot_node_encoding
 from prepare_drugs import edge_encoding as drug_edge_encoding
 from prepare_drugs import node_encoding as drug_node_encoding
-from prepare_prots import edge_encoding as prot_edge_encoding
-from prepare_prots import node_encoding as prot_node_encoding
 
 
 def process(row: pd.Series) -> dict:
@@ -52,10 +52,7 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-    if os.path.exists(snakemake.input.protseqs):
-        protseqs = pd.read_csv(snakemake.input.protseqs, sep='\t')
-    else:
-        protseqs = None
+    protseqs = None
 
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
@@ -68,24 +65,18 @@ if __name__ == "__main__":
     prots = prots[prots.index.isin(interactions["Target_ID"])]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
 
-    if protseqs is not None:
-        seqs = []
-        for i, row in prots.iterrows():
-            seqs.append(protseqs[protseqs["Target_ID"] == i]["AASeq"].values[0])
-        prots["AASeq"] = seqs
-
     full_data = process_df(interactions)
     config = update_config(
         snakemake.config,
         prot_size=prots.iloc[0]["data"]["x"].size(0),
-        drug_size=drugs.iloc[0]["data"]["x"].shape[1],
+        drug_size=drugs.iloc[0]["data"]["x"].size(0),
     )
 
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data", "count"] + snakemake.config["prot_cols"]],
-        "drugs": drugs[["data", "count"] + snakemake.config["drug_cols"]],
+        "prots": prots[["data", "count"]],
+        "drugs": drugs[["data", "count"]],
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:

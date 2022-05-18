@@ -25,11 +25,10 @@ prots:
 
 drugs:
   max_num_atoms: 150
-  encoding:
-    node_feats: label
-    edge_feats: none
+  node_feats: label
+  edge_feats: none
 
-split:
+split_data:
   method: random # random, target, drug
   train: 0.7
   val: 0.2

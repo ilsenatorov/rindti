@@ -8,76 +8,17 @@ include: "rules/helper.smk"
 sh = SnakemakeHelper(config, 8)
 
 
+include: "rules/sanity_checks.smk"
 include: "rules/prots.smk"
-
-
-output = parsed_graphs
+include: "rules/drugs.smk"
+include: "rules/data.smk"
 
 
 rule all:
     input:
-        output,
+        final_output,
 
 
-# rule prepare_prots:
-#     input:
-#         rins=expand(rinerator_output, protein=targets),
-#     output:
-#         protein_pickle=rinerator_protein_output,
-#     script:
-#         "scripts/prepare_prots.py"
-
-
-# rule parse_dataset:
-#     input:
-#         inter=drugs["inter"],
-#     output:
-#         inter="{results}/parse_dataset/{filtering}_{sampling}_inter.csv".format(
-#             results=target,
-#             filtering=config["parse_dataset"]["filtering"]
-#             if not config["only_prots"]
-#             else "",
-#             sampling=config["parse_dataset"]["sampling"]
-#             if not config["only_prots"]
-#             else "",
-#         ),
-#     script:
-#         "scripts/parse_dataset.py"
-
-
-# rule split_data:
-#     input:
-#         inter=rules.parse_dataset.output.inter,
-#     output:
-#         split_data="{results}/split_data/{split}_{filtering}_{sampling}_split.csv".format(
-#             results=target,
-#             split=config["split"]["method"] if not config["only_prots"] else "",
-#             filtering=config["parse_dataset"]["filtering"]
-#             if not config["only_prots"]
-#             else "",
-#             sampling=config["parse_dataset"]["sampling"]
-#             if not config["only_prots"]
-#             else "",
-#         ),
-#     script:
-#         "scripts/split_data.py"
-# rule prepare_drugs:
-#     input:
-#         lig=drugs["lig"],
-#     output:
-#         drug_pickle=drug_output,
-#     script:
-#         "scripts/prepare_drugs.py"
-# rule prepare_all:
-#     input:
-#         drugs=rules.prepare_drugs.output.drug_pickle,
-#         prots=protein_output,
-#         inter=rules.split_data.output.split_data,
-#         protseqs=drugs["prots"],
-#     output:
-#         combined_pickle=final_output,
-#     script:
-#         "scripts/prepare_all.py"
 # rule prepare_transformer:
 #     input:
 #         gnomad=gnomad,

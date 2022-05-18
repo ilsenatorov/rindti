@@ -133,8 +133,7 @@ class DrugEncoder:
 
 
 if __name__ == "__main__":
-    config = snakemake.config["prepare_drugs"]
-    drug_enc = DrugEncoder(config["node_feats"], config["edge_feats"], config["max_num_atoms"])
+    drug_enc = DrugEncoder(snakemake.params.node_feats, snakemake.params.edge_feats, snakemake.params.max_num_atoms)
     ligs = pd.read_csv(snakemake.input.lig, sep="\t").drop_duplicates("Drug_ID").set_index("Drug_ID")
     ligs["data"] = ligs["Drug"].apply(drug_enc)
     ligs = ligs[ligs["data"].notna()]
