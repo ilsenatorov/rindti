@@ -4,7 +4,7 @@ import resource
 
 def create_script(protein: str, inp: str, params: dict):
     """
-    Create pymol parsing script for a protein according to the config
+    Create pymol parsing script for a protein according to the params.
     """
     resources = params.resources
     results = params.results

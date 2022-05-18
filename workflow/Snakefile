@@ -8,10 +8,10 @@ include: "rules/helper.smk"
 sh = SnakemakeHelper(config, 8)
 
 
-include: "rules/structs.smk"
+include: "rules/prots.smk"
 
 
-output = expand(parsed_structs, prot=sh.prot_ids)
+output = parsed_graphs
 
 
 rule all:
@@ -61,8 +61,6 @@ rule all:
 #         ),
 #     script:
 #         "scripts/split_data.py"
-
-
 # rule prepare_drugs:
 #     input:
 #         lig=drugs["lig"],

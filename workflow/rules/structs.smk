@@ -1,5 +1,3 @@
-use_pymol = True if config["prots"]["structs"]["method"] != "whole" else False
-
 parsed_structs_dir = sh._target(
     "parsed_structs",
     sh.namer(config["prots"]["structs"]),
@@ -10,7 +8,7 @@ pymol_scripts = sh._target(
     "{prot}.pml",
 )
 
-if not use_pymol:
+if config["prots"]["structs"]["method"] != "whole":
     parsed_structs = sh._source("structures", "{prot}.pdb")
 else:
     parsed_structs = os.path.join(parsed_structs_dir, "{prot}.pdb")
@@ -38,7 +36,7 @@ rule run_pymol:
     output:
         structs=parsed_structs,
     log:
-        os.path.join(parsed_structs_dir + "_log", "{prot}.log"),
+        sh._target("pymol_logs", sh.namer(config["prots"]["structs"]), "{prot}.log"),
     conda:
         "../envs/pymol.yaml"
     shell:

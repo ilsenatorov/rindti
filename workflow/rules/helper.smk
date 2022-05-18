@@ -48,61 +48,6 @@ class SnakemakeHelper:
 
     def _target(self, *args) -> str:
         return os.path.join(self.target, *args)
-
-
-# rinerator_output = f"{target}/rinerator_{config['structures']}/{{protein}}/{{protein}}_h.sif"
-# rinerator_protein_output = f"{target}/rinerator_based/protein_data_{config['structures']}_{prot_settings}.pkl"
-
-# distance_protein_output = f"{target}/distance_based/protein_data_{config['structures']}_{prot_settings}.pkl"
-# if config["graph"] == "distance":
-#     protein_output = distance_protein_output
-# else:
-#     protein_output = rinerator_protein_output
-
-# if config["only_prots"]:  # Only calculate the data for the prots
-#     output = [protein_output]
-#     drug_output = ""
-#     final_output = ""
-#     transformer_output = ""
-#     plot_output = ""
-# else:
-
-#     drug_output = target + f"/prepare_drugs/drug_data_{drug_settings}.pkl"
-
-#     split_data = (
-#         "{target}/split_data/{split}_{filtering}_{sampling}_{task}_split.csv".format(
-#             target=target,
-#             split=config["split"]["method"],
-#             filtering=config["parse_dataset"]["filtering"],
-#             sampling=config["parse_dataset"]["sampling"],
-#             task=config["parse_dataset"]["task"],
-#         )
-#         if not config["only_prots"]
-#         else ""
-#     )
-
-#     transformer_output = "{target}/prepare_transformer/{node_feats}_transformer.pkl".format(
-#         target=target, node_feats=config["prepare_prots"]["node_feats"]
-#     )
-
-#     final_output = "{target}/prepare_all/{split}_{filtering}_{sampling}_{task}_{structures}_{graph}_{prot_settings}_{drug_settings}.pkl".format(
-#         target=target,
-#         split=config["split"]["method"],
-#         filtering=config["parse_dataset"]["filtering"],
-#         sampling=config["parse_dataset"]["sampling"],
-#         task=config["parse_dataset"]["task"],
-#         structures=config["structures"],
-#         graph=config["graph"],
-#         prot_settings=prot_settings,
-#         drug_settings=drug_settings,
-#     )
-
-#     plot_output = final_output.split("/")[-1].split(".")[0]
-#     plot_output = f"{target}/report/plot_summary/{plot_output}.html"
-
-#     output = [final_output, plot_output]
-
-
 # ### CHECK IF templates ARE PRESENT ###
 # if osp.isdir(os.path.join(source, "templates")):
 #     templates = expand(

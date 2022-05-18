@@ -103,7 +103,7 @@ if __name__ == "__main__":
         threshold = snakemake.params.threshold
 
         def get_graph(filename: str) -> dict:
-            return Structure(filename, snakemake.config["prepare_prots"]["node_feats"]).get_graph(threshold)
+            return Structure(filename, snakemake.params.node_feats).get_graph(threshold)
 
         data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
         df = pd.DataFrame(pd.Series(data, name="data"))

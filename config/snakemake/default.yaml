@@ -17,10 +17,9 @@ prots:
       threshold: 70
 
   features:
-    method: graph # graph, esm or sequence
-    graph:
+    method: rinerator # distance or rinerator
+    distance:
       threshold: 7
-  encoding:
     node_feats: label # label, onehot, or esm
     edge_feats: none # label, onehot, or none
 

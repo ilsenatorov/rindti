@@ -257,7 +257,7 @@ def extract_name(protein_sif: str) -> str:
 
 if __name__ == "__main__":
     if "snakemake" in globals():
-        if snakemake.config["prepare_prots"]["node_feats"] == "esm":
+        if snakemake.params["node_feats"] == "esm":
             prots = pd.read_csv(snakemake.input.seqs, sep="\t")
             esm_encoder = ESMEncoder(prots["Target_ID"], prots["AASeq"])
             prots["data"] = prots["Target_ID"].apply(esm_encoder)
@@ -267,9 +267,7 @@ if __name__ == "__main__":
             prots = pd.DataFrame(prots)
             prots["ID"] = prots["sif"].apply(extract_name)
             prots.set_index("ID", inplace=True)
-            prot_encoder = ProteinEncoder(
-                snakemake.config["prepare_prots"]["node_feats"], snakemake.config["prepare_prots"]["edge_feats"]
-            )
+            prot_encoder = ProteinEncoder(snakemake.params.node_feats, snakemake.params.edge_feats)
             prots["data"] = prots["sif"].apply(prot_encoder)
         prots.to_pickle(snakemake.output.protein_pickle)
     else:
