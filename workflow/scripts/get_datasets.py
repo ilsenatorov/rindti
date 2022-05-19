@@ -40,7 +40,7 @@ class DatasetFetcher:
         self.max_number_aa = max_number_aa
         self.dataset_folder = f"{dataset_dir}/{dataset_name}/resources"
         self.structures_folder = f"{self.dataset_folder}/structures"
-        self.tabbles_folder = f"{self.dataset_folder}/tables"
+        self.tables_folder = f"{self.dataset_folder}/tables"
         self._create_dirs()
 
     def _create_dirs(self):
@@ -50,28 +50,22 @@ class DatasetFetcher:
 
     def _get_glass(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Download the GLASS dataset."""
+        colnames = {
+            "UniProt ID": "Target_ID",
+            "InChI Key": "Drug_ID",
+            "Canonical SMILES": "Drug",
+            "Value": "Y",
+            "FASTA Sequence": "Target",
+        }
         inter = pd.read_csv("https://zhanggroup.org/GLASS/downloads/interactions_total.tsv", sep="\t")
         lig = pd.read_csv("https://zhanggroup.org/GLASS/downloads/ligands.tsv", sep="\t")
+        prot = pd.read_csv("https://zhanggroup.org/GLASS/downloads/targets.tsv", sep="\t")
         inter = inter[inter["Parameter"].isin(["Ki", "IC50", "EC50"])]
-        inter = inter.rename(
-            {
-                "UniProt ID": "Target_ID",
-                "InChI Key": "Drug_ID",
-                "Value": "Y",
-            },
-            axis=1,
-        )[["Drug_ID", "Target_ID", "Y"]]
-        lig = lig.rename(
-            {
-                "UniProt ID": "Target_ID",
-                "InChI Key": "Drug_ID",
-                "Value": "Y",
-                "Canonical SMILES": "Drug",
-            },
-            axis=1,
-        )[["Drug_ID", "Drug"]]
+        inter = inter.rename(colnames, axis=1,)[["Drug_ID", "Target_ID", "Y"]]
+        lig = lig.rename(colnames, axis=1,)[["Drug_ID", "Drug"]]
+        prot = prot.rename(colnames, axis=1)[["Target_ID", "Target"]]
         inter["Y"] = inter["Y"].apply(get_float)
-        return inter, lig
+        return inter, lig, prot
 
     def load_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Load the necessary dataset."""
@@ -83,7 +77,11 @@ class DatasetFetcher:
             raise NotImplementedError("Davis dataset is not available yet.")
         else:
             data = DTI(name=self.dataset_name).get_data()
-        return data[["Drug_ID", "Target_ID", "Y"]], data.drop_duplicates()[["Drug", "Drug_ID"]]
+        return (
+            data[["Drug_ID", "Target_ID", "Y"]],
+            data[["Drug", "Drug_ID"]].drop_duplicates(),
+            data[["Target", "Target_ID"]].drop_duplicates(),
+        )
 
     def get_pdb(self, pdb_id: str) -> None:
         """Download PDB structure from AlphaFoldDB."""
@@ -97,27 +95,30 @@ class DatasetFetcher:
 
     def run(self):
         """Run the script."""
-        inter, lig = self.load_data()
+        inter, lig, prot = self.load_data()
         inter = inter[inter["Y"].notna()]
         inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
         for i in tqdm(inter["Target_ID"].unique()):
             self.get_pdb(i)
         available_structures = [x.split(".")[0] for x in os.listdir(self.structures_folder)]
         inter = inter[inter["Target_ID"].isin(available_structures)]
+        prot = prot[prot["Target_ID"].isin(available_structures)]
         lig = lig[lig["Drug_ID"].isin(inter["Drug_ID"].unique())]
 
         inter.to_csv(f"{self.tables_folder}/inter.tsv", sep="\t", index=False)
         lig.to_csv(f"{self.tables_folder}/lig.tsv", sep="\t", index=False)
+        prot.to_csv(f"{self.tables_folder}/prot.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":
     from jsonargparse import CLI
+    from typing import Union
 
     def run(
         dataset_name: str,
         dataset_dir: str = "datasets",
         min_number_aa: int = 0,
-        max_number_aa: int = float("inf"),
+        max_number_aa: Union[int, float] = float("inf"),
     ):
         """Run the script."""
         DatasetFetcher(dataset_name, dataset_dir, min_number_aa, max_number_aa).run()
