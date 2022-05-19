@@ -180,7 +180,7 @@ def output_fig(dims, distance, scale, dim_reducer, loss, temperature, pos_margin
         scale,
         {"pca": PCA, "umap": UMAP, "tsne": TSNE}[dim_reducer],
         {"lifted": GeneralisedLiftedStructureLoss, "snnl": SoftNearestNeighborLoss}[loss],
-        temperature=10 ** temperature,
+        temperature=10**temperature,
         pos_margin=pos_margin,
         neg_margin=neg_margin,
     )
