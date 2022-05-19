@@ -7,7 +7,7 @@ from rindti.utils import read_config, write_config
 
 @pytest.fixture
 def config():
-    return read_config("tests/configs/snakemake.yaml")
+    return read_config("tests/configs/default_snakemake.yaml")
 
 
 def run_snakemake(config: dict, tmp_path: str):
@@ -18,6 +18,7 @@ def run_snakemake(config: dict, tmp_path: str):
             "snakemake",
             "-j",
             "4",
+            "--forceall",
             "--use-conda",
             "--configfile",
             f"{tmp_path / 'tmp_config.yaml'}",
