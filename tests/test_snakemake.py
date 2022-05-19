@@ -63,7 +63,7 @@ class TestSnakeMake:
         config["split_data"]["method"] = split
         run_snakemake(config, tmp_path)
 
-    @pytest.mark.parametrize("filtering", ["all", "posneg", "balanced"])
+    @pytest.mark.parametrize("filtering", ["all", "posneg"])
     @pytest.mark.parametrize("sampling", ["none", "over", "under"])
     def test_parse_dataset(self, filtering: str, sampling: str, config: dict, tmp_path: str):
         """Test the dataset filtering and sampling methods."""

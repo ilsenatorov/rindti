@@ -23,7 +23,7 @@ jobs:
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
@@ -50,8 +50,7 @@ jobs:
         shell: bash -l {0}
         run: pytest -m "not gpu"
 
-      - name: interrogate
-        uses: JackMcKew/python-interrogate-check@main
+      - uses: JackMcKew/python-interrogate-check@main
         with:
           path: rindti
           badge-location: badges/interrogate_badge.svg
