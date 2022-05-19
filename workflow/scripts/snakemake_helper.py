@@ -1,16 +1,20 @@
-import os
-import os.path as osp
 import hashlib
 import json
+import os
+import os.path as osp
+
 import pandas as pd
 
 
 def flatten_config(config: dict) -> dict:
     """Flatten a config dictionary."""
-    return pd.json_normalize(config).T[0].to_dict()
+    df = pd.json_normalize(config).T.sort_index()
+    return df[0].to_dict()
 
 
 class Namer:
+    """Assist in naming the files"""
+
     def __init__(self, cutoff: int = None):
         self.cutoff = cutoff
 
@@ -20,7 +24,9 @@ class Namer:
         return hashlib.md5(as_json).hexdigest()[: self.cutoff]
 
     def get_name(self, config: dict) -> str:
-        """Get the name of a config."""
+        """Get the name of a config.
+        All the string entries are concatenated and the hash is appended.
+        """
         flat = flatten_config(config)
         res = ""
         for k, v in flat.items():
@@ -30,11 +36,27 @@ class Namer:
                 res += v[0]
         return res + "_" + self.hash_config(config)
 
+    def explain_name(self, config: dict) -> str:
+        """Explain config name"""
+        print(f"{'Letter'.center(10)} # {'Value'.center(10)} # {'Key'.center(30)}")
+        print("#" * 56)
+        flat = flatten_config(config)
+        res = ""
+        for k, v in flat.items():
+            if k in ["source", "target"]:
+                continue
+            elif isinstance(v, str):
+                res += v[0]
+                print(f"{v[0].center(10)} # {v.center(10)} # {k.center(30)}")
+        return res + "_" + self.hash_config(config)
+
     def __call__(self, config: dict) -> str:
         return self.get_name(config)
 
 
 class SnakemakeHelper:
+    """Helper class for Snakemake."""
+
     def __init__(self, config: dict, namer_cutoff: int = None):
         self.namer = Namer(namer_cutoff)
         self.source = config["source"]

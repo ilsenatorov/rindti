@@ -1,14 +1,12 @@
 from snakemake.utils import validate
-
-validate(config, schema="schemas/config.schema.yaml")
+from scripts.snakemake_helper import SnakemakeHelper
+import os
 
 
 configfile: "config/snakemake/default.yaml"
 
 
-include: "rules/helper.smk"
-
-
+validate(config, schema="schemas/config.schema.yaml")
 sh = SnakemakeHelper(config, 8)
 
 
