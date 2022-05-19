@@ -17,7 +17,7 @@ def create_script(protein: str, inp: str, params: dict):
 
     if params.method == "plddt":
         script.append('cmd.select("result", "b > {threshold}")')
-        fmt_keywords["threshold"] = params.method_params["threshold"]
+        fmt_keywords["threshold"] = params.other_params[params.method]["threshold"]
     else:
         # template-based
         script += [
@@ -29,7 +29,7 @@ def create_script(protein: str, inp: str, params: dict):
             'cmd.extra_fit("name CA", max_score, "tmalign")',
         ]
 
-        fmt_keywords["radius"] = params.method_params["radius"]
+        fmt_keywords["radius"] = params.other_params[params.method]["radius"]
         if params.method == "bsite":
             script.append('cmd.select("result", "br. {protein} within {radius} of organic")')
         elif params.method == "template":

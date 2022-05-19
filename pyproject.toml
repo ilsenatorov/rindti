@@ -37,4 +37,5 @@ minversion = "6.0"
 markers = [
     "slow",
     "gpu",
+    "snakemake",
 ]

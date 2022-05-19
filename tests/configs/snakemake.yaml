@@ -1,5 +1,5 @@
 # the two root directories to take the data from and to store the data in
-source: datasets/test/resources
+source: tests/test_data/resources
 prot_cols: ["AASeq"]
 drug_cols: ["IUPAC"]
 

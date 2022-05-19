@@ -8,7 +8,7 @@ pymol_scripts = sh._target(
     "{prot}.pml",
 )
 
-if config["prots"]["structs"]["method"] != "whole":
+if config["prots"]["structs"]["method"] == "whole":
     parsed_structs = sh._source("structures", "{prot}.pdb")
 else:
     parsed_structs = os.path.join(parsed_structs_dir, "{prot}.pdb")
@@ -24,7 +24,7 @@ rule create_pymol_scripts:
         resources=sh.source,
         results=sh.target,
         method=config["prots"]["structs"]["method"],
-        method_params=config["prots"]["structs"].get(config["prots"]["structs"]["method"]),
+        other_params=config["prots"]["structs"],
     script:
         "../scripts/create_pymol_scripts.py"
 

@@ -7,7 +7,7 @@ only_prots: false
 
 prots:
   structs:
-    method: plddt # whole, template, bsite, plddt
+    method: whole # whole, template, bsite, plddt
     bsite:
       radius: 5
     template:
