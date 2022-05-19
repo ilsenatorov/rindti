@@ -125,7 +125,7 @@ class BaseModel(LightningModule):
             for k, v in metrics.items():
                 self.logger.experiment.add_scalar(k, v, self.current_epoch)
             if hparams:
-                self.logger.log_hyperparams(self.hparams, metrics)
+                self.logger.log_hyperparams(self.hparams, {k.split("_")[-1]: v for k, v in metrics.items()})
 
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything."""
