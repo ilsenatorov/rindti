@@ -38,9 +38,6 @@ jobs:
         with:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}
-          restore-keys: |
-            ${{ matrix.label }}-conda-
-            ${{ matrix.label }}-
 
       - if: ${{ steps.cache.outputs.cache-hit == false }}
         name: Update environment
