@@ -14,3 +14,31 @@ def onehot_encode(position: int, count: int) -> list:
     t = [0] * (count)
     t[position - 1] = 1
     return t
+
+
+prot_node_encoding = list_to_dict(
+    [
+        "ala",
+        "arg",
+        "asn",
+        "asp",
+        "cys",
+        "gln",
+        "glu",
+        "gly",
+        "his",
+        "ile",
+        "leu",
+        "lys",
+        "met",
+        "phe",
+        "pro",
+        "ser",
+        "thr",
+        "trp",
+        "tyr",
+        "val",
+    ]
+)
+
+prot_edge_encoding = list_to_dict(["cnt", "combi", "hbond", "pept", "ovl"])

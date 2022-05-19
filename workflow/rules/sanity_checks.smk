@@ -6,8 +6,8 @@ else:
     if not config["only_prots"] and config["structures"] not in ["whole", "plddt"]:
         raise ValueError("No templates available")
     templates = []
-if not config["only_prots"] and not os.path.isdir(sh._source("drugs")):
-    raise ValueError("No drug interaction data available, can't calculate final data!")
+# if not config["only_prots"] and not os.path.isdir(sh._source("tables")):
+#     raise ValueError("No drug interaction data available, can't calculate final data!")
 ### CHECK IF gnomad is available ###
 # if osp.isfile(sh._source("gnomad.csv")):
 #     gnomad = sh.source("gnomad.csv")

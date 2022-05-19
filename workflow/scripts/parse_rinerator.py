@@ -7,34 +7,7 @@ import pandas as pd
 import torch
 from extract_esm import create_parser
 from extract_esm import main as extract_main
-from utils import list_to_dict, onehot_encode
-
-node_encoding = list_to_dict(
-    [
-        "ala",
-        "arg",
-        "asn",
-        "asp",
-        "cys",
-        "gln",
-        "glu",
-        "gly",
-        "his",
-        "ile",
-        "leu",
-        "lys",
-        "met",
-        "phe",
-        "pro",
-        "ser",
-        "thr",
-        "trp",
-        "tyr",
-        "val",
-    ]
-)
-
-edge_encoding = list_to_dict(["cnt", "combi", "hbond", "pept", "ovl"])
+from utils import onehot_encode, prot_node_encoding, prot_edge_encoding
 
 
 def generate_esm_python(prot_ids, seqs, batch_size):
@@ -107,9 +80,9 @@ class ProteinEncoder:
         """
         residue = residue.lower()
         if self.node_feats == "label":
-            return node_encoding[residue] + 1
+            return prot_node_encoding[residue] + 1
         elif self.node_feats == "onehot":
-            return onehot_encode(node_encoding[residue], len(node_encoding))
+            return onehot_encode(prot_node_encoding[residue], len(prot_node_encoding))
         else:
             raise ValueError("Unknown node_feats type!")
 
@@ -141,7 +114,7 @@ class ProteinEncoder:
                 chain2, resn2, x2, resaa2 = node2split
                 if x1 != "_" or x2 != "_":
                     continue
-                if resaa1.lower() not in node_encoding or resaa2.lower() not in node_encoding:
+                if resaa1.lower() not in prot_node_encoding or resaa2.lower() not in prot_node_encoding:
                     continue
                 resn1 = int(resn1)
                 resn2 = int(resn2)
@@ -216,12 +189,12 @@ class ProteinEncoder:
         edge_index = edge_index.t().contiguous()
         if self.edge_feats == "none":
             return edge_index, None
-        edge_feats = edges["type"].apply(lambda x: edge_encoding[x])
+        edge_feats = edges["type"].apply(lambda x: prot_edge_encoding[x])
         if self.edge_feats == "label":
             edge_feats = torch.tensor(edge_feats, dtype=torch.long)
             return edge_index, edge_feats
         elif self.edge_feats == "onehot":
-            edge_feats = edge_feats.apply(onehot_encode, count=len(edge_encoding))
+            edge_feats = edge_feats.apply(onehot_encode, count=len(prot_edge_encoding))
             edge_feats = torch.tensor(edge_feats, dtype=torch.float)
             return edge_index, edge_feats
 

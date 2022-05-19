@@ -40,12 +40,12 @@ class DatasetFetcher:
         self.max_number_aa = max_number_aa
         self.dataset_folder = f"{dataset_dir}/{dataset_name}/resources"
         self.structures_folder = f"{self.dataset_folder}/structures"
-        self.drugs_folder = f"{self.dataset_folder}/drugs"
+        self.tabbles_folder = f"{self.dataset_folder}/tables"
         self._create_dirs()
 
     def _create_dirs(self):
         """Create necessary directories."""
-        Path(self.drugs_folder).mkdir(parents=True, exist_ok=True)
+        Path(self.tables_folder).mkdir(parents=True, exist_ok=True)
         Path(self.structures_folder).mkdir(parents=True, exist_ok=True)
 
     def _get_glass(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -106,8 +106,8 @@ class DatasetFetcher:
         inter = inter[inter["Target_ID"].isin(available_structures)]
         lig = lig[lig["Drug_ID"].isin(inter["Drug_ID"].unique())]
 
-        inter.to_csv(f"{self.drugs_folder}/inter.tsv", sep="\t", index=False)
-        lig.to_csv(f"{self.drugs_folder}/lig.tsv", sep="\t", index=False)
+        inter.to_csv(f"{self.tables_folder}/inter.tsv", sep="\t", index=False)
+        lig.to_csv(f"{self.tables_folder}/lig.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":
