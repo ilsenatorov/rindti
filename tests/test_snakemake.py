@@ -36,12 +36,14 @@ class TestSnakeMake:
     def test_structures(self, method: str, config: dict, tmp_path: str):
         """Test the various structure-parsing methods."""
         config["prots"]["structs"]["method"] = method
+        config["only_prots"] = True
         run_snakemake(config, tmp_path)
 
     @pytest.mark.parametrize("features", ["rinerator", "distance"])
     def test_features(self, features: str, config: dict, tmp_path: str):
         """Test the graph creation methods."""
         config["prots"]["features"]["method"] = features
+        config["only_prots"] = True
         run_snakemake(config, tmp_path)
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot"])
