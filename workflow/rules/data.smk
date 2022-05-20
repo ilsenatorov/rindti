@@ -1,10 +1,9 @@
-interaction_data = sh._source("tables", "inter.tsv")
 final_output = sh._target("prepare_all", sh.namer(config) + ".pkl")
 
 
 rule parse_dataset:
     input:
-        inter=interaction_data,
+        inter=sh.tables["inter"],
     output:
         inter=sh._target("parse_dataset", sh.namer(config["parse_dataset"]) + ".csv"),
     script:
