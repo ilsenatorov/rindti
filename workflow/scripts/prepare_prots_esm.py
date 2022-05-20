@@ -7,7 +7,7 @@ from extract_esm import create_parser
 from extract_esm import main as extract_main
 
 
-def generate_esm_python(prot_ids:list, seqs:list, batch_size:int=16) -> dict:
+def generate_esm_python(prot_ids: list, seqs: list, batch_size: int = 16) -> dict:
     """Return esms."""
     # TODO refactor
     esms = {}
@@ -33,7 +33,7 @@ def generate_esm_python(prot_ids:list, seqs:list, batch_size:int=16) -> dict:
     return esms
 
 
-def generate_esm_script(prot_ids:list, seqs:list) -> dict:
+def generate_esm_script(prot_ids: list, seqs: list) -> dict:
     """Generate ESM script."""
     # TODO refactor
     if not os.path.exists("./esms"):
@@ -60,6 +60,7 @@ def generate_esm_script(prot_ids:list, seqs:list) -> dict:
 
 class ESMEncoder:
     """Encodes protein data with ESM."""
+
     def __init__(self, prot_ids, seqs, batch_size=32):
         # self.esms = generate_esm_python(prot_ids, seqs, batch_size)
         self.esms = generate_esm_script(prot_ids, seqs, batch_size)

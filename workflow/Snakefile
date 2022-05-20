@@ -18,7 +18,7 @@ include: "rules/data.smk"
 
 rule all:
     input:
-        parsed_graphs if config['only_prots'] else final_output,
+        parsed_graphs if config["only_prots"] else final_output,
 
 
 # rule prepare_transformer:
@@ -29,8 +29,6 @@ rule all:
 #         transformer_pickle=transformer_output,
 #     script:
 #         "scripts/prepare_transformer.py"
-
-
 # rule plot_summary:
 #     input:
 #         pickle=rules.prepare_all.output.combined_pickle,

@@ -61,8 +61,14 @@ class DatasetFetcher:
         lig = pd.read_csv("https://zhanggroup.org/GLASS/downloads/ligands.tsv", sep="\t")
         prot = pd.read_csv("https://zhanggroup.org/GLASS/downloads/targets.tsv", sep="\t")
         inter = inter[inter["Parameter"].isin(["Ki", "IC50", "EC50"])]
-        inter = inter.rename(colnames, axis=1,)[["Drug_ID", "Target_ID", "Y"]]
-        lig = lig.rename(colnames, axis=1,)[["Drug_ID", "Drug"]]
+        inter = inter.rename(
+            colnames,
+            axis=1,
+        )[["Drug_ID", "Target_ID", "Y"]]
+        lig = lig.rename(
+            colnames,
+            axis=1,
+        )[["Drug_ID", "Drug"]]
         prot = prot.rename(colnames, axis=1)[["Target_ID", "Target"]]
         inter["Y"] = inter["Y"].apply(get_float)
         return inter, lig, prot
@@ -111,8 +117,9 @@ class DatasetFetcher:
 
 
 if __name__ == "__main__":
-    from jsonargparse import CLI
     from typing import Union
+
+    from jsonargparse import CLI
 
     def run(
         dataset_name: str,

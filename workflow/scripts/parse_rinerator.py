@@ -7,63 +7,7 @@ import pandas as pd
 import torch
 from extract_esm import create_parser
 from extract_esm import main as extract_main
-from utils import onehot_encode, prot_node_encoding, prot_edge_encoding
-
-
-def generate_esm_python(prot_ids, seqs, batch_size):
-    esms = {}
-    # Load ESM-1b model
-    model, alphabet = esm.pretrained.esm1b_t33_650M_UR50S()
-    batch_converter = alphabet.get_batch_converter()
-    model.eval()
-
-    seq_data = [(pid, seq[:1022]) for pid, seq in zip(prot_ids, seqs)]
-    for b in range(0, len(seq_data), batch_size):
-        print(f"\r{b}/{len(seq_data)}", end="")
-        batch_labels, batch_strs, batch_tokens = batch_converter(seq_data[b : b + batch_size])
-
-        with torch.no_grad():
-            results = model(batch_tokens, repr_layers=[33], return_contacts=True)
-        token_representations = results["representations"][33]
-
-        # Generate per-sequence representations via averaging
-        # NOTE: token 0 is always a beginning-of-sequence token, so the first residue is token 1.
-        for i, (pid, seq) in enumerate(seq_data[b : b + batch_size]):
-            esms[pid] = token_representations[i, 1 : len(seq) + 1].mean(0)
-    print()
-    return esms
-
-
-def generate_esm_script(prot_ids, seqs, batch_size):
-    if not os.path.exists("./esms"):
-        os.makedirs("./esms", exist_ok=True)
-        with open("./esms/prots.fasta", "w") as fasta:
-            for prot_id, seq in zip(prot_ids, seqs):
-                fasta.write(f">{prot_id}\n{seq[:1022]}\n")
-
-        esm_parser = create_parser()
-        esm_args = esm_parser.parse_args(
-            ["esm1b_t33_650M_UR50S", "esms/prots.fasta", "esms/", "--repr_layers", "33", "--include", "mean"]
-        )
-        print("start")
-        extract_main(esm_args)
-        print("finish")
-
-    embeds = {}
-    for prot_id in prot_ids:
-        repres = torch.load(f"./esms/{prot_id}.pt")["mean_representations"][33]
-        embeds[prot_id] = repres
-    # os.rmdir("./esms")
-    return embeds
-
-
-class ESMEncoder:
-    def __init__(self, prot_ids, seqs, batch_size=32):
-        # self.esms = generate_esm_python(prot_ids, seqs, batch_size)
-        self.esms = generate_esm_script(prot_ids, seqs, batch_size)
-
-    def __call__(self, prot_id):
-        return {"x": self.esms[prot_id]}
+from utils import onehot_encode, prot_edge_encoding, prot_node_encoding
 
 
 class ProteinEncoder:
@@ -230,18 +174,12 @@ def extract_name(protein_sif: str) -> str:
 
 if __name__ == "__main__":
     if "snakemake" in globals():
-        if snakemake.params["node_feats"] == "esm":
-            prots = pd.read_csv(snakemake.input.seqs, sep="\t")
-            esm_encoder = ESMEncoder(prots["Target_ID"], prots["AASeq"])
-            prots["data"] = prots["Target_ID"].apply(esm_encoder)
-            prots.set_index("Target_ID", inplace=True)
-        else:
-            prots = pd.Series(list(snakemake.input.rins), name="sif")
-            prots = pd.DataFrame(prots)
-            prots["ID"] = prots["sif"].apply(extract_name)
-            prots.set_index("ID", inplace=True)
-            prot_encoder = ProteinEncoder(snakemake.params.node_feats, snakemake.params.edge_feats)
-            prots["data"] = prots["sif"].apply(prot_encoder)
+        prots = pd.Series(list(snakemake.input.rins), name="sif")
+        prots = pd.DataFrame(prots)
+        prots["ID"] = prots["sif"].apply(extract_name)
+        prots.set_index("ID", inplace=True)
+        prot_encoder = ProteinEncoder(snakemake.params.node_feats, snakemake.params.edge_feats)
+        prots["data"] = prots["sif"].apply(prot_encoder)
         prots.to_pickle(snakemake.output.pickle)
     else:
         import argparse
