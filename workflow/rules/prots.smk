@@ -67,7 +67,7 @@ rule distance_based:
 
 rule esm:
     input:
-        prot=sh.tables["prot"],
+        seqs=sh.tables["prot"],
     output:
         pickle=prot_data,
     script:

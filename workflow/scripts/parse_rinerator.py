@@ -1,12 +1,9 @@
 import os
 from typing import Tuple
 
-import esm
 import numpy as np
 import pandas as pd
 import torch
-from extract_esm import create_parser
-from extract_esm import main as extract_main
 from utils import onehot_encode, prot_edge_encoding, prot_node_encoding
 
 

@@ -58,7 +58,7 @@ class TestSnakeMake:
         config["only_prots"] = True
         run_snakemake(config, tmp_path)
 
-    @pytest.mark.parametrize("features", ["rinerator", "distance"])
+    @pytest.mark.parametrize("features", ["rinerator", "distance", "esm"])
     def test_features(self, features: str, config: dict, tmp_path: str):
         """Test the graph creation methods."""
         config["prots"]["features"]["method"] = features

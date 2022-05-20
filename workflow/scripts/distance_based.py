@@ -1,31 +1,6 @@
 import torch
-from utils import list_to_dict, onehot_encode
-
-node_encoding = list_to_dict(
-    [
-        "ala",
-        "arg",
-        "asn",
-        "asp",
-        "cys",
-        "gln",
-        "glu",
-        "gly",
-        "his",
-        "ile",
-        "leu",
-        "lys",
-        "met",
-        "phe",
-        "pro",
-        "ser",
-        "thr",
-        "trp",
-        "tyr",
-        "val",
-        "unk",
-    ]
-)
+from utils import onehot_encode
+from utils import prot_node_encoding as node_encoding
 
 
 def encode_residue(residue: str, node_feats: str):

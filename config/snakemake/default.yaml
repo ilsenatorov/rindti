@@ -16,7 +16,7 @@ prots:
       threshold: 70
 
   features:
-    method: rinerator # distance or rinerator
+    method: distance # distance or rinerator
     distance:
       threshold: 7
     node_feats: label # label, onehot, or esm
