@@ -1,18 +1,27 @@
 include: "structs.smk"
 
 
-parsed_graphs = sh._target("parsed_graphs", sh.namer(config["prots"]) + ".pkl")
+prot_data = sh._target("prot_data", sh.namer(config["prots"]) + ".pkl")
 rinerator_dir = sh._target("rinerator", sh.namer(config["prots"]))
 rinerator_output = os.path.join(rinerator_dir, "{prot}/{prot}_h.sif")
 
 if config["prots"]["features"]["method"] == "rinerator":
 
-    ruleorder: parse_rinerator > distance_based
+    ruleorder: parse_rinerator > distance_based > esm
+
+
+elif config["prots"]["features"]["method"] == "distance":
+
+    ruleorder: distance_based > parse_rinerator > esm
+
+
+elif config["prots"]["features"]["method"] == "esm":
+
+    ruleorder: esm > parse_rinerator > distance_based
 
 
 else:
-
-    ruleorder: distance_based > parse_rinerator
+    raise ValueError("Unknown method: {}".format(config["prots"]["features"]["method"]))
 
 
 rule rinerator:
@@ -32,11 +41,23 @@ rule rinerator:
         """
 
 
+rule parse_rinerator:
+    input:
+        rins=expand(rinerator_output, prot=sh.prot_ids),
+    output:
+        pickle=prot_data,
+    params:
+        node_feats=config["prots"]["features"]["node_feats"],
+        edge_feats=config["prots"]["features"]["edge_feats"],
+    script:
+        "../scripts/parse_rinerator.py"
+
+
 rule distance_based:
     input:
         pdbs=expand(parsed_structs, prot=sh.prot_ids),
     output:
-        pickle=parsed_graphs,
+        pickle=prot_data,
     params:
         threshold=config["prots"]["features"]["distance"]["threshold"],
         node_feats=config["prots"]["features"]["node_feats"],
@@ -44,13 +65,10 @@ rule distance_based:
         "../scripts/distance_based.py"
 
 
-rule parse_rinerator:
+rule esm:
     input:
-        rins=expand(rinerator_output, prot=sh.prot_ids),
+        prot=sh.tables["prot"],
     output:
-        pickle=parsed_graphs,
-    params:
-        node_feats=config["prots"]["features"]["node_feats"],
-        edge_feats=config["prots"]["features"]["edge_feats"],
+        pickle=prot_data,
     script:
-        "../scripts/parse_rinerator.py"
+        "../scripts/prot_esm.py"

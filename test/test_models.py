@@ -4,7 +4,7 @@ from pytorch_lightning import Trainer
 from rindti.models import ClassificationModel
 from rindti.utils import IterDict, read_config
 
-CONFIG_FILE = "tests/configs/default_dti.yaml"
+CONFIG_FILE = "config/test/default_dti.yaml"
 
 
 default_config = read_config(CONFIG_FILE)

@@ -20,7 +20,7 @@ class Namer:
 
     def hash_config(self, config: dict) -> str:
         """Hash a config dictionary."""
-        as_json = json.dumps(config, sort_keys=True).encode("utf-8")
+        as_json = json.dumps(config).encode("utf-8")
         return hashlib.md5(as_json).hexdigest()[: self.cutoff]
 
     def get_name(self, config: dict) -> str:

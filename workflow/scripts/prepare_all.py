@@ -60,7 +60,7 @@ if __name__ == "__main__":
     prot_count = interactions["Target_ID"].value_counts()
     prots["count"] = prot_count
     drugs["count"] = drug_count
-    prots["data"] = prots["data"].apply(del_index_mapping)
+    # prots["data"] = prots["data"].apply(del_index_mapping)
     prots = prots[prots.index.isin(interactions["Target_ID"])]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
 

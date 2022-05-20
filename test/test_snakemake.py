@@ -1,13 +1,26 @@
+import os
 import subprocess
 
 import pytest
+from snakemake.utils import validate
 
 from rindti.utils import read_config, write_config
+
+SNAKEMAKE_CONFIG_DIR = "config/snakemake"
+DEFAULT_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "default.yaml")
+TEST_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "test.yaml")
+
+snakemake_configs = [
+    os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
+]
 
 
 @pytest.fixture
 def config():
-    return read_config("tests/configs/default_snakemake.yaml")
+    default_config = read_config(DEFAULT_CONFIG)
+    test_config = read_config(TEST_CONFIG)
+    default_config.update(test_config)
+    return default_config
 
 
 def run_snakemake(config: dict, tmp_path: str):
@@ -32,6 +45,12 @@ def run_snakemake(config: dict, tmp_path: str):
 class TestSnakeMake:
     """Runs all snakemake tests."""
 
+    @pytest.mark.parametrize("config_file", snakemake_configs)
+    def test_configs(self, config: dict, config_file: dict):
+        """Test all snakemake configs."""
+        config.update(read_config(config_file))
+        validate(config, "workflow/schemas/config.schema.yaml")
+
     @pytest.mark.parametrize("method", ["whole", "plddt", "bsite", "template"])
     def test_structures(self, method: str, config: dict, tmp_path: str):
         """Test the various structure-parsing methods."""
@@ -48,15 +67,18 @@ class TestSnakeMake:
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
-    @pytest.mark.parametrize("which", ["prots", "drugs"])
-    def test_encodings(self, node_feats: str, edge_feats: str, which: str, config: dict, tmp_path: str):
-        """Test the encoding methods for nodes and edges."""
-        if which == "prots":
-            config[which]["features"]["node_feats"] = node_feats
-            config[which]["features"]["edge_feats"] = edge_feats
-        else:
-            config[which]["node_feats"] = node_feats
-            config[which]["edge_feats"] = edge_feats
+    def test_prot_encodings(self, node_feats: str, edge_feats: str, config: dict, tmp_path: str):
+        """Test the encoding methods for prot nodes and edges."""
+        config["prots"]["features"]["node_feats"] = node_feats
+        config["prots"]["features"]["edge_feats"] = edge_feats
+        run_snakemake(config, tmp_path)
+
+    @pytest.mark.parametrize("node_feats", ["label", "onehot", "glycan", "glycanone"])
+    @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
+    def test_drug_encodings(self, node_feats: str, edge_feats: str, config: dict, tmp_path: str):
+        """Test the encoding methods for drug nodes and edges."""
+        config["drugs"]["node_feats"] = node_feats
+        config["drugs"]["edge_feats"] = edge_feats
         run_snakemake(config, tmp_path)
 
     @pytest.mark.parametrize("split", ["random", "drug", "target"])

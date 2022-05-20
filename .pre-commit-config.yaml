@@ -34,7 +34,7 @@ repos:
     hooks:
       - id: interrogate
         args: [-vv]
-        exclude: ^tests/
+        exclude: ^test/
   - repo: https://github.com/snakemake/snakefmt
     rev: v0.6.0
     hooks:
