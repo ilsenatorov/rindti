@@ -1,4 +1,4 @@
-interaction_data = sh._source("drugs", "inter.tsv")
+interaction_data = sh._source("tables", "inter.tsv")
 final_output = sh._target("prepare_all", sh.namer(config) + ".pkl")
 
 

@@ -21,8 +21,8 @@ rule create_pymol_scripts:
         scripts=expand(pymol_scripts, prot=sh.prot_ids),
     params:
         parsed_structs_dir=parsed_structs_dir,
-        resources=sh.source,
-        results=sh.target,
+        resources=sh.source_dir,
+        results=sh.target_dir,
         method=config["prots"]["structs"]["method"],
         other_params=config["prots"]["structs"],
     script:

@@ -4,10 +4,9 @@ from typing import Iterable
 
 import pandas as pd
 from pandas.core.frame import DataFrame
-from parse_rinerator import edge_encoding as prot_edge_encoding
-from parse_rinerator import node_encoding as prot_node_encoding
 from prepare_drugs import edge_encoding as drug_edge_encoding
 from prepare_drugs import node_encoding as drug_node_encoding
+from utils import prot_edge_encoding, prot_node_encoding
 
 
 def process(row: pd.Series) -> dict:

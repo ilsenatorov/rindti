@@ -3,7 +3,7 @@ drug_output = sh._target("prepare_drugs", sh.namer(config["drugs"]) + ".pkl")
 
 rule prepare_drugs:
     input:
-        lig=sh._source("drugs", "lig.tsv"),
+        lig=sh._source("tables", "lig.tsv"),
     output:
         drug_pickle=drug_output,
     params:
