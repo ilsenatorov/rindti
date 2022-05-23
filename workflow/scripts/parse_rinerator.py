@@ -1,4 +1,5 @@
 import os
+import pickle
 from typing import Tuple
 
 import numpy as np
@@ -177,7 +178,9 @@ if __name__ == "__main__":
         prots.set_index("ID", inplace=True)
         prot_encoder = ProteinEncoder(snakemake.params.node_feats, snakemake.params.edge_feats)
         prots["data"] = prots["sif"].apply(prot_encoder)
-        prots.to_pickle(snakemake.output.pickle)
+        prots = prots.to_dict("index")
+        with open(snakemake.output.pickle, "wb") as f:
+            pickle.dump(prots, f)
     else:
         import argparse
 
@@ -198,4 +201,6 @@ if __name__ == "__main__":
         prot_encoder = ProteinEncoder(args.node_feats, args.edge_feats)
         data = Parallel(n_jobs=args.threads)(delayed(prot_encoder)(i) for i in tqdm(prots["sif"]))
         prots["data"] = data
-        prots.to_pickle(args.output)
+        prots = prots.to_dict("index")
+        with open(args.output, "wb") as f:
+            pickle.dump(prots, f)

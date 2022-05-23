@@ -67,7 +67,6 @@ class DTIDataset(InMemoryDataset):
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
         graph = all_data[which].loc[id, "data"]
-        graph["count"] = float(all_data[which].loc[id, "count"])
         graph["id"] = id
         if (
             which == "drugs"

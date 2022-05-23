@@ -51,16 +51,8 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-    protseqs = None
-
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
-
-    drug_count = interactions["Drug_ID"].value_counts()
-    prot_count = interactions["Target_ID"].value_counts()
-    prots["count"] = prot_count
-    drugs["count"] = drug_count
-    # prots["data"] = prots["data"].apply(del_index_mapping)
     prots = prots[prots.index.isin(interactions["Target_ID"])]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
 
@@ -74,8 +66,8 @@ if __name__ == "__main__":
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data", "count"]],
-        "drugs": drugs[["data", "count"]],
+        "prots": prots[["data"]],
+        "drugs": drugs[["data"]],
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:

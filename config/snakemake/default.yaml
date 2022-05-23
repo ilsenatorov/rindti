@@ -1,7 +1,5 @@
 seed: 42
 source: null
-prot_cols: ["AASeq"]
-drug_cols: ["IUPAC"]
 
 only_prots: false
 

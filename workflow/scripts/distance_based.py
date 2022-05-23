@@ -69,6 +69,8 @@ class Structure:
 
 
 if __name__ == "__main__":
+    import pickle
+
     import pandas as pd
     from joblib import Parallel, delayed
     from tqdm import tqdm
@@ -85,7 +87,10 @@ if __name__ == "__main__":
         df["filename"] = all_structures
         df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
         df.set_index("ID", inplace=True)
-        df.drop("filename", axis=1).to_pickle(snakemake.output.pickle)
+        df.drop("filename", axis=1, inplace=True)
+        df = df.to_dict("index")
+        with open(snakemake.output.pickle, "wb") as f:
+            pickle.dump(df, f)
     else:
         import os
         import os.path as osp
@@ -105,6 +110,9 @@ if __name__ == "__main__":
             df["filename"] = pdbs
             df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
             df.set_index("ID", inplace=True)
-            df.drop("filename", axis=1).to_pickle(output)
+            df.drop("filename", axis=1, inplace=True)
+            df = df.to_dict("index")
+            with open(snakemake.output.pickle, "wb") as f:
+                pickle.dump(df, f)
 
         cli = CLI(run)
