@@ -75,6 +75,9 @@ def single_run(folder, version, **kwargs):
         **kwargs["trainer"],
     )
     model = models[kwargs["model"]["module"]](**kwargs)
+    from pprint import pprint
+
+    pprint(kwargs)
     trainer.fit(model, datamodule)
     trainer.test(model, datamodule)
 
