@@ -1,23 +1,2 @@
-seed: 42
-source: datasets/glass/resources
-prot_cols: ["AASeq"]
-drug_cols: ["IUPAC"]
-
-only_prots: false
-
-prots:
-  structs:
-    method: whole # whole, template, bsite, plddt
-    bsite:
-      radius: 5
-    template:
-      radius: 2
-    plddt:
-      threshold: 70
-
-  features:
-    method: rinerator # distance or rinerator
-    distance:
-      threshold: 7
-    node_feats: label # label, onehot, or esm
-    edge_feats: none # label, onehot, or none
+source: datasets/alphafold/resources
+only_prots: true

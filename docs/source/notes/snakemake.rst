@@ -26,23 +26,24 @@ The resulting files are named according the the string entries in the config fil
 While this decreases human readability, it is necessary to ensure that the once the config changes, the results are not overwritten.
 
 For example, given the following config::
-  prots:
-    structs:
-      method: whole
-    features:
-      method: distance
-      node_feats: onehot
+
+    prots:
+      structs:
+        method: whole
+      features:
+        method: distance
+        node_feats: onehot
+        edge_feats: none
+    drugs:
+      max_num_atoms: 150
+      node_feats: label
       edge_feats: none
-  drugs:
-    max_num_atoms: 150
-    node_feats: label
-    edge_feats: none
-  split_data:
-    method: random
-  parse_dataset:
-    filtering: all
-    sampling: none
-    task: class
+    split_data:
+      method: random
+    parse_dataset:
+      filtering: all
+      sampling: none
+      task: class
 
 The resulting file will be ``<target>/results/prepare_all/wdonlnranc_0f6b0ac6.pkl``.
 In this file, the first part (``wdonlnranc``) is human-readable compression of the config (``w`` for ``whole``, ``d`` for ``distance``, etc), while the second part (``0f6b0ac6``) is a hashed version of the config.
@@ -90,13 +91,41 @@ DTI dataset creation
 In order to create a DTI dataset, the following requirements have to be met:
 
 - PDB structures, located in the ``<source>/resources/structures`` directory
-- Necessary tsv tables tsv files located in the  ``<source>/resources/tables`` directory:
+- Necessary tsv tables located in the  ``<source>/resources/tables`` directory:
   - ``<source>/resources/tables/inter.tsv`` -  The interactions data, has to contain *Drug_ID*, *Target_ID* and *Y* columns,
   - ``<source>/resources/tables/lig.tsv`` -  The ligand data, has to contain *Drug_ID* and *Drug* columns, where *Drug* contains SMILES representation of the drug.
   - ``<source>/resources/tables/prot.tsv`` -  The protein data, has to contain *Target_ID* and *Target* columns, where *Target* contains the protein sequence.
 - ``only_proteins`` entry in the snakemake config has to be *false*
 
 After running the pipeline with ``snakemake -j 16 --use-conda --configfile your_config_file.yaml``, the pickle file should be created in ``<target>/results/prepare_all/`` folder.
+
+File validation
+^^^^^^^^^^^^^^^
+
+The following code can be used to validate the configuration file:
+
+.. code:: python
+
+  from snakemake.utils import validate
+  from rindti.utils import read_config
+
+  default_config = read_config('config/snakemake/default.yaml')
+  your_config = read_config('config/snakemake/your_config.yaml')
+  default_config.update(your_config)
+  validate(default_config, 'workflow/schemas/config.schema.yaml')
+
+The following code can be used to validate the tables:
+
+.. code:: python
+
+  from snakemake.utils import validate
+  import pandas as pd
+
+  for i in ['inter', 'lig', 'prot']:
+    df = pd.read_csv(f'test/test_data/resources/tables/{i}.tsv', sep='\t')
+    validate(df, f'workflow/schemas/{i}.schema.yaml'.format(i))
+
+
 
 Protein dataset creation
 ------------------------

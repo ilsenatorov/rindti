@@ -1,0 +1,14 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+description: row of lig.tsv file, containing information about a ligand
+type: object
+properties:
+  Drug_ID:
+    type: string
+    description: Unique identifier for the drug
+  Drug:
+    type: string
+    description: SMILES representation of the drug
+
+required:
+  - Drug_ID
+  - Drug

@@ -18,7 +18,7 @@ def get_float(entry: str):
 
 
 def count_residues(pdb: str) -> int:
-    """Count number of residues in a PDB file."""
+    """Count num of residues in a PDB file."""
     count = 0
     for line in pdb.split("\n"):
         if line.startswith("ATOM") and line[12:16].strip() == "CA":
@@ -31,13 +31,13 @@ class DatasetFetcher:
         self,
         dataset_name: str,
         dataset_dir: str = "datasets",
-        min_number_aa: int = 0,
-        max_number_aa: int = float("inf"),
+        min_num_aa: int = 0,
+        max_num_aa: int = float("inf"),
     ):
         self.dataset_name = dataset_name
         self.dataset_dir = dataset_dir
-        self.min_number_aa = min_number_aa
-        self.max_number_aa = max_number_aa
+        self.min_num_aa = min_num_aa
+        self.max_num_aa = max_num_aa
         self.dataset_folder = f"{dataset_dir}/{dataset_name}/resources"
         self.structures_folder = f"{self.dataset_folder}/structures"
         self.tables_folder = f"{self.dataset_folder}/tables"
@@ -95,7 +95,7 @@ class DatasetFetcher:
             response = requests.get(f"https://alphafold.ebi.ac.uk/files/AF-{pdb_id}-F1-model_v2.pdb")
             if response:
                 n_res = count_residues(response.text)
-                if n_res >= self.min_number_aa and n_res <= self.max_number_aa:
+                if n_res >= self.min_num_aa and n_res <= self.max_num_aa:
                     with open(f"{self.structures_folder}/{pdb_id}.pdb", "w") as file:
                         file.write(response.text)
 
@@ -124,10 +124,10 @@ if __name__ == "__main__":
     def run(
         dataset_name: str,
         dataset_dir: str = "datasets",
-        min_number_aa: int = 0,
-        max_number_aa: Union[int, float] = float("inf"),
+        min_num_aa: int = 0,
+        max_num_aa: Union[int, float] = float("inf"),
     ):
         """Run the script."""
-        DatasetFetcher(dataset_name, dataset_dir, min_number_aa, max_number_aa).run()
+        DatasetFetcher(dataset_name, dataset_dir, min_num_aa, max_num_aa).run()
 
     cli = CLI(run)
