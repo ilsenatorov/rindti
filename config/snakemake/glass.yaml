@@ -3,3 +3,5 @@ source: datasets/glass/resources
 prots:
   structs:
     method: template
+  features:
+    method: distance
