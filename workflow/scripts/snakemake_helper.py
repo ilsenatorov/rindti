@@ -8,7 +8,7 @@ import pandas as pd
 
 def flatten_config(config: dict) -> dict:
     """Flatten a config dictionary."""
-    df = pd.json_normalize(config).T.sort_index()
+    df = pd.json_normalize(config).T
     return df[0].to_dict()
 
 

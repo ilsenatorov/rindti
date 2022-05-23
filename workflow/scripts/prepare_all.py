@@ -41,6 +41,11 @@ def update_config(config: dict, prot_size=None, drug_size=None) -> dict:
     return config
 
 
+def filter_dict(d: dict, keys: Iterable[str]) -> dict:
+    """Filter dict by keys"""
+    return {k: v for k, v in d.items() if k in keys}
+
+
 if __name__ == "__main__":
 
     interactions = pd.read_csv(snakemake.input.inter, sep="\t")
@@ -51,23 +56,25 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-    interactions = interactions[interactions["Target_ID"].isin(prots.index)]
-    interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
-    prots = prots[prots.index.isin(interactions["Target_ID"])]
-    drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
+    interactions = interactions[interactions["Target_ID"].isin(prots.keys())]
+    interactions = interactions[interactions["Drug_ID"].isin(drugs.keys())]
+    prots = filter_dict(prots, interactions["Target_ID"].unique())
+    drugs = filter_dict(drugs, interactions["Drug_ID"].unique())
+    prot_count = interactions["Target_ID"].value_counts()
+    drug_count = interactions["Drug_ID"].value_counts()
+    for prot in prots:
+        prots[prot]["count"] = prot_count[prot]
+    for drug in drugs:
+        drugs[drug]["count"] = drug_count[drug]
 
     full_data = process_df(interactions)
-    config = update_config(
-        snakemake.config,
-        prot_size=prots.iloc[0]["data"]["x"].size(0),
-        drug_size=drugs.iloc[0]["data"]["x"].size(0),
-    )
+    config = update_config(snakemake.config)
 
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data"]],
-        "drugs": drugs[["data"]],
+        "prots": prots,
+        "drugs": drugs,
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:

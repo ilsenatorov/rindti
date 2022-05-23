@@ -22,7 +22,7 @@ prots:
 
 drugs:
   max_num_atoms: 150
-  node_feats: label # label, onehot, glycan or glycanone
+  node_feats: label # label, onehot, glycan
   edge_feats: none # label, onehot, or none
 
 split_data:

@@ -56,11 +56,6 @@ class DrugEncoder:
                 return glycan_encoding[atom_num] + chirality_encoding[atom.GetChiralTag()]
             else:
                 return glycan_encoding["other"] + chirality_encoding[atom.GetChiralTag()]
-        if self.node_feats == "glycanone":
-            if atom_num in glycan_encoding:
-                return glycan_encoding[atom_num]
-            else:
-                return glycan_encoding["other"]
 
         label = node_encoding[atom_num]
         if self.node_feats == "onehot":
@@ -137,6 +132,7 @@ if __name__ == "__main__":
     ligs = pd.read_csv(snakemake.input.lig, sep="\t").drop_duplicates("Drug_ID").set_index("Drug_ID")
     ligs["data"] = ligs["Drug"].apply(drug_enc)
     ligs = ligs[ligs["data"].notna()]
+    ligs = ligs.to_dict("index")
 
     with open(snakemake.output.drug_pickle, "wb") as file:
         pickle.dump(ligs, file)
