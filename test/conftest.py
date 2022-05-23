@@ -1,213 +1,42 @@
-import pickle
-from random import choice, randint
+import os
+import shutil
+import subprocess
 
-import pandas as pd
 import pytest
-import torch
 from pytorch_lightning.utilities.seed import seed_everything
-from torch.functional import Tensor
-from torch_geometric.loader import DataLoader
 
-from rindti.data import DTIDataModule, DTIDataset, PfamSampler, PreTrainDataModule, PreTrainDataset
-
-PROT_FEAT_DIM = 20
-PROT_EDGE_DIM = 5
-DRUG_FEAT_DIM = 14
-DRUG_EDGE_DIM = 3
-MIN_NODES = 50
-MAX_NODES = 100
-MIN_EDGES = 50
-MAX_EDGES = 100
-N_PROTS = 50
-N_DRUGS = 50
-N_INTER = 100
-BATCH_SIZE = 16
-PROT_PER_FAM = 8
-BATCH_PER_EPOCH = 10
+from rindti.data import DTIDataModule
 
 
-def create_features(feat_type: str, n: int, feat_dim: int) -> Tensor:
-    """Generate node features."""
-    if feat_type == "onehot":
-        return torch.rand((n, feat_dim))
-    elif feat_type == "label":
-        return torch.randint(low=1, high=feat_dim, size=(n,), dtype=torch.long)
-    else:
-        return None
-
-
-def create_fake_graph(
-    node_attr_type: str,
-    node_dim: int,
-    edge_attr_type: str,
-    edge_dim: int,
-    fam: list = None,
-    split: list = None,
-):
-    """Generate a fake graph."""
-    n_nodes = randint(MIN_NODES, MAX_NODES)
-    n_edges = randint(MIN_EDGES, MAX_EDGES)
-    d = dict(
-        x=create_features(node_attr_type, n_nodes, node_dim),
-        edge_index=torch.randint(0, n_nodes, (2, n_edges)),
-        edge_attr=create_features(edge_attr_type, n_edges, edge_dim),
-    )
-    if fam:
-        d["y"] = choice(fam)
-    return d
-
-
-def generate_params():
-    """Permutate parameters."""
-    for edge_type in ["label", "onehot", "none"]:
-        for node_type in ["label", "onehot"]:
-            yield {"edge_type": edge_type, "node_type": node_type}
-
-
-def fake_dataset(params: dict) -> dict:
-    """Create fake DTI dataset."""
-    prots = pd.Series(
+def run_snakemake(source: str):
+    """Run snakemake with the given source dir."""
+    subprocess.run(
         [
-            create_fake_graph(
-                params["prot_node_type"],
-                PROT_FEAT_DIM,
-                params["prot_edge_type"],
-                PROT_EDGE_DIM,
-            )
-            for _ in range(N_PROTS)
+            "snakemake",
+            "-j",
+            "4",
+            "--forceall",
+            "--use-conda",
+            "--config",
+            f"source={source}",
         ],
-        name="data",
-    )
-    drugs = pd.Series(
-        [
-            create_fake_graph(
-                "label",
-                DRUG_FEAT_DIM,
-                "label",
-                DRUG_EDGE_DIM,
-            )
-            for _ in range(N_DRUGS)
-        ],
-        name="data",
-    )
-    prots = pd.DataFrame(prots)
-    drugs = pd.DataFrame(drugs)
-    prots["count"] = 1
-    drugs["count"] = 1
-    inter = [
-        {
-            "prot_id": randint(0, N_PROTS - 1),
-            "drug_id": randint(0, N_DRUGS - 1),
-            "split": choice(["train", "val", "test"]),
-            "label": randint(0, 1),
-        }
-        for _ in range(N_INTER)
-    ]
-    return dict(
-        prots=prots,
-        drugs=drugs,
-        data=inter,
-        config={
-            "prot_feat_dim": PROT_FEAT_DIM,
-            "drug_feat_dim": DRUG_FEAT_DIM,
-            "prot_edge_dim": PROT_EDGE_DIM,
-            "drug_edge_dim": DRUG_EDGE_DIM,
-        },
+        check=True,
     )
 
 
-@pytest.fixture(scope="session", params=[{"prot_" + k: v for k, v in p.items()} for p in generate_params()])
-def dti_pickle(tmpdir_factory, request):
-    """Create a pickle file with fake DTI dataset."""
-    params = request.param
-    ds = fake_dataset(params)
-    fn = tmpdir_factory.mktemp("data").join("temp_data.pkl")
-    with open(fn, "wb") as file:
-        pickle.dump(ds, file)
-    print(fn)
-    return fn
-
-
-@pytest.fixture(scope="session", params=generate_params())
-def pretrain_pickle(tmpdir_factory, request):
-    """Create a pickle file with fake protein dataset."""
-    params = request.param
-    ds = pd.Series(
-        [
-            create_fake_graph(
-                params["node_type"],
-                PROT_FEAT_DIM,
-                params["edge_type"],
-                PROT_EDGE_DIM,
-                fam=[0, 1, 2],
-            )
-            for _ in range(N_PROTS)
-        ],
-        name="data",
-    )
-    ds = pd.DataFrame(ds)
-    fn = tmpdir_factory.mktemp("data").join("temp_pretrain_data.pkl")
-    ds.to_pickle(fn)
-    return fn
+@pytest.fixture(scope="session")
+def dti_pickle(tmpdir_factory) -> str:
+    tmpdir = tmpdir_factory.mktemp("test_data")
+    newdir = shutil.copytree("test/test_data/resources", str(tmpdir.join("resources")))
+    run_snakemake(newdir)
+    result = os.listdir(tmpdir.join("results/prepare_all"))[0]
+    return tmpdir.join("results/prepare_all", result)
 
 
 @pytest.fixture()
-def dti_dataset(dti_pickle):
-    """Create a DTI dataset."""
-    return DTIDataset(dti_pickle, "test")
-
-
-@pytest.fixture()
-def dti_datamodule(dti_pickle):
-    """Create a DTI data module."""
-    return DTIDataModule(dti_pickle, "test", batch_size=BATCH_SIZE)
-
-
-@pytest.fixture()
-def dti_dataloader(dti_dataset):
-    """Create a DTI data loader."""
-    return DataLoader(dti_dataset, batch_size=BATCH_SIZE, follow_batch=["prot_x", "drug_x"])
-
-
-@pytest.fixture
-def dti_batch(dti_dataloader):
-    """Create a batch of DTI data."""
-    return next(iter(dti_dataloader))
-
-
-@pytest.fixture()
-def pretrain_dataset(pretrain_pickle):
-    """Create a pretrain dataset."""
-    return PreTrainDataset(pretrain_pickle)
-
-
-@pytest.fixture()
-def pretrain_datamodule(pretrain_pickle):
-    """Create a pretrain data module."""
-    return PreTrainDataModule(pretrain_pickle, "test")
-
-
-@pytest.fixture()
-def pfam_sampler(pretrain_dataset):
-    """Create a pretrain sampler."""
-    return PfamSampler(
-        pretrain_dataset,
-        batch_size=BATCH_SIZE,
-        prot_per_fam=PROT_PER_FAM,
-        batch_per_epoch=BATCH_PER_EPOCH,
-    )
-
-
-@pytest.fixture()
-def pretrain_dataloader(pretrain_dataset, pfam_sampler):
-    """Create a pretrain data loader."""
-    return DataLoader(pretrain_dataset, batch_sampler=pfam_sampler)
-
-
-@pytest.fixture
-def pretrain_batch(pretrain_dataloader):
-    """Create a batch of pretrain data."""
-    return next(iter(pretrain_dataloader))
+def dti_datamodule(dti_pickle: str):
+    """Run snakemake with the given config."""
+    return DTIDataModule(dti_pickle, "test", batch_size=4)
 
 
 @pytest.fixture(autouse=True)
