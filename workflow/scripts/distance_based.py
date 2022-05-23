@@ -88,9 +88,7 @@ if __name__ == "__main__":
         df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
         df.set_index("ID", inplace=True)
         df.drop("filename", axis=1, inplace=True)
-        df = df.to_dict("index")
-        with open(snakemake.output.pickle, "wb") as f:
-            pickle.dump(df, f)
+        df = df.to_pickle(snakemake.output.pickle)
     else:
         import os
         import os.path as osp
@@ -112,7 +110,6 @@ if __name__ == "__main__":
             df.set_index("ID", inplace=True)
             df.drop("filename", axis=1, inplace=True)
             df = df.to_dict("index")
-            with open(snakemake.output.pickle, "wb") as f:
-                pickle.dump(df, f)
+            df.to_pickle(output)
 
         cli = CLI(run)

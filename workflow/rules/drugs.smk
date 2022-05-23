@@ -5,7 +5,7 @@ rule prepare_drugs:
     input:
         lig=sh.tables["lig"],
     output:
-        drug_pickle=drug_output,
+        pickle=drug_output,
     params:
         node_feats=config["drugs"]["node_feats"],
         edge_feats=config["drugs"]["edge_feats"],

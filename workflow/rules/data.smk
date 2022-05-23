@@ -25,7 +25,7 @@ rule split_data:
 
 rule prepare_all:
     input:
-        drugs=rules.prepare_drugs.output.drug_pickle,
+        drugs=rules.prepare_drugs.output.pickle,
         prots=prot_data,
         inter=rules.split_data.output.split_data,
     output:

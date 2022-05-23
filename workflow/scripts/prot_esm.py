@@ -32,6 +32,4 @@ if __name__ == "__main__":
 
     prots = pd.read_csv(snakemake.input.seqs, sep="\t")
     prots = generate_esm_python(prots)
-    with open(snakemake.output.pickle, "wb") as f:
-        pickle.dump(prots, f)
     prots.to_pickle(snakemake.output.pickle)
