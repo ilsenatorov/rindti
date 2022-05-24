@@ -10,76 +10,122 @@ It should be run with the following command:
 
 .. code:: console
 
-        snakemake -j 1 --use-conda --configfile your_config_file.yaml
+  snakemake -j 1 --use-conda --configfile your_config_file.yaml
 
 Confuguration
 -------------
 
 The config files for the snakemake workflow are located in the ``config/snakemake/`` file.
-`source` and `target` fields are required to set the correct working directory.
+`source` field is required to set the correct working directory, the results of the pipeline will be put in the ``results`` directory in the same folder.
 Examples of files for most standard DTI datasets are provided in the aforementioned directory.
-For most of the parameters changing the value and rerunning the pipeline from command line should be enough to generate a new file.
+
+File naming
+-----------
+
+The resulting files are named according the the string entries in the config file, followed by a string representing a hashed config dictionary.
+While this decreases human readability, it is necessary to ensure that the once the config changes, the results are not overwritten.
+
+For example, given the following config::
+
+    prots:
+      structs:
+        method: whole
+      features:
+        method: distance
+        node_feats: onehot
+        edge_feats: none
+    drugs:
+      max_num_atoms: 150
+      node_feats: label
+      edge_feats: none
+    split_data:
+      method: random
+    parse_dataset:
+      filtering: all
+      sampling: none
+      task: class
+
+The resulting file will be ``<target>/results/prepare_all/wdonlnranc_0f6b0ac6.pkl``.
+In this file, the first part (``wdonlnranc``) is human-readable compression of the config (``w`` for ``whole``, ``d`` for ``distance``, etc), while the second part (``0f6b0ac6``) is a hashed version of the config.
 
 File structure
 --------------
 
 It is recommended to organise your datasets folder as following::
 
-        datasets
-        ├── dataset1
-        │   └── resources
-        │       ├── drugs
-        │       ├── structures
-        │       └── templates[optional]
-        └── dataset2
-        └── resources
-                ├── drugs
-                ├── structures
-                └── templates[optional]
+  dataset1
+  └── resources
+  ├── structures
+  │   ├── struct1.pdb
+  │   ├── struct2.pdb
+  │   ├── struct3.pdb
+  ├── tables
+  │   ├── inter.tsv
+  │   ├── lig.tsv
+  │   └── prot.tsv
+  └── templates
+          └── template1.pdb
 
 After running the snakemake workflow for dataset1 and dataset2, the following files and directories will be generated (the actual directories might differ, depending on your config)::
 
-        datasets
-        ├── dataset1
-        │   ├── resources
-        │   │   ├── drugs
-        │   │   ├── structures
-        │   │   └── templates
-        │   └── results
-        │       ├── distance_based
-        │       ├── logs
-        │       ├── parse_dataset
-        │       ├── parsed_structures_template
-        │       ├── prepare_drugs
-        │       ├── pymol_template
-        │       ├── split_data
-        │       └── structure_info
-        └── dataset2
-        ├── resources
-        │   ├── drugs
-        │   ├── structures
-        │   └── templates
-        └── results
-                ├── distance_based
-                ├── logs
-                ├── parse_dataset
-                ├── parsed_structures_template
-                ├── prepare_drugs
-                ├── pymol_template
-                ├── split_data
-                └── structure_info
+  test_data
+  ├── resources
+  │   ├── structures
+  │   ├── tables
+  │   └── templates
+  └── results
+  ├── parse_dataset
+  ├── parsed_structs
+  ├── prepare_all
+  ├── prepare_drugs
+  ├── prot_data
+  ├── pymol_logs
+  ├── pymol_scripts
+  ├── rinerator
+  └── split_data
 
 
 DTI dataset creation
 --------------------
 
-In order to create the DTI dataset, the following requirements have to be met:
+In order to create a DTI dataset, the following requirements have to be met:
 
 - PDB structures, located in the ``<source>/resources/structures`` directory
-- Drug interaction data, two tsv files labelled ``<source>/resources/drugs/inter.tsv`` and ``<source>/resources/drugs/ligs.tsv``. The interactions has to contain *Drug_ID*, *Target_ID* and *Y* columns, while the ligand one has to contain *Drug_ID* and *Drug* columns, where *Drug* contains SMILES representation of the drug.
+- Necessary tsv tables located in the  ``<source>/resources/tables`` directory:
+  - ``<source>/resources/tables/inter.tsv`` -  The interactions data, has to contain *Drug_ID*, *Target_ID* and *Y* columns,
+  - ``<source>/resources/tables/lig.tsv`` -  The ligand data, has to contain *Drug_ID* and *Drug* columns, where *Drug* contains SMILES representation of the drug.
+  - ``<source>/resources/tables/prot.tsv`` -  The protein data, has to contain *Target_ID* and *Target* columns, where *Target* contains the protein sequence.
 - ``only_proteins`` entry in the snakemake config has to be *false*
 
 After running the pipeline with ``snakemake -j 16 --use-conda --configfile your_config_file.yaml``, the pickle file should be created in ``<target>/results/prepare_all/`` folder.
+
+File validation
+^^^^^^^^^^^^^^^
+
+The following code can be used to validate the configuration file:
+
+.. code:: python
+
+  from snakemake.utils import validate
+  from rindti.utils import read_config
+
+  default_config = read_config('config/snakemake/default.yaml')
+  your_config = read_config('config/snakemake/your_config.yaml')
+  default_config.update(your_config)
+  validate(default_config, 'workflow/schemas/config.schema.yaml')
+
+The following code can be used to validate the tables:
+
+.. code:: python
+
+  from snakemake.utils import validate
+  import pandas as pd
+
+  for i in ['inter', 'lig', 'prot']:
+    df = pd.read_csv(f'test/test_data/resources/tables/{i}.tsv', sep='\t')
+    validate(df, f'workflow/schemas/{i}.schema.yaml'.format(i))
+
+
 
 Protein dataset creation
 ------------------------
@@ -90,4 +136,4 @@ In order to create the protein-only dataset (for pretraining), the following req
 - PDB structures, located in the ``<source>/resources/structures`` directory
 - ``only_proteins`` entry in the snakemake config has to be *true*
 
-After running the pipeline with ``snakemake -j 16 --use-conda``, the pickle file should be created in ``results/prepare_proteins/`` folder.
+After running the pipeline with ``snakemake -j 16 --use-conda``, the pickle file should be created in ``<target>/results/prot_data/`` folder.

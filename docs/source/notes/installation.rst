@@ -30,13 +30,10 @@ In order to use this module, you must first install the following packages (pref
 
 Then one can run optionally ``pip install .`` in the root directory of the repository to install rindti as a package.
 
-Rinerator
----------
-
-RINerator is used to calculate the RINs of proteins. Currently it is not publicly available for installation.
 
 Testing
 -------
 
 In order to asses whether the installation of the packages was succesfull, please run ``pytest`` in the root directory.
 If the packages were not installed into path using pip, please use ``python -m pytest`` instead.
+Furthermore, if your device has no GPU support, please use ``pytest -m "not gpu"``

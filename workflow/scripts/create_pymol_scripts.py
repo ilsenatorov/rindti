@@ -2,58 +2,48 @@ import os
 import resource
 
 
-def create_script(protein, config):
+def create_script(protein: str, inp: str, params: dict):
     """
-    Create pymol parsing script for a protein according to the config
+    Create pymol parsing script for a protein according to the params.
     """
-    resources = config["source"]
-    results = config["target"]
+    resources = params.resources
+    results = params.results
     fmt_keywords = {"protein": protein, "resources": resources, "results": results}
-    script = """
-import psico.fullinit
-from glob import glob
+    script = [
+        "import psico.fullinit",
+        "from glob import glob",
+        'cmd.load("{inp}")',
+    ]
 
-cmd.load("{resources}/structures/{protein}.pdb")
-"""
-
-    if config["structures"] == "plddt":
-        script += """
-            cmd.select("result", "b > {threshold}")
-            """
-        fmt_keywords["threshold"] = config["plddt"]["threshold"]
+    if params.method == "plddt":
+        script.append('cmd.select("result", "b > {threshold}")')
+        fmt_keywords["threshold"] = params.other_params[params.method]["threshold"]
     else:
         # template-based
-        assert os.path.isdir(f"{resources}/templates")
-        script += """
-            lst = glob("{resources}/templates/*.pdb")
-            templates = [x.split('/')[-1].split('.')[0] for x in lst]
-            for i in lst:cmd.load(i)
-            scores = {{x : cmd.tmalign("{protein}", x) for x in templates}}
-            max_score = max(scores, key=scores.get)
+        script += [
+            'lst = glob("{resources}/templates/*.pdb")',
+            'templates = [x.split("/")[-1].split(".")[0] for x in lst]',
+            "for i in lst:cmd.load(i)",
+            'scores = {{x : cmd.tmalign("{protein}", x) for x in templates}}',
+            "max_score = max(scores, key=scores.get)",
+            'cmd.extra_fit("name CA", max_score, "tmalign")',
+        ]
 
-            cmd.extra_fit("name CA", max_score, "tmalign")
-            """
-
-        if config["structures"] == "bsite":
-            fmt_keywords["radius"] = config["bsite"]["radius"]
-            script += """
-                cmd.select("result", "br. {protein} within {radius} of organic")
-                """
-        elif config["structures"] == "template":
-            fmt_keywords["radius"] = config["template"]["radius"]
-            script += """
-                cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")
-                """
-    script += """
-        cmd.save("{results}/parsed_structures_{structures}/{protein}.pdb", "result")"""
-    fmt_keywords["structures"] = config["structures"]
-
-    return script.format(**fmt_keywords)
+        fmt_keywords["radius"] = params.other_params[params.method]["radius"]
+        if params.method == "bsite":
+            script.append('cmd.select("result", "br. {protein} within {radius} of organic")')
+        elif params.method == "template":
+            script.append('cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")')
+    script.append('cmd.save("{parsed_structs_dir}/{protein}.pdb", "result")')
+    fmt_keywords["parsed_structs_dir"] = params.parsed_structs_dir
+    fmt_keywords["structs"] = params.method
+    fmt_keywords["inp"] = inp
+    return "\n".join(script).format(**fmt_keywords)
 
 
 if __name__ == "__main__":
-    for output in snakemake.output:
-        protein = os.path.basename(output).split(".")[0]
+    for inp, out in zip(snakemake.input, snakemake.output):
+        protein = os.path.basename(out).split(".")[0]
 
-        with open(output, "w") as file:
-            file.write(create_script(protein, snakemake.config))
+        with open(out, "w") as file:
+            file.write(create_script(protein, inp, snakemake.params))

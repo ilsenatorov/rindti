@@ -1,0 +1,18 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+description: row of inter.tsv file, defining an interaction between a drug and a target
+type: object
+properties:
+  Drug_ID:
+    type: string
+    description: Unique identifier for the drug
+  Target_ID:
+    type: string
+    description: Unique identifier for the target
+  Y:
+    type: number
+    description: Measure of the drug-target interaction
+
+required:
+  - Drug_ID
+  - Target_ID
+  - Y

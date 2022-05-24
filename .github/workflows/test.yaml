@@ -1,13 +1,7 @@
 name: Testing
 
 on:
-  push:
-    branches:
-      - "*"
-
-  pull_request:
-    branches:
-      - "*"
+  [push, pull_request]
 
 jobs:
   test:
@@ -29,7 +23,7 @@ jobs:
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
@@ -44,9 +38,6 @@ jobs:
         with:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}
-          restore-keys: |
-            ${{ matrix.label }}-conda-
-            ${{ matrix.label }}-
 
       - if: ${{ steps.cache.outputs.cache-hit == false }}
         name: Update environment

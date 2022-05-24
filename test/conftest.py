@@ -27,6 +27,7 @@ BATCH_PER_EPOCH = 10
 
 
 def create_features(feat_type: str, n: int, feat_dim: int) -> Tensor:
+    """Generate node features."""
     if feat_type == "onehot":
         return torch.rand((n, feat_dim))
     elif feat_type == "label":
@@ -43,6 +44,7 @@ def create_fake_graph(
     fam: list = None,
     split: list = None,
 ):
+    """Generate a fake graph."""
     n_nodes = randint(MIN_NODES, MAX_NODES)
     n_edges = randint(MIN_EDGES, MAX_EDGES)
     d = dict(
@@ -56,12 +58,14 @@ def create_fake_graph(
 
 
 def generate_params():
+    """Permutate parameters."""
     for edge_type in ["label", "onehot", "none"]:
         for node_type in ["label", "onehot"]:
             yield {"edge_type": edge_type, "node_type": node_type}
 
 
-def fake_dataset(params):
+def fake_dataset(params: dict) -> dict:
+    """Create fake DTI dataset."""
     prots = pd.Series(
         [
             create_fake_graph(
@@ -114,7 +118,7 @@ def fake_dataset(params):
 
 @pytest.fixture(scope="session", params=[{"prot_" + k: v for k, v in p.items()} for p in generate_params()])
 def dti_pickle(tmpdir_factory, request):
-    """Create a pickle file with fake DTI dataset"""
+    """Create a pickle file with fake DTI dataset."""
     params = request.param
     ds = fake_dataset(params)
     fn = tmpdir_factory.mktemp("data").join("temp_data.pkl")
@@ -126,7 +130,7 @@ def dti_pickle(tmpdir_factory, request):
 
 @pytest.fixture(scope="session", params=generate_params())
 def pretrain_pickle(tmpdir_factory, request):
-    """Create a pickle file with fake protein dataset"""
+    """Create a pickle file with fake protein dataset."""
     params = request.param
     ds = pd.Series(
         [
@@ -149,36 +153,43 @@ def pretrain_pickle(tmpdir_factory, request):
 
 @pytest.fixture()
 def dti_dataset(dti_pickle):
+    """Create a DTI dataset."""
     return DTIDataset(dti_pickle, "test")
 
 
 @pytest.fixture()
 def dti_datamodule(dti_pickle):
+    """Create a DTI data module."""
     return DTIDataModule(dti_pickle, "test", batch_size=BATCH_SIZE)
 
 
 @pytest.fixture()
 def dti_dataloader(dti_dataset):
+    """Create a DTI data loader."""
     return DataLoader(dti_dataset, batch_size=BATCH_SIZE, follow_batch=["prot_x", "drug_x"])
 
 
 @pytest.fixture
 def dti_batch(dti_dataloader):
+    """Create a batch of DTI data."""
     return next(iter(dti_dataloader))
 
 
 @pytest.fixture()
 def pretrain_dataset(pretrain_pickle):
+    """Create a pretrain dataset."""
     return PreTrainDataset(pretrain_pickle)
 
 
 @pytest.fixture()
 def pretrain_datamodule(pretrain_pickle):
+    """Create a pretrain data module."""
     return PreTrainDataModule(pretrain_pickle, "test")
 
 
 @pytest.fixture()
 def pfam_sampler(pretrain_dataset):
+    """Create a pretrain sampler."""
     return PfamSampler(
         pretrain_dataset,
         batch_size=BATCH_SIZE,
@@ -189,14 +200,17 @@ def pfam_sampler(pretrain_dataset):
 
 @pytest.fixture()
 def pretrain_dataloader(pretrain_dataset, pfam_sampler):
+    """Create a pretrain data loader."""
     return DataLoader(pretrain_dataset, batch_sampler=pfam_sampler)
 
 
 @pytest.fixture
 def pretrain_batch(pretrain_dataloader):
+    """Create a batch of pretrain data."""
     return next(iter(pretrain_dataloader))
 
 
 @pytest.fixture(autouse=True)
 def seed():
+    """Set random seed."""
     seed_everything(42)

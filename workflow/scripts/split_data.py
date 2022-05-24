@@ -73,22 +73,13 @@ if __name__ == "__main__":
 
     seed_everything(snakemake.config["seed"])
     inter = pd.read_csv(snakemake.input.inter, sep="\t")
+    fracs = {"train_frac": snakemake.params.train, "val_frac": snakemake.params.val}
 
-    if snakemake.config["split"]["method"] == "coldtarget":
-        inter = split_groups(
-            inter,
-            col_name="Target_ID",
-            train_frac=snakemake.config["split"]["train"],
-            val_frac=snakemake.config["split"]["val"],
-        )
-    elif snakemake.config["split"]["method"] == "colddrug":
-        inter = split_groups(
-            inter,
-            col_name="Drug_ID",
-            train_frac=snakemake.config["split"]["train"],
-            val_frac=snakemake.config["split"]["val"],
-        )
-    elif snakemake.config["split"]["method"] == "random":
+    if snakemake.params.method == "target":
+        inter = split_groups(inter, col_name="Target_ID", **fracs)
+    elif snakemake.params.method == "drug":
+        inter = split_groups(inter, col_name="Drug_ID", **fracs)
+    elif snakemake.params.method == "random":
         inter = split_random(inter)
     else:
         raise NotImplementedError("Unknown split type!")

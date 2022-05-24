@@ -83,8 +83,8 @@ Can be invoked simply with:
 
 .. code:: python
 
-        from rindti.data import DTIDataModule, PreTrainDataModule
-        dti_pickle_file = "dti.pkl"
-        dti_dm = DTIDataModule(dti_pickle_file)
-        pretrain_pickle_file = "pretrain.pkl"
-        pretrain_dm = PreTrainDataModule(pretrain_pickle_file)
+  from rindti.data import DTIDataModule, PreTrainDataModule
+  dti_pickle_file = "dti.pkl"
+  dti_dm = DTIDataModule(dti_pickle_file)
+  pretrain_pickle_file = "pretrain.pkl"
+  pretrain_dm = PreTrainDataModule(pretrain_pickle_file)

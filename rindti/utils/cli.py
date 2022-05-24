@@ -47,6 +47,12 @@ def read_config(filename: str) -> dict:
     return config
 
 
+def write_config(filename: str, config: dict) -> None:
+    """Write a config to a file."""
+    with open(filename, "w") as file:
+        yaml.dump(config, file)
+
+
 def _tree():
     """Defaultdict of defaultdicts"""
     return collections.defaultdict(_tree)
