@@ -1,19 +1,11 @@
 import os
-import random
 import shutil
 import subprocess
 
-import pandas as pd
 import pytest
 from pytorch_lightning.utilities.seed import seed_everything
 
 from rindti.data import DTIDataModule, PreTrainDataModule
-
-
-def update_pretrain_data(data: dict) -> dict:
-    """Update pretrain Series."""
-    data["y"] = random.choice([0, 1])
-    return data
 
 
 def run_snakemake(*args):
@@ -45,15 +37,17 @@ def pretrain_snakemake_run(tmpdir_factory):
 @pytest.fixture(scope="session")
 def dti_pickle(full_snakemake_run: str) -> str:
     """Return the path to the full pickle file."""
-    result = os.listdir(full_snakemake_run.join("results/prepare_all"))[0]
-    return full_snakemake_run.join("results/prepare_all", result)
+    folder = "results/prepare_all"
+    result = os.listdir(full_snakemake_run.join(folder))[0]
+    return full_snakemake_run.join(folder, result)
 
 
 @pytest.fixture(scope="session")
 def pretrain_pickle(pretrain_snakemake_run: str) -> str:
     """Return the path to the pretrain pickle file."""
-    result = os.listdir(pretrain_snakemake_run.join("results/pretrain_prot_data"))[0]
-    return pretrain_snakemake_run.join("results/prot_data", result)
+    folder = "results/pretrain_prot_data"
+    result = os.listdir(pretrain_snakemake_run.join(folder))[0]
+    return pretrain_snakemake_run.join(folder, result)
 
 
 @pytest.fixture()
@@ -65,9 +59,6 @@ def dti_datamodule(dti_pickle: str):
 @pytest.fixture()
 def pretrain_datamodule(pretrain_pickle: str):
     """Pretrain datamodule from test data proteins."""
-    data = pd.read_pickle(pretrain_pickle)
-    data["data"] = data["data"].apply(update_pretrain_data)
-    data.to_pickle(pretrain_pickle)
     return PreTrainDataModule(pretrain_pickle, "test", batch_size=4)
 
 
