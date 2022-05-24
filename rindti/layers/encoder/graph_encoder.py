@@ -5,7 +5,8 @@ from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
-from .. import ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, TransformerNet
+from ..graphconv import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, TransformerNet
+from ..graphpool import DiffPoolNet, GMTNet, MeanPool
 
 node_embedders = {
     "ginconv": GINConvNet,

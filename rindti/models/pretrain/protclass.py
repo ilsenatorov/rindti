@@ -1,8 +1,8 @@
 from torch import Tensor, nn
 
 from ...data import TwoGraphData
-from ...layers import MLP
 from ...layers.encoder import GraphEncoder
+from ...layers.other import MLP
 from ..base_model import BaseModel
 
 

@@ -4,6 +4,7 @@ from torch.functional import Tensor
 
 from ...data import TwoGraphData
 from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
+from ...layers.other import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 
@@ -22,7 +23,7 @@ class ClassificationModel(BaseModel):
         )
         self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
         self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
-        self.mlp = self._get_mlp(**kwargs["model"]["mlp"])
+        self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
         self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
