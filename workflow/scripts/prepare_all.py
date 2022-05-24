@@ -78,7 +78,7 @@ if __name__ == "__main__":
     config = update_config(
         snakemake.config,
         prot_size=prots.iloc[0]["data"]["x"].size(0),
-        drug_size=drugs.iloc[0]["data"]["x"].shape[1],
+        drug_size=drugs.iloc[0]["data"]["x"].shape[1] if snakemake.config["prepare_drugs"]["node_feats"] in ["glycan", "glycanone"] else None,
     )
 
     final_data = {

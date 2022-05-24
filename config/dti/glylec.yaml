@@ -1,7 +1,7 @@
 runs: 1
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_glycanone_none.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_label_none_label_none.pkl
   exp_name: glylec
   batch_size: 64
   num_workers: 0
@@ -13,7 +13,7 @@ trainer:
 early_stop:
   patience: 40
 model:
-  module: esm_class
+  module: class
   feat_method: concat
   monitor: val_loss
   drug:
