@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 
 
-def generate_esm_python(prot: pd.DataFrame) -> dict:
+def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
     """Return esms."""
 
     model, alphabet = esm.pretrained.esm1b_t33_650M_UR50S()

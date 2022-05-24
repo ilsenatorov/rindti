@@ -29,7 +29,7 @@ def run_snakemake(*args):
 def snakemake_dir(tmpdir_factory):
     """Copy test data to a temporary directory and run snakemake on it."""
     tmpdir = tmpdir_factory.mktemp("test_data")
-    newdir = shutil.copytree("test/test_data/resources", str(tmpdir.join("resources")))
+    newdir = shutil.copytree("test/test_data/resources", tmpdir.join("resources"))
     run_snakemake(f"source={newdir}")
     return tmpdir
 
