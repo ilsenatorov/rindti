@@ -18,6 +18,7 @@ model:
   module: class
   feat_method: element_l1
   drug:
+    method: graph
     hidden_dim: 16
     node:
       module: ginconv
@@ -30,6 +31,7 @@ model:
       hidden_dim: 16
       ratio: 0.25
   prot:
+    method: graph
     hidden_dim: 16
     node:
       module: ginconv

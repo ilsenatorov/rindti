@@ -27,6 +27,8 @@ def count_residues(pdb: str) -> int:
 
 
 class DatasetFetcher:
+    """Download the dataset and pdb files."""
+
     def __init__(
         self,
         dataset_name: str,

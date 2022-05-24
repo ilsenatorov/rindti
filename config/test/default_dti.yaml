@@ -5,6 +5,7 @@ model:
   monitor: train_loss
   feat_method: [element_l1, concat]
   drug:
+    method: graph
     hidden_dim: 16
     node:
       module: [ginconv, gatconv]
@@ -15,6 +16,7 @@ model:
       num_heads: 1
 
   prot:
+    method: graph
     hidden_dim: 16
     node:
       module: ginconv

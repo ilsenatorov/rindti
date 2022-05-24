@@ -9,6 +9,8 @@ from utils import onehot_encode
 
 
 class ProteinEncoder:
+    """Performs all the encoding steps for a single sif file."""
+
     def __init__(self, node_feats: str, edge_feats: str):
         self.node_feats = node_feats
         self.edge_feats = edge_feats

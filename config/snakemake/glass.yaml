@@ -5,3 +5,5 @@ prots:
     method: template
   features:
     method: distance
+parse_dataset:
+  filtering: posneg

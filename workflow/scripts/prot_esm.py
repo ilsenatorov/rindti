@@ -32,6 +32,7 @@ def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
 
 
 def generate_esm_script(prot: pd.DataFrame) -> pd.DataFrame:
+    """Create an ESM script for btach processing."""
     prot_ids, seqs = list(zip(*[(k, v) for k, v in prot["Target"].to_dict().items()]))
     os.makedirs("./esms", exist_ok=True)
     with open("./esms/prots.fasta", "w") as fasta:

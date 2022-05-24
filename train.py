@@ -6,13 +6,12 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
-from rindti.models import ClassificationModel, ESMClassModel, RegressionModel
+from rindti.models import ClassificationModel, RegressionModel
 from rindti.utils import get_git_hash, read_config
 
 models = {
     "class": ClassificationModel,
     "reg": RegressionModel,
-    "esm_class": ESMClassModel,
 }
 
 

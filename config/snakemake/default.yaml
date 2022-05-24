@@ -25,7 +25,7 @@ split_data:
   train: 0.7 # test is created as a remainder of train and val
   val: 0.2
 parse_dataset:
-  filtering: posneg # all, posneg, balanced
+  filtering: all # all, posneg, balanced
   sampling: none # over, under, none
   task: class # class, reg
   threshold: 100 # threshold values for class problem

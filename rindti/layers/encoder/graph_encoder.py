@@ -5,7 +5,7 @@ from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
-from ..layers import ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, TransformerNet
+from .. import ChebConvNet, DiffPoolNet, FilmConvNet, GatConvNet, GINConvNet, GMTNet, MeanPool, TransformerNet
 
 node_embedders = {
     "ginconv": GINConvNet,
@@ -17,8 +17,8 @@ node_embedders = {
 poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
 
 
-class Encoder(LightningModule):
-    r"""Encoder for graphs
+class GraphEncoder(LightningModule):
+    r"""Encoder for graphs.
 
     Args:
         return_nodes (bool, optional): Return node embeddings as well. Defaults to False.
