@@ -22,3 +22,15 @@ def minmax_normalise(s: pd.Series) -> pd.Series:
 def to_prob(s: pd.Series) -> pd.Series:
     """Convert to probabilities."""
     return s / s.sum()
+
+
+def get_type(data: dict, key: str) -> str:
+    """Check which type of data we have."""
+    feat = data.get(key)
+    if isinstance(feat, LongTensor):
+        return "label"
+    if isinstance(feat, FloatTensor):
+        return "onehot"
+    if feat is None:
+        return "none"
+    raise ValueError("Unknown data type {}".format(type(data[key])))

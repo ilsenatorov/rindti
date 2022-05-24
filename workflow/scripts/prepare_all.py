@@ -116,9 +116,9 @@ if __name__ == "__main__":
     drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
 
     full_data = process_df(interactions)
-    dims = {
-        **{"prot_" + k: v for k, v in get_config(prots, "prot").items()},
-        **{"drug_" + k: v for k, v in get_config(drugs, "drug").items()},
+    snakemake.config["data"] = {
+        "prot": get_config(prots, "prot"),
+        "drug": get_config(drugs, "drug"),
     }
 
     final_data = {
@@ -126,7 +126,6 @@ if __name__ == "__main__":
         "config": snakemake.config,
         "prots": prots,
         "drugs": drugs,
-        "dims": dims,
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:

@@ -70,10 +70,9 @@ class DTIDataModule(BaseDataModule):
 
     def update_config(self, config: dict) -> None:
         """Update the main config with the config of the dataset."""
+        print(self.config)
         for i in ["prot", "drug"]:
-            config["model"][i]["data"] = self.config["data"][i]
-            config["model"][i]["data"]["feat_dim"] = self.config["snakemake"][f"{i}_feat_dim"]
-            config["model"][i]["data"]["edge_dim"] = self.config["snakemake"][f"{i}_edge_dim"]
+            config["model"][i]["data"] = self.config["snakemake"]["data"][i]
 
 
 class PreTrainDataModule(BaseDataModule):

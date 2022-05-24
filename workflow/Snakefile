@@ -18,7 +18,7 @@ include: "rules/data.smk"
 
 rule all:
     input:
-        prot_data if config["only_prots"] else final_output,
+        pretrain_prot_data if config["only_prots"] else final_output,
 
 
 # rule prepare_transformer:

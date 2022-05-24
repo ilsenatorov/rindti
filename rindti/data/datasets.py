@@ -41,13 +41,6 @@ class DTIDataset(InMemoryDataset):
         self.filename = filename
         return os.path.join("data", exp_name, basefilename)
 
-    def _set_types(self, data: dict) -> dict:
-        """Set feat type in the self.config from snakemake self.config."""
-        for i in ["prot", "drug"]:
-            self.config["data"][f"{i}"]["feat_type"] = get_type(data, f"{i}_x")
-            self.config["data"][f"{i}"]["edge_type"] = get_type(data, f"{i}_edge_feats")
-        return self.config
-
     def process_(self, data_list: list, split: str):
         """Process the datalist.
 
@@ -87,9 +80,6 @@ class DTIDataset(InMemoryDataset):
             all_data = pickle.load(file)
             self.config = {}
             self.config["snakemake"] = all_data["config"]
-            self.config["data"] = {"prot": {}, "drug": {}}
-            self.config["data"]["prot"]["max_nodes"] = 0
-            self.config["data"]["drug"]["max_nodes"] = 0
             for split in self.splits.keys():
                 data_list = []
                 for i in all_data["data"]:
@@ -100,14 +90,7 @@ class DTIDataset(InMemoryDataset):
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
                     two_graph_data.num_nodes = 1  # supresses the warning
-                    self.config["data"]["prot"]["max_nodes"] = max(
-                        self.config["data"]["prot"]["max_nodes"], two_graph_data.n_nodes("prot_")
-                    )
-                    self.config["data"]["drug"]["max_nodes"] = max(
-                        self.config["data"]["drug"]["max_nodes"], two_graph_data.n_nodes("drug_")
-                    )
                     data_list.append(two_graph_data)
-                    self.config = self._set_types(data_list[0])
                 if data_list:
                     self.process_(data_list, split)
 
