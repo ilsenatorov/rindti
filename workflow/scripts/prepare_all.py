@@ -6,8 +6,7 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 from prepare_drugs import edge_encoding as drug_edge_encoding
 from prepare_drugs import node_encoding as drug_node_encoding
-from prepare_prots import edge_encoding as prot_edge_encoding
-from prepare_prots import node_encoding as prot_node_encoding
+from utils import prot_edge_encoding, prot_node_encoding
 
 
 def process(row: pd.Series) -> dict:
@@ -52,40 +51,29 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-    if os.path.exists(snakemake.input.protseqs):
-        protseqs = pd.read_csv(snakemake.input.protseqs, sep='\t')
-    else:
-        protseqs = None
-
+    print(interactions)
+    print(prots)
+    print(drugs)
+    print("====================================")
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
+    print(interactions.shape)
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
-
-    drug_count = interactions["Drug_ID"].value_counts()
+    print(interactions.shape)
+    prots = prots[prots.index.isin(interactions["Target_ID"].unique())]
+    drugs = drugs[drugs.index.isin(interactions["Drug_ID"].unique())]
     prot_count = interactions["Target_ID"].value_counts()
-    prots["count"] = prot_count
-    drugs["count"] = drug_count
-    prots["data"] = prots["data"].apply(del_index_mapping)
-    prots = prots[prots.index.isin(interactions["Target_ID"])]
-    drugs = drugs[drugs.index.isin(interactions["Drug_ID"])]
-
-    if protseqs is not None:
-        seqs = []
-        for i, row in prots.iterrows():
-            seqs.append(protseqs[protseqs["Target_ID"] == i]["AASeq"].values[0])
-        prots["AASeq"] = seqs
+    drug_count = interactions["Drug_ID"].value_counts()
+    prots["data"] = prots.apply(lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1)
+    drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
 
     full_data = process_df(interactions)
-    config = update_config(
-        snakemake.config,
-        prot_size=prots.iloc[0]["data"]["x"].size(0),
-        drug_size=drugs.iloc[0]["data"]["x"].shape[1],
-    )
+    config = update_config(snakemake.config)
 
     final_data = {
         "data": full_data,
         "config": config,
-        "prots": prots[["data", "count"] + snakemake.config["prot_cols"]],
-        "drugs": drugs[["data", "count"] + snakemake.config["drug_cols"]],
+        "prots": prots,
+        "drugs": drugs,
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:

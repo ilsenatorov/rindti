@@ -11,10 +11,10 @@ __pycache__/
 *.csv
 *.pkl
 *.pyc
-data/*
+data/
 report/
-resources/
 results/
+datasets/
 *logs/
 *Untitled*
 *build*

@@ -1,4 +1,4 @@
-from .dti import ClassificationModel, RegressionModel, ESMClassModel
+from .dti import ClassificationModel, ESMClassModel, RegressionModel
 from .pretrain import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
 
 __all__ = [

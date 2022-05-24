@@ -1,31 +1,6 @@
 import torch
-from utils import list_to_dict, onehot_encode
-
-node_encoding = list_to_dict(
-    [
-        "ala",
-        "arg",
-        "asn",
-        "asp",
-        "cys",
-        "gln",
-        "glu",
-        "gly",
-        "his",
-        "ile",
-        "leu",
-        "lys",
-        "met",
-        "phe",
-        "pro",
-        "ser",
-        "thr",
-        "trp",
-        "tyr",
-        "val",
-        "unk",
-    ]
-)
+from utils import onehot_encode
+from utils import prot_node_encoding as node_encoding
 
 
 def encode_residue(residue: str, node_feats: str):
@@ -94,6 +69,8 @@ class Structure:
 
 
 if __name__ == "__main__":
+    import pickle
+
     import pandas as pd
     from joblib import Parallel, delayed
     from tqdm import tqdm
@@ -103,14 +80,15 @@ if __name__ == "__main__":
         threshold = snakemake.params.threshold
 
         def get_graph(filename: str) -> dict:
-            return Structure(filename, snakemake.config["prepare_prots"]["node_feats"]).get_graph(threshold)
+            return Structure(filename, snakemake.params.node_feats).get_graph(threshold)
 
         data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
         df = pd.DataFrame(pd.Series(data, name="data"))
         df["filename"] = all_structures
         df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
         df.set_index("ID", inplace=True)
-        df.drop("filename", axis=1).to_pickle(snakemake.output.pickle)
+        df.drop("filename", axis=1, inplace=True)
+        df = df.to_pickle(snakemake.output.pickle)
     else:
         import os
         import os.path as osp
@@ -130,6 +108,8 @@ if __name__ == "__main__":
             df["filename"] = pdbs
             df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
             df.set_index("ID", inplace=True)
-            df.drop("filename", axis=1).to_pickle(output)
+            df.drop("filename", axis=1, inplace=True)
+            df = df.to_dict("index")
+            df.to_pickle(output)
 
         cli = CLI(run)

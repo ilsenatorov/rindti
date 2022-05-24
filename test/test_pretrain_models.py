@@ -4,7 +4,7 @@ from pytorch_lightning import Trainer
 from rindti.models import ProtClassModel
 from rindti.utils import IterDict, read_config
 
-CONFIG_FILE = "tests/configs/default_pfam.yaml"
+CONFIG_FILE = "config/test/default_pfam.yaml"
 
 
 default_config = read_config(CONFIG_FILE)

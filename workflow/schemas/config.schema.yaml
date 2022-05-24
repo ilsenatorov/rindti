@@ -1,0 +1,81 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+
+description: snakemake configuration file
+
+type: object
+
+properties:
+  seed:
+    type: number
+  source:
+    type: string
+  prots:
+    type: object
+    properties:
+      structs:
+        type: object
+        properties:
+          method:
+            type: string
+          bsite:
+            type: object
+            properties:
+              radius:
+                type: number
+          template:
+            type: object
+            properties:
+              radius:
+                type: number
+          plddt:
+            type: object
+            properties:
+              threshold:
+                type: number
+      features:
+        type: object
+        properties:
+          method:
+            type: string
+          distance:
+            type: object
+            properties:
+              threshold:
+                type: number
+          node_feats:
+            type: string
+          edge_feats:
+            type: string
+  drugs:
+    type: object
+    properties:
+      max_num_atoms:
+        type: number
+      node_feats:
+        type: string
+      edge_feats:
+        type: string
+  split_data:
+    type: object
+    properties:
+      method:
+        type: string
+      train:
+        type: number
+      val:
+        type: number
+      test:
+        type: number
+  parse_dataset:
+    type: object
+    properties:
+      filtering:
+        type: string
+      sampling:
+        type: string
+      task:
+        type: string
+      threshold:
+        type: number
+      log:
+        type: boolean

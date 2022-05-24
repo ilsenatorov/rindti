@@ -1,0 +1,14 @@
+$schema: "http://json-schema.org/draft-04/schema#"
+description: row of prot.tsv file, containing information about a ligand
+type: object
+properties:
+  Target_ID:
+    type: string
+    description: Unique identifier for the protein (usually UniProt ID)
+  Target:
+    type: string
+    description: Protein sequence
+
+required:
+  - Target_ID
+  - Target
