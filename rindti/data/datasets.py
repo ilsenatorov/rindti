@@ -63,8 +63,8 @@ class DTIDataset(InMemoryDataset):
         graph["id"] = id
         if (
             which == "drugs"
-            and "prepare_drugs" in kwargs["snakemake"]
-            and kwargs["snakemake"]["prepare_drugs"]["node_feats"] == "IUPAC"
+            and "drugs" in kwargs["snakemake"]
+            and kwargs["snakemake"]["drugs"]["node_feats"] == "IUPAC"
         ):
             graph["IUPAC"] = all_data[which].loc[id, "IUPAC"]
         return {which.rstrip("s") + "_" + k: v for k, v in graph.items()}

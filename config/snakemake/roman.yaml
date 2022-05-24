@@ -1,6 +1,9 @@
 # the two root directories to take the data from and to store the data in
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle_new
 
 prots:
   features:
     method: esm
+
+drugs:
+  node_feats: IUPAC
