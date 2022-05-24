@@ -1,5 +1,4 @@
 import os
-import pickle
 import random
 import shutil
 import subprocess
@@ -26,7 +25,7 @@ def run_snakemake(*args):
 
 
 @pytest.fixture(scope="session")
-def snakemake_dir(tmpdir_factory):
+def full_snakemake_run(tmpdir_factory):
     """Copy test data to a temporary directory and run snakemake on it."""
     tmpdir = tmpdir_factory.mktemp("test_data")
     newdir = shutil.copytree("test/test_data/resources", tmpdir.join("resources"))
@@ -35,17 +34,26 @@ def snakemake_dir(tmpdir_factory):
 
 
 @pytest.fixture(scope="session")
-def dti_pickle(snakemake_dir: str) -> str:
-    """Return the path to the full pickle file."""
-    result = os.listdir(snakemake_dir.join("results/prepare_all"))[0]
-    return snakemake_dir.join("results/prepare_all", result)
+def pretrain_snakemake_run(tmpdir_factory):
+    """Copy test data to a temporary directory and run snakemake on it."""
+    tmpdir = tmpdir_factory.mktemp("test_data")
+    newdir = shutil.copytree("test/test_data/resources", tmpdir.join("resources"))
+    run_snakemake(f"source={newdir}", "only_prots=true")
+    return tmpdir
 
 
 @pytest.fixture(scope="session")
-def pretrain_pickle(snakemake_dir: str) -> str:
+def dti_pickle(full_snakemake_run: str) -> str:
+    """Return the path to the full pickle file."""
+    result = os.listdir(full_snakemake_run.join("results/prepare_all"))[0]
+    return full_snakemake_run.join("results/prepare_all", result)
+
+
+@pytest.fixture(scope="session")
+def pretrain_pickle(pretrain_snakemake_run: str) -> str:
     """Return the path to the pretrain pickle file."""
-    result = os.listdir(snakemake_dir.join("results/pretrain_prot_data"))[0]
-    return snakemake_dir.join("results/prot_data", result)
+    result = os.listdir(pretrain_snakemake_run.join("results/pretrain_prot_data"))[0]
+    return pretrain_snakemake_run.join("results/prot_data", result)
 
 
 @pytest.fixture()

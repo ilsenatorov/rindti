@@ -128,7 +128,6 @@ class PreTrainDataset(InMemoryDataset):
 
     def process(self):
         """If the dataset was not seen before, process everything."""
-        self.config = dict(max_nodes=0)
         data = pd.read_pickle(self.filename)
         data_list = []
         for i in data["data"]:
