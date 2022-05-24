@@ -44,7 +44,7 @@ def dti_pickle(snakemake_dir: str) -> str:
 @pytest.fixture(scope="session")
 def pretrain_pickle(snakemake_dir: str) -> str:
     """Return the path to the pretrain pickle file."""
-    result = os.listdir(snakemake_dir.join("results/prot_data"))[0]
+    result = os.listdir(snakemake_dir.join("results/pretrain_prot_data"))[0]
     return snakemake_dir.join("results/prot_data", result)
 
 

@@ -1,33 +1,11 @@
-import pickle
-
 import numpy as np
 import pandas as pd
 import torch
+from encd import encd
 from rdkit import Chem
 from rdkit.Chem import rdmolfiles, rdmolops
-from rdkit.Chem.rdchem import ChiralType
 from torch_geometric.utils import to_undirected
-from utils import list_to_dict, onehot_encode
-
-node_encoding = list_to_dict(["other", 6, 7, 8, 9, 16, 17, 35, 15, 53, 5, 11, 14, 34])
-edge_encoding = list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"])
-glycan_encoding = {
-    "other": [0, 0, 0],
-    6: [1, 0, 0],  # carbon
-    7: [0, 1, 0],  # nitrogen
-    8: [0, 0, 1],  # oxygen
-}
-
-chirality_encoding = {
-    ChiralType.CHI_OTHER: [0, 0, 0],
-    ChiralType.CHI_TETRAHEDRAL_CCW: [
-        1,
-        1,
-        0,
-    ],  # counterclockwise rotation of polarized light -> rotate light to the left
-    ChiralType.CHI_TETRAHEDRAL_CW: [1, 0, 1],  # clockwise rotation of polarized light -> rotate light to the right
-    ChiralType.CHI_UNSPECIFIED: [0, 0, 0],
-}
+from utils import onehot_encode
 
 
 class DrugEncoder:
@@ -48,25 +26,25 @@ class DrugEncoder:
 
     def encode_node(self, atom_num, atom):
         """Encode single atom"""
-        if atom_num not in node_encoding.keys():
+        if atom_num not in encd["drug"]["node"].keys():
             atom_num = "other"
 
         if self.node_feats == "glycan":
-            if atom_num in glycan_encoding:
-                return glycan_encoding[atom_num] + chirality_encoding[atom.GetChiralTag()]
+            if atom_num in encd["glycan"]:
+                return encd["glycan"][atom_num] + encd["chirality"][atom.GetChiralTag()]
             else:
-                return glycan_encoding["other"] + chirality_encoding[atom.GetChiralTag()]
+                return encd["glycan"]["other"] + encd["chirality"][atom.GetChiralTag()]
 
-        label = node_encoding[atom_num]
+        label = encd["drug"]["node"][atom_num]
         if self.node_feats == "onehot":
-            return onehot_encode(label, len(node_encoding))
+            return onehot_encode(label, len(encd["drug"]["node"]))
         return label + 1
 
     def encode_edge(self, edge):
         """Encode single edge"""
-        label = edge_encoding[edge]
+        label = encd["drug"]["edge"][edge]
         if self.edge_feats == "onehot":
-            return onehot_encode(label, len(edge_encoding))
+            return onehot_encode(label, len(encd["drug"]["edge"]))
         elif self.edge_feats == "label":
             return label
         else:
@@ -95,7 +73,7 @@ class DrugEncoder:
             edges.append([start, end])
             btype = str(bond.GetBondType())
             # If bond type is unknown, remove molecule
-            if btype not in edge_encoding.keys():
+            if btype not in encd["drug"]["edge"].keys():
                 return np.nan
             if self.edge_feats != "none":
                 edge_feats.append(self.encode_edge(btype))

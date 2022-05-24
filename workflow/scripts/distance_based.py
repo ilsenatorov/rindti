@@ -1,6 +1,8 @@
 import torch
+from encd import encd
 from utils import onehot_encode
-from utils import prot_node_encoding as node_encoding
+
+node_encoding = encd["prot"]["node"]
 
 
 def encode_residue(residue: str, node_feats: str):

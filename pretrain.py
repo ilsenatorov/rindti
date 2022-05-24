@@ -3,7 +3,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import PreTrainDataModule
-from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassESMModel, ProtClassModel
+from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
 from rindti.utils import read_config
 
 models = {
@@ -12,7 +12,6 @@ models = {
     "class": ProtClassModel,
     "bgrl": BGRLModel,
     "distance": DistanceModel,
-    "esmclass": ProtClassESMModel,
 }
 
 
@@ -22,11 +21,6 @@ def pretrain(**kwargs):
     dm = PreTrainDataModule(**kwargs["datamodule"])
     dm.setup()
     dm.update_config(kwargs)
-    ## TODO need a more elegant solution for this
-    labels = dm.get_labels()
-    kwargs["model"]["label_list"] = list(labels)
-    kwargs["model"]["encoder"]["data"]["feat_dim"] = 20
-    kwargs["model"]["encoder"]["data"]["edge_dim"] = 5
     logger = TensorBoardLogger("tb_logs", name="prot_test", default_hp_metric=False)
     callbacks = [
         ModelCheckpoint(monitor="val_loss", save_top_k=3, mode="min"),
@@ -41,7 +35,7 @@ def pretrain(**kwargs):
         deterministic=False,
         **kwargs["trainer"],
     )
-    model = models[kwargs["model"]["module"]](**kwargs["model"])
+    model = models[kwargs["model"]["module"]](**kwargs)
     trainer.fit(model, dm)
 
 

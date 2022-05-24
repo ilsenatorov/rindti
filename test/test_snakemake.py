@@ -73,7 +73,7 @@ class TestSnakeMake:
         config["prots"]["features"]["edge_feats"] = edge_feats
         run_snakemake(config, tmp_path)
 
-    @pytest.mark.parametrize("node_feats", ["label", "onehot", "glycan", "glycanone"])
+    @pytest.mark.parametrize("node_feats", ["label", "onehot", "glycan"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
     def test_drug_encodings(self, node_feats: str, edge_feats: str, config: dict, tmp_path: str):
         """Test the encoding methods for drug nodes and edges."""

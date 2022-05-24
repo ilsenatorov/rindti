@@ -96,4 +96,5 @@ class PreTrainDataModule(BaseDataModule):
 
     def update_config(self, config: dict) -> None:
         """Update the main config with the config of the dataset."""
-        config["model"]["encoder"]["data"] = self.config.copy()
+        config["model"]["encoder"]["data"] = self.config["data"]
+        config["model"]["num_classes"] = self.config["data"]["num_classes"]
