@@ -1,10 +1,9 @@
 runs: 1
 seed: 42
 datamodule:
-  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/results/glylec/prepare_all/random_all_none_class_whole_rinerator_esm_none_glycanone_none.pkl
   filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/results/prepare_all/elnwInranc_4441f51d.pkl
   exp_name: glylec
-  batch_size: 64
+  batch_size: 1
   num_workers: 0
 trainer:
   gpus: 1

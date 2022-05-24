@@ -51,14 +51,8 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-    print(interactions)
-    print(prots)
-    print(drugs)
-    print("====================================")
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
-    print(interactions.shape)
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
-    print(interactions.shape)
     prots = prots[prots.index.isin(interactions["Target_ID"].unique())]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"].unique())]
     prot_count = interactions["Target_ID"].value_counts()
