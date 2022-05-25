@@ -33,7 +33,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="output directory for extracted representations",
     )
 
-    parser.add_argument("--toks_per_batch", type=int, default=4096, help="maximum batch size")
+    parser.add_argument("--toks_per_batch", type=int, default=128, help="maximum batch size")
     parser.add_argument(
         "--repr_layers",
         type=int,

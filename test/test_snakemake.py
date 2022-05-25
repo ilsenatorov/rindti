@@ -58,6 +58,13 @@ class TestSnakeMake:
         config["only_prots"] = True
         run_snakemake(config, tmp_path)
 
+    @pytest.mark.gpu
+    def test_features_esm(self, features: str, config: dict, tmp_path: str):
+        """Test the graph creation methods."""
+        config["prots"]["features"]["method"] = "esm"
+        config["only_prots"] = True
+        run_snakemake(config, tmp_path)
+
     @pytest.mark.parametrize("features", ["rinerator", "distance"])  # NOTE esm testing disabled
     def test_features(self, features: str, config: dict, tmp_path: str):
         """Test the graph creation methods."""
