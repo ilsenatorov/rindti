@@ -6,7 +6,6 @@ import pandas as pd
 import torch
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 
-from ..utils import get_type
 from .data import TwoGraphData
 
 

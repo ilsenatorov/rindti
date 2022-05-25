@@ -26,6 +26,7 @@ model:
       hidden_dim: 16
   mlp:
     hidden_dim: 16
+    num_layers: 4
   optimizer:
     module: adam
     lr: 0.0001
