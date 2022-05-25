@@ -3,13 +3,14 @@ seed: 42
 datamodule:
   filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/results/prepare_all/elnwInranc_4441f51d.pkl
   exp_name: glylec
-  batch_size: 1
+  batch_size: 64
   num_workers: 0
 trainer:
   gpus: 1
   max_epochs: 1000
   profiler: null
   gradient_clip_val: 100
+  precision: 16
 early_stop:
   patience: 40
 model:

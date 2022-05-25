@@ -39,7 +39,8 @@ class ESMClassModel(BaseModel):
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         return dict(
-            pred=torch.sigmoid(self.mlp(joint_embedding)),
+            # pred=torch.sigmoid(self.mlp(joint_embedding)),
+            pred=self.mlp(joint_embedding),
             prot_embed=prot_embed,
             drug_embed=drug_embed,
             joint_embed=joint_embedding,
@@ -54,5 +55,6 @@ class ESMClassModel(BaseModel):
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
+        # bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
+        bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
         return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
