@@ -2,6 +2,7 @@ import os
 import subprocess
 
 import pytest
+from snakemake import snakemake
 from snakemake.utils import validate
 
 from rindti.utils import read_config, write_config
@@ -26,17 +27,12 @@ def config():
 def run_snakemake(config: dict, tmp_path: str):
     """Run snakemake with the given config."""
     write_config(tmp_path / "tmp_config.yaml", config)
-    subprocess.run(
-        [
-            "snakemake",
-            "-j",
-            "4",
-            "--forceall",
-            "--use-conda",
-            "--configfile",
-            f"{tmp_path / 'tmp_config.yaml'}",
-        ],
-        check=True,
+    assert snakemake(
+        "workflow/Snakefile",
+        configfiles=[tmp_path / "tmp_config.yaml"],
+        use_conda=True,
+        cores=4,
+        forceall=True,
     )
 
 
