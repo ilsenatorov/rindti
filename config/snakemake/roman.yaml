@@ -1,9 +1,11 @@
 # the two root directories to take the data from and to store the data in
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/oracle_new
-
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/resources
+only_prots: false
 prots:
   features:
     method: esm
-
 drugs:
   node_feats: IUPAC
+parse_dataset:
+  filtering: all
+  threshold: 1.645

@@ -22,8 +22,8 @@ class SweetNetEncoder(LightningModule):
     """Uses SweetNet to encode a glycan."""
 
     def __init__(self, trainable=False, **kwargs):
-        super().__init__(**kwargs)
-        self.sweetnet = SweetNetAdapter(trainable, **kwargs["model"]["drug"]).cuda()
+        super().__init__()
+        self.sweetnet = SweetNetAdapter(trainable, **kwargs).cuda()
 
     def forward(self, data: Union[dict, Data], **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         if not isinstance(data, dict):

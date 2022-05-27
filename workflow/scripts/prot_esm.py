@@ -46,7 +46,7 @@ def generate_esm_script(prot: pd.DataFrame) -> pd.DataFrame:
     extract_main(esm_args)
     data = []
     for prot_id in prot_ids:
-        data.append({"x": torch.load(f"./esms/{prot_id}.pt")["mean_representations"][33]})
+        data.append({"x": torch.load(f"./esms/{prot_id}.pt")["mean_representations"][33].unsqueeze(0)})
     # os.rmdir("./esms")
     prot["data"] = data
     # prot = prot.to_dict("index")
