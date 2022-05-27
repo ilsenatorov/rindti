@@ -52,6 +52,7 @@ class DTIDataset(InMemoryDataset):
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
+        # MEME comment to see if test difference works
         graph = all_data[which].loc[id, "data"]
         graph["id"] = id
         if (
