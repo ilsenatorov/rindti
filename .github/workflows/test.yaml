@@ -1,4 +1,4 @@
-name: Testing
+name: Test
 
 on: [push]
 
@@ -19,32 +19,32 @@ jobs:
           #   label: win-64
           #   prefix: C:\Miniconda3\envs\rindti
 
-    name: ${{ matrix.label }}
-    runs-on: ${{ matrix.os }}
+    name: Test rindti
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: rindti
-          use-mamba: true
+          python-version: 3.8
 
-      - uses: actions/cache@v3
-        id: cache
-        with:
-          path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-conda-${{ hashFiles('workflow/envs/main.yaml') }}
-
-      - if: ${{ steps.cache.outputs.cache-hit == false }}
-        name: Update environment
-        run: mamba env update -n rindti -f workflow/envs/main.yaml
-
+      - name: Install PyTorch 3.8+cpu
+        run: |
+          pip install torch==1.11+cpu torchvision==0.12+cpu -f https://download.pytorch.org/whl/torch_stable.html
+      - name: Install internal dependencies
+        run: |
+          pip install torch-scatter -f https://data.pyg.org/whl/torch-1.11+cpu.html
+          pip install torch-sparse -f https://data.pyg.org/whl/torch-1.11+cpu.html
+          pip install torch-cluster -f https://data.pyg.org/whl/torch-1.11+cpu.html
+          pip install torch-spline-conv -f https://data.pyg.org/whl/torch-1.11+cpu.html
+          pip install snakemake
+      - name: Install main package
+        run: |
+          pip install -e .[full,test]
       - name: Run tests
-        shell: bash -l {0}
-        run: pytest -m "not slow" --cov=rindti --cov-report=xml
+        run: |
+          pytest --cov --cov-report=xml
 
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v2
