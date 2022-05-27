@@ -1,6 +1,6 @@
 name: Changelog Enforcer
 
-on:  # yamllint disable-line rule:truthy
+on:
   pull_request:
 
 jobs:
