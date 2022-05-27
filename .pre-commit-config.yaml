@@ -40,6 +40,6 @@ repos:
         args: [-vv]
         exclude: ^test/
 
-ci:
-  autofix_commit_msg: |
-    [skip ci] auto fixes from pre-commit hooks
+# ci:
+#   autofix_commit_msg: |
+#     [skip ci] auto fixes from pre-commit hooks
