@@ -8,11 +8,11 @@ import argparse
 import pathlib
 
 import torch
-
 from esm import Alphabet, FastaBatchedDataset, ProteinBertModel, pretrained
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
+    """Create a parser for the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Extract per-token representations and model outputs for sequences in a FASTA file"  # noqa
     )
@@ -33,7 +33,7 @@ def create_parser():
         help="output directory for extracted representations",
     )
 
-    parser.add_argument("--toks_per_batch", type=int, default=4096, help="maximum batch size")
+    parser.add_argument("--toks_per_batch", type=int, default=128, help="maximum batch size")
     parser.add_argument(
         "--repr_layers",
         type=int,
@@ -60,6 +60,7 @@ def create_parser():
 
 
 def main(args):
+    """Extract representations from a FASTA file."""
     model, alphabet = pretrained.load_model_and_alphabet(args.model_location)
     model.eval()
     if torch.cuda.is_available() and not args.nogpu:
@@ -81,9 +82,7 @@ def main(args):
 
     with torch.no_grad():
         for batch_idx, (labels, strs, toks) in enumerate(data_loader):
-            print(
-                f"Processing {batch_idx + 1} of {len(batches)} batches ({toks.size(0)} sequences)"
-            )
+            print(f"Processing {batch_idx + 1} of {len(batches)} batches ({toks.size(0)} sequences)")
             if torch.cuda.is_available() and not args.nogpu:
                 toks = toks.to(device="cuda", non_blocking=True)
 
@@ -94,10 +93,7 @@ def main(args):
 
             out = model(toks, repr_layers=repr_layers, return_contacts=return_contacts)
 
-            logits = out["logits"].to(device="cpu")
-            representations = {
-                layer: t.to(device="cpu") for layer, t in out["representations"].items()
-            }
+            representations = {layer: t.to(device="cpu") for layer, t in out["representations"].items()}
             if return_contacts:
                 contacts = out["contacts"].to(device="cpu")
 
@@ -109,18 +105,14 @@ def main(args):
                 # See https://github.com/pytorch/pytorch/issues/1995
                 if "per_tok" in args.include:
                     result["representations"] = {
-                        layer: t[i, 1 : len(strs[i]) + 1].clone()
-                        for layer, t in representations.items()
+                        layer: t[i, 1 : len(strs[i]) + 1].clone() for layer, t in representations.items()
                     }
                 if "mean" in args.include:
                     result["mean_representations"] = {
-                        layer: t[i, 1 : len(strs[i]) + 1].mean(0).clone()
-                        for layer, t in representations.items()
+                        layer: t[i, 1 : len(strs[i]) + 1].mean(0).clone() for layer, t in representations.items()
                     }
                 if "bos" in args.include:
-                    result["bos_representations"] = {
-                        layer: t[i, 0].clone() for layer, t in representations.items()
-                    }
+                    result["bos_representations"] = {layer: t[i, 0].clone() for layer, t in representations.items()}
                 if return_contacts:
                     result["contacts"] = contacts[i, : len(strs[i]), : len(strs[i])].clone()
 

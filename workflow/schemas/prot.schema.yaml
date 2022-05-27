@@ -11,4 +11,3 @@ properties:
 
 required:
   - Target_ID
-  - Target

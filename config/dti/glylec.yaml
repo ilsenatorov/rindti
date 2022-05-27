@@ -1,7 +1,7 @@
 runs: 1
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/resources/results/prepare_all/elnwInranc_4441f51d.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/elnwInancr_ff08ca25.pkl
   exp_name: glylec
   batch_size: 64
   num_workers: 0
@@ -14,13 +14,13 @@ trainer:
 early_stop:
   patience: 40
 model:
-  module: esm_class
+  module: class
   feat_method: concat
   monitor: val_loss
   drug:
     hidden_dim: 128
+    method: sweetnet
     node:
-      module: SweetNet
       dropout: 0.1
       hidden_dim: 16
       num_layers: 3
@@ -31,6 +31,7 @@ model:
       ratio: 0.25
   prot:
     hidden_dim: 128
+    method: pretrained
     node:
       module: ginconv
       dropout: 0.1

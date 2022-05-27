@@ -4,6 +4,7 @@ include: "structs.smk"
 prot_data = sh._target("prot_data", sh.namer(config["prots"]) + ".pkl")
 rinerator_dir = sh._target("rinerator", sh.namer(config["prots"]))
 rinerator_output = os.path.join(rinerator_dir, "{prot}/{prot}_h.sif")
+pretrain_prot_data = sh._target("pretrain_prot_data", sh.namer(config["prots"]) + ".pkl")
 
 if config["prots"]["features"]["method"] == "rinerator":
 
@@ -72,3 +73,13 @@ rule esm:
         pickle=prot_data,
     script:
         "../scripts/prot_esm.py"
+
+
+rule pretrain_prots:
+    input:
+        prot_data=prot_data,
+        prot_table=sh.tables["prot"],
+    output:
+        pretrain_prot_data=pretrain_prot_data,
+    script:
+        "../scripts/pretrain_prot_data.py"

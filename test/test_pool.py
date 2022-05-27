@@ -2,7 +2,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
-from rindti.layers import DiffPoolNet, GMTNet, MeanPool
+from rindti.layers.graphpool import DiffPoolNet, GMTNet, MeanPool
 
 default_config = {
     "K": 1,

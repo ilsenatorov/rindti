@@ -3,8 +3,8 @@ import os
 import esm
 import pandas as pd
 import torch
-
-from extract_esm import create_parser, main as extract_main
+from extract_esm import create_parser
+from extract_esm import main as extract_main
 
 
 def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
@@ -32,6 +32,7 @@ def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
 
 
 def generate_esm_script(prot: pd.DataFrame) -> pd.DataFrame:
+    """Create an ESM script for btach processing."""
     prot_ids, seqs = list(zip(*[(k, v) for k, v in prot["Target"].to_dict().items()]))
     os.makedirs("./esms", exist_ok=True)
     with open("./esms/prots.fasta", "w") as fasta:
@@ -45,7 +46,7 @@ def generate_esm_script(prot: pd.DataFrame) -> pd.DataFrame:
     extract_main(esm_args)
     data = []
     for prot_id in prot_ids:
-        data.append({"x": torch.load(f"./esms/{prot_id}.pt")["mean_representations"][33]})
+        data.append({"x": torch.load(f"./esms/{prot_id}.pt")["mean_representations"][33].unsqueeze(0)})
     # os.rmdir("./esms")
     prot["data"] = data
     # prot = prot.to_dict("index")
