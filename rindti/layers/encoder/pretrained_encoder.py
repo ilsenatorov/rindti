@@ -13,12 +13,15 @@ class PretrainedEncoder(LightningModule):
 
     def __init__(self, **kwargs):
         super().__init__()
-        self.update_params(kwargs)
+        self.update_params(**kwargs)
         self.mlp = MLP(
             kwargs["data"]["feat_dim"],
             kwargs["hidden_dim"],
             kwargs["hidden_dim"],
         )
+
+    def update_params(self, **kwargs):
+        pass
 
     def forward(
         self,

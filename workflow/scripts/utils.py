@@ -50,7 +50,7 @@ def feat_dim(df: pd.DataFrame, which: str) -> int:
     if ftype == "label":
         return len(encd[which]["node"])
     else:
-        return df["data"][0]["x"].size(1)
+        return df["data"][0]["x"].shape[0]
 
 
 def edge_dim(df: pd.DataFrame, which: str) -> int:
