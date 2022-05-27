@@ -16,9 +16,17 @@ include: "rules/drugs.smk"
 include: "rules/data.smk"
 
 
+if config["only_prots"] == "both":
+    output = [pretrain_prot_data, final_output]
+elif config["only_prots"]:
+    output = [pretrain_prot_data]
+else:
+    output = [final_output]
+
+
 rule all:
     input:
-        pretrain_prot_data if config["only_prots"] else final_output,
+        output,
 
 
 # rule prepare_transformer:

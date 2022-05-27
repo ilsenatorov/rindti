@@ -1,53 +1,64 @@
 import os
 import shutil
-import subprocess
 
 import pytest
 from pytorch_lightning.utilities.seed import seed_everything
+from snakemake import snakemake
 
 from rindti.data import DTIDataModule, PreTrainDataModule
+from rindti.utils import read_config, write_config
+
+SNAKEMAKE_CONFIG_DIR = "config/snakemake"
+DEFAULT_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "default.yaml")
+TEST_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "test.yaml")
 
 
-def run_snakemake(*args):
-    """Run snakemake with the given source dir."""
-    subprocess.run(
-        ["snakemake", "-j", "4", "--forceall", "--use-conda", "--config", *args],
-        check=True,
+@pytest.fixture(scope="session")
+def snakemake_config():
+    default_config = read_config(DEFAULT_CONFIG)
+    test_config = read_config(TEST_CONFIG)
+    default_config.update(test_config)
+    return default_config
+
+
+def run_snakemake(config: dict, tmpdir_factory: str):
+    """Run snakemake with the given config."""
+    tmpdir = tmpdir_factory.mktemp("test")
+    config_path = str(tmpdir.join("tmp_config.yaml"))
+    source_path = str(tmpdir.join("resources"))
+    shutil.copytree("test/test_data/resources", source_path)
+    config["source"] = source_path
+    write_config(config_path, config)
+    assert snakemake(
+        "workflow/Snakefile",
+        configfiles=[config_path],
+        use_conda=True,
+        cores=4,
+        forceall=True,
     )
-
-
-@pytest.fixture(scope="session")
-def full_snakemake_run(tmpdir_factory):
-    """Copy test data to a temporary directory and run snakemake on it."""
-    tmpdir = tmpdir_factory.mktemp("test_data")
-    newdir = shutil.copytree("test/test_data/resources", tmpdir.join("resources"))
-    run_snakemake(f"source={newdir}")
     return tmpdir
 
 
 @pytest.fixture(scope="session")
-def pretrain_snakemake_run(tmpdir_factory):
+def snakemake_run(snakemake_config: dict, tmpdir_factory):
     """Copy test data to a temporary directory and run snakemake on it."""
-    tmpdir = tmpdir_factory.mktemp("test_data")
-    newdir = shutil.copytree("test/test_data/resources", tmpdir.join("resources"))
-    run_snakemake(f"source={newdir}", "only_prots=true")
-    return tmpdir
+    return run_snakemake(snakemake_config, tmpdir_factory)
 
 
 @pytest.fixture(scope="session")
-def dti_pickle(full_snakemake_run: str) -> str:
+def dti_pickle(snakemake_run: str) -> str:
     """Return the path to the full pickle file."""
     folder = "results/prepare_all"
-    result = os.listdir(full_snakemake_run.join(folder))[0]
-    return full_snakemake_run.join(folder, result)
+    result = os.listdir(snakemake_run.join(folder))[0]
+    return snakemake_run.join(folder, result)
 
 
 @pytest.fixture(scope="session")
-def pretrain_pickle(pretrain_snakemake_run: str) -> str:
+def pretrain_pickle(snakemake_run: str) -> str:
     """Return the path to the pretrain pickle file."""
     folder = "results/pretrain_prot_data"
-    result = os.listdir(pretrain_snakemake_run.join(folder))[0]
-    return pretrain_snakemake_run.join(folder, result)
+    result = os.listdir(snakemake_run.join(folder))[0]
+    return snakemake_run.join(folder, result)
 
 
 @pytest.fixture()
