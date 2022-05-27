@@ -1,39 +1,15 @@
 import os
-import subprocess
 
 import pytest
-from snakemake import snakemake
 from snakemake.utils import validate
 
-from rindti.utils import read_config, write_config
+from rindti.utils import read_config
 
-SNAKEMAKE_CONFIG_DIR = "config/snakemake"
-DEFAULT_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "default.yaml")
-TEST_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "test.yaml")
+from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
 
 snakemake_configs = [
     os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
 ]
-
-
-@pytest.fixture
-def config():
-    default_config = read_config(DEFAULT_CONFIG)
-    test_config = read_config(TEST_CONFIG)
-    default_config.update(test_config)
-    return default_config
-
-
-def run_snakemake(config: dict, tmp_path: str):
-    """Run snakemake with the given config."""
-    write_config(tmp_path / "tmp_config.yaml", config)
-    assert snakemake(
-        "workflow/Snakefile",
-        configfiles=[tmp_path / "tmp_config.yaml"],
-        use_conda=True,
-        cores=4,
-        forceall=True,
-    )
 
 
 @pytest.mark.snakemake
@@ -42,58 +18,58 @@ class TestSnakeMake:
     """Runs all snakemake tests."""
 
     @pytest.mark.parametrize("config_file", snakemake_configs)
-    def test_configs(self, config: dict, config_file: dict):
+    def test_configs(self, snakemake_config: dict, config_file: dict):
         """Test all snakemake configs."""
-        config.update(read_config(config_file))
-        validate(config, "workflow/schemas/config.schema.yaml")
+        snakemake_config.update(read_config(config_file))
+        validate(snakemake_config, "workflow/schemas/config.schema.yaml")
 
     @pytest.mark.parametrize("method", ["whole", "plddt", "bsite", "template"])
-    def test_structures(self, method: str, config: dict, tmp_path: str):
+    def test_structures(self, method: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the various structure-parsing methods."""
-        config["prots"]["structs"]["method"] = method
-        config["only_prots"] = True
-        run_snakemake(config, tmp_path)
+        snakemake_config["prots"]["structs"]["method"] = method
+        snakemake_config["only_prots"] = True
+        run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.gpu
-    def test_features_esm(self, features: str, config: dict, tmp_path: str):
+    def test_features_esm(self, snakemake_config: dict, tmpdir_factory: str):
         """Test the graph creation methods."""
-        config["prots"]["features"]["method"] = "esm"
-        config["only_prots"] = True
-        run_snakemake(config, tmp_path)
+        snakemake_config["prots"]["features"]["method"] = "esm"
+        snakemake_config["only_prots"] = True
+        run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("features", ["rinerator", "distance"])  # NOTE esm testing disabled
-    def test_features(self, features: str, config: dict, tmp_path: str):
+    def test_features(self, features: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the graph creation methods."""
-        config["prots"]["features"]["method"] = features
-        config["only_prots"] = True
-        run_snakemake(config, tmp_path)
+        snakemake_config["prots"]["features"]["method"] = features
+        snakemake_config["only_prots"] = True
+        run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
-    def test_prot_encodings(self, node_feats: str, edge_feats: str, config: dict, tmp_path: str):
+    def test_prot_encodings(self, node_feats: str, edge_feats: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the encoding methods for prot nodes and edges."""
-        config["prots"]["features"]["node_feats"] = node_feats
-        config["prots"]["features"]["edge_feats"] = edge_feats
-        run_snakemake(config, tmp_path)
+        snakemake_config["prots"]["features"]["node_feats"] = node_feats
+        snakemake_config["prots"]["features"]["edge_feats"] = edge_feats
+        run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot", "glycan"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
-    def test_drug_encodings(self, node_feats: str, edge_feats: str, config: dict, tmp_path: str):
+    def test_drug_encodings(self, node_feats: str, edge_feats: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the encoding methods for drug nodes and edges."""
-        config["drugs"]["node_feats"] = node_feats
-        config["drugs"]["edge_feats"] = edge_feats
-        run_snakemake(config, tmp_path)
+        snakemake_config["drugs"]["node_feats"] = node_feats
+        snakemake_config["drugs"]["edge_feats"] = edge_feats
+        run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("split", ["random", "drug", "target"])
-    def test_splits(self, split: str, config: dict, tmp_path: str):
+    def test_splits(self, split: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the dataset splitting methods."""
-        config["split_data"]["method"] = split
-        run_snakemake(config, tmp_path)
+        snakemake_config["split_data"]["method"] = split
+        run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("filtering", ["all", "posneg"])
     @pytest.mark.parametrize("sampling", ["none", "over", "under"])
-    def test_parse_dataset(self, filtering: str, sampling: str, config: dict, tmp_path: str):
+    def test_parse_dataset(self, filtering: str, sampling: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the dataset filtering and sampling methods."""
-        config["parse_dataset"]["filtering"] = filtering
-        config["parse_dataset"]["sampling"] = sampling
-        run_snakemake(config, tmp_path)
+        snakemake_config["parse_dataset"]["filtering"] = filtering
+        snakemake_config["parse_dataset"]["sampling"] = sampling
+        run_snakemake(snakemake_config, tmpdir_factory)
