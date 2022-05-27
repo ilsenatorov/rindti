@@ -41,20 +41,16 @@ class DTIDataset(InMemoryDataset):
         return os.path.join("data", exp_name, basefilename)
 
     def process_(self, data_list: list, split: str):
-        """Process the datalist.
-
-        Args:
-            data_list (list): List of TwoGraphData entries
-            s (int): index of train, val or test
-        """
-        if self.pre_filter is not None:
+        if self.pre_filter is not None:      
             data_list = [data for data in data_list if self.pre_filter(data)]
 
-        if self.pre_transform is not None:
+        if self.pre_transform is not None:   
             data_list = [self.pre_transform(data) for data in data_list]
 
+
         data, slices = self.collate(data_list)
-        torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
+        torch.save((data, slices, self.config), 
+        self.processed_paths[self.splits[split]])
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
