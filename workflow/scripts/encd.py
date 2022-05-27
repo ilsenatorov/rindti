@@ -6,8 +6,6 @@ def list_to_dict(l):
     return {val: i for i, val in enumerate(l)}
 
 
-# MEME comment
-
 encd = {
     "prot": {
         "node": list_to_dict(
