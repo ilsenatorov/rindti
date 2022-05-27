@@ -56,6 +56,11 @@ class DrugEncoder:
                 return glycan_encoding[atom_num] + chirality_encoding[atom.GetChiralTag()]
             else:
                 return glycan_encoding["other"] + chirality_encoding[atom.GetChiralTag()]
+        if self.node_feats == "glycanone":
+            if atom_num in glycan_encoding:
+                return glycan_encoding[atom_num]
+            else:
+                return glycan_encoding["other"]
 
         label = node_encoding[atom_num]
         if self.node_feats == "onehot":
