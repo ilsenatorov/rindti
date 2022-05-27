@@ -41,12 +41,6 @@ class DTIDataset(InMemoryDataset):
         return os.path.join("data", exp_name, basefilename)
 
     def process_(self, data_list: list, split: str):
-        """Process the datalist.
-
-        Args:
-            data_list (list): List of TwoGraphData entries
-            s (int): index of train, val or test
-        """
         if self.pre_filter is not None:
             data_list = [data for data in data_list if self.pre_filter(data)]
 
@@ -58,6 +52,7 @@ class DTIDataset(InMemoryDataset):
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
+        # MEME comment to see if test difference works
         graph = all_data[which].loc[id, "data"]
         graph["id"] = id
         if (
