@@ -12,7 +12,6 @@ rindti.data
     PfamSampler
     WeightedPfamSampler
     DataCorruptor
-    GnomadTransformer
     SizeFilter
     corrupt_features
     mask_features
