@@ -2,12 +2,13 @@ import pytest
 import torch
 from torch_geometric.data import Data
 
-from rindti.data.transforms import DataCorruptor, SizeFilter, TwoGraphData
+from rindti.data.transforms import DataCorruptor, SizeFilter
 
 
-def graph(n_nodes: int) -> Data:
+@pytest.fixture
+def graph() -> Data:
     data = {
-        "x": torch.eye(10)[torch.randint(0, 10, (n_nodes,))],
+        "x": torch.randint(1, 10, (10,)),
         "edge_index": torch.tensor(
             [
                 [0, 1, 1, 2, 2, 3, 3, 4, 4, 5],
@@ -18,7 +19,19 @@ def graph(n_nodes: int) -> Data:
     return Data(**data)
 
 
-@pytest.mark.parametrize("nnodes, result", [(10, True), (2, False), (20, False)])
-def test_size_filter(nnodes, result):
+def test_size_filter(graph: Data):
+    """Test SizeFilter"""
     sf = SizeFilter(5, 15)
-    assert sf(graph(nnodes)) == result
+    assert sf(graph)
+
+
+@pytest.mark.parametrize("which", ["mask", "corrupt"])
+def test_corruptor(which: str, graph: Data):
+    dc = DataCorruptor({"x": 0.5}, which)
+    orig_feats = graph["x"].clone()
+    corrdata = dc(graph)
+    feats = corrdata["x"]
+    if which == "mask":
+        assert feats[feats == 0].size(0) == 5
+    else:
+        assert feats[feats == orig_feats].size(0) >= 5
