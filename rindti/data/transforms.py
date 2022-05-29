@@ -42,8 +42,6 @@ class DataCorruptor:
             self.corr_func = mask_features
         elif self.type == "corrupt":
             self.corr_func = corrupt_features
-        else:
-            raise ValueError("Unknown corruption function type, should be 'mask' or 'corrupt'!")
 
     def __call__(self, data: Union[Data, TwoGraphData]) -> TwoGraphData:
         """Apply corruption.

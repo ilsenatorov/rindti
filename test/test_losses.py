@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from rindti.losses import GeneralisedLiftedStructureLoss, NodeLoss, SoftNearestNeighborLoss
+from rindti.losses import GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss
 
 
 @pytest.fixture
@@ -17,6 +17,7 @@ def fam_idx() -> torch.Tensor:
 
 @pytest.mark.parametrize("loss_class", [GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss])
 def test_graph_struct(loss_class, embeds: torch.Tensor, fam_idx: torch.Tensor) -> None:
+    """8 points belong to the 'correct' class, 2 don't, loss has to be lower for the correct class."""
     loss = loss_class()
     res = loss(embeds, fam_idx)["graph_loss"]
     assert res[:4].allclose(res[5:9])
