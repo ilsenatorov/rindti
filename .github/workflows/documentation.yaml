@@ -39,4 +39,4 @@ jobs:
 
       - name: Build documentation
         run: |
-          cd docs && sphinx-build source build
+          cd docs && make clean && make html SPHINXOPTS="-W"
