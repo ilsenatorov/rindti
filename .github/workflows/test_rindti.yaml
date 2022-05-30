@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - rindti/**
+  pull_request:
 
 jobs:
   test:

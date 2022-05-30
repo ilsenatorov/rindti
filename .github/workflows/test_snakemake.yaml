@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - workflow/**
+  pull_request:
+
 
 jobs:
   test:
