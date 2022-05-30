@@ -22,8 +22,3 @@ class ProtDrugMax(BaseBaseline):
         except KeyError:
             drug_mean = 0.5
         return (prot_mean + drug_mean) / 2
-
-    def predict(self, test: pd.DataFrame) -> pd.DataFrame:
-        """Apply prediction to the whole test dataframe."""
-        test["pred"] = test.apply(lambda x: self.predict_pair(x["Target_ID"], x["Drug_ID"]), axis=1)
-        return test
