@@ -4,7 +4,7 @@
 
 - Improved documentation building
 - Added a page in documentation on quick start
-- Added baseline models that only use labels
+- Added baseline models that only use labels and tests for its features
 
 ## [v1.4.0]
 

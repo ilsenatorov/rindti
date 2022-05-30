@@ -1,17 +1,19 @@
-from max_likelihood import Max
-from prot_drug_max_likelihood import ProtDrugMax
-from single_max import SingleMax
+from .max_likelihood import Max
+from .prot_drug_max_likelihood import ProtDrugMax
 
-models = {"max": Max, "prot_drug_max": ProtDrugMax, "single_max": SingleMax}
+models = {"max": Max, "prot_drug_max": ProtDrugMax}
 
 
-def run(model: str, filename: str, train_frac: float = 0.8, n_runs: int = 10, prot: bool = True, prob: bool = False):
+def run(
+    model: str,
+    filename: str,
+    train_frac: float = 0.8,
+    n_runs: int = 10,
+    which: str = "both",
+    prob: bool = False,
+):
     """Assess the performance of the model on a dataset."""
-    kwargs = {
-        "prot": prot,
-        "prob": prob,
-    }
-    model = models[model](**kwargs)
+    model = models[model](which=which, prob=prob)
     model.assess_dataset(filename, train_frac, n_runs)
 
 
