@@ -1,6 +1,6 @@
 from max_likelihood import Max
-from single_max import SingleMax
 from prot_drug_max_likelihood import ProtDrugMax
+from single_max import SingleMax
 
 models = {"max": Max, "prot_drug_max": ProtDrugMax, "single_max": SingleMax}
 

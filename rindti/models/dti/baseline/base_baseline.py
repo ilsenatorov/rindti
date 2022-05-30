@@ -6,6 +6,7 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 class BaseBaseline:
     """Parent of all baseline models."""
+
     def __init__(self, **kwargs):
         self.prob = kwargs["prob"]
 
@@ -53,4 +54,6 @@ class BaseBaseline:
                 averages["mcc"].append(metrics["mcc"])
                 averages["auc"].append(metrics["auc"])
                 print(f"Run {i}\tAcc : {metrics['acc']:.3}\tAUROC: {metrics['auc']:.3}\tMCC: {metrics['mcc']:.3}")
-            print(f"Average\tAcc : {np.mean(averages['acc']):.3}\tAUROC: {np.mean(averages['auc']):.3}\tMCC: {np.mean(averages['mcc']):.3}")
+            print(
+                f"Average\tAcc : {np.mean(averages['acc']):.3}\tAUROC: {np.mean(averages['auc']):.3}\tMCC: {np.mean(averages['mcc']):.3}"
+            )

@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 from base_baseline import BaseBaseline
 
 
@@ -17,7 +16,9 @@ class ProtDrugMax(BaseBaseline):
         """Predict the outcome for a pair of a protein and a drug."""
         try:
             if self.prob:
-                prot_mean = np.random.normal(loc=self.protgroup.loc[prot_id, "Y"], scale=self.protgroup.loc[prot_id, "std"])
+                prot_mean = np.random.normal(
+                    loc=self.protgroup.loc[prot_id, "Y"], scale=self.protgroup.loc[prot_id, "std"]
+                )
             else:
                 prot_mean = self.protgroup.loc[prot_id, "Y"]
         except KeyError:
@@ -25,7 +26,9 @@ class ProtDrugMax(BaseBaseline):
 
         try:
             if self.prob:
-                drug_mean = np.random.normal(loc=self.druggroup.loc[drug_id, "Y"], scale=self.druggroup.loc[drug_id, "std"])
+                drug_mean = np.random.normal(
+                    loc=self.druggroup.loc[drug_id, "Y"], scale=self.druggroup.loc[drug_id, "std"]
+                )
             else:
                 drug_mean = self.druggroup.loc[drug_id, "Y"]
         except KeyError:
