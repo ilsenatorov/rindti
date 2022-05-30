@@ -11,8 +11,8 @@ jobs:
           - os: ubuntu-latest
             label: linux-64
             prefix: /usr/share/miniconda3/envs/rindti
-            python-version: [3.8]
-            torch-version: [1.11.0]
+            python-version: 3.8
+            torch-version: 1.11.0
 
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
@@ -37,4 +37,4 @@ jobs:
           python setup.py install
       - name: Build documentation
         run: |
-          cd docs && make clean && make html SPHINXOPTS="-W"  # Fail on warning.
+          cd docs && make clean && make html
