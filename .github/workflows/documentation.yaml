@@ -28,7 +28,7 @@ jobs:
           pip install torch==${{ matrix.torch-version}}+cpu -f https://download.pytorch.org/whl/torch_stable.html
       - name: Install internal dependencies
         run: |
-          pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-{{ matrix.torch-version }}+cpu.html
+          pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-${{ matrix.torch-version }}+cpu.html
           pip install sphinx_rtd_theme
           pip install pytorch-lightning
 
