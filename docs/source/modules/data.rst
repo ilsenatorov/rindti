@@ -1,5 +1,5 @@
 rindti.data
-====================
+===========
 
 .. currentmodule:: rindti.data
 

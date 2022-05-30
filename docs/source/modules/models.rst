@@ -7,6 +7,8 @@ rindti.models
 Base Model
 ----------
 
+The base model defines a lot of common methods that are identical for all models - logging, saving, etc.
+
 .. autoclass:: rindti.models.base_model.BaseModel
    :members:
    :undoc-members:
@@ -16,6 +18,9 @@ Base Model
 
 DTI models
 --------------------
+
+Drug-target interaction prediction models.
+Calculate embeddings for drugs and proteins, then use an MLP to predict the final result.
 
 .. currentmodule:: rindti.models.dti
 .. autosummary::
@@ -32,6 +37,9 @@ DTI models
 
 Baseline models
 ----------------
+
+These models are used to predict the baseline values for datasets.
+They do not have access to the actual features and operate solely on the labels of drugs and proteins.
 
 .. currentmodule:: rindti.models.dti.baseline
 .. autosummary::
