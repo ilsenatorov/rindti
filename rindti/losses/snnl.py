@@ -1,9 +1,9 @@
-from typing import List, Union
+from typing import Union
 
 import torch
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule
-from torch import Tensor
+from torch import LongTensor, Tensor
 
 
 class SoftNearestNeighborLoss(LightningModule):
@@ -32,7 +32,7 @@ class SoftNearestNeighborLoss(LightningModule):
         self.optim_temperature = optim_temperature
         self.grad_step = grad_step
 
-    def _forward(self, embeds: Tensor, fam_idx: List[int], temp_frac: Union[int, Tensor]) -> Tensor:
+    def _forward(self, embeds: Tensor, fam_idx: LongTensor, temp_frac: Union[int, Tensor]) -> Tensor:
         """Calculate the soft nearest neighbor loss for a given temp denominator."""
         embeds = F.normalize(embeds)
         sim = 1 - torch.matmul(embeds, embeds.t())
@@ -40,10 +40,12 @@ class SoftNearestNeighborLoss(LightningModule):
         f = expsim / (self.eps + expsim.sum(dim=1))
         fam_mask = (fam_idx == fam_idx.t()).float()
         f = f * fam_mask
+        print(f.shape)
         loss = -torch.log(self.eps + f.sum(dim=1))
-        return dict(graph_loss=loss.mean())
+        print(loss)
+        return dict(graph_loss=loss)
 
-    def forward(self, embeds: Tensor, fam_idx: List[int]) -> Tensor:
+    def forward(self, embeds: Tensor, fam_idx: LongTensor) -> Tensor:
         """"""
         if not self.optim_temperature:
             return self._forward(embeds, fam_idx, 1.0)

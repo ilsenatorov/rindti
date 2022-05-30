@@ -1,9 +1,10 @@
 # CHANGELOG
 
-## [Unreleased]
+## [v1.5.0]
 
 - Improved documentation building
-- Added a page in documentation on quick start.
+- Added a page in documentation on quick start
+- Added baseline models that only use labels
 
 ## [v1.4.0]
 

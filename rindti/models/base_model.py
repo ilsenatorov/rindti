@@ -41,7 +41,7 @@ class BaseModel(LightningModule):
         self.test_metrics = metrics.clone(prefix="test_")
 
     def _set_reg_metrics(self):
-        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), R2Score(), ExplainedVariance()])
+        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")

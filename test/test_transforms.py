@@ -1,45 +1,37 @@
-from copy import deepcopy
-from math import ceil
-
 import pytest
 import torch
+from torch_geometric.data import Data
 
-from rindti.data import DataCorruptor, corrupt_features, mask_features
-
-LOW = 1
-HIGH = 10
-N_NODES = 15
-
-original_features = torch.randint(LOW, HIGH, (N_NODES,), dtype=torch.long)
-original_data = {k: deepcopy(original_features) for k in ["x", "prot_x", "drug_x"]}
+from rindti.data.transforms import DataCorruptor, SizeFilter
 
 
-def _assert_corruption(orig_features, corrupt_features, frac):
-    expected_number = ceil(N_NODES * frac)
-    assert corrupt_features[corrupt_features != orig_features].size(0) <= expected_number
+@pytest.fixture
+def graph() -> Data:
+    data = {
+        "x": torch.randint(1, 10, (10,)),
+        "edge_index": torch.tensor(
+            [
+                [0, 1, 1, 2, 2, 3, 3, 4, 4, 5],
+                [1, 0, 2, 1, 3, 2, 4, 3, 5, 4],
+            ]
+        ),
+    }
+    return Data(**data)
 
 
-def _assert_mask(masked_features, frac):
-    expected_number = ceil(N_NODES * frac)
-    assert torch.count_nonzero(masked_features) == (N_NODES - expected_number)
+def test_size_filter(graph: Data):
+    """Test SizeFilter"""
+    sf = SizeFilter(5, 15)
+    assert sf(graph)
 
 
-@pytest.mark.parametrize("func", [mask_features, corrupt_features])
-@pytest.mark.parametrize("frac", [-1, 3])
-def test_assert_fail(func, frac):
-    features = deepcopy(original_features)
-    with pytest.raises(AssertionError):
-        func(features, frac)
-
-
-@pytest.mark.parametrize("d", [{"x": 0.2}, {"prot_x": 0.4, "drug_x": 0.7}])
-@pytest.mark.parametrize("type", ["mask", "corrupt"])
-def test_data_corruptor(d, type):
-    dc = DataCorruptor(d, type)
-    corrupted_data = deepcopy(original_data)
-    corrupted_data = dc(corrupted_data)
-    for k, v in d.items():
-        if type == "corrupt":
-            _assert_corruption(corrupted_data[k], original_features, v)
-        elif type == "mask":
-            _assert_mask(corrupted_data[k], v)
+@pytest.mark.parametrize("which", ["mask", "corrupt"])
+def test_corruptor(which: str, graph: Data):
+    dc = DataCorruptor({"x": 0.5}, which)
+    orig_feats = graph["x"].clone()
+    corrdata = dc(graph)
+    feats = corrdata["x"]
+    if which == "mask":
+        assert feats[feats == 0].size(0) == 5
+    else:
+        assert feats[feats == orig_feats].size(0) >= 5
