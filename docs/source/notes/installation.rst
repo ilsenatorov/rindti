@@ -9,8 +9,8 @@ One can install the packages necessary through conda (mamba) using the following
 
 .. code:: console
 
-        conda install -c conda-forge mamba # mamba is much faster than conda
-        mamba env create --quiet --name rindti --file workflow/envs/main.yaml
+    conda install -c conda-forge mamba # mamba is much faster than conda
+    mamba env create --quiet --name rindti --file workflow/envs/main.yaml
 
 
 Then one can run optionally run `pip install .` in the root directory of the repository to install rindti as a package.
@@ -20,13 +20,13 @@ Manual installation
 
 In order to use this module, you must first install the following packages (preferably in the order listed here):
 
-    - pytorch
-    - torch_geometric
-    - pytorch_lightning
-    - snakemake
-    - rdkit
-    - seaborn
-    - plotly
+  - pytorch
+  - torch_geometric
+  - pytorch_lightning
+  - snakemake
+  - rdkit
+  - seaborn
+  - plotly
 
 Then one can run optionally ``pip install .`` in the root directory of the repository to install rindti as a package.
 
