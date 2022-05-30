@@ -2,7 +2,7 @@
 seed: 42
 runs: 5
 datamodule:
-  filename: test.pkl
+  filename: test/test_data/results/pretrain_prot_data/wdln_1479ac8c.pkl
   exp_name: test
   batch_size: 128
   num_workers: 4
@@ -15,6 +15,7 @@ early_stop:
   patience: 60
 
 model:
+  monitor: val_loss
   module: class
   hidden_dim: 128
   encoder:

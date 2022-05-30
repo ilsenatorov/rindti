@@ -1,6 +1,7 @@
 # RINDTI
 
 ![testing](https://github.com/ilsenatorov/rindti/actions/workflows/test.yaml/badge.svg)
+![pre-commit.ci status](https://results.pre-commit.ci/badge/github/ilsenatorov/rindti/master.svg)](https://results.pre-commit.ci/latest/github/ilsenatorov/rindti/master)
 
 This repository aims to simplify the drug-target interaction prediction process which is based on protein residue interaction networks (RINs)
 

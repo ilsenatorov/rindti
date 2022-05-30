@@ -1,16 +1,13 @@
-import os
 import pickle
 from typing import Iterable
 
 import pandas as pd
 from pandas.core.frame import DataFrame
-from prepare_drugs import edge_encoding as drug_edge_encoding
-from prepare_drugs import node_encoding as drug_node_encoding
-from utils import prot_edge_encoding, prot_node_encoding
+from utils import get_config
 
 
 def process(row: pd.Series) -> dict:
-    """Process each interaction, drugs encoded as graphs"""
+    """Process each interaction."""
     split = row["split"]
     return {
         "label": row["Y"],
@@ -32,15 +29,6 @@ def del_index_mapping(x: dict) -> dict:
     return x
 
 
-def update_config(config: dict, prot_size=None, drug_size=None) -> dict:
-    """Updates config with dims of everything"""
-    config["prot_feat_dim"] = len(prot_node_encoding) if prot_size is None else prot_size
-    config["drug_feat_dim"] = len(drug_node_encoding) if drug_size is None else drug_size
-    config["prot_edge_dim"] = len(prot_edge_encoding)
-    config["drug_edge_dim"] = len(drug_edge_encoding)
-    return config
-
-
 if __name__ == "__main__":
 
     interactions = pd.read_csv(snakemake.input.inter, sep="\t")
@@ -53,22 +41,25 @@ if __name__ == "__main__":
 
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
-    
+
     prots = prots[prots.index.isin(interactions["Target_ID"].unique())]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"].unique())]
-    
+
     prot_count = interactions["Target_ID"].value_counts()
     drug_count = interactions["Drug_ID"].value_counts()
-    
+
     prots["data"] = prots.apply(lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1)
     drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
 
     full_data = process_df(interactions)
-    config = update_config(snakemake.config)
+    snakemake.config["data"] = {
+        "prot": get_config(prots, "prot"),
+        "drug": get_config(drugs, "drug"),
+    }
 
     final_data = {
         "data": full_data,
-        "config": config,
+        "config": snakemake.config,
         "prots": prots,
         "drugs": drugs,
     }

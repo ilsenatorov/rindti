@@ -1,7 +1,9 @@
-name: Testing
+name: Test snakemake
 
 on:
-  [push, pull_request]
+  push:
+    paths:
+      - workflow/**
 
 jobs:
   test:
@@ -11,14 +13,6 @@ jobs:
           - os: ubuntu-latest
             label: linux-64
             prefix: /usr/share/miniconda3/envs/rindti
-
-          # - os: macos-latest
-          #   label: osx-64
-          #   prefix: /Users/runner/miniconda3/envs/rindti
-
-          # - os: windows-latest
-          #   label: win-64
-          #   prefix: C:\Miniconda3\envs\rindti
 
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
@@ -45,4 +39,4 @@ jobs:
 
       - name: Run tests
         shell: bash -l {0}
-        run: pytest -m "not gpu"
+        run: pytest -m "not gpu and snakemake"
