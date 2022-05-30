@@ -5,10 +5,11 @@ from prot_drug_max_likelihood import ProtDrugMax
 models = {"max": Max, "prot_drug_max": ProtDrugMax, "single_max": SingleMax}
 
 
-def run(model: str, filename: str, train_frac: float = 0.8, n_runs: int = 10, prots: bool = True):
+def run(model: str, filename: str, train_frac: float = 0.8, n_runs: int = 10, prot: bool = True, prob: bool = False):
     """Assess the performance of the model on a dataset."""
     kwargs = {
-        "prot": prots,
+        "prot": prot,
+        "prob": prob,
     }
     model = models[model](**kwargs)
     model.assess_dataset(filename, train_frac, n_runs)

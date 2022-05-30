@@ -7,7 +7,7 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 class BaseBaseline:
     """Parent of all baseline models."""
     def __init__(self, **kwargs):
-        pass
+        self.prob = kwargs["prob"]
 
     def fit(self, train: pd.DataFrame):
         """Fit the model to the training dataframe. Has to have 'Drug_ID', 'Target_ID' and 'Y' columns."""
