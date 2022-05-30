@@ -1,4 +1,3 @@
-import pandas as pd
 from max_likelihood import Max
 from single_max import SingleMax
 from prot_drug_max_likelihood import ProtDrugMax

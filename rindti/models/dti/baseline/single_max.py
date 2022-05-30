@@ -1,6 +1,6 @@
 import pandas as pd
 
-from rindti.models.dti.baseline.base_baseline import BaseBaseline
+from base_baseline import BaseBaseline
 
 
 class SingleMax(BaseBaseline):
