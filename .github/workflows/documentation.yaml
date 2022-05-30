@@ -2,8 +2,6 @@ name: Build documentation
 
 on:
   push:
-    paths:
-      - rindti/**
 
 jobs:
   build:
