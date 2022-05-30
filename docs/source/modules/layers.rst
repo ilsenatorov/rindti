@@ -22,13 +22,7 @@ Node layers
 .. currentmodule:: rindti.layers.graphconv
 .. autosummary::
     :nosignatures:
-
-    ChebConvNet
-    FilmConvNet
-    GatConvNet
-    GINConvNet
-    PNAConvNet
-    TransformerNet
+    :recursive:
 
 
 .. automodule:: rindti.layers.graphconv
@@ -43,10 +37,7 @@ Pooling layers
 .. currentmodule:: rindti.layers.graphpool
 .. autosummary::
    :nosignatures:
-
-    DiffPoolNet
-    GMTNet
-    MeanPool
+   :recursive:
 
 
 .. automodule:: rindti.layers.graphpool
@@ -62,11 +53,7 @@ Other layers
 .. currentmodule:: rindti.layers.other
 .. autosummary::
    :nosignatures:
-
-    MLP
-    MutualInformation
-    SequenceEmbedding
-
+   :recursive:
 
 .. automodule:: rindti.layers.other
    :members:
