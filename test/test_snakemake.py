@@ -37,7 +37,6 @@ class TestSnakeMake:
         snakemake_config["only_prots"] = True
         run_snakemake(snakemake_config, tmpdir_factory)
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize("features", ["rinerator", "distance"])  # NOTE esm testing disabled
     def test_features(self, features: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the graph creation methods."""

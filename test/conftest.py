@@ -46,6 +46,14 @@ def snakemake_run(snakemake_config: dict, tmpdir_factory):
 
 
 @pytest.fixture(scope="session")
+def split_data(snakemake_run):
+    """Return the split data."""
+    folder = "results/split_data"
+    result = os.listdir(snakemake_run.join(folder))[0]
+    return snakemake_run.join(folder, result)
+
+
+@pytest.fixture(scope="session")
 def dti_pickle(snakemake_run: str) -> str:
     """Return the path to the full pickle file."""
     folder = "results/prepare_all"

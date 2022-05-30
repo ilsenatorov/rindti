@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-from base_baseline import BaseBaseline
+
+from .base_baseline import BaseBaseline
 
 
 class Max(BaseBaseline):
@@ -23,9 +24,3 @@ class Max(BaseBaseline):
         """Apply prediction to the whole test dataframe."""
         test["pred"] = test.apply(lambda x: self.predict_pair(x["Target_ID"], x["Drug_ID"]), axis=1)
         return test
-
-
-if __name__ == "__main__":
-    from jsonargparse import CLI
-
-    cli = CLI(Max.assess_dataset)
