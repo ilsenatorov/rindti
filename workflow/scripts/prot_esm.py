@@ -3,8 +3,8 @@ import os
 import esm
 import pandas as pd
 import torch
-
-from extract_esm import create_parser, main as extract_main
+from extract_esm import create_parser
+from extract_esm import main as extract_main
 
 
 def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
