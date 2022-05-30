@@ -28,3 +28,18 @@ DTI models
    :undoc-members:
    :exclude-members: training, shared_step
    :show-inheritance:
+
+
+Baseline models
+----------------
+
+.. currentmodule:: rindti.models.dti.baseline
+.. autosummary::
+   :nosignatures:
+   :recursive:
+
+
+.. automodule:: rindti.models.dti.baseline
+   :members:
+   :undoc-members:
+   :show-inheritance:
