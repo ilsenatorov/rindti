@@ -1,6 +1,6 @@
 seed: 42
 source: null
-only_prots: both # false (no pretraining), true (pretraining) or both
+only_prots: false # false (no pretraining), true (pretraining) or both
 prots:
   structs:
     method: whole # whole, template, bsite, plddt

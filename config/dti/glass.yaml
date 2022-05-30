@@ -2,7 +2,7 @@ seed: 42
 runs: 1
 exp_name: glass
 datamodule:
-  filename: datasets/glass/results/prepare_all/tdlnlnrpnc_709085a9.pkl
+  filename: datasets/glass/results/prepare_all/tdlnpnclnr_9dc97485.pkl
   exp_name: test
   batch_size: 512
   num_workers: 4

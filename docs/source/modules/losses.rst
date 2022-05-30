@@ -4,11 +4,7 @@ rindti.losses
 .. currentmodule:: rindti.losses
 .. autosummary::
     :nosignatures:
-
-    GeneralisedLiftedStructureLoss
-    NodeLoss
-    PfamCrossEntropyLoss
-    SoftNearestNeighborLoss
+    :recursive:
 
 .. automodule:: rindti.losses
     :members:

@@ -1,1 +1,2 @@
 source: test/test_data/resources
+only_prots: both
