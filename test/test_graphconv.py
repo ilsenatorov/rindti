@@ -1,9 +1,7 @@
-from pprint import pprint
-
 import pytest
 import torch
 
-from rindti.layers import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, PNAConvNet, TransformerNet
+from rindti.layers.graphconv import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, TransformerNet
 
 N_NODES = 10
 N_EDGES = 50

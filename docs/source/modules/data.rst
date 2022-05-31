@@ -1,21 +1,11 @@
 rindti.data
-====================
+===========
 
 .. currentmodule:: rindti.data
+
 .. autosummary::
     :nosignatures:
-
-    TwoGraphData
-    DTIDataset
-    LargePreTrainDataset
-    PreTrainDataset
-    PfamSampler
-    WeightedPfamSampler
-    DataCorruptor
-    GnomadTransformer
-    SizeFilter
-    corrupt_features
-    mask_features
+    :recursive:
 
 .. automodule:: rindti.data
     :members:

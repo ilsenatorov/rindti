@@ -1,16 +1,17 @@
-import torch
 import torch.nn.functional as F
 from torch.functional import Tensor
 
 from ...data import TwoGraphData
+from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
+from ...layers.other import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
-from ..encoder import Encoder
-from ..sweet_net_encoder import SweetNetEncoder
+
+encoders = {"graph": GraphEncoder, "sweetnet": SweetNetEncoder, "pretrained": PretrainedEncoder}
 
 
 class ClassificationModel(BaseModel):
-    """Model for DTI prediction as a class problem."""
+    """Model for DTI prediction as a classification problem."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -19,12 +20,9 @@ class ClassificationModel(BaseModel):
             kwargs["model"]["prot"]["hidden_dim"],
             kwargs["model"]["drug"]["hidden_dim"],
         )
-        self.prot_encoder = Encoder(**kwargs["model"]["prot"])
-        if kwargs["model"]["drug"]["node"]["module"] == "SweetNet":
-            self.drug_encoder = SweetNetEncoder(**kwargs)
-        else:
-            self.drug_encoder = Encoder(**kwargs["model"]["drug"])
-        self.mlp = self._get_mlp(**kwargs["model"]["mlp"])
+        self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
+        self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
+        self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
         self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
@@ -33,7 +31,7 @@ class ClassificationModel(BaseModel):
         drug_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         return dict(
-            pred=torch.sigmoid(self.mlp(joint_embedding)),
+            pred=self.mlp(joint_embedding),
             prot_embed=prot_embed,
             drug_embed=drug_embed,
             joint_embed=joint_embedding,
@@ -49,5 +47,5 @@ class ClassificationModel(BaseModel):
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        bce_loss = F.binary_cross_entropy(fwd_dict["pred"], labels.float())
+        bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
         return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

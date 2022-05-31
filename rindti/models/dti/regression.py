@@ -1,3 +1,4 @@
+import torch
 import torch.nn.functional as F
 
 from ...data import TwoGraphData
@@ -18,5 +19,5 @@ class RegressionModel(ClassificationModel):
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        mse_loss = F.mse_loss(fwd_dict["pred"], labels.float())
+        mse_loss = F.mse_loss(torch.sigmoid(fwd_dict["pred"]), labels.float())
         return dict(loss=mse_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

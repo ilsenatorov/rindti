@@ -39,5 +39,4 @@ class MLP(BaseLayer):
         self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))
 
     def forward(self, x: Tensor) -> Tensor:
-        """"""
         return self.mlp(x)

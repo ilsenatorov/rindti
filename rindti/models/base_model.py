@@ -17,7 +17,6 @@ from torchmetrics import (
 )
 
 from ..data import TwoGraphData
-from ..layers import MLP
 
 
 class BaseModel(LightningModule):
@@ -42,13 +41,10 @@ class BaseModel(LightningModule):
         self.test_metrics = metrics.clone(prefix="test_")
 
     def _set_reg_metrics(self):
-        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), R2Score(), ExplainedVariance()])
+        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
-
-    def _get_mlp(self, **params) -> MLP:
-        return MLP(input_dim=self.embed_dim, out_dim=1, **params)
 
     def _determine_feat_method(
         self,

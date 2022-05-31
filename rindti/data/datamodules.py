@@ -34,18 +34,6 @@ class BaseDataModule(LightningDataModule):
     def predict_dataloader(self):
         return DataLoader(self.test, **self._dl_kwargs(False))
 
-    def __repr__(self):
-        return "DataModule\n" + "\n".join(
-            [repr(getattr(self, x)) for x in ["train", "val", "test"] if hasattr(self, x)]
-        )
-
-    def get_labels(self) -> set:
-        labels = set()
-        for ds in [self.train, self.val, self.test]:
-            for i in ds:
-                labels.add(i.y)
-        return labels
-
 
 class DTIDataModule(BaseDataModule):
     """Data module for the DTI dataset."""
@@ -65,15 +53,11 @@ class DTIDataModule(BaseDataModule):
             follow_batch=["prot_x", "drug_x"],
         )
 
-    def __repr__(self):
-        return "DTI " + super().__repr__()
-
     def update_config(self, config: dict) -> None:
         """Update the main config with the config of the dataset."""
+        print(self.config)
         for i in ["prot", "drug"]:
-            config["model"][i]["data"] = self.config["data"][i]
-            config["model"][i]["data"]["feat_dim"] = self.config["snakemake"][f"{i}_feat_dim"]
-            config["model"][i]["data"]["edge_dim"] = self.config["snakemake"][f"{i}_edge_dim"]
+            config["model"][i]["data"] = self.config["snakemake"]["data"][i]
 
 
 class PreTrainDataModule(BaseDataModule):
@@ -97,4 +81,5 @@ class PreTrainDataModule(BaseDataModule):
 
     def update_config(self, config: dict) -> None:
         """Update the main config with the config of the dataset."""
-        config["model"]["encoder"]["data"] = self.config.copy()
+        config["model"]["encoder"]["data"] = self.config["data"]
+        config["model"]["num_classes"] = self.config["data"]["num_classes"]

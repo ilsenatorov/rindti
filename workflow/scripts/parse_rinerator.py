@@ -1,14 +1,16 @@
 import os
-import pickle
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import torch
-from utils import onehot_encode, prot_edge_encoding, prot_node_encoding
+from encd import encd
+from utils import onehot_encode
 
 
 class ProteinEncoder:
+    """Performs all the encoding steps for a single sif file."""
+
     def __init__(self, node_feats: str, edge_feats: str):
         self.node_feats = node_feats
         self.edge_feats = edge_feats
@@ -22,9 +24,9 @@ class ProteinEncoder:
         """
         residue = residue.lower()
         if self.node_feats == "label":
-            return prot_node_encoding[residue] + 1
+            return encd["prot"]["node"][residue] + 1
         elif self.node_feats == "onehot":
-            return onehot_encode(prot_node_encoding[residue], len(prot_node_encoding))
+            return onehot_encode(encd["prot"]["node"][residue], len(encd["prot"]["node"]))
         else:
             raise ValueError("Unknown node_feats type!")
 
@@ -56,7 +58,7 @@ class ProteinEncoder:
                 chain2, resn2, x2, resaa2 = node2split
                 if x1 != "_" or x2 != "_":
                     continue
-                if resaa1.lower() not in prot_node_encoding or resaa2.lower() not in prot_node_encoding:
+                if resaa1.lower() not in encd["prot"]["node"] or resaa2.lower() not in encd["prot"]["node"]:
                     continue
                 resn1 = int(resn1)
                 resn2 = int(resn2)
@@ -131,12 +133,12 @@ class ProteinEncoder:
         edge_index = edge_index.t().contiguous()
         if self.edge_feats == "none":
             return edge_index, None
-        edge_feats = edges["type"].apply(lambda x: prot_edge_encoding[x])
+        edge_feats = edges["type"].apply(lambda x: encd["prot"]["edge"][x])
         if self.edge_feats == "label":
             edge_feats = torch.tensor(edge_feats, dtype=torch.long)
             return edge_index, edge_feats
         elif self.edge_feats == "onehot":
-            edge_feats = edge_feats.apply(onehot_encode, count=len(prot_edge_encoding))
+            edge_feats = edge_feats.apply(onehot_encode, count=len(encd["prot"]["edge"]))
             edge_feats = torch.tensor(edge_feats, dtype=torch.float)
             return edge_index, edge_feats
 

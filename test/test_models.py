@@ -1,7 +1,7 @@
 import pytest
 from pytorch_lightning import Trainer
 
-from rindti.models import ClassificationModel
+from rindti.models import ClassificationModel, RegressionModel
 from rindti.utils import IterDict, read_config
 
 CONFIG_FILE = "config/test/default_dti.yaml"
@@ -57,3 +57,7 @@ class BaseTestModel:
 
 class TestClassificationModel(BaseTestModel):
     model_class = ClassificationModel
+
+
+class TestRegressionModel(BaseTestModel):
+    model_class = RegressionModel

@@ -30,7 +30,7 @@ class Namer:
         flat = flatten_config(config)
         res = ""
         for k, v in flat.items():
-            if k in ["source", "target"]:
+            if k == "source":
                 continue
             elif isinstance(v, str):
                 res += v[0]
