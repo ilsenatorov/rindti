@@ -4,6 +4,6 @@ import rindti.losses
 import rindti.models
 import rindti.utils
 
-__version__ = "1.5.0"
+from .version import version as __version__
 
-__all__ = ["__version__", "rindti"]
+__all__ = ["rindti", "__version__"]
