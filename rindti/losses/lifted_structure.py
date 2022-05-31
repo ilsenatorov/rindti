@@ -1,8 +1,8 @@
-from typing import List
+from typing import Dict
 
 import torch
 from pytorch_lightning import LightningModule
-from torch import Tensor
+from torch import LongTensor, Tensor
 
 
 class GeneralisedLiftedStructureLoss(LightningModule):
@@ -20,8 +20,7 @@ class GeneralisedLiftedStructureLoss(LightningModule):
         self.pos_margin = pos_margin
         self.neg_margin = neg_margin
 
-    def forward(self, embeds: Tensor, fam_idx: List[int]) -> Tensor:
-        """"""
+    def forward(self, embeds: Tensor, fam_idx: LongTensor) -> Dict[str, Tensor]:
         dist = torch.cdist(embeds, embeds)
         fam_mask = (fam_idx == fam_idx.t()).float()
         pos = (dist - self.pos_margin) * fam_mask
