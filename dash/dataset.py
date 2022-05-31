@@ -7,6 +7,7 @@ import dash_bio.utils.ngl_parser as ngl_parser
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import yaml
 
 import dash
 from dash import Input, Output, dcc, html
@@ -41,7 +42,7 @@ def update_data(data: dict, plddt: pd.Series) -> dict:
     inter = pd.DataFrame(data["data"])
     prots = prots.join(inter.groupby("prot_id").agg("mean"))
     prots["count"] = prots["data"].apply(lambda x: x["count"])
-    return {"prots": prots}
+    return {"prots": prots, "config": data["config"]}
 
 
 def file_options(folder: str) -> Iterable[str]:
@@ -52,21 +53,16 @@ def file_options(folder: str) -> Iterable[str]:
 @app.callback(
     Output("highlighted_prot", "data"),
     Input("prot_struct", "clickData"),
-    Input("prot_dist", "clickData"),
 )
-def highlight_prot(prot_struct: str, prot_dist: str) -> str:
-    """Save the protein that is highlighted, clean other stores"""
-    print(prot_struct, prot_dist)
-    if prot_struct is None and prot_dist is None:
+def highlight_prot(prot_struct: str) -> str:
+    """Save the protein that is highlighted, clean other stores."""
+    if prot_struct is None:
         raise PreventUpdate
-    if prot_struct is not None:
-        return prot_struct["points"][0]["hovertext"]
-    if prot_dist is not None:
-        return prot_dist["points"][0]["hovertext"]
+    return prot_struct["points"][0]["hovertext"]
 
 
 @app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("highlighted_prot", "data"))
-def plot_molecule(prot_id: str) -> Tuple[dict, dict]:
+def plot_molecule(prot_id: str) -> Tuple[list, dict]:
     """Get molecular visualisation on click."""
     if not prot_id:
         raise PreventUpdate
@@ -78,7 +74,7 @@ def plot_molecule(prot_id: str) -> Tuple[dict, dict]:
     }
     data_list = [
         ngl_parser.get_data(
-            data_path="file:datasets/glass/results/parsed_structs/t_c4e04594/",
+            data_path="file:datasets/glass/results/parsed_structs/t_7f51bea2/",
             pdb_id=prot_id,
             color="blue",
             reset_view=True,
@@ -88,18 +84,24 @@ def plot_molecule(prot_id: str) -> Tuple[dict, dict]:
     return data_list, molstyles_dict
 
 
-with open("datasets/glass/results/prepare_all/tdlnpnclnr_9dc97485.pkl", "rb") as f:
+with open("datasets/glass/results/prepare_all/tdlnpnclnr_3980ef6d.pkl", "rb") as f:
     data = pickle.load(f)
 
-plddt = pd.read_csv("datasets/glass/results/structure_info/t_c4e04594.tsv", sep="\t", index_col=0).squeeze("columns")
+plddt = pd.read_csv("datasets/glass/results/structure_info/t_7f51bea2.tsv", sep="\t", index_col=0).squeeze("columns")
 data = update_data(data, plddt)
 
 app.layout = html.Div(
+    style={"display": "flex", "flex-direction": "row"},
     children=[
         dcc.Store(id="highlighted_prot"),
-        dcc.Graph(id="prot_struct", figure=plot_prot_structs(data["prots"])),
-        dcc.Graph(id="prot_dist", figure=plot_prot_dist(data["prots"])),
+        html.Div(
+            children=[
+                dcc.Graph(id="prot_struct", figure=plot_prot_structs(data["prots"])),
+                dcc.Graph(id="prot_dist", figure=plot_prot_dist(data["prots"])),
+            ]
+        ),
         dashbio.NglMoleculeViewer(id="molecule"),
+        html.Plaintext(id="config", children=yaml.dump(data["config"])),
     ],
 )
 

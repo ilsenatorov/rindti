@@ -7,7 +7,7 @@ prots:
     bsite:
       radius: 5
     template:
-      radius: 2
+      radius: 7
     plddt:
       threshold: 70
   features:

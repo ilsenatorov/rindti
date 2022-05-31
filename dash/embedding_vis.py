@@ -3,7 +3,7 @@ import sys
 from collections import defaultdict
 
 import dash_bio as dashbio
-import dash_bio_utils.ngl_parser as ngl_parser
+import dash_bio.utils.ngl_parser as ngl_parser
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
