@@ -92,10 +92,9 @@ def baselines(data: dict) -> go.Figure:
     test = inter[inter["split"] == "test"]
     models = {k: ProtDrugMax(k) for k in ["prot", "drug", "both", "none"]}
     metrics = {k: v.assess_dataset(train, test) for k, v in models.items()}
-    print(metrics)
     metrics = pd.DataFrame(metrics)
     metrics.to_csv("test.csv")
-    return px.bar(metrics)
+    return px.bar(metrics.T.round(3), barmode="group", text_auto=True, width=800, height=600)
 
 
 with open("datasets/glass/results/prepare_all/tdlnpnclnr_3980ef6d.pkl", "rb") as f:
