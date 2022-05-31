@@ -5,7 +5,7 @@ rule parse_dataset:
     input:
         inter=sh.tables["inter"],
     output:
-        inter=sh._target("parse_dataset", sh.namer(config["parse_dataset"]) + ".csv"),
+        inter=sh._target("parse_dataset", sh.namer(config["parse_dataset"]) + ".tsv"),
     script:
         "../scripts/parse_dataset.py"
 
@@ -14,7 +14,7 @@ rule split_data:
     input:
         inter=rules.parse_dataset.output.inter,
     output:
-        split_data=sh._target("split_data", sh.namer(config["split_data"]) + ".csv"),
+        split_data=sh._target("split_data", sh.namer(config["split_data"]) + ".tsv"),
     params:
         method=config["split_data"]["method"],
         train=config["split_data"]["train"],

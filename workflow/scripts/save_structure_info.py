@@ -1,8 +1,5 @@
-from typing import no_type_check
-
 import numpy as np
 import pandas as pd
-from numpy.core.fromnumeric import squeeze
 
 plddt_scores = {}
 for structure in snakemake.input.structs:
@@ -15,4 +12,4 @@ for structure in snakemake.input.structs:
         plddt_scores[structure_id] = np.mean(calphas_plddt)
 
 plddt_scores = pd.Series(plddt_scores, name="plddt").sort_values()
-plddt_scores.to_csv(snakemake.output.tsv, sep="\t")
+plddt_scores.to_csv(snakemake.output.struct_info, sep="\t")

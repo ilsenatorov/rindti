@@ -2,7 +2,7 @@ import pickle
 
 import pandas as pd
 import plotly.graph_objects as go
-from pandas.core.frame import DataFrame
+from pandas import DataFrame
 from plotly.subplots import make_subplots
 
 

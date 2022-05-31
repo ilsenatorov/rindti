@@ -8,6 +8,8 @@ pymol_scripts = sh._target(
     "{prot}.pml",
 )
 
+struct_info = sh._target("structure_info", sh.namer(config["prots"]["structs"]) + ".tsv")
+
 if config["prots"]["structs"]["method"] == "whole":
     parsed_structs = sh._source("structures", "{prot}.pdb")
 else:
@@ -43,13 +45,10 @@ rule run_pymol:
         "pymol -k -y -c {input.script} > {log} 2>&1"
 
 
-# rule save_structure_info:
-#     input:
-#         structs=expand(structs, protein=targets),
-#     output:
-#         tsv="{results}/structure_info/{type}_info.tsv".format(
-#             results=target,
-#             type=config["structs"],
-#         ),
-#     script:
-#         "scripts/save_structure_info.py"
+rule save_structure_info:
+    input:
+        structs=expand(parsed_structs, prot=sh.prot_ids),
+    output:
+        struct_info=struct_info,
+    script:
+        "../scripts/save_structure_info.py"
