@@ -1,6 +1,7 @@
 # RINDTI
 
-![testing](https://github.com/ilsenatorov/rindti/actions/workflows/test.yaml/badge.svg)
+![rindti_test](https://github.com/ilsenatorov/rindti/actions/workflows/test_rindti.yaml/badge.svg)
+![snakemake_test](https://github.com/ilsenatorov/rindti/actions/workflows/test_snakemake.yaml/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/ilsenatorov/rindti/master.svg)](https://results.pre-commit.ci/latest/github/ilsenatorov/rindti/master)
 [![codecov](https://codecov.io/gh/ilsenatorov/rindti/branch/master/graph/badge.svg?token=KWEX1R7FVS)](https://codecov.io/gh/ilsenatorov/rindti)
 
