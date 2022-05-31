@@ -29,13 +29,11 @@ def test() -> pd.DataFrame:
     )
 
 
-@pytest.mark.parametrize("model", ["max", "prot_drug_max"])
 @pytest.mark.parametrize("prob", [True, False])
-@pytest.mark.parametrize("which", ["both", "prot", "drug"])
+@pytest.mark.parametrize("which", ["both", "prot", "drug", "none"])
 def test_baselines(
     split_data: str,
-    model: str,
     prob: bool,
     which: str,
 ):
-    run(model, split_data, prob=prob, which=which)
+    run(split_data, prob=prob, which=which)

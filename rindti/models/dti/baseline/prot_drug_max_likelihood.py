@@ -16,11 +16,13 @@ class ProtDrugMax(BaseBaseline):
         train["count"] = 1
         self.protgroup = train.groupby("Target_ID").agg({"Y": ["mean", "std"], "count": "sum"}).loc[:, "Y"]
         self.druggroup = train.groupby("Drug_ID").agg({"Y": ["mean", "std"], "count": "sum"}).loc[:, "Y"]
+        self.mean = train["Y"].mean()
+        self.std = train["Y"].std()
 
     def _get_val(self, group: pd.DataFrame, id: str) -> float:
         if id not in group.index:
             return 0.5
-        elif self.prob:
+        if self.prob:
             return np.random.normal(loc=group.at[id, "mean"], scale=group.at[id, "std"])
         return group.at[id, "mean"]
 
@@ -28,9 +30,13 @@ class ProtDrugMax(BaseBaseline):
         """Predict the outcome for a pair of a protein and a drug."""
         if self.which == "both":
             return (self._get_val(self.protgroup, prot_id) + self._get_val(self.druggroup, drug_id)) / 2
-        elif self.which == "prot":
+        if self.which == "prot":
             return self._get_val(self.protgroup, prot_id)
-        elif self.which == "drug":
+        if self.which == "drug":
             return self._get_val(self.druggroup, drug_id)
+        if self.which == "none":
+            if self.prob:
+                return np.random.normal(loc=self.mean, scale=self.std)
+            return self.mean
         else:
             raise ValueError(f"Unknown value for which: {self.which}")

@@ -12,6 +12,7 @@ import yaml
 import dash
 from dash import Input, Output, dcc, html
 from dash.exceptions import PreventUpdate
+from rindti.models.dti.baseline import ProtDrugMax
 
 app = dash.Dash(__name__)
 
@@ -42,7 +43,7 @@ def update_data(data: dict, plddt: pd.Series) -> dict:
     inter = pd.DataFrame(data["data"])
     prots = prots.join(inter.groupby("prot_id").agg("mean"))
     prots["count"] = prots["data"].apply(lambda x: x["count"])
-    return {"prots": prots, "config": data["config"]}
+    return {"prots": prots, "config": data["config"], "inter": inter}
 
 
 def file_options(folder: str) -> Iterable[str]:
@@ -84,11 +85,25 @@ def plot_molecule(prot_id: str) -> Tuple[list, dict]:
     return data_list, molstyles_dict
 
 
+def baselines(data: dict) -> go.Figure:
+    """Plots the baselines."""
+    inter = data["inter"].rename({"prot_id": "Target_ID", "drug_id": "Drug_ID", "label": "Y"}, axis=1)
+    train = inter[inter["split"] == "train"]
+    test = inter[inter["split"] == "test"]
+    models = {k: ProtDrugMax(k) for k in ["prot", "drug", "both", "none"]}
+    metrics = {k: v.assess_dataset(train, test) for k, v in models.items()}
+    print(metrics)
+    metrics = pd.DataFrame(metrics)
+    metrics.to_csv("test.csv")
+    return px.bar(metrics)
+
+
 with open("datasets/glass/results/prepare_all/tdlnpnclnr_3980ef6d.pkl", "rb") as f:
     data = pickle.load(f)
 
 plddt = pd.read_csv("datasets/glass/results/structure_info/t_7f51bea2.tsv", sep="\t", index_col=0).squeeze("columns")
 data = update_data(data, plddt)
+baselines(data)
 
 app.layout = html.Div(
     style={"display": "flex", "flex-direction": "row"},
@@ -98,6 +113,7 @@ app.layout = html.Div(
             children=[
                 dcc.Graph(id="prot_struct", figure=plot_prot_structs(data["prots"])),
                 dcc.Graph(id="prot_dist", figure=plot_prot_dist(data["prots"])),
+                dcc.Graph(id="baselines", figure=baselines(data)),
             ]
         ),
         dashbio.NglMoleculeViewer(id="molecule"),

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import torch
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
@@ -24,9 +23,9 @@ class BaseBaseline:
         y_hat = torch.tensor(pred["pred"].values)
         y = torch.tensor(pred["Y"].values)
         return dict(
-            acc=accuracy(y_hat, y).float(),
-            auc=auroc(y_hat, y).float(),
-            mcc=matthews_corrcoef(y_hat, y, num_classes=2).float(),
+            acc=accuracy(y_hat, y).float().item(),
+            auc=auroc(y_hat, y).float().item(),
+            mcc=matthews_corrcoef(y_hat, y, num_classes=2).float().item(),
         )
 
     def predict(self, test: pd.DataFrame) -> pd.DataFrame:
@@ -34,11 +33,7 @@ class BaseBaseline:
         test["pred"] = test.apply(lambda x: self.predict_pair(x["Target_ID"], x["Drug_ID"]), axis=1)
         return test
 
-    def assess_dataset(self, filename: str, train_frac: float = 0.8, n_runs: int = 10):
+    def assess_dataset(self, train: pd.DataFrame, test: pd.DataFrame):
         """Assess the performance of the model on a dataset."""
-        dataset = pd.read_csv(filename, sep="\t")
-        train = dataset[dataset["split"] == "train"]
-        val = dataset[dataset["split"] == "val"]
         self.fit(train)
-        metrics = self.test_metrics(val)
-        print(f"Results\tAcc : {metrics['acc']:.3}\tAUROC: {metrics['auc']:.3}\tMCC: {metrics['mcc']:.3}")
+        return self.test_metrics(test)

@@ -1,20 +1,20 @@
-from .max_likelihood import Max
-from .prot_drug_max_likelihood import ProtDrugMax
+import pandas as pd
 
-models = {"max": Max, "prot_drug_max": ProtDrugMax}
+from .prot_drug_max_likelihood import ProtDrugMax
 
 
 def run(
-    model: str,
     filename: str,
-    train_frac: float = 0.8,
-    n_runs: int = 10,
     which: str = "both",
     prob: bool = False,
 ):
     """Assess the performance of the model on a dataset."""
-    model = models[model](which=which, prob=prob)
-    model.assess_dataset(filename, train_frac, n_runs)
+    model = ProtDrugMax(which=which, prob=prob)
+    data = pd.read_csv(filename, sep="\t")
+    train = data[data["split"] == "train"]
+    test = data[data["split"] == "test"]
+    metrics = model.assess_dataset(train, test)
+    print(f"Results\tAcc : {metrics['acc']:.3}\tAUROC: {metrics['auc']:.3}\tMCC: {metrics['mcc']:.3}")
 
 
 if __name__ == "__main__":
