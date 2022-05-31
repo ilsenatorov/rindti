@@ -2,7 +2,7 @@
 source: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/resources
 prots:
   features:
-    method: esm # rinerator, distance, esm
+    method: rinerator # rinerator, distance, esm
 drugs:
   node_feats: glycan # IUPAC, label, onehot, glycan
 split_data:

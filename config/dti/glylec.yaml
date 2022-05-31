@@ -1,7 +1,7 @@
 runs: 1
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/elnwgntanc_cf18ae8f.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_abf61671.pkl
   exp_name: glylec
   batch_size: 64
   num_workers: 0
@@ -31,7 +31,7 @@ model:
       ratio: 0.25
   prot:
     hidden_dim: 128
-    method: pretrained
+    method: graph
     node:
       module: ginconv
       dropout: 0.1
