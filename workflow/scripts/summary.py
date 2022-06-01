@@ -34,5 +34,6 @@ if __name__ == "__main__":
     with open(snakemake.input.pickle, "rb") as file:
         data = pickle.load(file)
     new_data = update_data(data, plddt)
+    new_data["struct_dir"] = snakemake.params.struct_dir
     with open(snakemake.output.summary, "wb") as file:
         pickle.dump(new_data, file)

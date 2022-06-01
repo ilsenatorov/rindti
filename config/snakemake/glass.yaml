@@ -6,4 +6,6 @@ prots:
   features:
     method: distance
 parse_dataset:
-  filtering: posneg
+  filtering: all
+split_data:
+  method: target

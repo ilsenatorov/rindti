@@ -23,7 +23,7 @@ elif config["only_prots"]:
 else:
     output = [final_output]
 
-output.append(struct_info)
+output.append(summary)
 
 
 rule all:

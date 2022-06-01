@@ -16,57 +16,56 @@ from rindti.models.dti.baseline import ProtDrugMax
 
 app = dash.Dash(__name__)
 
+folder = "datasets/glass/results/summary"
+files = [x for x in os.listdir(folder)]
+columns = ["nnodes", "nedges", "plddt", "count", "label"]
 
-def plot_prot_structs(prots: pd.DataFrame) -> go.Figure:
+
+@app.callback(
+    Output("prot_struct", "figure"),
+    Input("data", "data"),
+    Input("x-col", "value"),
+    Input("y-col", "value"),
+    Input("color-col", "value"),
+)
+def plot_prot_structs(data: dict, x: str, y: str, color: str) -> go.Figure:
     """Plots protein structure information."""
+    prots = pd.DataFrame(data["prots"])
     return px.scatter(
         prots,
-        x="nnodes",
-        y="nedges",
-        color="plddt",
+        x=x,
+        y=y,
+        color=color,
         width=800,
         height=600,
         hover_name=prots.index,
     )
 
 
-def plot_prot_dist(prots: pd.DataFrame) -> go.Figure:
-    """Distribtion of proteins."""
-    return px.scatter(prots, "label", "count", hover_name=prots.index, width=800, height=600)
-
-
-def update_data(data: dict, plddt: pd.Series) -> dict:
-    """Takes original pickle and plddt file and combines them."""
-    prots = data["prots"].join(plddt)
-    prots["nnodes"] = prots["data"].apply(lambda x: x["x"].size(0))
-    prots["nedges"] = prots["data"].apply(lambda x: x["edge_index"].size(1))
-    inter = pd.DataFrame(data["data"])
-    prots = prots.join(inter.groupby("prot_id").agg("mean"))
-    prots["count"] = prots["data"].apply(lambda x: x["count"])
-    return {"prots": prots, "config": data["config"], "inter": inter}
-
-
-def file_options(folder: str) -> Iterable[str]:
-    """All files in given folder."""
-    return [os.path.join(folder, i) for i in os.listdir(folder)]
+@app.callback(Output("baselines", "figure"), Input("data", "data"), Input("prob", "value"))
+def plot_baselines(data: dict, prob: bool) -> go.Figure:
+    """Plots the baselines."""
+    inter = pd.DataFrame(data["inter"]).rename({"prot_id": "Target_ID", "drug_id": "Drug_ID", "label": "Y"}, axis=1)
+    train = inter[inter["split"] == "train"]
+    test = inter[inter["split"] == "test"]
+    models = {k: ProtDrugMax(k, prob=prob) for k in ["prot", "drug", "both", "none"]}
+    metrics = {k: v.assess_dataset(train, test) for k, v in models.items()}
+    metrics = pd.DataFrame(metrics)
+    metrics.to_csv("test.csv")
+    return px.bar(metrics.T.round(3), barmode="group", text_auto=True, width=800, height=600)
 
 
 @app.callback(
-    Output("highlighted_prot", "data"),
+    Output("molecule", "data"),
+    Output("molecule", "molStyles"),
     Input("prot_struct", "clickData"),
+    Input("data", "data"),
 )
-def highlight_prot(prot_struct: str) -> str:
-    """Save the protein that is highlighted, clean other stores."""
-    if prot_struct is None:
-        raise PreventUpdate
-    return prot_struct["points"][0]["hovertext"]
-
-
-@app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("highlighted_prot", "data"))
-def plot_molecule(prot_id: str) -> Tuple[list, dict]:
+def plot_molecule(prot_id: str, data: dict) -> Tuple[list, dict]:
     """Get molecular visualisation on click."""
     if not prot_id:
         raise PreventUpdate
+    prot_id = prot_id["points"][0]["hovertext"]
     molstyles_dict = {
         "representations": ["cartoon"],
         "chosenAtomsColor": "white",
@@ -75,7 +74,7 @@ def plot_molecule(prot_id: str) -> Tuple[list, dict]:
     }
     data_list = [
         ngl_parser.get_data(
-            data_path="file:datasets/glass/results/parsed_structs/t_7f51bea2/",
+            data_path=f"file:{data['struct_dir']}/",
             pdb_id=prot_id,
             color="blue",
             reset_view=True,
@@ -85,38 +84,80 @@ def plot_molecule(prot_id: str) -> Tuple[list, dict]:
     return data_list, molstyles_dict
 
 
-def baselines(data: dict) -> go.Figure:
-    """Plots the baselines."""
-    inter = data["inter"].rename({"prot_id": "Target_ID", "drug_id": "Drug_ID", "label": "Y"}, axis=1)
-    train = inter[inter["split"] == "train"]
-    test = inter[inter["split"] == "test"]
-    models = {k: ProtDrugMax(k) for k in ["prot", "drug", "both", "none"]}
-    metrics = {k: v.assess_dataset(train, test) for k, v in models.items()}
-    metrics = pd.DataFrame(metrics)
-    metrics.to_csv("test.csv")
-    return px.bar(metrics.T.round(3), barmode="group", text_auto=True, width=800, height=600)
+@app.callback(Output("data", "data"), Input("dropdown", "value"))
+def read_data(filename: str) -> dict:
+    """Read pickle file."""
+    with open(os.path.join(folder, filename), "rb") as file:
+        data = pickle.load(file)
+    return {k: v.to_dict() if isinstance(v, pd.DataFrame) else v for k, v in data.items()}
 
 
-with open("datasets/glass/results/prepare_all/tdlnpnclnr_3980ef6d.pkl", "rb") as f:
-    data = pickle.load(f)
+@app.callback(Output("config", "children"), Input("data", "data"))
+def get_config(data: dict) -> str:
+    """Return config as yaml."""
+    return yaml.dump({k: v for k, v in data["config"].items() if k != "data"})
 
-plddt = pd.read_csv("datasets/glass/results/structure_info/t_7f51bea2.tsv", sep="\t", index_col=0).squeeze("columns")
-data = update_data(data, plddt)
-baselines(data)
+
+flex_style = {"display": "flex", "flex-direction": "row", "justify-content": "left"}
+
+
+def build_col_option(colname: str, col_id: str, value: str) -> html.Div:
+    """Options for the prot plotter."""
+    return html.Div(
+        style=flex_style,
+        children=[
+            html.Div(colname + "     "),
+            dcc.Dropdown(id=col_id, options=columns, value=value),
+        ],
+    )
+
 
 app.layout = html.Div(
-    style={"display": "flex", "flex-direction": "row"},
     children=[
-        dcc.Store(id="highlighted_prot"),
+        dcc.Store(id="data"),
         html.Div(
-            children=[
-                dcc.Graph(id="prot_struct", figure=plot_prot_structs(data["prots"])),
-                dcc.Graph(id="prot_dist", figure=plot_prot_dist(data["prots"])),
-                dcc.Graph(id="baselines", figure=baselines(data)),
+            [
+                html.H4("Summary file"),
+                dcc.Dropdown(id="dropdown", options=files, value=files[0], style={"width": "50%"}),
+                html.Div(
+                    children=[
+                        build_col_option(colname, col_id, value)
+                        for colname, col_id, value in [
+                            ("X-axis", "x-col", "nnodes"),
+                            ("Y-axis", "y-col", "nedges"),
+                            ("Color", "color-col", "label"),
+                        ]
+                    ],
+                ),
             ]
         ),
-        dashbio.NglMoleculeViewer(id="molecule"),
-        html.Plaintext(id="config", children=yaml.dump(data["config"])),
+        html.Div(
+            style={"display": "flex", "flex-direction": "row"},
+            children=[
+                dcc.Graph(id="prot_struct"),
+                dashbio.NglMoleculeViewer(id="molecule"),
+            ],
+        ),
+        html.Div(
+            style={"display": "flex", "flex-direction": "row"},
+            children=[
+                dcc.Graph(id="baselines"),
+                html.Plaintext(id="config"),
+            ],
+        ),
+        html.Div(
+            [
+                html.H4("Probabilistic"),
+                dcc.RadioItems(
+                    id="prob",
+                    options=[
+                        {"label": "true", "value": True},
+                        {"label": "false", "value": False},
+                    ],
+                    value=False,
+                ),
+            ]
+        ),
     ],
 )
 

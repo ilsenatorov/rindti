@@ -1,4 +1,5 @@
 final_output = sh._target("prepare_all", sh.namer(config) + ".pkl")
+summary = sh._target("summary", sh.namer(config) + ".pkl")
 
 
 rule parse_dataset:
@@ -32,3 +33,15 @@ rule prepare_all:
         combined_pickle=final_output,
     script:
         "../scripts/prepare_all.py"
+
+
+rule summary:
+    input:
+        pickle=rules.prepare_all.output.combined_pickle,
+        structs=expand(parsed_structs, prot=sh.prot_ids),
+    output:
+        summary=summary,
+    params:
+        struct_dir=parsed_structs_dir,
+    script:
+        "../scripts/summary.py"
