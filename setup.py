@@ -1,13 +1,14 @@
 import setuptools
 
 with open("README.md", "r") as fh:
-
     long_description = fh.read()
 
+with open("rindti/version.py") as infile:
+    exec(infile.read())
 
 setuptools.setup(
     name="RINDTI",
-    version="1.5.0",
+    version=version,
     author="Ilya Senatorov",
     author_email="ilya.senatorov@helmholtz-hips.de",
     description="Drug-Target prediction using residue interaction networks",
