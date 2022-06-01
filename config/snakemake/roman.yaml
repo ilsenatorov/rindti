@@ -4,9 +4,9 @@ prots:
   features:
     method: rinerator # rinerator, distance, esm
 drugs:
-  node_feats: glycan # IUPAC, label, onehot, glycan
+  node_feats: IUPAC # IUPAC, label, onehot, glycan
 split_data:
-  method: target # random, drug, target
+  method: drug # random, drug, target
 parse_dataset:
   filtering: all
-  threshold: 100
+  threshold: 1.645
