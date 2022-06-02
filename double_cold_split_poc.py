@@ -13,8 +13,8 @@ params = {
         "KP": 1,  # keep parents to next generation
         "CP": 0.8,  # crossover probability
         "MP": 0.8,  # mutation probability
-        "D": 0.1,  # weight of drug balance between train and test sets
-        "B": 3,  # weight of protein balance between train and test sets
+        "D": 1,  # weight of drug balance between train and test sets
+        "B": 200,  # weight of protein balance between train and test sets
     }
 }
 
@@ -187,6 +187,7 @@ class GeneticSplit(Split):
         train_data = self.data[self.data["Target_ID"].isin(train_prots) & self.data["Drug_ID"].isin(train_drugs)]
         test_data = self.data[self.data["Target_ID"].isin(test_prots) & self.data["Drug_ID"].isin(test_drugs)]
 
+        keep_data_len = len(self.data) - len(drop_data)
         """
         actually compute the score to minimize the number of dropped interactions as well as the differences between 
         the rations of drugs, targets, and interactions between train set and test set.
@@ -195,12 +196,12 @@ class GeneticSplit(Split):
         return - (
                 params["GA"]["D"] * len(drop_data) +
                 params["GA"]["B"] * (
-                        (1 - ((len(train_data) / len(test_data)) -
-                              self.train_partition / (1 - self.train_partition))) ** 2 +
-                        (1 - ((len(train_drugs) / len(test_drugs)) -
-                              self.train_partition / (1 - self.train_partition))) ** 2 +
-                        (1 - ((len(train_prots) / len(test_prots)) -
-                              self.train_partition / (1 - self.train_partition))) ** 2
+                        ((len(train_data) / keep_data_len) / (len(test_data) / keep_data_len) -
+                         self.train_partition / (1 - self.train_partition)) ** 2 +
+                        ((len(train_drugs) / len(self.drugs)) / (len(test_drugs) / len(self.drugs)) -
+                         self.train_partition / (1 - self.train_partition)) ** 2 +
+                        ((len(train_prots) / len(self.prots)) / (len(train_prots) / len(self.prots)) -
+                         self.train_partition / (1 - self.train_partition)) ** 2
                 )
         )
 
