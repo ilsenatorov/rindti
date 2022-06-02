@@ -8,15 +8,13 @@ from pygad import GA
 
 params = {
     "GA": {
-        "G": 100,  # Number of generations in optimization
-        "P": 4,  # number of parents ??
-        "KP": 3,  # Keep parents to next generation
-        "CP": 4,  # crossover probability
-        "MP": 4,  # mutation probability
-        "A": 1,  # weight of dropped samples in the scoring
-        "I": 1,  # weight of interaction balance between train and test sets
-        "D": 1,  # weight of drug balance between train and test sets
-        "T": 1,  # weight of protein balance between train and test sets
+        "G": 1000,  # number of generations in optimization
+        "P": 6,  # number of parents
+        "KP": 1,  # keep parents to next generation
+        "CP": 0.8,  # crossover probability
+        "MP": 0.8,  # mutation probability
+        "D": 0.1,  # weight of drug balance between train and test sets
+        "B": 3,  # weight of protein balance between train and test sets
     }
 }
 
@@ -39,7 +37,7 @@ def show_data_split(split, dataset):
 
     print(
         f"=================================================\n"
-        f"Final Split Evaluation"
+        f"Final Split Evaluation\n"
         f"-------------------------------------------------\n"
         f"Total number of interactions: {len(data)}\n"
         f"Dropped number of interactions: {len(data) - len(train_data) - len(test_data)} "
@@ -164,9 +162,8 @@ class GeneticSplit(Split):
         )
         ga.run()
         solution, solution_fitness, solution_idx = ga.best_solution()
-        print(f"Parameters of the best solution : {solution}")
-        print(f"Fitness value of the best solution = {solution_fitness}")
         show_data_split(solution, self.dataset)
+        return solution, solution_fitness
 
     def fitness_function(self, solution, idx):
         """Evaluate the intermediate solution"""
@@ -196,13 +193,15 @@ class GeneticSplit(Split):
         As the genetic algorithm is a maximization algorithm, we have to negate the minimization score
         """
         return - (
-                params["GA"]["A"] * len(drop_data) +
-                params["GA"]["I"] * (1 - ((len(train_data) / len(test_data)) -
-                                          self.train_partition / (1 - self.train_partition))) ** 2 +
-                params["GA"]["D"] * (1 - ((len(train_drugs) / len(test_drugs)) -
-                                          self.train_partition / (1 - self.train_partition))) ** 2 +
-                params["GA"]["T"] * (1 - ((len(train_prots) / len(test_prots)) -
-                                          self.train_partition / (1 - self.train_partition))) ** 2
+                params["GA"]["D"] * len(drop_data) +
+                params["GA"]["B"] * (
+                        (1 - ((len(train_data) / len(test_data)) -
+                              self.train_partition / (1 - self.train_partition))) ** 2 +
+                        (1 - ((len(train_drugs) / len(test_drugs)) -
+                              self.train_partition / (1 - self.train_partition))) ** 2 +
+                        (1 - ((len(train_prots) / len(test_prots)) -
+                              self.train_partition / (1 - self.train_partition))) ** 2
+                )
         )
 
     @staticmethod
