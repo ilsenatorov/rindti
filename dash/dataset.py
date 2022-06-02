@@ -4,6 +4,8 @@ from typing import Iterable, Tuple
 
 import dash_bio as dashbio
 import dash_bio.utils.ngl_parser as ngl_parser
+import dash_cytoscape as cyto
+import networkx as nx
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -112,6 +114,32 @@ def build_col_option(colname: str, col_id: str, value: str) -> html.Div:
     )
 
 
+def edge_class(g: nx.Graph, u: str, v: str) -> str:
+    return {0: "neg", 1: "pos"}[g.get_edge_data(u, v)["label"]]
+
+
+@app.callback(Output("cytoscape", "elements"), Input("data", "data"), Input("prot_struct", "clickData"))
+def cytoscape(data: dict, prot_id: str) -> list:
+    if not prot_id:
+        raise PreventUpdate
+    prot_id = prot_id["points"][0]["hovertext"]
+    inter = pd.DataFrame(data["inter"])
+    g = nx.from_pandas_edgelist(
+        inter,
+        source="prot_id",
+        target="drug_id",
+        edge_attr=["label"],
+    )
+    nodes = [{"data": {"id": x}, "classes": "drug"} for x in g.neighbors(prot_id)]
+    nodes.append({"data": {"id": prot_id, "label": prot_id}, "classes": "prot"})
+    edges = [
+        {"data": {"source": x, "target": prot_id}, "classes": edge_class(g, prot_id, x)} for x in g.neighbors(prot_id)
+    ]
+    pos_edges = [x for x in edges if x["classes"] == "pos"]
+    neg_edges = [x for x in edges if x["classes"] == "neg"]
+    return nodes + pos_edges + neg_edges
+
+
 app.layout = html.Div(
     children=[
         dcc.Store(id="data"),
@@ -130,6 +158,16 @@ app.layout = html.Div(
                     ],
                 ),
             ]
+        ),
+        cyto.Cytoscape(
+            id="cytoscape",
+            layout={"name": "concentric"},
+            style={"width": "100%", "height": "400px"},
+            stylesheet=[
+                {"selector": ".prot", "style": {"background-color": "blue", "line-color": "black"}},
+                {"selector": ".pos", "style": {"line-color": "green"}},
+                {"selector": ".neg", "style": {"line-color": "red"}},
+            ],
         ),
         html.Div(
             style={"display": "flex", "flex-direction": "row"},
