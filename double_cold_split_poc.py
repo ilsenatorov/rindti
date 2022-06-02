@@ -14,7 +14,7 @@ params = {
         "CP": 0.8,  # crossover probability
         "MP": 0.8,  # mutation probability
         "D": 1,  # weight of drug balance between train and test sets
-        "B": 200,  # weight of protein balance between train and test sets
+        "B": 1,  # weight of protein balance between train and test sets
     }
 }
 
@@ -141,11 +141,14 @@ class GeneticSplit(Split):
         self.data = pd.read_csv(self.dataset, sep="\t")
         self.prots = self.data["Target_ID"].unique()
         self.drugs = self.data["Drug_ID"].unique()
+        self.prob_lower_bound = None
         self.train_partition = None
 
     def split(self, train_partition=0.7):
         """Initialize the genetic algorithm based on some hyperparameter"""
         self.train_partition = train_partition
+        self.prob_lower_bound = 2 * (len(self.data) / (len(self.prots) + len(self.drugs))) * train_partition * (1 - train_partition) * (len(self.prots) + len(self.drugs))
+        print("LB:", self.prob_lower_bound)
         ga = GA(
             num_generations=params["GA"]["G"],
             num_parents_mating=params["GA"]["P"],
@@ -187,21 +190,17 @@ class GeneticSplit(Split):
         train_data = self.data[self.data["Target_ID"].isin(train_prots) & self.data["Drug_ID"].isin(train_drugs)]
         test_data = self.data[self.data["Target_ID"].isin(test_prots) & self.data["Drug_ID"].isin(test_drugs)]
 
-        keep_data_len = len(self.data) - len(drop_data)
         """
         actually compute the score to minimize the number of dropped interactions as well as the differences between 
         the rations of drugs, targets, and interactions between train set and test set.
         As the genetic algorithm is a maximization algorithm, we have to negate the minimization score
         """
         return - (
-                params["GA"]["D"] * len(drop_data) +
+                params["GA"]["D"] * (len(drop_data) / self.prob_lower_bound) +
                 params["GA"]["B"] * (
-                        ((len(train_data) / keep_data_len) / (len(test_data) / keep_data_len) -
-                         self.train_partition / (1 - self.train_partition)) ** 2 +
-                        ((len(train_drugs) / len(self.drugs)) / (len(test_drugs) / len(self.drugs)) -
-                         self.train_partition / (1 - self.train_partition)) ** 2 +
-                        ((len(train_prots) / len(self.prots)) / (len(train_prots) / len(self.prots)) -
-                         self.train_partition / (1 - self.train_partition)) ** 2
+                        (len(train_data) / (len(self.data) - len(drop_data)) - self.train_partition) ** 2 +
+                        (len(train_drugs) / len(self.drugs) - self.train_partition) ** 2 +
+                        (len(train_prots) / len(self.prots) - self.train_partition) ** 2
                 )
         )
 
