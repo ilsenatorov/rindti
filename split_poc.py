@@ -6,6 +6,8 @@ from copy import copy
 import pandas as pd
 from pygad import GA
 from pytorch_lightning import seed_everything
+from rdkit import Chem
+from rdkit.Chem.Scaffolds import MurckoScaffold
 
 
 params = {
@@ -19,6 +21,10 @@ params = {
         "B": 1,  # weight of protein balance between train and test sets
     }
 }
+
+
+def flatten_list(t):
+    return [item for sublist in t for item in sublist]
 
 
 def show_data_split(split, dataset, train_partition, output=True):
@@ -235,17 +241,96 @@ methods = {
     "ga": GeneticSplit,
 }
 
-if __name__ == '__main__':
-    # double_cold_split_poc.py random_100_1000 ga 0.7 5
+
+def eval_split(args):
     np.random.seed(42)
     results = []
     ds = None
-    for seed in np.random.uniform(0, 100, int(sys.argv[4])):
+    for seed in np.random.uniform(0, 100, int(args[3])):
         seed_everything(seed)
-        splitter = methods[sys.argv[2]](sys.argv[1])
+        splitter = methods[args[1]](args[0])
         if ds is None:
             ds = splitter.dataset
         solution = splitter.split(float(sys.argv[3]))
         results.append((solution, show_data_split(solution, ds, float(sys.argv[3]), output=False)))
     best = max(results, key=lambda x: x[1])
     show_data_split(best[0], ds, float(sys.argv[3]))
+
+
+def get_scaffolds(lig):
+    """Compute the scaffold for proteins"""
+    if lig != lig:
+        return np.nan
+    mol = Chem.MolFromSmiles(lig)
+    if mol is None:
+        return np.nan
+    scaffold = MurckoScaffold.GetScaffoldForMol(mol)
+    generic_sf = MurckoScaffold.MakeScaffoldGeneric(scaffold)
+    return Chem.CanonSmiles(Chem.MolToSmiles(generic_sf))
+
+
+def solve_int_knapsack(weights, border):
+    """Solve the knapsack problem using dynamic programming"""
+    k = [[0 for _ in range(border + 1)] for _ in range(len(weights) + 1)]
+    s = [[[] for _ in range(border + 1)] for _ in range(len(weights) + 1)]
+    for i in range(len(weights) + 1):
+        for w in range(border + 1):
+            if i == 0 or w == 0:
+                k[i][w] = 0
+            elif weights[i - 1] <= w:
+                if 1 + k[i - 1][w - weights[i - 1]] > k[i - 1][w]:
+                    k[i][w] = 1 + k[i - 1][w - weights[i - 1]]
+                    s[i][w] = s[i - 1][w - weights[i - 1]] + [i - 1]
+                else:
+                    k[i][w] = k[i - 1][w]
+                    s[i][w] = s[i - 1][w]
+            else:
+                k[i][w] = k[i - 1][w]
+                s[i][w] = s[i - 1][w]
+    return k[len(weights)][border], s[len(weights)][border]
+
+
+def scaffold_split(args):
+    """Compute a scaffold split for drugs"""
+    # read in the data and compute scaffolds
+    inter = pd.read_csv(os.path.join(args[0], "tables", "inter.tsv"), sep="\t")
+    ligs = pd.read_csv(os.path.join(args[0], "tables", "lig.tsv"), sep="\t")
+    # ligs = ligs.dropna(subset=["Scaff"])
+    ligs["Scaff"] = ligs["Drug"].apply(lambda x: get_scaffolds(x))
+
+    # find the groups for each scaffold and compute it's size in interactions in the actual data
+    groups = {}
+    for i, (_, value) in enumerate(ligs.groupby("Scaff").indices.items()):
+        count = 0
+        drugs = []
+        for index in value:
+            drugs.append(ligs.loc[index, "Drug_ID"])
+            count += len(inter[inter["Drug_ID"] == drugs[-1]])
+        groups[i] = (drugs, count)
+
+    # due to better runtime, we find the data that go into test data,
+    # the knapsack solver's runtime depends on the border
+    upper_limit = int(len(inter) * (1 - float(args[1])))
+    test_indices = solve_int_knapsack(
+        [groups[x][1] for x in groups.keys()],
+        upper_limit,
+    )
+
+    # assign the actual separation into train and test split
+    test_drugs = flatten_list([groups[i][0] for i in test_indices[1]])
+    inter["split"] = inter["Drug_ID"].apply(lambda x: "test" if x in test_drugs else "train")
+    inter.to_csv(os.path.join(args[0], "tables", "inter_scaff.tsv"), sep="\t", index=False)
+
+
+if __name__ == '__main__':
+    """
+    For double cold splitting:
+    splitting_poc.py dc random_100_1000 ga 0.7 5 (script, split-mode, graph, training-split, runs of algorithm)
+    
+    For scaffold split:
+    splitting_poc.py sc /path/to/resources 0.7 (script, split-mode, data, training-split)
+    """
+    if sys.argv[1] == "dc":
+        eval_split(sys.argv[2:])
+    elif sys.argv[1] == "sc":
+        scaffold_split(sys.argv[2:])
