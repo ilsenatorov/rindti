@@ -5,21 +5,23 @@ import numpy as np
 from copy import copy
 import pandas as pd
 from pygad import GA
+from pytorch_lightning import seed_everything
+
 
 params = {
     "GA": {
         "G": 1000,  # number of generations in optimization
-        "P": 6,  # number of parents
-        "KP": 1,  # keep parents to next generation
-        "CP": 0.8,  # crossover probability
-        "MP": 0.8,  # mutation probability
+        "P": 3,  # number of parents
+        "KP": 2,  # keep parents to next generation
+        "MP": 0.1,  # mutation probability
+        "CP": 0.2,  # crossover probability
         "D": 1,  # weight of drug balance between train and test sets
         "B": 1,  # weight of protein balance between train and test sets
     }
 }
 
 
-def show_data_split(split, dataset):
+def show_data_split(split, dataset, train_partition, output=True):
     data = pd.read_csv(dataset, sep="\t")
     prots = data["Target_ID"].unique()
     drugs = data["Drug_ID"].unique()
@@ -34,28 +36,42 @@ def show_data_split(split, dataset):
 
     train_data = data[data["Target_ID"].isin(train_prots) & data["Drug_ID"].isin(train_drugs)]
     test_data = data[data["Target_ID"].isin(test_prots) & data["Drug_ID"].isin(test_drugs)]
+    prob_lower_bound = 2 * (len(data) / (len(prots) + len(drugs))) * train_partition * \
+        (1 - train_partition) * (len(prots) + len(drugs))
 
-    print(
-        f"=================================================\n"
-        f"Final Split Evaluation\n"
-        f"-------------------------------------------------\n"
-        f"Total number of interactions: {len(data)}\n"
-        f"Dropped number of interactions: {len(data) - len(train_data) - len(test_data)} "
-        f"({(len(data) - len(train_data) - len(test_data)) / len(data):.2})\n"
-        f"Total number of proteins: {len(prots)}\n"
-        f"Total number of drugs: {len(drugs)}\n"
-        f"-------------------------------------------------\n"
-        f"Number of interactions in training: {len(train_data)} ({len(train_data) / len(data):.2})\n"
-        f"Number of interactions in testing: {len(test_data)} ({len(test_data) / len(data):.2})\n"
-        f"Fraction of interactions in training: {len(train_data) / (len(train_data) + len(test_data)):.2}\n"
-        f"Fraction of interactions in testing: {len(test_data) / (len(train_data) + len(test_data)):.2}\n"
-        f"-------------------------------------------------\n"
-        f"Number of proteins in training: {len(train_prots)} ({len(train_prots) / len(prots):.2})\n"
-        f"Number of proteins in testing: {len(test_prots)} ({len(test_prots) / len(prots):.2})\n"
-        f"Number of drugs in training: {len(train_drugs)} ({len(train_drugs) / len(drugs):.2})\n"
-        f"Number of drugs in testing: {len(test_drugs)} ({len(test_drugs) / len(drugs):.2})\n"
-        f"================================================="
+    score = - (
+            params["GA"]["D"] * ((len(data) - len(train_data) - len(test_data)) / prob_lower_bound) +
+            params["GA"]["B"] * (
+                    abs(len(train_data) / (len(data) - (len(data) - len(train_data) - len(test_data))) - train_partition) +
+                    abs(len(train_drugs) / len(drugs) - train_partition) +
+                    abs(len(train_prots) / len(prots) - train_partition)
+            )
     )
+    if output:
+        print(
+            f"=================================================\n"
+            f"Final Split Evaluation\n"
+            f"-------------------------------------------------\n"
+            f"Final scoring for the solution: {score:.5}\n"
+            f"Total number of interactions: {len(data)}\n"
+            f"Dropped number of interactions: {len(data) - len(train_data) - len(test_data)} "
+            f"({(len(data) - len(train_data) - len(test_data)) / len(data):.2})\n"
+            f"Probabilistic lower bound: {int(prob_lower_bound)}\n"
+            f"Total number of proteins: {len(prots)}\n"
+            f"Total number of drugs: {len(drugs)}\n"
+            f"-------------------------------------------------\n"
+            f"Number of interactions in training: {len(train_data)} ({len(train_data) / len(data):.2})\n"
+            f"Number of interactions in testing: {len(test_data)} ({len(test_data) / len(data):.2})\n"
+            f"Fraction of interactions in training: {len(train_data) / (len(train_data) + len(test_data)):.2}\n"
+            f"Fraction of interactions in testing: {len(test_data) / (len(train_data) + len(test_data)):.2}\n"
+            f"-------------------------------------------------\n"
+            f"Number of proteins in training: {len(train_prots)} ({len(train_prots) / len(prots):.2})\n"
+            f"Number of proteins in testing: {len(test_prots)} ({len(test_prots) / len(prots):.2})\n"
+            f"Number of drugs in training: {len(train_drugs)} ({len(train_drugs) / len(drugs):.2})\n"
+            f"Number of drugs in testing: {len(test_drugs)} ({len(test_drugs) / len(drugs):.2})\n"
+            f"================================================="
+        )
+    return score
 
 
 class Split:
@@ -147,8 +163,8 @@ class GeneticSplit(Split):
     def split(self, train_partition=0.7):
         """Initialize the genetic algorithm based on some hyperparameter"""
         self.train_partition = train_partition
-        self.prob_lower_bound = 2 * (len(self.data) / (len(self.prots) + len(self.drugs))) * train_partition * (1 - train_partition) * (len(self.prots) + len(self.drugs))
-        print("LB:", self.prob_lower_bound)
+        self.prob_lower_bound = 2 * (len(self.data) / (len(self.prots) + len(self.drugs))) * train_partition * \
+                                (1 - train_partition) * (len(self.prots) + len(self.drugs))
         ga = GA(
             num_generations=params["GA"]["G"],
             num_parents_mating=params["GA"]["P"],
@@ -165,8 +181,8 @@ class GeneticSplit(Split):
         )
         ga.run()
         solution, solution_fitness, solution_idx = ga.best_solution()
-        show_data_split(solution, self.dataset)
-        return solution, solution_fitness
+        # show_data_split(solution, self.dataset, self.train_partition)
+        return solution
 
     def fitness_function(self, solution, idx):
         """Evaluate the intermediate solution"""
@@ -188,7 +204,6 @@ class GeneticSplit(Split):
             (self.data["Target_ID"].isin(test_prots) & self.data["Drug_ID"].isin(train_drugs))
             ]
         train_data = self.data[self.data["Target_ID"].isin(train_prots) & self.data["Drug_ID"].isin(train_drugs)]
-        test_data = self.data[self.data["Target_ID"].isin(test_prots) & self.data["Drug_ID"].isin(test_drugs)]
 
         """
         actually compute the score to minimize the number of dropped interactions as well as the differences between 
@@ -198,9 +213,9 @@ class GeneticSplit(Split):
         return - (
                 params["GA"]["D"] * (len(drop_data) / self.prob_lower_bound) +
                 params["GA"]["B"] * (
-                        (len(train_data) / (len(self.data) - len(drop_data)) - self.train_partition) ** 2 +
-                        (len(train_drugs) / len(self.drugs) - self.train_partition) ** 2 +
-                        (len(train_prots) / len(self.prots) - self.train_partition) ** 2
+                        abs(len(train_data) / (len(self.data) - len(drop_data)) - self.train_partition) +
+                        abs(len(train_drugs) / len(self.drugs) - self.train_partition) +
+                        abs(len(train_prots) / len(self.prots) - self.train_partition)
                 )
         )
 
@@ -208,7 +223,7 @@ class GeneticSplit(Split):
     def generation_end(ga_instance):
         """Track the process of optimization"""
         tmp = ga_instance.last_generation_fitness
-        if ga_instance.generations_completed % 10 == 0:
+        if ga_instance.generations_completed % 10000 == 0:
             print(f"{ga_instance.generations_completed:5} | "
                   f"{min(tmp):7.4} | "
                   f"{np.mean([x for x in ga_instance.last_generation_fitness if x != float('-inf')]):7.4} | "
@@ -221,5 +236,16 @@ methods = {
 }
 
 if __name__ == '__main__':
-    # double_cold_split_poc.py random_100_1000 ga 0.7
-    methods[sys.argv[2]](sys.argv[1]).split(float(sys.argv[3]))
+    # double_cold_split_poc.py random_100_1000 ga 0.7 5
+    np.random.seed(42)
+    results = []
+    ds = None
+    for seed in np.random.uniform(0, 100, int(sys.argv[4])):
+        seed_everything(seed)
+        splitter = methods[sys.argv[2]](sys.argv[1])
+        if ds is None:
+            ds = splitter.dataset
+        solution = splitter.split(float(sys.argv[3]))
+        results.append((solution, show_data_split(solution, ds, float(sys.argv[3]), output=False)))
+    best = max(results, key=lambda x: x[1])
+    show_data_split(best[0], ds, float(sys.argv[3]))
