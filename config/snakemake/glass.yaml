@@ -8,4 +8,4 @@ prots:
 parse_dataset:
   filtering: all
 split_data:
-  method: target
+  method: community

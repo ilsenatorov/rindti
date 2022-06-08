@@ -21,7 +21,7 @@ drugs:
   node_feats: label # label, onehot, glycan
   edge_feats: none # label, onehot, none
 split_data:
-  method: random # random, target, drug
+  method: random # random, target, drug, community
   train: 0.7 # test is created as a remainder of train and val
   val: 0.2
 parse_dataset:
