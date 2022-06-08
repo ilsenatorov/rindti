@@ -93,6 +93,7 @@ def get_communities(df: pd.DataFrame) -> pd.DataFrame:
     for name, row in communities.iterrows():
         idx = df["Target_ID"].isin(row["protids"]) & df["Drug_ID"].isin(row["drugids"])
         df.loc[idx, "community"] = "com" + str(int(name))
+    df = df[df["community"].notna()]
     return df
 
 
