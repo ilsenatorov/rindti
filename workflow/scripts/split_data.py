@@ -72,16 +72,13 @@ def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float =
 def get_communities(df: pd.DataFrame) -> pd.DataFrame:
     """Assigns each interaction to a community, based on Louvain algorithm."""
     G = nx.from_pandas_edgelist(df, source="Target_ID", target="Drug_ID")
+    all_drugs = set(df["Drug_ID"].unique())
+    all_prots = set(df["Target_ID"].unique())
     s = list(nx.algorithms.community.louvain_communities(G))
     communities = []
     for i in s:
-        drugs = []
-        prots = []
-        for j in i:
-            if j in df["Drug_ID"].unique():
-                drugs.append(j)
-            else:
-                prots.append(j)
+        drugs = i.intersection(all_drugs)
+        prots = i.intersection(all_prots)
         subset = df[df["Target_ID"].isin(prots) & df["Drug_ID"].isin(drugs)]
         communities.append(
             {
@@ -93,7 +90,6 @@ def get_communities(df: pd.DataFrame) -> pd.DataFrame:
             }
         )
     communities = pd.DataFrame(communities).sort_values("edgen").reset_index(drop=True)
-
     for name, row in communities.iterrows():
         idx = df["Target_ID"].isin(row["protids"]) & df["Drug_ID"].isin(row["drugids"])
         df.loc[idx, "community"] = "com" + str(int(name))

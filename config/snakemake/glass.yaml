@@ -6,6 +6,6 @@ prots:
   features:
     method: distance
 parse_dataset:
-  filtering: all
+  filtering: posneg
 split_data:
   method: community
