@@ -121,6 +121,15 @@ def edge_class(g: nx.Graph, u: str, v: str) -> str:
     return {0: "neg", 1: "pos"}[g.get_edge_data(u, v)["label"]]
 
 
+def get_class(name, center):
+    if name == center:
+        return "center"
+    elif "-" in name:
+        return "drug"
+    else:
+        return "prot"
+
+
 @app.callback(Output("cytoscape", "elements"), Input("data", "data"), Input("prot_struct", "clickData"))
 def cytoscape(data: dict, prot_id: str) -> list:
     """Graph of protein interactions."""
@@ -135,9 +144,23 @@ def cytoscape(data: dict, prot_id: str) -> list:
         edge_attr=["label"],
     )
     subgraph = nx.ego_graph(g, prot_id, radius=2)
-    nodes = [{"data": {"id": x}, "classes": "drug" if "-" in x else "prot"} for x in subgraph.nodes]
+    nodes = [
+        {
+            "data": {"id": x},
+            "classes": get_class(x, prot_id),
+        }
+        for x in subgraph.nodes
+    ]
     edges = [
-        {"data": {"source": x[0], "target": x[1]}, "classes": edge_class(subgraph, x[0], x[1])} for x in subgraph.edges
+        {
+            "data": {"source": x[0], "target": x[1]},
+            "classes": edge_class(
+                subgraph,
+                x[0],
+                x[1],
+            ),
+        }
+        for x in subgraph.edges
     ]
     return nodes + edges
 
@@ -163,11 +186,12 @@ app.layout = html.Div(
         ),
         cyto.Cytoscape(
             id="cytoscape",
-            layout={"name": "cose"},
+            layout={"name": "concentric"},
             style={"width": "100%", "height": "800px"},
             stylesheet=[
-                {"selector": ".prot", "style": {"background-color": "blue", "shape": "circle"}},
-                {"selector": ".drug", "style": {"background-color": "orange", "shape": "square"}},
+                {"selector": ".prot", "style": {"background-color": "orange", "shape": "square"}},
+                {"selector": ".center", "style": {"background-color": "brown", "shape": "triangle"}},
+                {"selector": ".drug", "style": {"background-color": "blue", "shape": "circle"}},
                 {"selector": ".pos", "style": {"line-color": "green"}},
                 {"selector": ".neg", "style": {"line-color": "red"}},
             ],
