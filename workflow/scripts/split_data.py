@@ -1,3 +1,4 @@
+import networkx as nx
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -68,6 +69,37 @@ def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float =
     return inter
 
 
+def get_communities(df: pd.DataFrame) -> pd.DataFrame:
+    """Assigns each interaction to a community, based on Louvain algorithm."""
+    G = nx.from_pandas_edgelist(df, source="Target_ID", target="Drug_ID")
+    s = list(nx.algorithms.community.louvain_communities(G))
+    communities = []
+    for i in s:
+        drugs = []
+        prots = []
+        for j in i:
+            if j in df["Drug_ID"].unique():
+                drugs.append(j)
+            else:
+                prots.append(j)
+        subset = df[df["Target_ID"].isin(prots) & df["Drug_ID"].isin(drugs)]
+        communities.append(
+            {
+                "protn": len(prots),
+                "drugn": len(drugs),
+                "edgen": len(subset),
+                "protids": prots,
+                "drugids": drugs,
+            }
+        )
+    communities = pd.DataFrame(communities).sort_values("edgen").reset_index(drop=True)
+
+    for name, row in communities.iterrows():
+        idx = df["Target_ID"].isin(row["protids"]) & df["Drug_ID"].isin(row["drugids"])
+        df.loc[idx, "community"] = "com" + str(int(name))
+    return df
+
+
 if __name__ == "__main__":
     from pytorch_lightning import seed_everything
 
@@ -81,6 +113,9 @@ if __name__ == "__main__":
         inter = split_groups(inter, col_name="Drug_ID", **fracs)
     elif snakemake.params.method == "random":
         inter = split_random(inter)
+    elif snakemake.params.method == "community":
+        inter = get_communities(inter)
+        inter = split_groups(inter, col_name="community", **fracs)
     else:
         raise NotImplementedError("Unknown split type!")
     inter.to_csv(snakemake.output.split_data, sep="\t")
