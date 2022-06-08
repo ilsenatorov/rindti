@@ -5,7 +5,7 @@ import pandas as pd
 from workflow.scripts.split_data import get_communities, split_groups
 
 
-def split(df: pd.DataFrame, train_frac: float, val_frac: float):
+def split_ilya_louvain(df: pd.DataFrame, train_frac: float, val_frac: float) -> pd.DataFrame:
     """Split the data.
     Args:
         df (pd.DataFrame): DataFrame "Drug_ID", "Target_ID" and "Y" columns.
@@ -17,6 +17,11 @@ def split(df: pd.DataFrame, train_frac: float, val_frac: float):
     df = get_communities(df)
     df = split_groups(df, "community", 10, train_frac, val_frac)
     return df
+
+
+def split_roman_genetic(df: pd.DataFrame, train_frac: float, val_frac: float) -> pd.DataFrame:
+    """TODO @Roman"""
+    raise NotImplementedError
 
 
 def assess_split(df: pd.DataFrame, orig_num: int, train_frac: float, val_frac: float) -> dict:
@@ -43,28 +48,36 @@ def assess_split(df: pd.DataFrame, orig_num: int, train_frac: float, val_frac: f
     return dict(train_diff=train_diff, val_diff=val_diff, test_diff=test_diff, total_diff=total_diff)
 
 
-def main(filename: str, num_iter: int = 10, train_frac: float = 0.7, val_frac: float = 0.2):
+def main(
+    filename: str,
+    split: str,
+    num_iter: int = 10,
+    train_frac: float = 0.7,
+    val_frac: float = 0.2,
+):
     """Main function.
     Args:
         filename (str): Path to the dataset file to be split, should be a tsv with necessary columns.
+        split (str): Name of the split to be assessed. Currently supports "ilya_louvain" and "roman_genetic".
         num_iter (int, optional): Number of iterations.
         train_frac (float, optional): value from 0 to 1, how much of the data should go into train.
         val_frac (float, optional): value from 0 to 1, how much of the data should into validation.
     """
+    splits = {"ilya_louvain": split_ilya_louvain, "roman_genetic": split_roman_genetic}
     df = pd.read_csv(filename, sep="\t")
     results = []
     orig_num = df.shape[0]
     for i in range(num_iter):
         start = time.time()
-        df = split(df, train_frac, val_frac)
+        df = splits[split](df, train_frac, val_frac)
         metrics = assess_split(df, orig_num, train_frac, val_frac)
         metrics["time"] = time.time() - start
         results.append(metrics)
     results = pd.DataFrame(results)
     print("Mean")
-    print(results.mean())
+    print(results.mean().to_string())
     print("Std")
-    print(results.std())
+    print(results.std().to_string())
 
 
 if __name__ == "__main__":
