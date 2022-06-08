@@ -17,6 +17,8 @@ from dash.exceptions import PreventUpdate
 from rindti.models.dti.baseline import ProtDrugMax
 
 app = dash.Dash(__name__)
+cyto.load_extra_layouts()
+
 
 folder = "datasets/glass/results/summary"
 files = [x for x in os.listdir(folder)]
@@ -115,11 +117,13 @@ def build_col_option(colname: str, col_id: str, value: str) -> html.Div:
 
 
 def edge_class(g: nx.Graph, u: str, v: str) -> str:
+    """Get edge class."""
     return {0: "neg", 1: "pos"}[g.get_edge_data(u, v)["label"]]
 
 
 @app.callback(Output("cytoscape", "elements"), Input("data", "data"), Input("prot_struct", "clickData"))
 def cytoscape(data: dict, prot_id: str) -> list:
+    """Graph of protein interactions."""
     if not prot_id:
         raise PreventUpdate
     prot_id = prot_id["points"][0]["hovertext"]
@@ -130,14 +134,12 @@ def cytoscape(data: dict, prot_id: str) -> list:
         target="drug_id",
         edge_attr=["label"],
     )
-    nodes = [{"data": {"id": x}, "classes": "drug"} for x in g.neighbors(prot_id)]
-    nodes.append({"data": {"id": prot_id, "label": prot_id}, "classes": "prot"})
+    subgraph = nx.ego_graph(g, prot_id, radius=2)
+    nodes = [{"data": {"id": x}, "classes": "drug" if "-" in x else "prot"} for x in subgraph.nodes]
     edges = [
-        {"data": {"source": x, "target": prot_id}, "classes": edge_class(g, prot_id, x)} for x in g.neighbors(prot_id)
+        {"data": {"source": x[0], "target": x[1]}, "classes": edge_class(subgraph, x[0], x[1])} for x in subgraph.edges
     ]
-    pos_edges = [x for x in edges if x["classes"] == "pos"]
-    neg_edges = [x for x in edges if x["classes"] == "neg"]
-    return nodes + pos_edges + neg_edges
+    return nodes + edges
 
 
 app.layout = html.Div(
@@ -151,9 +153,9 @@ app.layout = html.Div(
                     children=[
                         build_col_option(colname, col_id, value)
                         for colname, col_id, value in [
-                            ("X-axis", "x-col", "nnodes"),
-                            ("Y-axis", "y-col", "nedges"),
-                            ("Color", "color-col", "label"),
+                            ("X-axis", "x-col", "label"),
+                            ("Y-axis", "y-col", "count"),
+                            ("Color", "color-col", "plddt"),
                         ]
                     ],
                 ),
@@ -161,10 +163,11 @@ app.layout = html.Div(
         ),
         cyto.Cytoscape(
             id="cytoscape",
-            layout={"name": "concentric"},
-            style={"width": "100%", "height": "400px"},
+            layout={"name": "cose"},
+            style={"width": "100%", "height": "800px"},
             stylesheet=[
-                {"selector": ".prot", "style": {"background-color": "blue", "line-color": "black"}},
+                {"selector": ".prot", "style": {"background-color": "blue", "shape": "circle"}},
+                {"selector": ".drug", "style": {"background-color": "orange", "shape": "square"}},
                 {"selector": ".pos", "style": {"line-color": "green"}},
                 {"selector": ".neg", "style": {"line-color": "red"}},
             ],
