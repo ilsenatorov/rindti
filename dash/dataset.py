@@ -6,6 +6,7 @@ import dash_bio as dashbio
 import dash_bio.utils.ngl_parser as ngl_parser
 import dash_cytoscape as cyto
 import networkx as nx
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -118,7 +119,11 @@ def build_col_option(colname: str, col_id: str, value: str) -> html.Div:
 
 def edge_class(g: nx.Graph, u: str, v: str) -> str:
     """Get edge class."""
-    return {0: "neg", 1: "pos"}[g.get_edge_data(u, v)["label"]]
+    d = {0: "neg", 1: "pos", 2: "other"}
+    edge = g.get_edge_data(u, v)
+    if edge:
+        return d[edge["label"]]
+    return "other"
 
 
 @app.callback(Output("cytoscape", "elements"), Input("data", "data"), Input("prot_struct", "clickData"))
@@ -135,10 +140,24 @@ def cytoscape(data: dict, prot_id: str) -> list:
         edge_attr=["label"],
     )
     subgraph = nx.ego_graph(g, prot_id, radius=2)
-    nodes = [{"data": {"id": x}, "classes": "drug" if "-" in x else "prot"} for x in subgraph.nodes]
-    edges = [
-        {"data": {"source": x[0], "target": x[1]}, "classes": edge_class(subgraph, x[0], x[1])} for x in subgraph.edges
-    ]
+    nodes = [{"data": {"id": x}} for x in subgraph.nodes]
+    edges = [{"data": {"source": x[0], "target": x[1]}} for x in subgraph.edges]
+    linspace = np.linspace(0, 2 * np.pi, len(nodes))
+    for i in range(len(nodes)):
+        if nodes[i]["data"]["id"] == prot_id:
+            nodes[i]["classes"] = "center"
+            nodes[i]["position"] = {"x": 0, "y": 0}
+        elif "-" in nodes[i]["data"]["id"]:
+            nodes[i]["classes"] = "drug"
+            nodes[i]["position"] = {"x": np.cos(linspace[i]) * 200, "y": np.sin(linspace[i]) * 200}
+        else:
+            nodes[i]["classes"] = "prot"
+            nodes[i]["position"] = {"x": np.cos(linspace[i]) * 400, "y": np.sin(linspace[i]) * 400}
+    for i in range(len(edges)):
+        edges[i]["classes"] = edge_class(subgraph, edges[i]["data"]["source"], edges[i]["data"]["target"])
+        if not (edges[i]["data"]["source"] == prot_id or edges[i]["data"]["target"] == prot_id):
+            edges[i]["classes"] += " second"
+    nodes.sort(key=lambda x: edge_class(g, x["data"]["id"], prot_id))
     return nodes + edges
 
 
@@ -163,13 +182,15 @@ app.layout = html.Div(
         ),
         cyto.Cytoscape(
             id="cytoscape",
-            layout={"name": "cose"},
+            layout={"name": "preset"},
             style={"width": "100%", "height": "800px"},
             stylesheet=[
-                {"selector": ".prot", "style": {"background-color": "blue", "shape": "circle"}},
-                {"selector": ".drug", "style": {"background-color": "orange", "shape": "square"}},
+                {"selector": ".prot", "style": {"background-color": "blue", "shape": "square"}},
+                {"selector": ".center", "style": {"background-color": "pink", "shape": "triangle"}},
+                {"selector": ".drug", "style": {"background-color": "orange", "shape": "circle"}},
                 {"selector": ".pos", "style": {"line-color": "green"}},
                 {"selector": ".neg", "style": {"line-color": "red"}},
+                {"selector": ".second", "style": {"opacity": 0.25}},
             ],
         ),
         html.Div(
