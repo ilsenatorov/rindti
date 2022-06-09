@@ -16,6 +16,7 @@ def split_ilya_louvain(df: pd.DataFrame, train_frac: float, val_frac: float) -> 
     """
     df = get_communities(df)
     df = split_groups(df, "community", 10, train_frac, val_frac)
+    df = df[df["split"].notna()]
     return df
 
 

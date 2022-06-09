@@ -25,7 +25,7 @@ def split_groups(
     Returns:
         pd.DataFrame: DataFrame with a new 'split' column
     """
-    sorted_index = [x for x in inter[col_name].value_counts().index]
+    sorted_index = inter[col_name].value_counts().index
     train_prop = int(bin_size * train_frac)
     val_prop = int(bin_size * val_frac)
     train = []
@@ -46,6 +46,7 @@ def split_groups(
     inter.loc[train_idx, "split"] = "train"
     inter.loc[val_idx, "split"] = "val"
     inter.loc[test_idx, "split"] = "test"
+    inter = inter[inter["split"].notna()]
     return inter
 
 
@@ -93,7 +94,6 @@ def get_communities(df: pd.DataFrame) -> pd.DataFrame:
     for name, row in communities.iterrows():
         idx = df["Target_ID"].isin(row["protids"]) & df["Drug_ID"].isin(row["drugids"])
         df.loc[idx, "community"] = "com" + str(int(name))
-    df = df[df["community"].notna()]
     return df
 
 
