@@ -1,6 +1,7 @@
 import os
 import random
 
+import torch
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger
@@ -8,6 +9,10 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from rindti.data import DTIDataModule
 from rindti.models import ClassificationModel, RegressionModel
 from rindti.utils import get_git_hash, read_config
+from pprint import pprint
+
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 
 models = {
     "class": ClassificationModel,
@@ -74,7 +79,6 @@ def single_run(folder, version, **kwargs):
         **kwargs["trainer"],
     )
     model = models[kwargs["model"]["module"]](**kwargs)
-    from pprint import pprint
 
     pprint(kwargs)
     trainer.fit(model, datamodule)
