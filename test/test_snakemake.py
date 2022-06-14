@@ -71,7 +71,7 @@ class TestSnakeMake:
         snakemake_config["drugs"]["edge_feats"] = edge_feats
         run_snakemake(snakemake_config, tmpdir_factory)
 
-    @pytest.mark.parametrize("split", ["random", "drug", "target"])
+    @pytest.mark.parametrize("split", ["random", "drug", "target", "community"])
     def test_splits(self, split: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the dataset splitting methods."""
         snakemake_config["split_data"]["method"] = split
