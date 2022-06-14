@@ -40,9 +40,9 @@ def split_groups(
         val += val_bin
         subset = [x for x in subset if x not in val_bin]
         test += subset
-    train_idx = inter[inter[col_name].isin(train)].index
-    val_idx = inter[inter[col_name].isin(val)].index
-    test_idx = inter[inter[col_name].isin(test)].index
+    train_idx = inter[col_name].isin(train)
+    val_idx = inter[col_name].isin(val)
+    test_idx = inter[col_name].isin(test)
     inter.loc[train_idx, "split"] = "train"
     inter.loc[val_idx, "split"] = "val"
     inter.loc[test_idx, "split"] = "test"
