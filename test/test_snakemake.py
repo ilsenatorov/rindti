@@ -5,11 +5,19 @@ from snakemake.utils import validate
 
 from rindti.utils import read_config
 
-from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
+from .conftest import DEFAULT_CONFIG, SNAKEMAKE_CONFIG_DIR, TEST_CONFIG, run_snakemake
 
 snakemake_configs = [
     os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
 ]
+
+
+@pytest.fixture()
+def snakemake_config():
+    default_config = read_config(DEFAULT_CONFIG)
+    test_config = read_config(TEST_CONFIG)
+    default_config.update(test_config)
+    return default_config
 
 
 @pytest.mark.snakemake
@@ -26,6 +34,9 @@ class TestSnakeMake:
     @pytest.mark.parametrize("method", ["whole", "plddt", "bsite", "template"])
     def test_structures(self, method: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the various structure-parsing methods."""
+        from pprint import pprint
+
+        pprint(snakemake_config)
         snakemake_config["prots"]["structs"]["method"] = method
         snakemake_config["only_prots"] = True
         run_snakemake(snakemake_config, tmpdir_factory)
