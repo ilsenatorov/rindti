@@ -1,0 +1,93 @@
+output_dir: exp/shot2
+models:
+  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
+  - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/results/prepare_all/rlnwgnranc_7cfb529f.pkl
+    drug_method: graph
+    prot_method: graph
+    models:
+      - name: Gly_82_1
+        checkpoint: tb_logs/dti_glylec/rlnwgntanc_5e01134f/version_1/version_82/checkpoints/epoch=58-step=152396.ckpt
+        params: [0.97246337, 0.047011796]
+      #- name: Gly_82_2
+      #  checkpoint: tb_logs/dti_glylec/rlnwgntanc_5e01134f/version_1/version_82/checkpoints/epoch=48-step=126566.ckpt
+      #  params: [0.9698246, 0.052165713]
+      - name: GlW_15_1
+        checkpoint: tb_logs/dti_glylec_w/rlnwgntanc_5e01134f/version_0/version_15/checkpoints/epoch=24-step=64574.ckpt
+        params: [0.65945333, 0.2622942]
+      #- name: GlW_15_2
+      #  checkpoint: tb_logs/dti_glylec_w/rlnwgntanc_5e01134f/version_0/version_15/checkpoints/epoch=15-step=41327.ckpt
+      #  params: [0.64813143, 0.2441228]
+      - name: GlW_82_1
+        checkpoint: tb_logs/dti_glylec_w/rlnwgntanc_5e01134f/version_2/version_82/checkpoints/epoch=35-step=92987.ckpt
+        params: [0.9475651, 0.09242792]
+      #- name: GlW_82_2
+      #  checkpoint: tb_logs/dti_glylec_w/rlnwgntanc_5e01134f/version_2/version_82/checkpoints/epoch=32-step=85238.ckpt
+      #  params: [0.94547373, 0.07900441]
+      - name: GlW_04_1
+        checkpoint: tb_logs/dti_glylec_w/rlnwgntanc_5e01134f/version_2/version_4/checkpoints/epoch=26-step=69740.ckpt
+        params: [0.9398765, 0.076663196]
+      #- name: GlW_04_2
+      #  checkpoint: tb_logs/dti_glylec_w/rlnwgntanc_5e01134f/version_2/version_4/checkpoints/epoch=24-step=64574.ckpt
+      #  params: [0.9291005, 0.08472054]
+      - name: Glb_82_1
+        checkpoint: tb_logs/dti_glylec_b/rlnwgntanc_5e01134f/version_2/version_82/checkpoints/epoch=45-step=7911.ckpt
+        params: [0.6938906, 0.12954149]
+      - name: GlB_82_1
+        checkpoint: tb_logs/dti_glylec_bb/rlnwgntanc_5e01134f/version_1/version_82/checkpoints/epoch=17-step=3095.ckpt
+        params: [0.64666456, 0.13629991]
+#  - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/results/prepare_all/rlnwlnranc_2cf66a76.pkl
+#    drug_method: graph
+#    prot_method: graph
+#    models:
+#      - name: Lab_82_1
+#        checkpoint: tb_logs/dti_glylec/rlnwlntanc_1dc421f8/version_1/version_82/checkpoints/epoch=81-step=211805.ckpt
+#      - name: Lab_82_2
+#        checkpoint: tb_logs/dti_glylec/rlnwlntanc_1dc421f8/version_1/version_82/checkpoints/epoch=69-step=180809.ckpt
+methods: [obfuscate]  # , delete]
+sequences: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/resources/tables/prot.tsv
+datamodule:
+  batch_size: 1
+model:
+  module: class
+  feat_method: concat
+  monitor: val_loss
+  drug:
+    hidden_dim: 128
+    method: graph
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 32
+      num_layers: 3
+    pool:
+      module: gmt
+      num_heads: 4
+      hidden_dim: 32
+      ratio: 0.25
+  prot:
+    hidden_dim: 128
+    method: graph
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 64
+      num_layers: 3
+    pool:
+      module: gmt
+      num_heads: 4
+      hidden_dim: 64
+      ratio: 0.25
+  mlp:
+    dropout: 0.2
+    hidden_dim: 512
+  optimizer:
+    module: adam
+    lr: 0.0001
+    prot_lr: 0.001
+    drug_lr: 0.001
+    weight_decay: 0.01
+    momentum: 0.01
+    reduce_lr:
+      factor: 0.1
+      patience: 20
+      monitor: val_loss

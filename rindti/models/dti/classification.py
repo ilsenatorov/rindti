@@ -1,4 +1,5 @@
 import torch.nn.functional as F
+import torch
 from torch.functional import Tensor
 
 from ...data import TwoGraphData
@@ -13,7 +14,7 @@ encoders = {"graph": GraphEncoder, "sweetnet": SweetNetEncoder, "pretrained": Pr
 class ClassificationModel(BaseModel):
     """Model for DTI prediction as a classification problem."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, pos_weight=1, neg_weight=1, **kwargs):
         super().__init__(**kwargs)
         self._determine_feat_method(
             kwargs["model"]["feat_method"],
@@ -24,11 +25,14 @@ class ClassificationModel(BaseModel):
         self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
         self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
         self._set_class_metrics()
+        self.pos_weight = torch.tensor(pos_weight)
+        self.neg_weight = torch.tensor(neg_weight)
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """"""
         prot_embed = self.prot_encoder(prot)
         drug_embed = self.drug_encoder(drug)
+        drug_embed = drug_embed.to(prot_embed.device)  # in case of inference and prot_embedding being in CPU mode
         joint_embedding = self.merge_features(drug_embed, prot_embed)
         return dict(
             pred=self.mlp(joint_embedding),
@@ -47,5 +51,6 @@ class ClassificationModel(BaseModel):
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
+        weights = torch.where(labels == 0, self.pos_weight.to(labels.device), self.neg_weight.to(labels.device)).float()
+        bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float(), weight=weights)
         return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
