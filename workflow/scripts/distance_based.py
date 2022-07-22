@@ -67,12 +67,11 @@ class Structure:
         """Get a graph using threshold as a cutoff"""
         nodes = self.get_nodes()
         edges = self.get_edges(threshold)
-        return dict(x=nodes, edge_index=edges)
+        coords = self.get_coords()
+        return dict(x=nodes, edge_index=edges, pos=coords)
 
 
 if __name__ == "__main__":
-    import pickle
-
     import pandas as pd
     from joblib import Parallel, delayed
     from tqdm import tqdm

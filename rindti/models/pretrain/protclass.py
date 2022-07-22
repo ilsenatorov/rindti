@@ -12,16 +12,25 @@ class ProtClassModel(BaseModel):
     def __init__(self, **kwargs):
         kwargs = super().__init__(**kwargs)
         self.encoder = GraphEncoder(**kwargs["encoder"])
+        self.noise_predict = MLP(kwargs["hidden_dim"], out_dim=3, **kwargs["mlp"])
         self.mlp = MLP(input_dim=kwargs["hidden_dim"], out_dim=kwargs["num_classes"], **kwargs["mlp"])
         self.loss = nn.CrossEntropyLoss()
-        self._set_class_metrics(kwargs["num_classes"])
 
     def forward(self, data: dict) -> Tensor:
-        graphs = self.encoder(data)
-        preds = self.mlp(graphs)
-        return preds
+        encoded = self.encoder(data)
+        noise_preds = self.noise_predict(encoded["node"])
+        preds = self.mlp(encoded["graph"])
+        return preds, encoded["noise"], noise_preds
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        preds = self.forward(data)
-        loss = self.loss(preds, data.y)
-        return {"loss": loss, "preds": preds.detach(), "labels": data.y}
+        preds, noise, noise_preds = self.forward(data)
+        cross_entropy_loss = self.loss(preds, data.y)
+        denoising_loss = (noise - noise_preds).pow(2).mean()
+        loss = cross_entropy_loss + 1 * denoising_loss
+        return {
+            "loss": loss,
+            "cross_entropy_loss": cross_entropy_loss,
+            "denoising_loss": denoising_loss,
+            "preds": preds.detach(),
+            "labels": data.y,
+        }

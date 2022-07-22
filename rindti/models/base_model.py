@@ -91,21 +91,22 @@ class BaseModel(LightningModule):
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step."""
         ss = self.shared_step(data)
-        self.train_metrics.update(ss["preds"], ss["labels"])
-        self.log("train_loss", ss["loss"], batch_size=self.batch_size)
+        for i in ss.keys():
+            if "loss" in i:
+                self.log("train_" + i, ss[i], batch_size=self.batch_size)
         return ss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during validation step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
-        self.val_metrics.update(ss["preds"], ss["labels"])
-        self.log("val_loss", ss["loss"], batch_size=self.batch_size)
+        for i in ss.keys():
+            if "loss" in i:
+                self.log("val_" + i, ss[i], batch_size=self.batch_size)
         return ss
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during test step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
-        self.test_metrics.update(ss["preds"], ss["labels"])
         self.log("test_loss", ss["loss"], batch_size=self.batch_size)
         return ss
 
@@ -126,21 +127,6 @@ class BaseModel(LightningModule):
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything."""
         self.log_histograms()
-        metrics = self.train_metrics.compute()
-        self.train_metrics.reset()
-        self.log_all(metrics)
-
-    def validation_epoch_end(self, outputs: dict):
-        """What to do at the end of a validation epoch. Logs everything."""
-        metrics = self.val_metrics.compute()
-        self.val_metrics.reset()
-        self.log_all(metrics, hparams=True)
-
-    def test_epoch_end(self, outputs: dict):
-        """What to do at the end of a test epoch. Logs everything."""
-        metrics = self.test_metrics.compute()
-        self.test_metrics.reset()
-        self.log_all(metrics)
 
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimizer and/or lr schedulers"""

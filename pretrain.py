@@ -3,15 +3,11 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import PreTrainDataModule
-from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
+from rindti.models import ProtClassModel
 from rindti.utils import read_config
 
 models = {
-    "graphlog": GraphLogModel,
-    "infograph": InfoGraphModel,
     "class": ProtClassModel,
-    "bgrl": BGRLModel,
-    "distance": DistanceModel,
 }
 
 

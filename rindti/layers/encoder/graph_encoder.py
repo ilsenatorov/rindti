@@ -1,5 +1,6 @@
 from typing import Tuple, Union
 
+import torch
 from pytorch_lightning import LightningModule
 from torch import nn
 from torch.functional import Tensor
@@ -15,7 +16,11 @@ node_embedders = {
     "filmconv": FilmConvNet,
     "transformer": TransformerNet,
 }
-poolers = {"gmt": GMTNet, "diffpool": DiffPoolNet, "mean": MeanPool}
+poolers = {
+    "gmt": GMTNet,
+    "diffpool": DiffPoolNet,
+    "mean": MeanPool,
+}
 
 
 class GraphEncoder(LightningModule):
@@ -25,8 +30,9 @@ class GraphEncoder(LightningModule):
         return_nodes (bool, optional): Return node embeddings as well. Defaults to False.
     """
 
-    def __init__(self, return_nodes: bool = False, **kwargs):
+    def __init__(self, return_nodes: bool = False, sigma: float = 0.02, **kwargs):
         super().__init__()
+        self.sigma = sigma
         self.update_params(kwargs)
         self.feat_embed = self._get_feat_embed(kwargs)
         self.node_embed = self._get_node_embed(kwargs["node"])
@@ -38,7 +44,7 @@ class GraphEncoder(LightningModule):
         data_params = kwargs["data"]
         kwargs["pool"]["max_nodes"] = data_params["max_nodes"]
         kwargs.update(data_params)
-        kwargs["node"]["input_dim"] = kwargs["hidden_dim"]
+        kwargs["node"]["input_dim"] = kwargs["hidden_dim"] + 3
         kwargs["node"]["output_dim"] = kwargs["hidden_dim"]
         kwargs["pool"]["input_dim"] = kwargs["hidden_dim"]
         kwargs["pool"]["output_dim"] = kwargs["hidden_dim"]
@@ -80,23 +86,25 @@ class GraphEncoder(LightningModule):
         """
         if not isinstance(data, dict):
             data = data.to_dict()
-        x, edge_index, batch, edge_feats = (
+        x, edge_index, batch, edge_feats, pos = (
             data["x"],
             data["edge_index"],
             data["batch"],
             data.get("edge_feats"),
+            data.get("pos"),
         )
         feat_embed = self.feat_embed(x)
+        noise = torch.randn_like(pos) * self.sigma
+        pos = pos + noise
+        x = torch.cat([feat_embed, pos], dim=-1) if pos is not None else feat_embed
         node_embed = self.node_embed(
-            x=feat_embed,
+            x=x,
             edge_index=edge_index,
             edge_feats=edge_feats,
             batch=batch,
         )
         embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)
-        if self.return_nodes:
-            return embed, node_embed
-        return embed
+        return {"graph": embed, "node": node_embed, "noise": noise}
 
     def embed(self, data: Data, **kwargs):
         """Generate an embedding for a graph."""
