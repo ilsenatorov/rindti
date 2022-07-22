@@ -28,7 +28,7 @@ class NeighborhoodMasker:
     def __init__(self, spots=1, k=1, graphs=None, mode=None):
         self.k = k
         self.spots = spots
-        self.graphs = ["prot"] if graphs is None else graphs
+        self.graphs = [x for x in graphs.keys() if x != "main"]
 
     def __call__(self, data: Union[Data, TwoGraphData]):
         for graph in self.graphs:

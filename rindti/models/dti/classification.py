@@ -61,10 +61,14 @@ class MultitaskClassification(ClassificationModel):
         self.prot_class = "prot" in kwargs["transform"]["graphs"]
         self.drug_class = "drug" in kwargs["transform"]["graphs"]
 
+        self.main_weight = kwargs["transform"]["graphs"]["main"]["weight"]
+
         if self.prot_class:
             self.pp_train_metrics, self.pp_val_metrics, self.pp_test_metrics = self._set_class_metrics(num_classes=21, prefix="pp_")
+            self.prot_weight = kwargs["transform"]["graphs"]["prot"]["weight"]
         if self.drug_class:
             self.dp_train_metrics, self.dp_val_metrics, self.dp_test_metrics = self._set_class_metrics(num_classes=3, prefix="dp_")
+            self.drug_weight = kwargs["transform"]["graphs"]["drug"]["weight"]
 
     def forward(self, prot: dict, drug: dict) -> dict:
         prot_graph_embed, prot_node_embed = self.prot_encoder(prot)
@@ -89,17 +93,17 @@ class MultitaskClassification(ClassificationModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
-        loss = bce_loss
+        loss = self.main_weight * bce_loss
 
         if self.prot_class:
             prot_loss = F.cross_entropy(torch.softmax(fwd_dict["prot_node_class"], dim=1), data["prot_x_orig"])
-            loss += prot_loss
+            loss += self.prot_weight * prot_loss
         else:
             prot_loss = None
 
         if self.drug_class:
             drug_loss = F.cross_entropy(torch.softmax(fwd_dict["drug_node_class"], dim=1), data["drug_x_orig"])
-            loss += drug_loss
+            loss += self.drug_weight * drug_loss
         else:
             drug_loss = None
 
