@@ -1,3 +1,4 @@
+import copy
 import pickle
 from copy import deepcopy
 from math import ceil
@@ -21,6 +22,33 @@ class SizeFilter:
         """Returns True if number of nodes in given graph is within required values else False."""
         nnodes = data.num_nodes
         return nnodes > self.min_nnodes and nnodes < self.max_nnodes
+
+
+class NeighborhoodMasker:
+    def __init__(self, spots=1, k=1, graphs=None, mode=None):
+        self.k = k
+        self.spots = spots
+        self.graphs = ["prot"] if graphs is None else graphs
+
+    def __call__(self, data: Union[Data, TwoGraphData]):
+        for graph in self.graphs:
+            mask_ids = []
+            candidates = set(np.random.choice(range(len(data[graph + "_x"])), self.spots, replace=False))
+            for i in range(self.k):
+                new_candidates = set()
+                for c in candidates:
+                    mask_ids.append(c)
+                    for x in data[graph + "_edge_index"][0, (data[graph + "_edge_index"][1] == 170)]:
+                        new_candidates.add(x.item())
+                candidates = new_candidates
+            for c in candidates:
+                mask_ids.append(c)
+
+            data[graph + "_masked"] = mask_ids
+            data[graph + "_x_orig"] = data[graph + "_x"].clone()
+            data[graph + "_x"][mask_ids] = 0
+
+        return data
 
 
 class DataCorruptor:

@@ -1,5 +1,6 @@
 import os
 import pickle
+import random
 from typing import Callable, Iterable
 
 import pandas as pd
@@ -7,6 +8,23 @@ import torch
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 
 from .data import TwoGraphData
+
+
+def balance_data(data_list):
+    count = {}
+    for s in data_list:
+        if s["label"] not in count:
+            count[s["label"]] = 0
+        count[s["label"]] += 1
+    majority_class = max(count.keys(), key=lambda k: count[k])
+    minority_class = min(count.keys(), key=lambda k: count[k])
+    keep_ratio = count[minority_class] / count[majority_class]
+
+    output = []
+    for s in data_list:
+        if s["label"] == minority_class or random.random() < keep_ratio:
+            output.append(s)
+    return output
 
 
 class DTIDataset(InMemoryDataset):
@@ -86,6 +104,7 @@ class DTIDataset(InMemoryDataset):
                     two_graph_data.num_nodes = 1  # supresses the warning
                     data_list.append(two_graph_data)
                 if data_list:
+                    data_list = balance_data(data_list)
                     self.process_(data_list, split)
 
 

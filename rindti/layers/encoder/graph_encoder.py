@@ -93,10 +93,8 @@ class GraphEncoder(LightningModule):
             edge_feats=edge_feats,
             batch=batch,
         )
-        embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)
-        if self.return_nodes:
-            return embed, node_embed
-        return embed
+        graph_embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)
+        return graph_embed, node_embed
 
     def embed(self, data: Data, **kwargs):
         """Generate an embedding for a graph."""

@@ -28,7 +28,7 @@ class BaseModel(LightningModule):
         self.batch_size = kwargs["datamodule"]["batch_size"]
         return kwargs["model"]
 
-    def _set_class_metrics(self, num_classes: int = 2):
+    def _set_class_metrics(self, num_classes: int = 2, prefix: str = ""):
         metrics = MetricCollection(
             [
                 Accuracy(num_classes=None if num_classes == 2 else num_classes),
@@ -36,9 +36,8 @@ class BaseModel(LightningModule):
                 MatthewsCorrCoef(num_classes=num_classes),
             ]
         )
-        self.train_metrics = metrics.clone(prefix="train_")
-        self.val_metrics = metrics.clone(prefix="val_")
-        self.test_metrics = metrics.clone(prefix="test_")
+        return metrics.clone(prefix=prefix + "train_"), metrics.clone(prefix=prefix + "val_"), \
+            metrics.clone(prefix=prefix + "test_")
 
     def _set_reg_metrics(self):
         metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])

@@ -7,7 +7,8 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
-from rindti.models import ClassificationModel, RegressionModel
+from rindti.data.transforms import NeighborhoodMasker, DataCorruptor
+from rindti.models import ClassificationModel, RegressionModel, MultitaskClassification
 from rindti.utils import get_git_hash, read_config
 from pprint import pprint
 
@@ -17,6 +18,13 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 models = {
     "class": ClassificationModel,
     "reg": RegressionModel,
+    "multiclass": MultitaskClassification,
+}
+
+
+transformers = {
+    "neighbor": NeighborhoodMasker,
+    "corrupter": DataCorruptor,
 }
 
 
@@ -55,7 +63,7 @@ def single_run(folder, version, **kwargs):
     """Does a single run."""
     seed_everything(kwargs["seed"])
     datamodule = DTIDataModule(**kwargs["datamodule"])
-    datamodule.setup()
+    datamodule.setup(transform=NeighborhoodMasker(**kwargs["transform"]))
     datamodule.update_config(kwargs)
 
     logger = TensorBoardLogger(

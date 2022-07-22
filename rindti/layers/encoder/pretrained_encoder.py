@@ -27,7 +27,7 @@ class PretrainedEncoder(LightningModule):
         self,
         data: Union[dict, Data],
         **kwargs,
-    ) -> Tensor:
+    ) -> Tuple[Union[None, Tensor], Tensor]:
         r"""Encode an entry.
 
         Args:
@@ -36,4 +36,4 @@ class PretrainedEncoder(LightningModule):
         Returns:
             Tensor: Encoded entry.
         """
-        return self.mlp(data["x"])
+        return None, self.mlp(data["x"])

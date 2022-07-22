@@ -1,10 +1,15 @@
 runs: 3
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwIntanc_4e03bb8f.pkl
-  exp_name: glylec
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
+  exp_name: glylec_mbb
   batch_size: 64
   num_workers: 0
+transform:
+  mode: neighbors
+  k: 1
+  spots: 1
+  graphs: [prot]
 trainer:
   gpus: 1
   max_epochs: 1000
@@ -13,12 +18,12 @@ trainer:
 early_stop:
   patience: 40
 model:
-  module: class
+  module: multiclass
   feat_method: concat
   monitor: val_loss
   drug:
     hidden_dim: 128
-    method: sweetnet
+    method: graph
     node:
       module: ginconv
       dropout: 0.1

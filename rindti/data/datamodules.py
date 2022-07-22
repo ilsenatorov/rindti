@@ -1,3 +1,5 @@
+from typing import Callable
+
 from pytorch_lightning import LightningDataModule
 from torch.utils.data.sampler import Sampler
 from torch_geometric.loader import DataLoader
@@ -38,11 +40,11 @@ class BaseDataModule(LightningDataModule):
 class DTIDataModule(BaseDataModule):
     """Data module for the DTI dataset."""
 
-    def setup(self, stage: str = None):
+    def setup(self, stage: str = None, transform: Callable = None):
         """Load the individual datasets"""
-        self.train = DTIDataset(self.filename, self.exp_name, split="train").shuffle()
-        self.val = DTIDataset(self.filename, self.exp_name, split="val").shuffle()
-        self.test = DTIDataset(self.filename, self.exp_name, split="test").shuffle()
+        self.train = DTIDataset(self.filename, self.exp_name, split="train", transform=transform).shuffle()
+        self.val = DTIDataset(self.filename, self.exp_name, split="val", transform=transform).shuffle()
+        self.test = DTIDataset(self.filename, self.exp_name, split="test", transform=transform).shuffle()
         self.config = self.train.config
 
     def _dl_kwargs(self, shuffle: bool = False):
