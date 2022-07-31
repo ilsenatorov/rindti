@@ -1,9 +1,9 @@
 from pytorch_lightning import LightningDataModule
-from torch.utils.data.sampler import Sampler
 from torch_geometric.loader import DataLoader
 
 from ..utils import split_random
 from .datasets import DTIDataset, PreTrainDataset
+from .large_datasets import LargePreTrainDataset
 
 
 class BaseDataModule(LightningDataModule):
@@ -83,3 +83,18 @@ class PreTrainDataModule(BaseDataModule):
         """Update the main config with the config of the dataset."""
         config["model"]["encoder"]["data"] = self.config["data"]
         config["model"]["num_classes"] = self.config["data"]["num_classes"]
+
+
+class LargePreTrainDataModule(BaseDataModule):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def setup(self, stage: str = None):
+        """Load the individual datasets."""
+        ds = LargePreTrainDataset(self.filename)
+        self.train, self.val, self.test = split_random(ds, [0.7, 0.2, 0.1])
+        self.config = ds.config
+
+    def update_config(self, config: dict) -> None:
+        """Update the main config with the config of the dataset."""
+        config["model"]["encoder"]["data"] = {"feat_dim": 21, "feat_type": "label", "edge_type": "none"}

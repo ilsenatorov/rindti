@@ -112,6 +112,7 @@ class LargePreTrainDataset(Dataset):
         self.input_dir = Path(root)
         self.threshold = threshold
         self.threads = threads
+        self.config = {"feat_dim": 21, "edge_type": "none", "max_nodes": 0}
         super().__init__(root, transform, pre_transform, pre_filter)
 
     @property
@@ -125,6 +126,7 @@ class LargePreTrainDataset(Dataset):
         for raw_path in self.input_dir.glob("*.pdb"):
             s = Structure(raw_path)
             data = Data(**s.get_graph(self.threshold))
+            self.config["max_nodes"] = max(self.config["max_nodes"], data.num_nodes)
 
             if self.pre_filter is not None and not self.pre_filter(data):
                 continue
