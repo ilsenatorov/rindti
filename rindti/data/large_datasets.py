@@ -27,7 +27,6 @@ node_encode = {
     "trp": 17,
     "tyr": 18,
     "val": 19,
-    "unk": 20,
 }
 
 
@@ -41,6 +40,7 @@ class Residue:
         self.x = float(line[30:38].strip())
         self.y = float(line[38:46].strip())
         self.z = float(line[46:54].strip())
+        self.plddt = float(line[60:66].strip())
 
 
 class Structure:
@@ -75,28 +75,16 @@ class Structure:
         edges = edges[edges[:, 0] != edges[:, 1]]
         return edges.t()
 
-    def get_graph(self, threshold: float) -> dict:
+    def get_graph(self) -> dict:
         """Get a graph using threshold as a cutoff"""
-        nodes = self.get_nodes()
-        edges = self.get_edges(threshold)
-        coords = self.get_coords()
-        return dict(x=nodes, edge_index=edges, pos=coords)
-
-
-def run(input_dir: str, output_dir: str, threads: int = 1, threshold: int = 5):
-    """Run the pipeline"""
-    input_dir = Path(input_dir)
-    output_dir = Path(output_dir)
-    output_dir.mkdir(exist_ok=True, parents=True)
-
-    def save_graph(pdb_id: str) -> None:
-        """Calculate a single graph from a file"""
-        graph: dict = Structure(input_dir / f"{pdb_id}.pdb").get_graph(threshold)
-        data = Data(**graph)
-        torch.save(data, output_dir / f"{pdb_id}.pt")
-
-    pdbs = [f.stem for f in input_dir.glob("*.pdb")]
-    Parallel(n_jobs=threads)(delayed(save_graph)(i) for i in tqdm(pdbs))
+        nodes = []
+        pos = []
+        plddt = []
+        for res in self.residues.values():
+            nodes.append(node_encode[res.name.lower()])
+            pos.append([res.x, res.y, res.z])
+            plddt.append(res.plddt)
+        return dict(x=torch.tensor(nodes), pos=torch.tensor(pos), plddt=torch.tensor(plddt))
 
 
 class LargePreTrainDataset(Dataset):
@@ -106,40 +94,34 @@ class LargePreTrainDataset(Dataset):
         transform: Callable = None,
         pre_transform: Callable = None,
         pre_filter: Callable = None,
-        threshold: int = 7,
         threads: int = 1,
     ):
         self.input_dir = Path(root)
-        self.threshold = threshold
         self.threads = threads
-        self.config = {"feat_dim": 21, "edge_type": "none", "max_nodes": 0}
         super().__init__(root, transform, pre_transform, pre_filter)
 
     @property
     def processed_file_names(self):
         """All generated filenames."""
-        return [f"data_{x}.pt" for x in range(self.len())]
+        return ["data_0.pt"]
 
     def process(self):
         """Convert pdbs into graphs."""
-        idx = 0
-        for raw_path in self.input_dir.glob("*.pdb"):
+
+        def process(idx: int, raw_path: str):
             s = Structure(raw_path)
-            data = Data(**s.get_graph(self.threshold))
-            self.config["max_nodes"] = max(self.config["max_nodes"], data.num_nodes)
-
-            if self.pre_filter is not None and not self.pre_filter(data):
-                continue
-
+            data = Data(**s.get_graph())
             if self.pre_transform is not None:
                 data = self.pre_transform(data)
-
             torch.save(data, Path(self.processed_dir) / f"data_{idx}.pt")
-            idx += 1
+
+        Parallel(n_jobs=self.threads)(
+            delayed(process)(idx, i) for idx, i in tqdm(enumerate(self.input_dir.glob("*.pdb")))
+        )
 
     def len(self):
         """Number of pdb structures == number of graphs."""
-        return len([x for x in self.input_dir.glob("*.pdb")])
+        return 177724
 
     def get(self, idx: int):
         """Load a single graph."""
