@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Union
 
 import torch
 from joblib import Parallel, delayed
@@ -108,9 +108,9 @@ class LargePreTrainDataset(Dataset):
     def process(self):
         """Convert pdbs into graphs."""
 
-        def process(idx: int, raw_path: str):
+        def process(idx: int, raw_path: Path) -> None:
             s = Structure(raw_path)
-            data = Data(**s.get_graph())
+            data = Data(**s.get_graph(), uniprot_id=raw_path.stem)
             if self.pre_transform is not None:
                 data = self.pre_transform(data)
             torch.save(data, Path(self.processed_dir) / f"data_{idx}.pt")

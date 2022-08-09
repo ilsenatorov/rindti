@@ -1,5 +1,3 @@
-import pickle
-from copy import deepcopy
 from math import ceil
 from typing import Dict, Tuple, Union
 
@@ -94,3 +92,30 @@ def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, li
     idx = list(np.random.choice(range(num_nodes), num_corrupt_nodes, replace=False))
     features = torch.zeros_like(features[idx])
     return features, idx
+
+
+class PosNoise:
+    """Add Gaussian noise to the coordinates of the nodes in a graph."""
+
+    def __init__(self, sigma: float = 0.5):
+        self.sigma = sigma
+
+    def __call__(self, batch) -> torch.Tensor:
+        noise = torch.randn_like(batch.pos) * self.sigma
+        batch.pos += noise
+        batch.noise = noise
+        return batch
+
+
+class MaskType:
+    """Masks the type of the nodes in a graph."""
+
+    def __init__(self, prob: float):
+        self.prob = prob
+
+    def __call__(self, batch) -> torch.Tensor:
+        mask = torch.rand_like(batch.x, dtype=torch.float32) < self.prob
+        batch.orig_x = batch.x[mask]
+        batch.x[mask] = 20
+        batch.mask = mask
+        return batch
