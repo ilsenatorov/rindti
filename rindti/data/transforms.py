@@ -11,6 +11,17 @@ from torch_geometric.data import Data
 from .data import TwoGraphData
 
 
+class NullTransformer:
+    def __init__(self, **kwargs):
+        self.graphs = [x for x in kwargs["graphs"].keys() if x != "main"]
+
+    def __call__(self, data: Union[Data, TwoGraphData]):
+        for graph in self.graphs:
+            data[graph + "_x_orig"] = data[graph + "_x"].clone()
+
+        return data
+
+
 class SizeFilter:
     """Filters out graph that are too big/small."""
 
@@ -38,15 +49,38 @@ class NeighborhoodMasker:
                 new_candidates = set()
                 for c in candidates:
                     mask_ids.append(c)
-                    for x in data[graph + "_edge_index"][0, (data[graph + "_edge_index"][1] == 170)]:
+                    for x in data[graph + "_edge_index"][0, (data[graph + "_edge_index"][1] == c)]:
                         new_candidates.add(x.item())
                 candidates = new_candidates
             for c in candidates:
                 mask_ids.append(c)
 
-            data[graph + "_masked"] = mask_ids
             data[graph + "_x_orig"] = data[graph + "_x"].clone()
             data[graph + "_x"][mask_ids] = 0
+
+        return data
+
+
+class ESMasker:
+    def __init__(self, graphs=None, **kwargs):
+        self.graphs = [x for x in graphs.keys() if x != "main"]
+
+    def __call__(self, data: Union[Data, TwoGraphData]):
+        for graph in self.graphs:
+            alt_frac = int(len(data[graph + "_x"]) * 0.15)
+            alt = np.random.choice(range(len(data[graph + "_x"])), alt_frac, replace=None)
+
+            data[graph + "_x_orig"] = data[graph + "_x"].clone()
+
+            for pos in alt:
+                x = np.random.random()
+                if x < 0.8:
+                    data[graph + "_x"][pos] = 0
+                elif 0.8 < x < 0.9:
+                    c = list(range(1, 21))
+                    if data[graph + "_x"][pos] in c:
+                        c.remove(data[graph + "_x"][pos])
+                    data[graph + "_x"][pos] = np.random.choice(c, size=1)[0]
 
         return data
 

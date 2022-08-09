@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
-from torch.functional import Tensor
+from torch import nn
+import numpy as np
 
 from ...data import TwoGraphData
 from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
@@ -56,8 +57,12 @@ class MultitaskClassification(ClassificationModel):
     def __init__(self, **kwargs):
         super(MultitaskClassification, self).__init__(**kwargs)
 
-        self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], out_dim=21, num_layers=2)
-        self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], out_dim=3, num_layers=2)
+        # self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], out_dim=21, num_layers=2)
+        # self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], out_dim=3, num_layers=2)
+
+        self.prot_node_classifier = nn.Linear(in_features=kwargs["model"]["drug"]["hidden_dim"], out_features=21)
+        self.drug_node_classifier = nn.Linear(in_features=kwargs["model"]["prot"]["hidden_dim"], out_features=3)
+
         self.prot_class = "prot" in kwargs["transform"]["graphs"]
         self.drug_class = "drug" in kwargs["transform"]["graphs"]
 
@@ -96,7 +101,8 @@ class MultitaskClassification(ClassificationModel):
         loss = self.main_weight * bce_loss
 
         if self.prot_class:
-            prot_loss = F.cross_entropy(torch.softmax(fwd_dict["prot_node_class"], dim=1), data["prot_x_orig"])
+            idx = torch.tensor(np.argwhere(data["prot_x_orig"].cpu() - data["prot_x"].cpu())).squeeze()
+            prot_loss = F.cross_entropy(torch.softmax(fwd_dict["prot_node_class"], dim=1)[idx, :], data["prot_x_orig"][idx])
             loss += self.prot_weight * prot_loss
         else:
             prot_loss = None

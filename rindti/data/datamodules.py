@@ -40,12 +40,20 @@ class BaseDataModule(LightningDataModule):
 class DTIDataModule(BaseDataModule):
     """Data module for the DTI dataset."""
 
-    def setup(self, stage: str = None, transform: Callable = None):
+    def setup(self, stage: str = None, transform: Callable = None, split=None):
         """Load the individual datasets"""
-        self.train = DTIDataset(self.filename, self.exp_name, split="train", transform=transform).shuffle()
-        self.val = DTIDataset(self.filename, self.exp_name, split="val", transform=transform).shuffle()
-        self.test = DTIDataset(self.filename, self.exp_name, split="test", transform=transform).shuffle()
-        self.config = self.train.config
+        self.config = None
+        if split == "train" or split is None:
+            self.train = DTIDataset(self.filename, self.exp_name, split="train", transform=transform).shuffle()
+            self.config = self.train.config
+        if split == "val" or split is None:
+            self.val = DTIDataset(self.filename, self.exp_name, split="val", transform=transform).shuffle()
+            if self.config is None:
+                self.config = self.val.config
+        if split == "test" or split is None:
+            self.test = DTIDataset(self.filename, self.exp_name, split="test", transform=transform).shuffle()
+            if self.config is None:
+                self.config = self.test.config
 
     def _dl_kwargs(self, shuffle: bool = False):
         return dict(

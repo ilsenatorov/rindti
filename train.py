@@ -7,9 +7,10 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
-from rindti.data.transforms import NeighborhoodMasker, DataCorruptor
+from rindti.data.transforms import NeighborhoodMasker, DataCorruptor, ESMasker, NullTransformer
 from rindti.models import ClassificationModel, RegressionModel, MultitaskClassification
 from rindti.utils import get_git_hash, read_config
+from rindti.utils.ddd_es import DeepDoubleDescentEarlyStopping as DDDES
 from pprint import pprint
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -23,7 +24,9 @@ models = {
 
 
 transformers = {
+    "none": NullTransformer,
     "neighbor": NeighborhoodMasker,
+    "esm": ESMasker,
     "corrupter": DataCorruptor,
 }
 
@@ -63,7 +66,7 @@ def single_run(folder, version, **kwargs):
     """Does a single run."""
     seed_everything(kwargs["seed"])
     datamodule = DTIDataModule(**kwargs["datamodule"])
-    datamodule.setup(transform=NeighborhoodMasker(**kwargs["transform"]))
+    datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]))
     datamodule.update_config(kwargs)
 
     logger = TensorBoardLogger(
@@ -75,7 +78,8 @@ def single_run(folder, version, **kwargs):
 
     callbacks = [
         ModelCheckpoint(monitor=kwargs["model"]["monitor"], save_top_k=3, mode="min"),
-        EarlyStopping(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
+        # EarlyStopping(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
+        DDDES(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
