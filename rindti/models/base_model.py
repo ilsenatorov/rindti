@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR, CosineAnnealingWarmRestarts
 from torchmetrics import (
     AUROC,
     Accuracy,
@@ -17,6 +17,7 @@ from torchmetrics import (
 )
 
 from ..data import TwoGraphData
+from ..utils.lr_schedule import LinearWarmupCosineAnnealingWarmRestartsLR
 
 
 class BaseModel(LightningModule):
@@ -151,13 +152,21 @@ class BaseModel(LightningModule):
         if hasattr(self, "drug_encoder"):
             {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
         optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
+        lr_params = opt_params["lr_schedule"]
         lr_scheduler = {
             "monitor": self.hparams["model"]["monitor"],
-            "scheduler": ReduceLROnPlateau(
+            # "scheduler": ReduceLROnPlateau(
+            #     optimizer,
+            #     verbose=True,
+            #     factor=opt_params["reduce_lr"]["factor"],
+            #     patience=opt_params["reduce_lr"]["patience"],
+            # ),
+            "scheduler": LinearWarmupCosineAnnealingWarmRestartsLR(
                 optimizer,
-                verbose=True,
-                factor=opt_params["reduce_lr"]["factor"],
-                patience=opt_params["reduce_lr"]["patience"],
+                warmup_epochs=lr_params["warmup_epochs"],
+                start_lr=1e-7,
+                peak_lr=opt_params["lr"],
+                cos_restart_dist=lr_params["cos_restart_dist"]
             ),
         }
         return [optimizer], [lr_scheduler]
