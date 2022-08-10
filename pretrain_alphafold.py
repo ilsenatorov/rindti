@@ -35,15 +35,15 @@ if __name__ == "__main__":
         transform=transform,
         pre_transform=pre_transform,
         threads=64,
-    )[:1000]
-    model = DenoiseModel(dropout=0.1, hidden_dim=512, num_layers=5, num_heads=4)
-    dl = torch_geometric.loader.DataLoader(ds, batch_size=4, shuffle=True, num_workers=16)
+    )[:10000]
+    model = DenoiseModel(dropout=0.1, hidden_dim=512, num_layers=3, num_heads=4, weighted_loss=False)
+    dl = torch_geometric.loader.DataLoader(ds, batch_size=32, shuffle=True, num_workers=16)
     trainer = Trainer(
         gpus=1,
-        accumulate_grad_batches=8,
+        # accumulate_grad_batches=4,
         log_every_n_steps=100,
         max_epochs=6000,
-        gradient_clip_val=0.5,
+        gradient_clip_val=5,
         callbacks=[StochasticWeightAveraging(swa_lrs=1e-2)],
     )
     trainer.fit(model, dl)

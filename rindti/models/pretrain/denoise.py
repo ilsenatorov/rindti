@@ -18,16 +18,24 @@ class DenoiseModel(LightningModule):
 
     def __init__(
         self,
+        local_module: str = "GAT",
+        global_module: str = "Performer",
         hidden_dim: int = 512,
         num_layers: int = 6,
         num_heads: int = 4,
         dropout: float = 0.1,
-        lr: float = 1e-4,
+        optimizer: str = "Adam",
+        max_lr: float = 1e-4,
+        start_lr: float = 1e-5,
+        min_lr: float = 1e-7,
         weighted_loss: bool = False,
     ):
         super().__init__()
         self.save_hyperparameters()
-        self.lr = lr
+        self.max_lr = max_lr
+        self.start_lr = start_lr
+        self.min_lr = min_lr
+        self.optimizer = optimizer
         self.weighted_loss = weighted_loss
         mid_dim = hidden_dim // 2
         self.feat_encode = torch.nn.Embedding(21, mid_dim)
@@ -36,8 +44,8 @@ class DenoiseModel(LightningModule):
             *[
                 GPSLayer(
                     hidden_dim,
-                    "GAT",
-                    "Transformer",
+                    local_module,
+                    global_module,
                     num_heads,
                     dropout=dropout,
                     attn_dropout=dropout,
@@ -139,12 +147,15 @@ class DenoiseModel(LightningModule):
 
     def configure_optimizers(self):
         """Adam optimizer with linear warmup and cosine annealing."""
-        optim = torch.optim.AdamW(self.parameters(), lr=self.lr, betas=(0.9, 0.95), weight_decay=1e-5)
+        if self.optimizer == "Adam":
+            optim = torch.optim.AdamW(self.parameters(), lr=self.max_lr, betas=(0.9, 0.95), weight_decay=1e-5)
+        else:
+            optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
         scheduler = LinearWarmupCosineAnnealingLR(
             optim,
             warmup_epochs=40,
             max_epochs=2000,
-            warmup_start_lr=1e-5,
-            eta_min=1e-7,
+            warmup_start_lr=self.start_lr,
+            eta_min=self.min_lr,
         )
         return [optim], [scheduler]
