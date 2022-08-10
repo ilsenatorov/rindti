@@ -152,7 +152,7 @@ class BaseModel(LightningModule):
         optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
         lr_params = opt_params["lr_schedule"]
         lr_scheduler = {
-            "monitor": self.hparams["model"]["monitor"],
+            "monitor": self.hparams["early_stop"]["monitor"],
             # "scheduler": ReduceLROnPlateau(
             #     optimizer,
             #     verbose=True,
