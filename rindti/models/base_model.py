@@ -1,10 +1,9 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR, CosineAnnealingWarmRestarts
 from torchmetrics import (
     AUROC,
     Accuracy,
@@ -13,11 +12,10 @@ from torchmetrics import (
     MeanAbsoluteError,
     MeanSquaredError,
     MetricCollection,
-    R2Score,
 )
 
 from ..data import TwoGraphData
-from ..utils.lr_schedule import LinearWarmupCosineAnnealingWarmRestartsLR
+from ..lr_schedules.LWCA import LinearWarmupCosineAnnealingLR
 
 
 class BaseModel(LightningModule):
@@ -161,12 +159,19 @@ class BaseModel(LightningModule):
             #     factor=opt_params["reduce_lr"]["factor"],
             #     patience=opt_params["reduce_lr"]["patience"],
             # ),
-            "scheduler": LinearWarmupCosineAnnealingWarmRestartsLR(
+
+            # "scheduler": LinearWarmupCosineAnnealingWarmRestartsLR(
+            #     optimizer,
+            #     warmup_epochs=lr_params["warmup_epochs"],
+            #     start_lr=1e-7,
+            #     peak_lr=opt_params["lr"],
+            #     cos_restart_dist=lr_params["cos_restart_dist"],
+            # ),
+
+            "scheduler": LinearWarmupCosineAnnealingLR(
                 optimizer,
                 warmup_epochs=lr_params["warmup_epochs"],
-                start_lr=1e-7,
-                peak_lr=opt_params["lr"],
-                cos_restart_dist=lr_params["cos_restart_dist"]
+                max_epochs=lr_params["cos_restart_dist"],
             ),
         }
         return [optimizer], [lr_scheduler]

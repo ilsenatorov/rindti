@@ -77,9 +77,9 @@ def single_run(folder, version, **kwargs):
     )
 
     callbacks = [
-        ModelCheckpoint(monitor=kwargs["model"]["monitor"], save_top_k=3, mode="min"),
-        # EarlyStopping(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
-        DDDES(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
+        ModelCheckpoint(**kwargs["checkpoints"]),
+        # EarlyStopping(monitor=kwargs["early_stop"]["monitor"], mode="min", **kwargs["early_stop"]),
+        DDDES(**kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
