@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from rindti.layers.graphconv import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, TransformerNet
+from rindti.layers.processor import GINConvNet, GraphGPSNet, TransformerNet
 
 N_NODES = 10
 N_EDGES = 50
@@ -69,21 +69,10 @@ class TestGINConv(BaseTestGraphConv):
     module = GINConvNet
 
 
-class TestChebConv(BaseTestGraphConv):
-
-    module = ChebConvNet
-
-
-class TestGATConv(BaseTestGraphConv):
-
-    module = GatConvNet
-
-
 class TestTransformerConv(BaseTestGraphConv):
 
     module = TransformerNet
 
 
-class TestFilmConv(BaseLabelEdgeConv):
-
-    module = FilmConvNet
+class TestGraphGPSConv(BaseLabelEdgeConv):
+    module = GraphGPSNet

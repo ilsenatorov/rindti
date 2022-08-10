@@ -1,9 +1,7 @@
-from argparse import ArgumentParser
-
 import torch.nn.functional as F
-from torch import LongTensor, Tensor
+from torch import Tensor
+from torch_geometric.data import Batch
 from torch_geometric.nn import GraphMultisetTransformer
-from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
 
@@ -44,7 +42,9 @@ class GMTNet(BaseLayer):
             layer_norm=True,
         )
 
-    def forward(self, x: Tensor, edge_index: Adj, batch: LongTensor) -> Tensor:
+    def forward(self, data: Batch) -> Tensor:
         """"""
+        x, edge_index, batch = data.x, data.edge_index, data.batch
         embeds = self.pool(x, batch, edge_index)
-        return F.normalize(embeds, dim=1)
+        data.aggr = embeds
+        return data

@@ -1,10 +1,10 @@
-from argparse import ArgumentParser
 from math import ceil
 
 import torch
 import torch.nn.functional as F
 import torch_geometric
 from torch.functional import Tensor
+from torch_geometric.data import Batch
 from torch_geometric.nn import DenseSAGEConv, dense_diff_pool, dense_mincut_pool
 from torch_geometric.typing import Adj
 
@@ -57,9 +57,9 @@ class DiffPoolNet(BaseLayer):
         self.embedblock3 = DiffPoolBlock(hidden_dim, hidden_dim)
         self.lin1 = torch.nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
+    def forward(self, data: Batch) -> Batch:
         """"""
-
+        x, edge_index, batch = data.x, data.edge_index, data.batch
         x, _ = torch_geometric.utils.to_dense_batch(x, batch, max_num_nodes=self.max_nodes)
         adj = torch_geometric.utils.to_dense_adj(edge_index, batch, max_num_nodes=self.max_nodes)
 
@@ -75,9 +75,8 @@ class DiffPoolNet(BaseLayer):
         x = F.relu(x)
         x = x.mean(dim=1)
         x = self.lin1(x)
-        x = F.dropout(x, p=self.dropout, training=self.training)
-        x = F.normalize(x, dim=1)
-        return x
+        data.aggr = x
+        return data
 
 
 class DiffPoolBlock(torch.nn.Module):

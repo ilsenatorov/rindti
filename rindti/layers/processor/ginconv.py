@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch import nn
 from torch.functional import Tensor
 from torch_geometric.nn import GINConv

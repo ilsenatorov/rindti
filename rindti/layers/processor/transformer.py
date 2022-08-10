@@ -1,8 +1,6 @@
-from argparse import ArgumentParser
-
 from torch import Tensor, nn
+from torch_geometric.data import Batch
 from torch_geometric.nn import TransformerConv
-from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
 
@@ -31,17 +29,11 @@ class TransformerNet(BaseLayer):
         hidden_dim: int = 32,
         dropout: float = 0.1,
         edge_dim: int = None,
-        edge_type: str = "none",
         heads: int = 1,
         num_layers: int = 3,
         **kwargs,
     ):
         super().__init__()
-        self.edge_type = edge_type
-        if edge_type == "none":
-            edge_dim = None
-        if edge_type == "label":
-            self.edge_embed = nn.Embedding(edge_dim + 1, edge_dim)
         self.inp = TransformerConv(
             input_dim,
             hidden_dim,
@@ -65,14 +57,12 @@ class TransformerNet(BaseLayer):
         )
         self.out = TransformerConv(hidden_dim, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim, concat=False)
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
+    def forward(self, data: Batch) -> Tensor:
         """"""
-        if self.edge_type == "none":
-            edge_feats = None
-        elif self.edge_type == "label":
-            edge_feats = self.edge_embed(edge_feats)
-        x = self.inp(x, edge_index, edge_feats)
+        x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
+        x = self.inp(x, edge_index, edge_attr)
         for module in self.mid_layers:
-            x = module(x, edge_index, edge_feats)
-        x = self.out(x, edge_index, edge_feats)
-        return x
+            x = module(x, edge_index, edge_attr)
+        x = self.out(x, edge_index, edge_attr)
+        data.x = x
+        return data

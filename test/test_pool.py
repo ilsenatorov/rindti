@@ -2,7 +2,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
-from rindti.layers.graphpool import DiffPoolNet, GMTNet, MeanPool
+from rindti.layers.aggr import DiffPoolNet, GMTNet
 
 default_config = {
     "K": 1,
@@ -55,15 +55,3 @@ class TestGMTNet(BaseTestGraphPool):
 class TestDiffPool(BaseTestGraphPool):
 
     module = DiffPoolNet
-
-
-class TestMeanPool(BaseTestGraphPool):
-
-    module = MeanPool
-
-    def test_forward(self):
-        """MeanPool always return same dim as input"""
-        module = self.module(**default_config)
-        output = module.forward(fake_data.x, fake_data.edge_index, fake_data.batch)
-        assert output.size(0) == 5
-        assert output.size(1) == 16
