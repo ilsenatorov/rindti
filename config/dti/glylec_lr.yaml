@@ -24,7 +24,7 @@ early_stop:
   monitor: val_loss
   mode: min
 checkpoints:
-  monitor: val_Accuracy
+  monitor: val_acc
   save_top_k: 3
   mode: max
 model:
@@ -61,11 +61,14 @@ model:
     hidden_dim: 512
   optimizer:
     module: adam
-    lr: 0.001
-    prot_lr: 0.01
-    drug_lr: 0.01
+    lr: 0.0001
+    prot_lr: 0.001
+    drug_lr: 0.001
     weight_decay: 0.01
     momentum: 0.01
     lr_schedule:
+      module: lwca
       warmup_epochs: 10
-      cos_restart_dist: 50
+      cos_restart_dist: 500
+      min_lr: 1e-7
+      start_lr: 1e-5

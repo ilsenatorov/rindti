@@ -4,6 +4,7 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import (
     AUROC,
     Accuracy,
@@ -16,6 +17,15 @@ from torchmetrics import (
 
 from ..data import TwoGraphData
 from ..lr_schedules.LWCA import LinearWarmupCosineAnnealingLR
+from ..lr_schedules.LWCAWR import LinearWarmupCosineAnnealingWarmRestartsLR
+
+
+optimizers = {
+    "adamw": AdamW,
+    "adam": Adam,
+    "sgd": SGD,
+    "rmsprop": RMSprop
+}
 
 
 class BaseModel(LightningModule):
@@ -143,35 +153,45 @@ class BaseModel(LightningModule):
     def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimizer and/or lr schedulers"""
         opt_params = self.hparams.model["optimizer"]
-        optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[opt_params["module"]]
+
         params = [{"params": self.parameters()}]
         if hasattr(self, "prot_encoder"):
             params.append({"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]})
         if hasattr(self, "drug_encoder"):
-            {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
+            params.append({"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]})
+
+        optimizer = optimizers[opt_params["module"]]
         optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
-        lr_params = opt_params["lr_schedule"]
-        lr_scheduler = {
-            "monitor": self.hparams["early_stop"]["monitor"],
-            # "scheduler": ReduceLROnPlateau(
-            #     optimizer,
-            #     verbose=True,
-            #     factor=opt_params["reduce_lr"]["factor"],
-            #     patience=opt_params["reduce_lr"]["patience"],
-            # ),
 
-            # "scheduler": LinearWarmupCosineAnnealingWarmRestartsLR(
-            #     optimizer,
-            #     warmup_epochs=lr_params["warmup_epochs"],
-            #     start_lr=1e-7,
-            #     peak_lr=opt_params["lr"],
-            #     cos_restart_dist=lr_params["cos_restart_dist"],
-            # ),
+        return [optimizer], [self.parse_lr_scheduler(optimizer, opt_params, opt_params["lr_schedule"])]
 
-            "scheduler": LinearWarmupCosineAnnealingLR(
+    def parse_lr_scheduler(self, optimizer, opt_params, lr_params):
+        lr_scheduler = {"monitor": self.hparams["early_stop"]["monitor"]}
+        if lr_params["module"] == "rlrop":
+            lr_scheduler["scheduler"] = ReduceLROnPlateau(
+                optimizer,
+                verbose=True,
+                factor=opt_params["reduce_lr"]["factor"],
+                patience=opt_params["reduce_lr"]["patience"],
+            )
+        elif lr_params["module"] == "lwcawr":
+            lr_scheduler["scheduler"] = LinearWarmupCosineAnnealingWarmRestartsLR(
+                optimizer,
+                warmup_epochs=lr_params["warmup_epochs"],
+                start_lr=float(lr_params["start_lr"]),
+                peak_lr=float(opt_params["lr"]),
+                cos_restart_dist=lr_params["cos_restart_dist"],
+                cos_eta_min=float(lr_params["min_lr"])
+            )
+        elif lr_params["module"] == "lwca":
+            lr_scheduler["scheduler"] = LinearWarmupCosineAnnealingLR(
                 optimizer,
                 warmup_epochs=lr_params["warmup_epochs"],
                 max_epochs=lr_params["cos_restart_dist"],
-            ),
-        }
-        return [optimizer], [lr_scheduler]
+                eta_min=float(lr_params["min_lr"]),
+                warmup_start_lr=float(lr_params["start_lr"]),
+            )
+        else:
+            raise ValueError("Unknown learning rate scheduler")
+
+        return [lr_scheduler]

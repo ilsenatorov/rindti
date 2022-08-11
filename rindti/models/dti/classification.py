@@ -179,7 +179,12 @@ class MultitaskClassification(ClassificationModel):
             self.log_all(metrics)
 
     def validation_epoch_end(self, outputs: dict):
-        super(MultitaskClassification, self).validation_epoch_end(outputs)
+        # super(MultitaskClassification, self).validation_epoch_end(outputs)
+        metrics = self.val_metrics.compute()
+        self.val_metrics.reset()
+        self.log_all(metrics, hparams=True)
+        self.log("val_acc", metrics["val_Accuracy"])
+
         if self.prot_class:
             metrics = self.pp_val_metrics.compute()
             self.pp_val_metrics.reset()
