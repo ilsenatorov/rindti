@@ -61,6 +61,7 @@ model:
     hidden_dim: 512
   optimizer:
     module: adam
+    single_lr: True
     lr: 0.0001
     prot_lr: 0.001
     drug_lr: 0.001

@@ -150,18 +150,27 @@ class BaseModel(LightningModule):
         self.test_metrics.reset()
         self.log_all(metrics)
 
-    def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+    def configure_optimizers(self):
         """Configure the optimizer and/or lr schedulers"""
         opt_params = self.hparams.model["optimizer"]
 
-        params = [{"params": self.parameters()}]
+        params = []
+        if hasattr(self, "mlp"):
+            params.append({"params": self.parameters(), "lr": opt_params["lr"]})
         if hasattr(self, "prot_encoder"):
             params.append({"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]})
         if hasattr(self, "drug_encoder"):
             params.append({"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]})
+        if hasattr(self, "prot_node_classifier"):
+            params.append({"params": self.prot_node_classifier.parameters(), "lr": opt_params["prot_lr"]})
+        if hasattr(self, "drug_node_classifier"):
+            params.append({"params": self.drug_node_classifier.parameters(), "lr": opt_params["drug_lr"]})
 
         optimizer = optimizers[opt_params["module"]]
-        optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
+        if opt_params["single_lr"]:
+            optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
+        else:
+            optimizer = optimizer(params=params, lr=opt_params["lr"])
 
         return [optimizer], [self.parse_lr_scheduler(optimizer, opt_params, opt_params["lr_schedule"])]
 
