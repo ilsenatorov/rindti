@@ -1,3 +1,5 @@
+import pickle
+
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -50,7 +52,8 @@ class ClassificationModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
-        return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
+        # return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
+        return dict(loss=bce_loss, preds=torch.sigmoid(fwd_dict["pred"].detach()), labels=labels.detach())
 
 
 class MultitaskClassification(ClassificationModel):
@@ -97,11 +100,12 @@ class MultitaskClassification(ClassificationModel):
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
+        pickle.dump(fwd_dict["drug_embed"], open("d_ricin.pkl", "wb"))
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
         loss = self.main_weight * bce_loss
 
         if self.prot_class:
-            idx = torch.tensor(np.argwhere(data["prot_x_orig"].cpu() - data["prot_x"].cpu())).squeeze()
+            idx = torch.tensor(np.argwhere(data["prot_x_orig"].detach().cpu() - data["prot_x"].detach().cpu())).squeeze()
             prot_loss = F.cross_entropy(torch.softmax(fwd_dict["prot_node_class"], dim=1)[idx, :], data["prot_x_orig"][idx])
             loss += self.prot_weight * prot_loss
         else:
@@ -116,14 +120,16 @@ class MultitaskClassification(ClassificationModel):
         output = dict(
             loss=loss,
             pred_loss=bce_loss,
-            preds=fwd_dict["pred"].detach(),
+            preds=torch.sigmoid(fwd_dict["pred"].detach()),
             labels=labels.detach(),
+            prot_embed=fwd_dict["prot_embed"],
+            drug_embed=fwd_dict["drug_embed"],
         )
         if self.prot_class:
             output.update(
                 dict(
                     prot_loss=prot_loss,
-                    prot_preds=fwd_dict["prot_node_class"],
+                    prot_preds=torch.softmax(fwd_dict["prot_node_class"], dim=1),
                     prot_labels=data["prot_x_orig"],
                 )
             )
@@ -131,7 +137,7 @@ class MultitaskClassification(ClassificationModel):
             output.update(
                 dict(
                     drug_loss=drug_loss,
-                    drug_preds=fwd_dict["drug_node_class"],
+                    drug_preds=torch.softmax(fwd_dict["drug_node_class"], dim=1),
                     drug_labels=data["drug_x_orig"],
                 )
             )
@@ -139,6 +145,8 @@ class MultitaskClassification(ClassificationModel):
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         ss = super(MultitaskClassification, self).training_step(data, data_idx)
+        self.log("train_dti_loss", ss["pred_loss"], batch_size=self.batch_size)
+
         if self.prot_class:
             self.pp_train_metrics.update(ss["prot_preds"], ss["prot_labels"])
             self.log("pp_train_loss", ss["prot_loss"], batch_size=self.batch_size)
@@ -149,6 +157,8 @@ class MultitaskClassification(ClassificationModel):
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         ss = super(MultitaskClassification, self).validation_step(data, data_idx)
+        self.log("val_dti_loss", ss["pred_loss"], batch_size=self.batch_size)
+
         if self.prot_class:
             self.pp_val_metrics.update(ss["prot_preds"], ss["prot_labels"])
             self.log("pp_val_loss", ss["prot_loss"], batch_size=self.batch_size)
@@ -159,6 +169,8 @@ class MultitaskClassification(ClassificationModel):
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
         ss = super(MultitaskClassification, self).test_step(data, data_idx)
+        self.log("test_dti_loss", ss["pred_loss"], batch_size=self.batch_size)
+
         if self.prot_class:
             self.pp_test_metrics.update(ss["prot_preds"], ss["prot_labels"])
             self.log("pp_test_loss", ss["prot_loss"], batch_size=self.batch_size)

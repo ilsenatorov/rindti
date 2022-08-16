@@ -57,8 +57,6 @@ if __name__ == "__main__":
         "drug": get_config(drugs, "drug"),
     }
 
-    print(full_data)
-
     final_data = {
         "data": full_data,
         "config": snakemake.config,

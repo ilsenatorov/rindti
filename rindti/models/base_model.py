@@ -143,6 +143,7 @@ class BaseModel(LightningModule):
         metrics = self.val_metrics.compute()
         self.val_metrics.reset()
         self.log_all(metrics, hparams=True)
+        self.log("val_acc", metrics["val_Accuracy"])
 
     def test_epoch_end(self, outputs: dict):
         """What to do at the end of a test epoch. Logs everything."""
@@ -168,7 +169,7 @@ class BaseModel(LightningModule):
 
         optimizer = optimizers[opt_params["module"]]
         if opt_params["single_lr"]:
-            optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
+            optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"], betas=(0.9, 0.95))
         else:
             optimizer = optimizer(params=params, lr=opt_params["lr"])
 
@@ -203,4 +204,4 @@ class BaseModel(LightningModule):
         else:
             raise ValueError("Unknown learning rate scheduler")
 
-        return [lr_scheduler]
+        return lr_scheduler

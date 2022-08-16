@@ -63,7 +63,6 @@ if __name__ == "__main__":
     inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
     if config["task"] == "class":
         inter["Y"] = inter["Y"].apply(lambda x: int(x < config["threshold"]))
-        print(inter["Y"])
     elif config["task"] == "reg":
         if config["log"]:
             inter["Y"] = inter["Y"].apply(np.log10)

@@ -169,7 +169,7 @@ class ProteinEncoder:
 
 def extract_name(protein_sif: str) -> str:
     """Extract the protein name from the sif filename"""
-    return protein_sif.split("/")[-1].split("_")[0]
+    return "_".join(protein_sif.split("/")[-1].split("_")[:-1])
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 # the two root directories to take the data from and to store the data in
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/resources
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources
 prots:
   features:
     method: rinerator # rinerator, distance, esm

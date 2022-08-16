@@ -16,7 +16,7 @@ transform:
       weight: 1
 trainer:
   gpus: 1
-  max_epochs: 1000
+  max_epochs: 3000
   profiler: null
   gradient_clip_val: 100
 early_stop:
@@ -69,7 +69,8 @@ model:
     momentum: 0.01
     lr_schedule:
       module: lwca
-      warmup_epochs: 10
+      warmup_epochs: 250
       cos_restart_dist: 500
       min_lr: 1e-7
       start_lr: 1e-5
+
