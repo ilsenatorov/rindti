@@ -79,7 +79,7 @@ def single_run(folder, version, **kwargs):
     callbacks = [
         ModelCheckpoint(save_last=True, **kwargs["checkpoints"]),
         # EarlyStopping(monitor=kwargs["early_stop"]["monitor"], mode="min", **kwargs["early_stop"]),
-        DDDES(**kwargs["early_stop"]),
+        # DDDES(**kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]
@@ -91,14 +91,9 @@ def single_run(folder, version, **kwargs):
         **kwargs["trainer"],
     )
     model = models[kwargs["model"]["module"]](**kwargs)
-    if kwargs["seed"] == 82:
-        model = model.load_from_checkpoint("tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_22/version_82/checkpoints/epoch=1348-step=232027.ckpt")
 
-    pprint(kwargs)
-    if kwargs["seed"] == 82:
-        trainer.fit(model, datamodule, ckpt_path="tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_22/version_82/checkpoints/epoch=1348-step=232027.ckpt")
-    else:
-        trainer.fit(model, datamodule)
+    # pprint(kwargs)
+    trainer.fit(model, datamodule)
     trainer.test(model, datamodule)
 
 

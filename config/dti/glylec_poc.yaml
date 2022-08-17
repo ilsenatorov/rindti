@@ -3,9 +3,8 @@ seed: 42
 datamodule:
   filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
   exp_name: glylec_mbb
-  batch_size: 32
+  batch_size: 64
   num_workers: 16
-  dyn_sampler: False
 transform:
   mode: esm  # neighbors
   k: 3
@@ -17,7 +16,7 @@ transform:
       weight: 1
 trainer:
   gpus: 1
-  max_epochs: 3000
+  max_epochs: 1000
   profiler: null
   gradient_clip_val: 100
 early_stop:
@@ -70,7 +69,8 @@ model:
     momentum: 0.01
     lr_schedule:
       module: lwca
-      warmup_epochs: 250
+      warmup_epochs: 10
       cos_restart_dist: 500
       min_lr: 1e-7
       start_lr: 1e-5
+

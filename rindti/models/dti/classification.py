@@ -100,7 +100,6 @@ class MultitaskClassification(ClassificationModel):
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
-        pickle.dump(fwd_dict["drug_embed"], open("d_ricin.pkl", "wb"))
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
         loss = self.main_weight * bce_loss
 
@@ -119,7 +118,7 @@ class MultitaskClassification(ClassificationModel):
 
         output = dict(
             loss=loss,
-            pred_loss=bce_loss,
+            pred_loss=bce_loss.detach(),
             preds=torch.sigmoid(fwd_dict["pred"].detach()),
             labels=labels.detach(),
             prot_embed=fwd_dict["prot_embed"],
@@ -128,7 +127,7 @@ class MultitaskClassification(ClassificationModel):
         if self.prot_class:
             output.update(
                 dict(
-                    prot_loss=prot_loss,
+                    prot_loss=prot_loss.detach(),
                     prot_preds=torch.softmax(fwd_dict["prot_node_class"], dim=1),
                     prot_labels=data["prot_x_orig"],
                 )
@@ -136,7 +135,7 @@ class MultitaskClassification(ClassificationModel):
         if self.drug_class:
             output.update(
                 dict(
-                    drug_loss=drug_loss,
+                    drug_loss=drug_loss.detach(),
                     drug_preds=torch.softmax(fwd_dict["drug_node_class"], dim=1),
                     drug_labels=data["drug_x_orig"],
                 )

@@ -20,3 +20,4 @@ datasets/
 *build*
 *egg-info*
 dist
+/misc/
