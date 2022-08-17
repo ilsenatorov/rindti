@@ -2,6 +2,7 @@ import torch_geometric
 import torch_geometric.transforms as T
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import StochasticWeightAveraging
+from torch_geometric.loader import DynamicBatchSampler
 
 from rindti.data import LargePreTrainDataset
 from rindti.data.transforms import MaskType, PosNoise
@@ -20,8 +21,9 @@ if __name__ == "__main__":
     )
     transform = T.Compose(
         [
+            # AACounts(),
             PosNoise(sigma=0.75),
-            MaskType(prob=0.125),
+            MaskType(prob=0.15),
             # T.RadiusGraph(r=7),
             # T.ToUndirected(),
             # T.RandomRotate(degrees=180, axis=0),
@@ -35,15 +37,16 @@ if __name__ == "__main__":
         transform=transform,
         pre_transform=pre_transform,
         threads=64,
-    )[:10000]
-    model = DenoiseModel(dropout=0.1, hidden_dim=512, num_layers=3, num_heads=4, weighted_loss=False)
-    dl = torch_geometric.loader.DataLoader(ds, batch_size=32, shuffle=True, num_workers=16)
+    )
+    sampler = DynamicBatchSampler(ds, max_num=30000, mode="node")
+    model = DenoiseModel(dropout=0.1, hidden_dim=128, num_layers=4, num_heads=2, weighted_loss=False)
+    dl = torch_geometric.loader.DataLoader(ds, batch_sampler=sampler, num_workers=16)
     trainer = Trainer(
         gpus=1,
         # accumulate_grad_batches=4,
-        log_every_n_steps=100,
+        log_every_n_steps=10,
         max_epochs=6000,
-        gradient_clip_val=5,
+        gradient_clip_val=1,
         callbacks=[StochasticWeightAveraging(swa_lrs=1e-2)],
     )
     trainer.fit(model, dl)
