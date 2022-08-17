@@ -181,8 +181,8 @@ class BaseModel(LightningModule):
             lr_scheduler["scheduler"] = ReduceLROnPlateau(
                 optimizer,
                 verbose=True,
-                factor=opt_params["reduce_lr"]["factor"],
-                patience=opt_params["reduce_lr"]["patience"],
+                factor=lr_params["factor"],
+                patience=lr_params["patience"],
             )
         elif lr_params["module"] == "lwcawr":
             lr_scheduler["scheduler"] = LinearWarmupCosineAnnealingWarmRestartsLR(

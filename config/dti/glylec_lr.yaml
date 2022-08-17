@@ -3,7 +3,7 @@ seed: 42
 datamodule:
   filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
   exp_name: glylec_mbb
-  batch_size: 32
+  batch_size: 64
   num_workers: 16
   dyn_sampler: False
 transform:
@@ -63,14 +63,13 @@ model:
   optimizer:
     module: adam
     single_lr: True
-    lr: 0.0001
+    lr: 0.001
     prot_lr: 0.001
     drug_lr: 0.001
     weight_decay: 0.01
     momentum: 0.01
     lr_schedule:
-      module: lwca
-      warmup_epochs: 250
-      cos_restart_dist: 500
-      min_lr: 1e-7
-      start_lr: 1e-5
+      module: rlrop
+      factor: 0.1
+      patience: 20
+      monitor: val_loss

@@ -58,13 +58,14 @@ class ClassificationModel(BaseModel):
 
 class MultitaskClassification(ClassificationModel):
     def __init__(self, **kwargs):
+        kwargs["model"]["mlp"]["hidden_dims"] = [512, 128, 64]
         super(MultitaskClassification, self).__init__(**kwargs)
 
-        # self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], out_dim=21, num_layers=2)
-        # self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], out_dim=3, num_layers=2)
+        self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], hidden_dims=[64, 32], out_dim=21)
+        self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], hidden_dims=[64, 16], out_dim=3)
 
-        self.prot_node_classifier = nn.Linear(in_features=kwargs["model"]["drug"]["hidden_dim"], out_features=21)
-        self.drug_node_classifier = nn.Linear(in_features=kwargs["model"]["prot"]["hidden_dim"], out_features=3)
+        # self.prot_node_classifier = nn.Linear(in_features=kwargs["model"]["drug"]["hidden_dim"], out_features=21)
+        # self.drug_node_classifier = nn.Linear(in_features=kwargs["model"]["prot"]["hidden_dim"], out_features=3)
 
         self.prot_class = "prot" in kwargs["transform"]["graphs"]
         self.drug_class = "drug" in kwargs["transform"]["graphs"]
