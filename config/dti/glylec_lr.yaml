@@ -69,6 +69,7 @@ model:
     weight_decay: 0.01
     momentum: 0.01
     lr_schedule:
+      monitor: val_acc
       module: lwca
       min_lr: 1e-7
       start_lr: 1e-5

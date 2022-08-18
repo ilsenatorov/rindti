@@ -16,7 +16,7 @@ from torchmetrics import (
 from ..data import TwoGraphData
 from ..lr_schedules.LWCA import LinearWarmupCosineAnnealingLR
 from ..lr_schedules.LWCAWR import LinearWarmupCosineAnnealingWarmRestartsLR
-
+from ..utils.metrics import DistOverlap
 
 optimizers = {
     "adamw": AdamW,
@@ -42,6 +42,7 @@ class BaseModel(LightningModule):
                 Accuracy(num_classes=None if num_classes == 2 else num_classes),
                 AUROC(num_classes=None if num_classes == 2 else num_classes),
                 MatthewsCorrCoef(num_classes=num_classes),
+                DistOverlap(),
             ]
         )
         return metrics.clone(prefix=prefix + "train_"), metrics.clone(prefix=prefix + "val_"), \

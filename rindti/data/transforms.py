@@ -14,7 +14,7 @@ class NullTransformer:
     transformed data
     """
 
-    def __init__(self, graphs):
+    def __init__(self, graphs, **kwargs):
         """Store which graphs should be transformed"""
         self.graphs = [x for x in graphs.keys() if x != "main"]
 
@@ -29,7 +29,7 @@ class NullTransformer:
 class SizeFilter:
     """Filters out graph that are too big/small."""
 
-    def __init__(self, min_nnodes: int, max_nnodes: int = 0):
+    def __init__(self, min_nnodes: int, max_nnodes: int = 0, **kwargs):
         self.min_nnodes = min_nnodes
         self.max_nnodes = max_nnodes
 
@@ -42,7 +42,7 @@ class SizeFilter:
 class NeighborhoodMasker:
     """Mask the neighborhoods around a node"""
 
-    def __init__(self, graphs, spots=1, k=1):
+    def __init__(self, graphs, spots=1, k=1, **kwargs):
         self.k = k
         self.spots = spots
         self.graphs = [x for x in graphs.keys() if x != "main"]
@@ -71,7 +71,7 @@ class NeighborhoodMasker:
 class ESMasker:
     """A node masker according to the ESM training, 13.5% of nodes are masked, 1.5% are mutated"""
 
-    def __init__(self, graphs):
+    def __init__(self, graphs, **kwargs):
         self.graphs = [x for x in graphs.keys() if x != "main"]
 
     def __call__(self, data: Union[Data, TwoGraphData]):
@@ -103,7 +103,7 @@ class DataCorruptor:
         type (str, optional): 'corrupt' or 'mask'. Corrupt puts new values sampled from old, mask puts zeroes. Defaults to 'mask'.
     """
 
-    def __init__(self, frac: Dict[str, float], type: str = "mask"):
+    def __init__(self, frac: Dict[str, float], type: str = "mask", **kwargs):
         self.type = type
         self.frac = {k: v for k, v in frac.items() if v > 0}
         self._set_corr_func()

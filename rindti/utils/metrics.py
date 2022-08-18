@@ -21,8 +21,10 @@ class DistOverlap(Metric):
 
     def compute(self) -> Any:
         """Calculate the metric based on the samples from the update rounds"""
+        self.pos = torch.stack(self.pos)
+        self.neg = torch.stack(self.neg)
         pos_mu, pos_sigma = torch.mean(self.pos), torch.std(self.pos)
-        neg_mu, neg_sigma = torch.mean(self.pos), torch.std(self.pos)
+        neg_mu, neg_sigma = torch.mean(self.neg), torch.std(self.neg)
 
         return torch.tensor(NormalDist(mu=pos_mu.item(), sigma=pos_sigma.item()).overlap(
             NormalDist(mu=neg_mu.item(), sigma=neg_sigma.item())
