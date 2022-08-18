@@ -6,6 +6,9 @@ import weakref
 from torch.optim import Optimizer
 
 
+"""This is copied from the torch_lightning code as this is currently in development phase"""
+
+
 EPOCH_DEPRECATION_WARNING = (
     "The epoch parameter in `scheduler.step()` was not necessary and is being "
     "deprecated where possible. Please use `scheduler.step()` to step the "

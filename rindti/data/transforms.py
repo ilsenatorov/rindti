@@ -1,6 +1,3 @@
-import copy
-import pickle
-from copy import deepcopy
 from math import ceil
 from typing import Dict, Tuple, Union
 
@@ -12,10 +9,17 @@ from .data import TwoGraphData
 
 
 class NullTransformer:
-    def __init__(self, **kwargs):
-        self.graphs = [x for x in kwargs["graphs"].keys() if x != "main"]
+    """
+    Null transformer, just adding the fields that are needed to make models running in inference when trained on
+    transformed data
+    """
+
+    def __init__(self, graphs):
+        """Store which graphs should be transformed"""
+        self.graphs = [x for x in graphs.keys() if x != "main"]
 
     def __call__(self, data: Union[Data, TwoGraphData]):
+        """Add the _x_orig filed equal to _x field, mimicking an unchanged, transformed sample"""
         for graph in self.graphs:
             data[graph + "_x_orig"] = data[graph + "_x"].clone()
 
@@ -36,12 +40,15 @@ class SizeFilter:
 
 
 class NeighborhoodMasker:
-    def __init__(self, spots=1, k=1, graphs=None, mode=None):
+    """Mask the neighborhoods around a node"""
+
+    def __init__(self, graphs, spots=1, k=1):
         self.k = k
         self.spots = spots
         self.graphs = [x for x in graphs.keys() if x != "main"]
 
     def __call__(self, data: Union[Data, TwoGraphData]):
+        """Transform the sample by iteratively masking nodes around the initial spots"""
         for graph in self.graphs:
             mask_ids = []
             candidates = set(np.random.choice(range(len(data[graph + "_x"])), self.spots, replace=False))
@@ -62,10 +69,13 @@ class NeighborhoodMasker:
 
 
 class ESMasker:
-    def __init__(self, graphs=None, **kwargs):
+    """A node masker according to the ESM training, 13.5% of nodes are masked, 1.5% are mutated"""
+
+    def __init__(self, graphs):
         self.graphs = [x for x in graphs.keys() if x != "main"]
 
     def __call__(self, data: Union[Data, TwoGraphData]):
+        """Transform the sample using masking and mutating"""
         for graph in self.graphs:
             alt_frac = int(len(data[graph + "_x"]) * 0.15)
             alt = np.random.choice(range(len(data[graph + "_x"])), alt_frac, replace=None)

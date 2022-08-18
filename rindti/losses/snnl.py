@@ -46,7 +46,7 @@ class SoftNearestNeighborLoss(LightningModule):
         return dict(graph_loss=loss)
 
     def forward(self, embeds: Tensor, fam_idx: LongTensor) -> Tensor:
-        """"""
+        """Calculate the soft nearest neighbor loss for a given temp denominator."""
         if not self.optim_temperature:
             return self._forward(embeds, fam_idx, 1.0)
 

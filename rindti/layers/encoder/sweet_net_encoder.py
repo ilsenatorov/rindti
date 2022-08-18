@@ -42,6 +42,7 @@ class SweetNetAdapter(SweetNet):
         self.lin4 = torch.nn.Linear(256, kwargs["hidden_dim"])
 
     def forward(self, x, edge_index=None, batch=None, inference=False):
+        """Forward a glycan through the Sweetnet"""
         x, edge_index = list(zip(*[glycan_to_graph(iupac) for iupac in x]))
         embeddings = []
         for y, edges in zip(x, edge_index):
@@ -60,5 +61,6 @@ class SweetNetAdapter(SweetNet):
             y = y1 + y2 + y3
             if self.trainable:
                 embeddings.append(self.lin4(y).squeeze())
-            embeddings.append(self.lin4(y.detach()).squeeze())
+            else:
+                embeddings.append(self.lin4(y.detach()).squeeze())
         return torch.stack(embeddings), None

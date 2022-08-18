@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
@@ -38,6 +36,7 @@ class BaseModel(LightningModule):
         return kwargs["model"]
 
     def _set_class_metrics(self, num_classes: int = 2, prefix: str = ""):
+        """Initialize classification metrics for this sample"""
         metrics = MetricCollection(
             [
                 Accuracy(num_classes=None if num_classes == 2 else num_classes),
@@ -49,6 +48,7 @@ class BaseModel(LightningModule):
             metrics.clone(prefix=prefix + "test_")
 
     def _set_reg_metrics(self):
+        """Initialize regression metrics for this model"""
         metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
@@ -176,6 +176,7 @@ class BaseModel(LightningModule):
         return [optimizer], [self.parse_lr_scheduler(optimizer, opt_params, opt_params["lr_schedule"])]
 
     def parse_lr_scheduler(self, optimizer, opt_params, lr_params):
+        """Parse learning rate scheduling based on config args"""
         lr_scheduler = {"monitor": self.hparams["early_stop"]["monitor"]}
         if lr_params["module"] == "rlrop":
             lr_scheduler["scheduler"] = ReduceLROnPlateau(

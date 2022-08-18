@@ -1,5 +1,7 @@
 from .max_likelihood import Max
 from .prot_drug_max_likelihood import ProtDrugMax
+from jsonargparse import CLI
+
 
 models = {"max": Max, "prot_drug_max": ProtDrugMax}
 
@@ -18,6 +20,4 @@ def run(
 
 
 if __name__ == "__main__":
-    from jsonargparse import CLI
-
     cli = CLI(run)

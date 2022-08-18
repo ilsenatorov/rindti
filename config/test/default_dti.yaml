@@ -14,7 +14,6 @@ model:
       module: [diffpool, gmt]
       hidden_dim: 16
       num_heads: 1
-
   prot:
     method: graph
     hidden_dim: 16
@@ -35,6 +34,7 @@ model:
     weight_decay: 0.01
     momentum: 0.01
     reduce_lr:
+      module: rlrop
       factor: 0.1
       patience: 20
       monitor: train_loss

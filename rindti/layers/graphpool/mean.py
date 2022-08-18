@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.nn import global_mean_pool
@@ -15,6 +13,6 @@ class MeanPool(BaseLayer):
         super().__init__()
 
     def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         pool = global_mean_pool(x, batch)
         return F.normalize(pool, dim=1)

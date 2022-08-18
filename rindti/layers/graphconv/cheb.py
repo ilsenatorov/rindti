@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch.functional import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import ChebConv
@@ -36,7 +34,7 @@ class ChebConvNet(BaseLayer):
         self.out = ChebConv(hidden_dim, output_dim, K)
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

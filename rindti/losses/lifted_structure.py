@@ -21,6 +21,7 @@ class GeneralisedLiftedStructureLoss(LightningModule):
         self.neg_margin = neg_margin
 
     def forward(self, embeds: Tensor, fam_idx: LongTensor) -> Dict[str, Tensor]:
+        """Compute the loss based on the embeddings and their family indices"""
         dist = torch.cdist(embeds, embeds)
         fam_mask = (fam_idx == fam_idx.t()).float()
         pos = (dist - self.pos_margin) * fam_mask
