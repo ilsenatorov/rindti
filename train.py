@@ -1,6 +1,7 @@
 import os
 import random
 
+import numpy as np
 import torch
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
@@ -90,7 +91,13 @@ def single_run(folder, version, **kwargs):
         enable_model_summary=False,
         **kwargs["trainer"],
     )
-    model = models[kwargs["model"]["module"]](**kwargs)
+
+    """effective_num = np.array([1, 1]) - np.array([np.power(0.36786104643297, 0.5), np.power(0.36786104643297, 16)])
+    weights = (1 - 0.9999) / np.array(effective_num)
+    weights = weights / sum(weights) * 2"""
+    weights = [1, 1]
+
+    model = models[kwargs["model"]["module"]](pos_weight=weights[0], neg_weight=weights[1], **kwargs)
 
     # pprint(kwargs)
     trainer.fit(model, datamodule)

@@ -1,6 +1,7 @@
 from typing import Tuple, Union
 
 from pytorch_lightning import LightningModule
+import torch
 from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
@@ -86,6 +87,10 @@ class GraphEncoder(LightningModule):
             data["batch"],
             data.get("edge_feats"),
         )
+        """if isinstance(self.feat_embed, nn.Embedding):
+            feat_embed = torch.stack([torch.tensor([0.0] * 128) if y == torch.tensor(0) else self.feat_embed(y) for y in x])
+        else:
+            feat_embed = self.feat_embed(x)"""
         feat_embed = self.feat_embed(x)
         node_embed = self.node_embed(
             x=feat_embed,

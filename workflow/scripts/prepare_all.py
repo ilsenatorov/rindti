@@ -1,6 +1,7 @@
 import pickle
 from typing import Iterable
 
+import numpy as np
 import pandas as pd
 from pandas.core.frame import DataFrame
 from utils import get_config
@@ -63,6 +64,8 @@ if __name__ == "__main__":
         "prots": prots,
         "drugs": drugs,
     }
+
+    print(np.average(interactions["Y"]))
 
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)
