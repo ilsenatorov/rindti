@@ -80,8 +80,7 @@ def fit_dist(**kwargs):
         kwargs["model"]["drug"]["method"] = data["drug_method"]
         kwargs["model"]["prot"]["method"] = data["prot_method"]
 
-        datamodule = DTIDataModule(filename=data["dataset"], exp_name="expl", batch_size=128, shuffle=False,
-                                   num_workers=16)
+        datamodule = DTIDataModule(filename=data["dataset"], exp_name="expl", batch_size=128, shuffle=False, num_workers=16)
         datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split="train")
         datamodule.update_config(kwargs)
         dataloader = datamodule.train_dataloader()
@@ -188,7 +187,6 @@ def explain(**kwargs):
                     for aa, p in zip(aa_seq, list(predictions)):
                         if aa not in aa_counter:
                             aa_counter[aa] = [0, 0]
-
                         aa_counter[aa][0] += 1
                         aa_counter[aa][1] += p
 
