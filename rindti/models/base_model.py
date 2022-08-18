@@ -19,13 +19,7 @@ from ..data import TwoGraphData
 from ..lr_schedules.LWCA import LinearWarmupCosineAnnealingLR
 from ..lr_schedules.LWCAWR import LinearWarmupCosineAnnealingWarmRestartsLR
 
-
-optimizers = {
-    "adamw": AdamW,
-    "adam": Adam,
-    "sgd": SGD,
-    "rmsprop": RMSprop
-}
+optimizers = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}
 
 
 class BaseModel(LightningModule):
@@ -45,8 +39,11 @@ class BaseModel(LightningModule):
                 MatthewsCorrCoef(num_classes=num_classes),
             ]
         )
-        return metrics.clone(prefix=prefix + "train_"), metrics.clone(prefix=prefix + "val_"), \
-            metrics.clone(prefix=prefix + "test_")
+        return (
+            metrics.clone(prefix=prefix + "train_"),
+            metrics.clone(prefix=prefix + "val_"),
+            metrics.clone(prefix=prefix + "test_"),
+        )
 
     def _set_reg_metrics(self):
         metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
@@ -191,7 +188,7 @@ class BaseModel(LightningModule):
                 start_lr=float(lr_params["start_lr"]),
                 peak_lr=float(opt_params["lr"]),
                 cos_restart_dist=lr_params["cos_restart_dist"],
-                cos_eta_min=float(lr_params["min_lr"])
+                cos_eta_min=float(lr_params["min_lr"]),
             )
         elif lr_params["module"] == "lwca":
             lr_scheduler["scheduler"] = LinearWarmupCosineAnnealingLR(

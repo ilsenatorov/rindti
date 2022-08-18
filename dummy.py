@@ -1,7 +1,8 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-import math
 
 x = np.linspace(0, 1, 100)
 plt.plot(x, stats.norm.pdf(x, 0.43299443, 0.11952501), color="green")

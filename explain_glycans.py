@@ -1,20 +1,20 @@
 import copy
+import os
 import pickle
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import torch
+import torch.nn.functional as F
 import viewer
 from pytorch_lightning import seed_everything
 from torch_geometric.loader import DataLoader
 from torchmetrics import Accuracy
-import matplotlib.pyplot as plt
-import torch.nn.functional as F
 
 from rindti.data import DTIDataModule, TwoGraphData
-from rindti.utils import read_config, get_git_hash, remove_arg_prefix
+from rindti.utils import get_git_hash, read_config, remove_arg_prefix
 from train import models
-import numpy as np
-import pandas as pd
-import os
 
 
 def modify_protein(prot: dict, mode: str):
@@ -27,12 +27,12 @@ def modify_protein(prot: dict, mode: str):
             if mode == "obfuscate":
                 prot_data["x"][i] = 0
             elif mode == "delete":
-                prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1):]])
-                prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1):]])
+                prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1) :]])
+                prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1) :]])
                 e_idx = prot_data["edge_index"].T
                 del_indices = [j for j, e in enumerate(e_idx) if i in e]
                 for d in reversed(del_indices):
-                    e_idx = torch.cat([e_idx[:d], e_idx[(d + 1):]])
+                    e_idx = torch.cat([e_idx[:d], e_idx[(d + 1) :]])
                 e_idx[e_idx > i] -= 1
                 prot_data["edge_index"] = e_idx.T
             elif mode == "skip":
@@ -143,11 +143,11 @@ def explain(ckpt, model_prefix, split, folder, mode, aa_counter, aa_dist, **kwar
             # aa_dist[d][1] += abs(p)
             aa_dist[d][1] += p
 
-        if x['prot_id'][0] not in stack:
-            stack[x['prot_id'][0]] = [1, predictions]
+        if x["prot_id"][0] not in stack:
+            stack[x["prot_id"][0]] = [1, predictions]
         else:
-            stack[x['prot_id'][0]][1] += predictions
-            stack[x['prot_id'][0]][0] += 1
+            stack[x["prot_id"][0]][1] += predictions
+            stack[x["prot_id"][0]][0] += 1
 
     for lectin in stack.keys():
         with open(dist_map[lectin], "r") as dist_file:
@@ -203,15 +203,15 @@ def main():
             print(f"{k}\t{aa_counter['obfuscate'][k][0]}\t{aa_counter['obfuscate'][k][1]}", file=out)
 
     with open(f"exp/glycans/counts/aa_count_delete.tsv", "w") as out:
-        for k in aa_counter['delete'].keys():
+        for k in aa_counter["delete"].keys():
             print(f"{k}\t{aa_counter['delete'][k][0]}\t{aa_counter['delete'][k][1]}", file=out)
 
     with open(f"exp/glycans/distance/aa_dist_obfuscate.tsv", "w") as out:
-        for k in aa_dist['obfuscate'].keys():
+        for k in aa_dist["obfuscate"].keys():
             print(f"{k}\t{aa_dist['obfuscate'][k][0]}\t{aa_dist['obfuscate'][k][1]}", file=out)
 
     with open(f"exp/glycans/distance/aa_dist_delete.tsv", "w") as out:
-        for k in aa_dist['delete'].keys():
+        for k in aa_dist["delete"].keys():
             print(f"{k}\t{aa_dist['delete'][k][0]}\t{aa_dist['delete'][k][1]}", file=out)
 
 

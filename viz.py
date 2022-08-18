@@ -1,11 +1,11 @@
 import pickle
 from argparse import ArgumentParser
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
 
 from rindti.data import DTIDataModule
 from rindti.data.transforms import NullTransformer
@@ -34,10 +34,20 @@ def run(model, dataloader, p_name, d_name):
 def compute_embeddings(config):
     config = read_config(config)
 
-    dti_datamodule = DTIDataModule(filename="/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl", exp_name="glylec_mbb", batch_size=128, shuffle=False)
+    dti_datamodule = DTIDataModule(
+        filename="/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl",
+        exp_name="glylec_mbb",
+        batch_size=128,
+        shuffle=False,
+    )
     dti_datamodule.setup(transform=NullTransformer(**config["transform"]))
     dti_datamodule.update_config(config)
-    ricin_datamodule = DTIDataModule(filename="/scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a40936e4.pkl", exp_name="glylec_mbb", batch_size=12, shuffle=False)
+    ricin_datamodule = DTIDataModule(
+        filename="/scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a40936e4.pkl",
+        exp_name="glylec_mbb",
+        batch_size=12,
+        shuffle=False,
+    )
     ricin_datamodule.setup(transform=NullTransformer(**config["transform"]), split="train")
     ricin_datamodule.update_config(config)
 
@@ -61,9 +71,9 @@ def show(prefix, title, name):
     embeds = TSNE(n_components=2, learning_rate="auto", init="random", perplexity=50).fit_transform(embeds)
     # embeds = PCA(n_components=2).fit_transform(embeds)
 
-    t_x, t_y = zip(*(embeds[:len(train_embeds)]))
-    v_x, v_y = zip(*(embeds[len(train_embeds):(len(train_embeds) + len(val_embeds))]))
-    r_x, r_y = zip(*(embeds[(len(train_embeds) + len(val_embeds)):]))
+    t_x, t_y = zip(*(embeds[: len(train_embeds)]))
+    v_x, v_y = zip(*(embeds[len(train_embeds) : (len(train_embeds) + len(val_embeds))]))
+    r_x, r_y = zip(*(embeds[(len(train_embeds) + len(val_embeds)) :]))
     plt.scatter(t_x, t_y, color="g", marker="x", label="train")
     plt.scatter(v_x, v_y, color="r", marker="+", label="val")
     plt.scatter(r_x, r_y, color="b", marker="o", label="ricin")
@@ -80,4 +90,3 @@ show("p", "Proteins", "prots_tsne.png")
 show("d", "Drugs", "drugs_tsne.png")
 
 print("Done")
-

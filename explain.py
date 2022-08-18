@@ -1,21 +1,18 @@
+import copy
+import os
 from argparse import ArgumentParser
 
+import numpy as np
+import prettytable as pt
+import scipy.stats as stats
 import torch
-import copy
-
 from matplotlib import pyplot as plt
 from pytorch_lightning import seed_everything
-import os
-
 from torch_geometric.loader import DataLoader
 
 from rindti.data import DTIDataModule, TwoGraphData
-
 from rindti.utils import read_config, remove_arg_prefix
 from train import models, transformers
-import prettytable as pt
-import scipy.stats as stats
-import numpy as np
 
 
 def modify_protein(prot: dict, mode: str):
@@ -28,12 +25,12 @@ def modify_protein(prot: dict, mode: str):
             if mode == "obfuscate":
                 prot_data["x"][i] = 0
             elif mode == "delete":
-                prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1):]])
-                prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1):]])
+                prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1) :]])
+                prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1) :]])
                 e_idx = prot_data["edge_index"].T
                 del_indices = [j for j, e in enumerate(e_idx) if i in e]
                 for d in reversed(del_indices):
-                    e_idx = torch.cat([e_idx[:d], e_idx[(d + 1):]])
+                    e_idx = torch.cat([e_idx[:d], e_idx[(d + 1) :]])
                 e_idx[e_idx > i] -= 1
                 prot_data["edge_index"] = e_idx.T
             elif mode == "skip":
@@ -80,7 +77,9 @@ def fit_dist(**kwargs):
         kwargs["model"]["drug"]["method"] = data["drug_method"]
         kwargs["model"]["prot"]["method"] = data["prot_method"]
 
-        datamodule = DTIDataModule(filename=data["dataset"], exp_name="expl", batch_size=128, shuffle=False, num_workers=16)
+        datamodule = DTIDataModule(
+            filename=data["dataset"], exp_name="expl", batch_size=128, shuffle=False, num_workers=16
+        )
         datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split="train")
         datamodule.update_config(kwargs)
         dataloader = datamodule.train_dataloader()
@@ -95,9 +94,9 @@ def fit_dist(**kwargs):
             os.makedirs(f"{kwargs['output_dir']}/{m['name']}/distance/", exist_ok=True)
 
             model = models[kwargs["model"]["module"]](**kwargs)
-            model = model.load_from_checkpoint(m['checkpoint'])
+            model = model.load_from_checkpoint(m["checkpoint"])
             model.eval()
-            model_list.append((m['name'], model))
+            model_list.append((m["name"], model))
             model_data[m["name"]] = [], []
         print("Models loaded")
 
@@ -139,9 +138,9 @@ def explain(**kwargs):
             os.makedirs(f"{kwargs['output_dir']}/{m['name']}/distance/", exist_ok=True)
 
             model = models[kwargs["model"]["module"]](**kwargs)
-            model = model.load_from_checkpoint(m['checkpoint'])
+            model = model.load_from_checkpoint(m["checkpoint"])
             model.eval()
-            model_list.append((m['name'], model, m["neg_params"], m["pos_params"]))
+            model_list.append((m["name"], model, m["neg_params"], m["pos_params"]))
         print("Models loaded")
 
         res_table = pt.PrettyTable()
@@ -178,7 +177,7 @@ def explain(**kwargs):
                     print("\t\t\t\tneg. p-val:", neg_p_val)
                     print("\t\t\t\tpos. p-val:", pos_p_val)
                     neg_line.append(round(neg_p_val, 5))
-                    pos_line.append(round(1-pos_p_val, 5))
+                    pos_line.append(round(1 - pos_p_val, 5))
                     predictions = predictions[0].expand(len(predictions) - 1) - torch.tensor(predictions[1:].squeeze())
                     predictions = predictions.detach().numpy()
 
@@ -219,5 +218,5 @@ def main():
         explain(**config)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

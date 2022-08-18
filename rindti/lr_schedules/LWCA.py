@@ -1,10 +1,10 @@
 import math
 import warnings
+import weakref
 from functools import wraps
 from typing import List
-import weakref
-from torch.optim import Optimizer
 
+from torch.optim import Optimizer
 
 EPOCH_DEPRECATION_WARNING = (
     "The epoch parameter in `scheduler.step()` was not necessary and is being "
@@ -21,27 +21,28 @@ class _LRScheduler:
 
         # Attach optimizer
         if not isinstance(optimizer, Optimizer):
-            raise TypeError('{} is not an Optimizer'.format(
-                type(optimizer).__name__))
+            raise TypeError("{} is not an Optimizer".format(type(optimizer).__name__))
         self.optimizer = optimizer
 
         # Initialize epoch and base learning rates
         if last_epoch == -1:
             for group in optimizer.param_groups:
-                group.setdefault('initial_lr', group['lr'])
+                group.setdefault("initial_lr", group["lr"])
         else:
             for i, group in enumerate(optimizer.param_groups):
-                if 'initial_lr' not in group:
-                    raise KeyError("param 'initial_lr' is not specified "
-                                   "in param_groups[{}] when resuming an optimizer".format(i))
-        self.base_lrs = [group['initial_lr'] for group in optimizer.param_groups]
+                if "initial_lr" not in group:
+                    raise KeyError(
+                        "param 'initial_lr' is not specified "
+                        "in param_groups[{}] when resuming an optimizer".format(i)
+                    )
+        self.base_lrs = [group["initial_lr"] for group in optimizer.param_groups]
         self.last_epoch = last_epoch
 
         # Following https://github.com/pytorch/pytorch/issues/20124
         # We would like to ensure that `lr_scheduler.step()` is called after
         # `optimizer.step()`
         def with_counter(method):
-            if getattr(method, '_with_counter', False):
+            if getattr(method, "_with_counter", False):
                 # `optimizer.step()` has already been replaced, return.
                 return method
 
@@ -81,7 +82,7 @@ class _LRScheduler:
         It contains an entry for every variable in self.__dict__ which
         is not the optimizer.
         """
-        return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
+        return {key: value for key, value in self.__dict__.items() if key != "optimizer"}
 
     def load_state_dict(self, state_dict):
         """Loads the schedulers state.
@@ -92,8 +93,7 @@ class _LRScheduler:
         self.__dict__.update(state_dict)
 
     def get_last_lr(self):
-        """ Return last computed learning rate by current scheduler.
-        """
+        """Return last computed learning rate by current scheduler."""
         return self._last_lr
 
     def get_lr(self):
@@ -102,40 +102,41 @@ class _LRScheduler:
 
     @staticmethod
     def print_lr(is_verbose, group, lr, epoch=None):
-        """Display the current learning rate.
-        """
+        """Display the current learning rate."""
         if is_verbose:
             if epoch is None:
-                print('Adjusting learning rate'
-                      ' of group {} to {:.4e}.'.format(group, lr))
+                print("Adjusting learning rate" " of group {} to {:.4e}.".format(group, lr))
             else:
-                epoch_str = ("%.2f" if isinstance(epoch, float) else
-                             "%.5d") % epoch
-                print('Epoch {}: adjusting learning rate'
-                      ' of group {} to {:.4e}.'.format(epoch_str, group, lr))
+                epoch_str = ("%.2f" if isinstance(epoch, float) else "%.5d") % epoch
+                print("Epoch {}: adjusting learning rate" " of group {} to {:.4e}.".format(epoch_str, group, lr))
 
     def step(self, epoch=None):
         # Raise a warning if old pattern is detected
         # https://github.com/pytorch/pytorch/issues/20124
         if self._step_count == 1:
             if not hasattr(self.optimizer.step, "_with_counter"):
-                warnings.warn("Seems like `optimizer.step()` has been overridden after learning rate scheduler "
-                              "initialization. Please, make sure to call `optimizer.step()` before "
-                              "`lr_scheduler.step()`. See more details at "
-                              "https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate", UserWarning)
+                warnings.warn(
+                    "Seems like `optimizer.step()` has been overridden after learning rate scheduler "
+                    "initialization. Please, make sure to call `optimizer.step()` before "
+                    "`lr_scheduler.step()`. See more details at "
+                    "https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate",
+                    UserWarning,
+                )
 
             # Just check if there were two first lr_scheduler.step() calls before optimizer.step()
             elif self.optimizer._step_count < 1:
-                warnings.warn("Detected call of `lr_scheduler.step()` before `optimizer.step()`. "
-                              "In PyTorch 1.1.0 and later, you should call them in the opposite order: "
-                              "`optimizer.step()` before `lr_scheduler.step()`.  Failure to do this "
-                              "will result in PyTorch skipping the first value of the learning rate schedule. "
-                              "See more details at "
-                              "https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate", UserWarning)
+                warnings.warn(
+                    "Detected call of `lr_scheduler.step()` before `optimizer.step()`. "
+                    "In PyTorch 1.1.0 and later, you should call them in the opposite order: "
+                    "`optimizer.step()` before `lr_scheduler.step()`.  Failure to do this "
+                    "will result in PyTorch skipping the first value of the learning rate schedule. "
+                    "See more details at "
+                    "https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate",
+                    UserWarning,
+                )
         self._step_count += 1
 
         class _enable_get_lr_call:
-
             def __init__(self, o):
                 self.o = o
 
@@ -160,10 +161,10 @@ class _LRScheduler:
 
         for i, data in enumerate(zip(self.optimizer.param_groups, values)):
             param_group, lr = data
-            param_group['lr'] = lr
+            param_group["lr"] = lr
             self.print_lr(self.verbose, i, lr, epoch)
 
-        self._last_lr = [group['lr'] for group in self.optimizer.param_groups]
+        self._last_lr = [group["lr"] for group in self.optimizer.param_groups]
 
 
 class LinearWarmupCosineAnnealingLR(_LRScheduler):

@@ -73,4 +73,3 @@ model:
       cos_restart_dist: 500
       min_lr: 1e-7
       start_lr: 1e-5
-

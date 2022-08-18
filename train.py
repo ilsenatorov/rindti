@@ -1,5 +1,6 @@
 import os
 import random
+from pprint import pprint
 
 import numpy as np
 import torch
@@ -8,13 +9,12 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichMode
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
-from rindti.data.transforms import NeighborhoodMasker, DataCorruptor, ESMasker, NullTransformer
-from rindti.models import ClassificationModel, RegressionModel, MultitaskClassification
+from rindti.data.transforms import DataCorruptor, ESMasker, NeighborhoodMasker, NullTransformer
+from rindti.models import ClassificationModel, MultitaskClassification, RegressionModel
 from rindti.utils import get_git_hash, read_config
 from rindti.utils.ddd_es import DeepDoubleDescentEarlyStopping as DDDES
-from pprint import pprint
 
-torch.multiprocessing.set_sharing_strategy('file_system')
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 
 models = {
