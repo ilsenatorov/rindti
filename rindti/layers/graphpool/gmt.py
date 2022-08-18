@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import torch.nn.functional as F
 from torch import LongTensor, Tensor
-from torch_geometric.nn import GraphMultisetTransformer
+from torch_geometric.nn.aggr import GraphMultisetTransformer
 from torch_geometric.typing import Adj
 
 from ..base_layer import BaseLayer
