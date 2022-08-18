@@ -37,6 +37,7 @@ model:
     weight_decay: 0.01
     momentum: 0.01
     reduce_lr:
+      module: rlrop
       factor: 0.1
       patience: 20
       monitor: train_loss

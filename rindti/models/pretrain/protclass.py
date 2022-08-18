@@ -21,7 +21,7 @@ class ProtClassModel(BaseModel):
 
     def forward(self, data: dict) -> Tensor:
         """Forward the data through the model"""
-        graphs = self.encoder(data)
+        graphs, _ = self.encoder(data)
         preds = self.mlp(graphs)
         return preds
 

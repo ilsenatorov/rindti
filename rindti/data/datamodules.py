@@ -17,7 +17,7 @@ class BaseDataModule(LightningDataModule):
         batch_size: int = 128,
         num_workers: int = 1,
         shuffle: bool = True,
-        dyn_sampler: bool = True,
+        dyn_sampler: bool = False,
     ):
         super().__init__()
         self.filename = filename

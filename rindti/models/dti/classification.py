@@ -59,6 +59,13 @@ class ClassificationModel(BaseModel):
         
         return dict(loss=bce_loss, preds=torch.sigmoid(fwd_dict["pred"].detach()), labels=labels.detach())
 
+    def validation_epoch_end(self, outputs: dict):
+        """WHat to do at the end of a validation epoch. Logs everthing."""
+        metrics = self.val_metrics.compute()
+        self.val_metrics.reset()
+        self.log_all(metrics, hparams=True)
+        self.log("val_acc", metrics["val_Accuracy"])
+
 
 class MultitaskClassification(ClassificationModel):
     def __init__(self, **kwargs):

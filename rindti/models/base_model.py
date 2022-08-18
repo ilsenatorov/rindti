@@ -143,7 +143,6 @@ class BaseModel(LightningModule):
         metrics = self.val_metrics.compute()
         self.val_metrics.reset()
         self.log_all(metrics, hparams=True)
-        self.log("val_acc", metrics["val_Accuracy"])
 
     def test_epoch_end(self, outputs: dict):
         """What to do at the end of a test epoch. Logs everything."""
@@ -157,7 +156,7 @@ class BaseModel(LightningModule):
 
         params = []
         if hasattr(self, "mlp"):
-            params.append({"params": self.parameters(), "lr": opt_params["lr"]})
+            params.append({"params": self.mlp.parameters(), "lr": opt_params["lr"]})
         if hasattr(self, "prot_encoder"):
             params.append({"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]})
         if hasattr(self, "drug_encoder"):
@@ -177,7 +176,7 @@ class BaseModel(LightningModule):
 
     def parse_lr_scheduler(self, optimizer, opt_params, lr_params):
         """Parse learning rate scheduling based on config args"""
-        lr_scheduler = {"monitor": self.hparams["early_stop"]["monitor"]}
+        lr_scheduler = {"monitor": lr_params["monitor"]}
         if lr_params["module"] == "rlrop":
             lr_scheduler["scheduler"] = ReduceLROnPlateau(
                 optimizer,
@@ -203,6 +202,9 @@ class BaseModel(LightningModule):
                 warmup_start_lr=float(lr_params["start_lr"]),
             )
         else:
-            raise ValueError("Unknown learning rate scheduler")
+            # raise ValueError("Unknown learning rate scheduler")
+            lr_scheduler["scheduler"] = ReduceLROnPlateau(
+                optimizer, verbose=True, factor=0.1, patience=20,
+            )
 
         return lr_scheduler

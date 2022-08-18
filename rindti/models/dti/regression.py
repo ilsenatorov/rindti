@@ -21,3 +21,7 @@ class RegressionModel(ClassificationModel):
         labels = data.label.unsqueeze(1)
         mse_loss = F.mse_loss(torch.sigmoid(fwd_dict["pred"]), labels.float())
         return dict(loss=mse_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
+
+    def validation_epoch_end(self, outputs: dict):
+        super(ClassificationModel, self).validation_epoch_end(outputs)
+
