@@ -10,7 +10,7 @@ from torchmetrics import ConfusionMatrix
 from torchmetrics.functional.classification import accuracy
 
 from ...data.large_datasets import node_encode
-from ...utils.math import LinearWarmupCosineAnnealingLR
+from ...utils.optim import LinearWarmupCosineAnnealingLR
 
 
 class DenoiseModel(LightningModule):

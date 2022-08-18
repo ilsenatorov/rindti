@@ -121,7 +121,7 @@ class LargePreTrainDataset(Dataset):
 
     def len(self):
         """Number of pdb structures == number of graphs."""
-        return 177724
+        return 663
 
     def get(self, idx: int):
         """Load a single graph."""

@@ -31,12 +31,12 @@ if __name__ == "__main__":
     )
 
     ds = LargePreTrainDataset(
-        "/scratch/SCRATCH_NVME/ilya/datasets/uniref50/resources/structures/",
+        "datasets/alphafold/resources/structures/",
         transform=transform,
         pre_transform=pre_transform,
         threads=64,
     )[:10000]
-    model = DenoiseModel(dropout=0.1, hidden_dim=512, num_layers=3, num_heads=4, weighted_loss=False)
+    model = DenoiseModel(dropout=0.1, hidden_dim=128, num_layers=3, num_heads=4, weighted_loss=False)
     dl = torch_geometric.loader.DataLoader(ds, batch_size=32, shuffle=True, num_workers=16)
     trainer = Trainer(
         gpus=1,
