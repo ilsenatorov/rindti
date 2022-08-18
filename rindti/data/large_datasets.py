@@ -3,7 +3,7 @@ from typing import Callable, Union
 
 import torch
 from joblib import Parallel, delayed
-from torch_geometric.data import Data, Dataset
+from torch_geometric.data import Data, Dataset, InMemoryDataset
 from tqdm import tqdm
 
 node_encode = {
@@ -125,4 +125,44 @@ class LargePreTrainDataset(Dataset):
 
     def get(self, idx: int):
         """Load a single graph."""
-        return torch.load(Path(self.processed_dir) / f"data_{idx}.pt")
+        return torch.load(self.processed_dir + "/" + f"data_{idx}.pt")
+
+
+class LargePreTrainMemoryDataset(InMemoryDataset):
+    def __init__(
+        self,
+        root: str,
+        transform: Callable = None,
+        pre_transform: Callable = None,
+        pre_filter: Callable = None,
+        threads: int = 1,
+    ):
+        self.input_dir = Path(root)
+        self.threads = threads
+        super().__init__(root, transform, pre_transform)
+        self.data, self.slices = torch.load(self.processed_paths[0])
+
+    @property
+    def processed_file_names(self):
+        """Which files have to be in the dir to consider dataset processed.
+
+        Returns:
+            Iterable[str]: list of files
+        """
+        return ["data.pt"]
+
+    def process(self):
+        """If the dataset was not seen before, process everything."""
+        data_list = []
+
+        def get_graph(filename: str) -> dict:
+            """Get a graph using threshold as a cutoff"""
+            s = Structure(filename)
+            entry = Data(**s.get_graph())
+            if self.pre_transform is not None:
+                entry = self.pre_transform(entry)
+            return entry
+
+        data_list = Parallel(n_jobs=self.threads)(delayed(get_graph)(i) for i in tqdm(self.input_dir.glob("*.pdb")))
+        data, slices = self.collate(data_list)
+        torch.save((data, slices), self.processed_paths[0])
