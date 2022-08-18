@@ -1,5 +1,5 @@
 # the two root directories to take the data from and to store the data in
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/resources
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources
 prots:
   features:
     method: rinerator # rinerator, distance, esm
@@ -7,6 +7,8 @@ drugs:
   node_feats: glycan # IUPAC, label, onehot, glycan
 split_data:
   method: target # random, drug, target
+  train: 1
+  val: 0.0
 parse_dataset:
-  filtering: posneg
-  threshold: 1.645
+  filtering: all
+  threshold: 0.5

@@ -46,5 +46,5 @@ class GMTNet(BaseLayer):
 
     def forward(self, x: Tensor, edge_index: Adj, batch: LongTensor) -> Tensor:
         """"""
-        embeds = self.pool(x, batch, edge_index)
+        embeds = self.pool(x, batch, edge_index=edge_index)
         return F.normalize(embeds, dim=1)

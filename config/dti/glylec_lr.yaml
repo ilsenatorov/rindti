@@ -4,7 +4,8 @@ datamodule:
   filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
   exp_name: glylec_mbb
   batch_size: 64
-  num_workers: 0
+  num_workers: 16
+  dyn_sampler: False
 transform:
   mode: esm  # neighbors
   k: 3
@@ -16,15 +17,20 @@ transform:
       weight: 1
 trainer:
   gpus: 1
-  max_epochs: 1000
+  max_epochs: 3000
   profiler: null
   gradient_clip_val: 100
 early_stop:
-  patience: 40
+  patience: 125
+  monitor: val_loss
+  mode: min
+checkpoints:
+  monitor: val_acc
+  save_top_k: 3
+  mode: max
 model:
   module: multiclass
   feat_method: concat
-  monitor: val_loss
   drug:
     hidden_dim: 128
     method: graph
@@ -39,7 +45,7 @@ model:
       hidden_dim: 128
       ratio: 0.25
   prot:
-    hidden_dim: 256
+    hidden_dim: 128
     method: graph
     node:
       module: ginconv
@@ -53,16 +59,17 @@ model:
       ratio: 0.25
   mlp:
     dropout: 0.2
-    hidden_dim: 1024
-    num_layers: 3
+    hidden_dim: 512
   optimizer:
     module: adam
+    single_lr: True
     lr: 0.001
-    prot_lr: 0.01
-    drug_lr: 0.01
+    prot_lr: 0.001
+    drug_lr: 0.001
     weight_decay: 0.01
     momentum: 0.01
-    reduce_lr:
+    lr_schedule:
+      module: rlrop
       factor: 0.1
       patience: 20
       monitor: val_loss

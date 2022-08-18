@@ -14,7 +14,7 @@ class ProtClassModel(BaseModel):
         self.encoder = GraphEncoder(**kwargs["encoder"])
         self.mlp = MLP(input_dim=kwargs["hidden_dim"], out_dim=kwargs["num_classes"], **kwargs["mlp"])
         self.loss = nn.CrossEntropyLoss()
-        self._set_class_metrics(kwargs["num_classes"])
+        self.train_metrics, self.val_metrics, self.test_metrics = self._set_class_metrics(kwargs["num_classes"])
 
     def forward(self, data: dict) -> Tensor:
         graphs = self.encoder(data)

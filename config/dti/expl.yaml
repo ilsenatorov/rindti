@@ -1,0 +1,95 @@
+runs: 3
+seed: 42
+output_dir: exp/multi
+models:
+  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
+  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/results/prepare_all/rlnwgntanc_001893e0.pkl
+  - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a40936e4.pkl
+    drug_method: graph
+    prot_method: graph
+    models:
+      - name: SGD
+        checkpoint: tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_0/version_82/checkpoints/epoch=122-step=21155.ckpt
+        pos_params: [0.4615402, 0.1289455]
+        neg_params: [0.56662285, 0.13507694]
+      - name: RMSProp
+        checkpoint: tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_4/version_82/checkpoints/epoch=167-step=28895.ckpt
+        pos_params: [0.4294854, 0.1645894]
+        neg_params: [0.54150695, 0.19828674]
+      - name: Adam
+        checkpoint: tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_8/version_82/checkpoints/epoch=98-step=17027.ckpt
+        pos_params: [0.43299443, 0.11952501]
+        neg_params: [0.5825024, 0.16159964]
+      - name: SGD+LR
+        checkpoint: tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_13/version_82/checkpoints/epoch=55-step=9631.ckpt
+        pos_params: [0.28199935, 0.18094142]
+        neg_params: [0.67558134, 0.25345966]
+      - name: Adam+LR
+        checkpoint: tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_16/version_82/checkpoints/epoch=199-step=34399.ckpt
+        pos_params: [0.13453805, 0.12812157]
+        neg_params: [0.76900375, 0.31010443]
+methods: [obfuscate]  # , delete]
+sequences: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/resources/tables/prot.tsv
+datamodule:
+  batch_size: 1
+transform:
+  mode: none  # esm  # neighbors
+  k: 3
+  spots: 3
+  graphs:
+    main:
+      weight: 4
+    prot:
+      weight: 1
+trainer:
+  gpus: 1
+  max_epochs: 1000
+  profiler: null
+  gradient_clip_val: 100
+early_stop:
+  patience: 40
+model:
+  module: multiclass
+  feat_method: concat
+  monitor: val_loss
+  drug:
+    hidden_dim: 256
+    method: graph
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: gmt
+      num_heads: 4
+      hidden_dim: 128
+      ratio: 0.25
+  prot:
+    hidden_dim: 256
+    method: graph
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: gmt
+      num_heads: 4
+      hidden_dim: 128
+      ratio: 0.25
+  mlp:
+    dropout: 0.2
+    hidden_dim: 1024
+    num_layers: 3
+  optimizer:
+    module: adam
+    lr: 0.001
+    prot_lr: 0.01
+    drug_lr: 0.01
+    weight_decay: 0.01
+    momentum: 0.01
+    reduce_lr:
+      factor: 0.1
+      patience: 20
+      monitor: val_loss

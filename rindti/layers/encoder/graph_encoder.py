@@ -51,7 +51,7 @@ class GraphEncoder(LightningModule):
         return poolers[params["module"]](**params)
 
     def _get_label_embed(self, params: dict) -> nn.Embedding:
-        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"])
+        return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"], padding_idx=0)
 
     def _get_onehot_embed(self, params: dict) -> nn.Linear:
         return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
@@ -98,10 +98,8 @@ class GraphEncoder(LightningModule):
             edge_feats=edge_feats,
             batch=batch,
         )
-        embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)
-        if self.return_nodes:
-            return embed, node_embed
-        return embed
+        graph_embed = self.pool(x=node_embed, edge_index=edge_index, batch=batch)
+        return graph_embed, node_embed
 
     def embed(self, data: Data, **kwargs):
         """Generate an embedding for a graph."""

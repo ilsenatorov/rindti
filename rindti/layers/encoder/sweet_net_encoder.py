@@ -61,4 +61,4 @@ class SweetNetAdapter(SweetNet):
             if self.trainable:
                 embeddings.append(self.lin4(y).squeeze())
             embeddings.append(self.lin4(y.detach()).squeeze())
-        return torch.stack(embeddings)
+        return torch.stack(embeddings), None
