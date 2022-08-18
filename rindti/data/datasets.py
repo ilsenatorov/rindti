@@ -104,7 +104,7 @@ class DTIDataset(InMemoryDataset):
                     two_graph_data.num_nodes = 1  # supresses the warning
                     data_list.append(two_graph_data)
                 if data_list:
-                    # data_list = balance_data(data_list)
+                    data_list = balance_data(data_list)
                     self.process_(data_list, split)
 
 

@@ -36,4 +36,4 @@ class PretrainedEncoder(LightningModule):
         Returns:
             Tensor: Encoded entry.
         """
-        return None, self.mlp(data["x"])
+        return self.mlp(data["x"]), None
