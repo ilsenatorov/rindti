@@ -14,7 +14,7 @@ class RegressionModel(ClassificationModel):
         self._set_reg_metrics()
 
     def shared_step(self, data: TwoGraphData) -> dict:
-        """"""
+        """Perform shared step for the regression model"""
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)

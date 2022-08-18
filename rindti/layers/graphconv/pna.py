@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch.functional import Tensor
 from torch.nn import Embedding
 from torch_geometric.nn import PNAConv
@@ -44,7 +42,7 @@ class PNAConvNet(BaseLayer):
         )
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

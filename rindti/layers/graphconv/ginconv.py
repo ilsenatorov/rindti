@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch import nn
 from torch.functional import Tensor
 from torch_geometric.nn import GINConv
@@ -52,7 +50,7 @@ class GINConvNet(BaseLayer):
         )
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

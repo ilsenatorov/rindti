@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 import torch.nn.functional as F
 from torch import LongTensor, Tensor
 from torch_geometric.nn import GraphMultisetTransformer
@@ -45,6 +43,6 @@ class GMTNet(BaseLayer):
         )
 
     def forward(self, x: Tensor, edge_index: Adj, batch: LongTensor) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         embeds = self.pool(x, batch, edge_index=edge_index)
         return F.normalize(embeds, dim=1)

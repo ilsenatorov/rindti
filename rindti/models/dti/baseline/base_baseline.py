@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import torch
 from torchmetrics.functional import accuracy, auroc, matthews_corrcoef

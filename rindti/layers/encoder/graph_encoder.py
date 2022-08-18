@@ -1,7 +1,6 @@
 from typing import Tuple, Union
 
 from pytorch_lightning import LightningModule
-import torch
 from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
@@ -45,18 +44,23 @@ class GraphEncoder(LightningModule):
         kwargs["pool"]["output_dim"] = kwargs["hidden_dim"]
 
     def _get_node_embed(self, params: dict) -> nn.Module:
+        """Get node embedding module based on its name"""
         return node_embedders[params["module"]](**params)
 
     def _get_pooler(self, params: dict) -> nn.Module:
+        """Get pooling module based on its name"""
         return poolers[params["module"]](**params)
 
     def _get_label_embed(self, params: dict) -> nn.Embedding:
+        """Get label embedding module based on its name"""
         return nn.Embedding(params["feat_dim"] + 1, params["hidden_dim"], padding_idx=0)
 
     def _get_onehot_embed(self, params: dict) -> nn.Linear:
+        """Get onehot embedding module based on its name"""
         return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
 
     def _get_feat_embed(self, params: dict) -> Union[nn.Embedding, nn.Linear]:
+        """Get feature embedding module based on its name"""
         if params["feat_type"] == "onehot":
             return self._get_onehot_embed(params)
         elif params["feat_type"] == "label":
@@ -87,10 +91,6 @@ class GraphEncoder(LightningModule):
             data["batch"],
             data.get("edge_feats"),
         )
-        """if isinstance(self.feat_embed, nn.Embedding):
-            feat_embed = torch.stack([torch.tensor([0.0] * 128) if y == torch.tensor(0) else self.feat_embed(y) for y in x])
-        else:
-            feat_embed = self.feat_embed(x)"""
         feat_embed = self.feat_embed(x)
         node_embed = self.node_embed(
             x=feat_embed,

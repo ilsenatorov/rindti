@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch.functional import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import FiLMConv
@@ -42,7 +40,7 @@ class FilmConvNet(BaseLayer):
         self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         if self.edge_dim <= 1:
             edge_feats = None
         x = self.inp(x, edge_index, edge_feats)

@@ -39,7 +39,7 @@ class GatConvNet(BaseLayer):
         self.out = GATConv(hidden_dim, output_dim, concat=False)
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
-        """"""
+        """Forward the data through the GNN module"""
         x = self.inp(x, edge_index)
         for module in self.mid_layers:
             x = module(x, edge_index)

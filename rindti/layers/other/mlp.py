@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 from typing import List
 
 from torch import nn
@@ -32,7 +31,6 @@ class MLP(BaseLayer):
     ):
         super().__init__()
 
-
         if hidden_dims is not None:
             self.mlp = nn.Sequential(nn.Linear(input_dim, hidden_dims[0]), nn.ReLU(), nn.Dropout(dropout))
             for i in range(len(hidden_dims) - 1):
@@ -49,4 +47,5 @@ class MLP(BaseLayer):
             self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))
 
     def forward(self, x: Tensor) -> Tensor:
+        """Forward the data through the MLP"""
         return self.mlp(x)

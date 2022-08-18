@@ -1,9 +1,5 @@
-import pickle
-
 import torch
 import torch.nn.functional as F
-from torch.functional import Tensor
-from torch import nn
 import numpy as np
 
 from ...data import TwoGraphData
@@ -35,7 +31,7 @@ class ClassificationModel(BaseModel):
         self.train_metrics, self.val_metrics, self.test_metrics = self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> dict:
-        """"""
+        """Forward the data though the classification model"""
         prot_embed, _ = self.prot_encoder(prot)
         drug_embed, _ = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
@@ -55,9 +51,10 @@ class ClassificationModel(BaseModel):
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
-        labels = data.label.unsqueeze(1)
+        labels = data["label"].unsqueeze(1)
         
-        weights = torch.where(labels == 0, self.pos_weight.to(labels.device), self.neg_weight.to(labels.device)).float()
+        # weights = torch.where(labels == 0, self.pos_weight.to(labels.device),
+        #                       self.neg_weight.to(labels.device)).float()
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
         
         return dict(loss=bce_loss, preds=torch.sigmoid(fwd_dict["pred"].detach()), labels=labels.detach())
@@ -71,22 +68,22 @@ class MultitaskClassification(ClassificationModel):
         self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], hidden_dims=[64, 32], out_dim=21)
         self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], hidden_dims=[64, 16], out_dim=3)
 
-        # self.prot_node_classifier = nn.Linear(in_features=kwargs["model"]["drug"]["hidden_dim"], out_features=21)
-        # self.drug_node_classifier = nn.Linear(in_features=kwargs["model"]["prot"]["hidden_dim"], out_features=3)
-
         self.prot_class = "prot" in kwargs["transform"]["graphs"]
         self.drug_class = "drug" in kwargs["transform"]["graphs"]
 
         self.main_weight = kwargs["transform"]["graphs"]["main"]["weight"]
 
         if self.prot_class:
-            self.pp_train_metrics, self.pp_val_metrics, self.pp_test_metrics = self._set_class_metrics(num_classes=21, prefix="pp_")
+            self.pp_train_metrics, self.pp_val_metrics, self.pp_test_metrics = self._set_class_metrics(num_classes=21,
+                                                                                                       prefix="pp_")
             self.prot_weight = kwargs["transform"]["graphs"]["prot"]["weight"]
         if self.drug_class:
-            self.dp_train_metrics, self.dp_val_metrics, self.dp_test_metrics = self._set_class_metrics(num_classes=3, prefix="dp_")
+            self.dp_train_metrics, self.dp_val_metrics, self.dp_test_metrics = self._set_class_metrics(num_classes=3,
+                                                                                                       prefix="dp_")
             self.drug_weight = kwargs["transform"]["graphs"]["drug"]["weight"]
 
     def forward(self, prot: dict, drug: dict) -> dict:
+        """Forward teh data through the model and also compute the predictions for side tasks"""
         prot_graph_embed, prot_node_embed = self.prot_encoder(prot)
         drug_graph_embed, drug_node_embed = self.drug_encoder(drug)
         joint_embedding = self.merge_features(drug_graph_embed, prot_graph_embed)
@@ -104,13 +101,15 @@ class MultitaskClassification(ClassificationModel):
         )
 
     def shared_step(self, data: TwoGraphData) -> dict:
+        """"Compute the shared step of the model"""
         prot = remove_arg_prefix("prot_", data)
         drug = remove_arg_prefix("drug_", data)
         fwd_dict = self.forward(prot, drug)
-        labels = data.label.unsqueeze(1)
+        labels = data["label"].unsqueeze(1)
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
         loss = self.main_weight * bce_loss
 
+        # if protein multitasking is enabled, compute it's loss
         if self.prot_class:
             idx = torch.tensor(np.argwhere(data["prot_x_orig"].detach().cpu() - data["prot_x"].detach().cpu())).squeeze()
             prot_loss = F.cross_entropy(torch.softmax(fwd_dict["prot_node_class"], dim=1)[idx, :], data["prot_x_orig"][idx])
@@ -118,12 +117,14 @@ class MultitaskClassification(ClassificationModel):
         else:
             prot_loss = None
 
+        # if drug multitasking is enabled, compute it's loss
         if self.drug_class:
             drug_loss = F.cross_entropy(torch.softmax(fwd_dict["drug_node_class"], dim=1), data["drug_x_orig"])
             loss += self.drug_weight * drug_loss
         else:
             drug_loss = None
 
+        # fill the output directory accordingly
         output = dict(
             loss=loss,
             pred_loss=bce_loss.detach(),
@@ -151,6 +152,7 @@ class MultitaskClassification(ClassificationModel):
         return output
 
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
+        """Perform training and keep track of all its metrics"""
         ss = super(MultitaskClassification, self).training_step(data, data_idx)
         self.log("train_dti_loss", ss["pred_loss"], batch_size=self.batch_size)
 
@@ -163,6 +165,7 @@ class MultitaskClassification(ClassificationModel):
         return ss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
+        """Perform validation and keep track of all its metrics"""
         ss = super(MultitaskClassification, self).validation_step(data, data_idx)
         self.log("val_dti_loss", ss["pred_loss"], batch_size=self.batch_size)
 
@@ -175,6 +178,7 @@ class MultitaskClassification(ClassificationModel):
         return ss
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
+        """Perform testing and keep track of all its metrics"""
         ss = super(MultitaskClassification, self).test_step(data, data_idx)
         self.log("test_dti_loss", ss["pred_loss"], batch_size=self.batch_size)
 
@@ -187,6 +191,7 @@ class MultitaskClassification(ClassificationModel):
         return ss
 
     def training_epoch_end(self, outputs: dict):
+        """Calculate training metrics"""
         super(MultitaskClassification, self).training_epoch_end(outputs)
         if self.prot_class:
             metrics = self.pp_train_metrics.compute()
@@ -198,7 +203,7 @@ class MultitaskClassification(ClassificationModel):
             self.log_all(metrics)
 
     def validation_epoch_end(self, outputs: dict):
-        # super(MultitaskClassification, self).validation_epoch_end(outputs)
+        """Calculate validation metrics"""
         metrics = self.val_metrics.compute()
         self.val_metrics.reset()
         self.log_all(metrics, hparams=True)
@@ -214,6 +219,7 @@ class MultitaskClassification(ClassificationModel):
             self.log_all(metrics, hparams=True)
 
     def test_epoch_end(self, outputs: dict):
+        """Calculate test metrics"""
         super(MultitaskClassification, self).test_epoch_end(outputs)
         if self.prot_class:
             metrics = self.pp_test_metrics.compute()

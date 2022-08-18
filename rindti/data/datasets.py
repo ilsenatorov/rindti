@@ -5,12 +5,15 @@ from typing import Callable, Iterable
 
 import pandas as pd
 import torch
+from deprecate import deprecated
 from torch_geometric.data import Data, Dataset, InMemoryDataset
 
 from .data import TwoGraphData
 
 
+@deprecated
 def balance_data(data_list):
+    """Method to balance the dataset after its creation by snakemake, this is a hot fix"""
     count = {}
     for s in data_list:
         if s["label"] not in count:
@@ -104,7 +107,7 @@ class DTIDataset(InMemoryDataset):
                     two_graph_data.num_nodes = 1  # supresses the warning
                     data_list.append(two_graph_data)
                 if data_list:
-                    data_list = balance_data(data_list)
+                    # data_list = balance_data(data_list)
                     self.process_(data_list, split)
 
 
