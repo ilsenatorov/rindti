@@ -38,8 +38,8 @@ if __name__ == "__main__":
         pre_transform=pre_transform,
         threads=64,
     )
-    sampler = DynamicBatchSampler(ds, max_num=30000, mode="node")
-    model = DenoiseModel(dropout=0.1, hidden_dim=128, num_layers=4, num_heads=2, weighted_loss=False)
+    sampler = DynamicBatchSampler(ds, max_num=3000, mode="node")
+    model = DenoiseModel(dropout=0.1, hidden_dim=1024, num_layers=12, num_heads=8, weighted_loss=False)
     dl = torch_geometric.loader.DataLoader(ds, batch_sampler=sampler, num_workers=16)
     trainer = Trainer(
         gpus=1,
