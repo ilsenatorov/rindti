@@ -7,9 +7,9 @@ from pytorch_lightning.callbacks import StochasticWeightAveraging
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DynamicBatchSampler
 
-from rindti.data import LargePreTrainDataset
+from rindti.data.lectin_datasets import LectinPreTrainDataset
 from rindti.data.transforms import MaskType, PosNoise
-from rindti.models.pretrain.denoise import DenoiseModel
+from rindti.models.pretrain.lectin_denoise import DenoiseModel
 
 if __name__ == "__main__":
 
@@ -35,7 +35,8 @@ if __name__ == "__main__":
         ]
     )
 
-    ds = LargePreTrainDataset(
+    ds = LectinPreTrainDataset(
+        "/home/rjo21/Desktop/rindti/data/pre_lectin/resources/structures/",
         "/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/resources/structures/",
         transform=transform,
         pre_transform=pre_transform,
@@ -63,8 +64,8 @@ if __name__ == "__main__":
         name=f"version_{next_version}",
         default_hp_metric=False,
     )
-    sampler = DynamicBatchSampler(ds, max_num=30000, mode="node")
-    model = DenoiseModel(dropout=0.1, hidden_dim=128, num_layers=4, num_heads=2, weighted_loss=False)
+    sampler = DynamicBatchSampler(ds, max_num=3000, mode="node")
+    model = DenoiseModel(dropout=0.1, hidden_dim=1024, num_layers=8, num_heads=8, weighted_loss=False)
     dl = torch_geometric.loader.DataLoader(ds, batch_sampler=sampler, num_workers=16)
     trainer = Trainer(
         gpus=1,
