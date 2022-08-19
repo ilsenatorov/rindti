@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.express as px
 import seaborn as sns
 import torch
 import torch.nn.functional as F
@@ -8,6 +9,8 @@ from pytorch_lightning import LightningModule
 from torch_geometric.data import Data
 from torchmetrics import ConfusionMatrix
 from torchmetrics.functional.classification import accuracy
+
+import wandb
 
 from ...data.large_datasets import node_encode
 from ...utils.optim import LinearWarmupCosineAnnealingLR
@@ -110,13 +113,18 @@ class DenoiseModel(LightningModule):
     def training_epoch_end(self, outputs) -> None:
         """Log the confusion matrix and the histograms"""
         confmat = self.confmat.compute().detach().cpu().numpy()
-        confmat = pd.DataFrame(confmat, index=node_encode.keys(), columns=node_encode.keys())
+        confmat = pd.DataFrame(confmat, index=node_encode.keys(), columns=node_encode.keys()).round(2)
         self.confmat.reset()
-        fig = plt.figure(figsize=(10, 10))
-        sns.heatmap(confmat, annot=True, fmt=".2f", cbar=False)
-        self.logger.experiment.add_figure("confmat", fig, self.current_epoch)
-        # for name, param in self.named_parameters():
-        #     self.logger.experiment.add_histogram(name, param, self.current_epoch)
+        fig = px.imshow(
+            confmat,
+            zmin=0,
+            zmax=1,
+            text_auto=True,
+            width=400,
+            height=400,
+            color_continuous_scale=px.colors.sequential.Viridis,
+        )
+        wandb.log({"chart": fig})
 
     def configure_optimizers(self):
         """Adam optimizer with linear warmup and cosine annealing."""
