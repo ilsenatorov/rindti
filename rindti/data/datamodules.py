@@ -6,7 +6,7 @@ from torch_geometric.loader import DataLoader
 from .dti_dataset import DTIDataset
 from .protein_dataset import ProtPreTrainDataset
 from .samplers import DynamicBatchSampler
-from .transforms import MaskType, PosNoise
+from .transforms import MaskType, MaskTypeWeighted, PosNoise
 
 
 class BaseDataModule(LightningDataModule):
@@ -72,10 +72,11 @@ class DTIDataModule(BaseDataModule):
 class ProteinDataModule(BaseDataModule):
     """DataModule for pretraining on prots."""
 
-    def __init__(self, *args, sigma: float = 0.75, prob: float = 0.15, **kwargs):
+    def __init__(self, *args, sigma: float = 0.75, prob: float = 0.15, weighted_mask: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.sigma = sigma
         self.prob = prob
+        self.weighted_mask = weighted_mask
 
     def setup(self, stage: str = None):
         """Load the individual datasets."""
@@ -90,7 +91,7 @@ class ProteinDataModule(BaseDataModule):
         transform = T.Compose(
             [
                 PosNoise(sigma=self.sigma),
-                MaskType(prob=self.prob),
+                MaskType(prob=self.prob) if self.weighted_mask else MaskTypeWeighted(prob=self.prob),
             ]
         )
         self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)

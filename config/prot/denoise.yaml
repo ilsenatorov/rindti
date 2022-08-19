@@ -1,0 +1,12 @@
+seed: 42
+datamodule:
+  filename: datasets/alphafold/resources/structures/
+  batch_sampling: true
+  max_num_nodes: 5000
+  num_workers: 16
+model:
+  dropout: 0.1
+  hidden_dim: 64
+  num_layers: 4
+  num_heads: 4
+  weighted_loss: false

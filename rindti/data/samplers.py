@@ -1,6 +1,5 @@
 from typing import Iterable, List
 
-import torch
 from torch.utils.data.sampler import Sampler
 from torch_geometric.data import Dataset
 
