@@ -17,7 +17,7 @@ class GraphGPSNet(BaseLayer):
         num_heads: int = 4,
         dropout: float = 0.1,
     ):
-        self.save_hyperparameters()
+        super().__init__()
         self.node_encode = torch.nn.Sequential(
             *[
                 GPSLayer(
@@ -34,10 +34,4 @@ class GraphGPSNet(BaseLayer):
 
     def forward(self, batch: Batch) -> Batch:
         """Return updated batch with noise and node type predictions."""
-        feat_encode = self.feat_encode(batch.x)
-        pos_encode = self.pos_encode(batch.pos)
-        batch.x = torch.cat([feat_encode, pos_encode], dim=1)
-        batch = self.node_encode(batch)
-        batch.noise_pred = self.noise_pred(batch.x)
-        batch.type_pred = self.type_pred(batch.x[batch.mask])
-        return batch
+        return self.node_encode(batch)

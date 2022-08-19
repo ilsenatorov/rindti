@@ -1,5 +1,6 @@
 import pytest
 import torch
+from torch_geometric.data import Data
 
 from rindti.layers.encoder import GraphEncoder
 
@@ -8,8 +9,16 @@ from rindti.layers.encoder import GraphEncoder
 def config():
     return {
         "hidden_dim": 16,
-        "node": {"module": "ginconv", "hidden_dim": 16},
-        "pool": {"module": "gmt", "hidden_dim": 16},
+        "feat_type": "onehot",
+        "feat_dim": 20,
+        "edge_type": "none",
+        "edge_dim": None,
+        "pos_dim": 3,
+        "max_nodes": 100,
+        "processor": "graphgps",
+        "processor_config": {},
+        "aggregator": "diffpool",
+        "aggregator_config": {},
     }
 
 
@@ -52,13 +61,14 @@ def batch(node_features, edge_features) -> dict:
             ]
         ),
         "edge_attr": edge_features,
+        "pos": torch.randn(10, 3),
         "batch": torch.tensor([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]),
     }
-    return data, config
+    return Data(**data), config
 
 
 def test_graph_encoder(batch, config):
     batch, data_config = batch
-    config["data"] = data_config
+    config.update(data_config)
     encoder = GraphEncoder(**config)
     encoder(batch)

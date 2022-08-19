@@ -2,32 +2,9 @@ from pathlib import Path
 
 import torch
 from encd import encd
-from joblib import Parallel, delayed
-from tqdm import tqdm
 from utils import onehot_encode
 
-node_encoding = [
-    "ala",
-    "arg",
-    "asn",
-    "asp",
-    "cys",
-    "gln",
-    "glu",
-    "gly",
-    "his",
-    "ile",
-    "leu",
-    "lys",
-    "met",
-    "phe",
-    "pro",
-    "ser",
-    "thr",
-    "trp",
-    "tyr",
-    "val",
-]
+node_encoding = encd["prot"]["node"]
 
 
 def encode_residue(residue: str, node_feats: str):
@@ -96,22 +73,47 @@ class Structure:
         return dict(x=nodes, edge_index=edges, pos=coords)
 
 
-def run(input_dir: str, output_dir: str, threads: int = 1, threshold: int = 5, node_feats: str = "label"):
-    """Run the pipeline"""
-    input_dir = Path(input_dir)
-    output_dir = Path(output_dir)
-    output_dir.mkdir(exist_ok=True, parents=True)
-
-    def save_graph(pdb_id: str) -> None:
-        """Calculate a single graph from a file"""
-        graph: dict = Structure(input_dir / f"{pdb_id}.pdb", node_feats).get_graph(threshold)
-        torch.save(graph, output_dir / f"{pdb_id}.pt")
-
-    pdbs = [f.stem for f in input_dir.glob("*.pdb")]
-    Parallel(n_jobs=threads)(delayed(save_graph)(i) for i in tqdm(pdbs))
-
-
 if __name__ == "__main__":
-    from jsonargparse import CLI
+    import pandas as pd
+    from joblib import Parallel, delayed
+    from tqdm import tqdm
 
-    CLI(run)
+    if "snakemake" in globals():
+        all_structures = snakemake.input.pdbs
+        threshold = snakemake.params.threshold
+
+        def get_graph(filename: str) -> dict:
+            """Single function to be run in parallel."""
+            return Structure(filename, snakemake.params.node_feats).get_graph(threshold)
+
+        data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
+        df = pd.DataFrame(pd.Series(data, name="data"))
+        df["filename"] = all_structures
+        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+        df.set_index("ID", inplace=True)
+        df.drop("filename", axis=1, inplace=True)
+        df = df.to_pickle(snakemake.output.pickle)
+    else:
+        import os
+        import os.path as osp
+
+        from jsonargparse import CLI
+
+        def run(pdb_dir: str, output: str, threads: int = 1, threshold: float = 5, node_feats: str = "label"):
+            """Run the pipeline"""
+
+            def get_graph(filename: str) -> dict:
+                """Calculate a single graph from a file"""
+                return Structure(filename, node_feats).get_graph(threshold)
+
+            pdbs = [osp.join(pdb_dir, x) for x in os.listdir(pdb_dir)]
+            data = Parallel(n_jobs=threads)(delayed(get_graph)(i) for i in tqdm(pdbs))
+            df = pd.DataFrame(pd.Series(data, name="data"))
+            df["filename"] = pdbs
+            df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+            df.set_index("ID", inplace=True)
+            df.drop("filename", axis=1, inplace=True)
+            df = df.to_dict("index")
+            df.to_pickle(output)
+
+        cli = CLI(run)

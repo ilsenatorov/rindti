@@ -1,7 +1,6 @@
 import pandas as pd
+from encd import encd
 from torch import FloatTensor, LongTensor
-
-from .encd import encd
 
 
 def onehot_encode(position: int, count: int) -> list:

@@ -17,9 +17,7 @@ class DiffPoolNet(BaseLayer):
     Refer to :class:`torch_geometric.nn.dense.dense_diff_pool` and :class:`torch_geometric.nn.dense.dense_mincut_pool` for more details.
 
     Args:
-        input_dim (int): Size of the input vector
-        output_dim (int): Size of the output vector
-        hidden_dim (int, optional): Size of the hidden vector. Defaults to 32.
+        hidden_dim (int, optional): Size of the hidden vector
         max_nodes (int, optional): Maximal number of nodes in a graph. Defaults to 600.
         dropout (float, optional): Dropout ratio. Defaults to 0.2.
         ratio (float, optional): Pooling ratio. Defaults to 0.25.
@@ -28,9 +26,7 @@ class DiffPoolNet(BaseLayer):
 
     def __init__(
         self,
-        input_dim: int,
-        output_dim: int,
-        hidden_dim: int = 128,
+        hidden_dim: int,
         max_nodes: int = 600,
         dropout: float = 0.2,
         ratio: float = 0.25,
@@ -48,14 +44,14 @@ class DiffPoolNet(BaseLayer):
         }[pooling_method]
 
         num_nodes = ceil(self.max_nodes * ratio)
-        self.poolblock1 = DiffPoolBlock(input_dim, num_nodes)
-        self.embedblock1 = DiffPoolBlock(input_dim, hidden_dim)
+        self.poolblock1 = DiffPoolBlock(hidden_dim, num_nodes)
+        self.embedblock1 = DiffPoolBlock(hidden_dim, hidden_dim)
         num_nodes = ceil(num_nodes * ratio)
         self.poolblock2 = DiffPoolBlock(hidden_dim, num_nodes)
         self.embedblock2 = DiffPoolBlock(hidden_dim, hidden_dim)
 
         self.embedblock3 = DiffPoolBlock(hidden_dim, hidden_dim)
-        self.lin1 = torch.nn.Linear(hidden_dim, output_dim)
+        self.lin1 = torch.nn.Linear(hidden_dim, hidden_dim)
 
     def forward(self, data: Batch) -> Batch:
         """"""

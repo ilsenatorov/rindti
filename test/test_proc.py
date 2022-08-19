@@ -5,9 +5,7 @@ from rindti.layers.processor import GINConvNet, GraphGPSNet, TransformerNet
 
 N_NODES = 10
 N_EDGES = 50
-INPUT_DIM = 16
 HIDDEN_DIM = 64
-OUTPUT_DIM = 32
 EDGE_DIM = 6
 
 
@@ -21,7 +19,7 @@ def fake_data(request):
     else:
         edge_feats = None
     return {
-        "x": torch.rand(size=(N_NODES, INPUT_DIM)),
+        "x": torch.rand(size=(N_NODES, HIDDEN_DIM)),
         "edge_index": torch.randint(low=0, high=N_NODES - 1, size=(2, N_EDGES)),
         "batch": torch.zeros((N_NODES), dtype=torch.long),
         "edge_feats": edge_feats,
@@ -37,9 +35,7 @@ def default_config(fake_data):
         "dropout": 0.2,
         "edge_dim": EDGE_DIM if fake_data["type"] != "none" else None,
         "hidden_dim": HIDDEN_DIM,
-        "input_dim": INPUT_DIM,
         "num_heads": 4,
-        "output_dim": OUTPUT_DIM,
     }
 
 
@@ -47,22 +43,18 @@ class BaseTestGraphConv:
     @pytest.mark.parametrize("fake_data", ["label", "onehot", "none"], indirect=True)
     def test_forward(self, default_config, fake_data):
         module = self.module(**default_config)
-        output = module.forward(**fake_data)
+        output = module.forward(fake_data)
         assert output.size(0) == N_NODES
-        assert output.size(1) == OUTPUT_DIM
-
-    # def test_args(self):
-    #     parser = MyArgParser()
-    #     self.module.add_arguments(parser)
+        assert output.size(1) == HIDDEN_DIM
 
 
 class BaseLabelEdgeConv(BaseTestGraphConv):
     @pytest.mark.parametrize("fake_data", ["label", "none"], indirect=True)
     def test_forward(self, default_config, fake_data):
         module = self.module(**default_config)
-        output = module.forward(**fake_data)
+        output = module.forward(fake_data)
         assert output.size(0) == N_NODES
-        assert output.size(1) == OUTPUT_DIM
+        assert output.size(1) == HIDDEN_DIM
 
 
 class TestGINConv(BaseTestGraphConv):

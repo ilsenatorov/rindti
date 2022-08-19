@@ -1,10 +1,6 @@
-from typing import Tuple, Union
-
 import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
-from torch.optim import SGD, Adam, AdamW, RMSprop
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import (
     AUROC,
     Accuracy,
@@ -13,20 +9,33 @@ from torchmetrics import (
     MeanAbsoluteError,
     MeanSquaredError,
     MetricCollection,
-    R2Score,
 )
 
 from ..data import TwoGraphData
+from ..utils.optim import LinearWarmupCosineAnnealingLR
 
 
 class BaseModel(LightningModule):
     """Base model, defines a lot of helper functions."""
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        optimizer: str = "Adam",
+        max_lr: float = 1e-4,
+        start_lr: float = 1e-5,
+        min_lr: float = 1e-7,
+        warmup_epochs: int = 1,
+        max_epochs: int = 10,
+        **kwargs,
+    ):
         super().__init__()
         self.save_hyperparameters()
-        self.batch_size = kwargs["datamodule"]["batch_size"]
-        return kwargs["model"]
+        self.optimizer = optimizer
+        self.max_lr = max_lr
+        self.start_lr = start_lr
+        self.min_lr = min_lr
+        self.warmup_epochs = warmup_epochs
+        self.max_epochs = max_epochs
 
     def _set_class_metrics(self, num_classes: int = 2):
         metrics = MetricCollection(
@@ -61,14 +70,6 @@ class BaseModel(LightningModule):
             assert drug_hidden_dim == prot_hidden_dim
             self.merge_features = self._element_l2
             self.embed_dim = drug_hidden_dim
-        elif feat_method == "element_l1":
-            assert drug_hidden_dim == prot_hidden_dim
-            self.merge_features = self._element_l1
-            self.embed_dim = drug_hidden_dim
-        elif feat_method == "mult":
-            assert drug_hidden_dim == prot_hidden_dim
-            self.merge_features = self._mult
-            self.embed_dim = drug_hidden_dim
         else:
             raise ValueError("unsupported feature method")
 
@@ -80,71 +81,38 @@ class BaseModel(LightningModule):
         """L2 distance."""
         return torch.sqrt(((drug_embed - prot_embed) ** 2) + 1e-6).float()
 
-    def _element_l1(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """L1 distance."""
-        return (drug_embed - prot_embed).abs()
-
-    def _mult(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """Multiplication."""
-        return drug_embed * prot_embed
-
     def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during training step."""
         ss = self.shared_step(data)
-        for i in ss.keys():
-            if "loss" in i:
-                self.log("train_" + i, ss[i], batch_size=self.batch_size)
+        for k, v in ss.items():
+            self.log(f"train_{k}", v)
         return ss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during validation step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
-        for i in ss.keys():
-            if "loss" in i:
-                self.log("val_" + i, ss[i], batch_size=self.batch_size)
+        for k, v in ss.items():
+            self.log(f"val_{k}", v)
         return ss
 
     def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
         """What to do during test step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
-        self.log("test_loss", ss["loss"], batch_size=self.batch_size)
+        for k, v in ss.items():
+            self.log(f"test_{k}", v)
         return ss
 
-    def log_histograms(self):
-        """Logs the histograms of all the available parameters."""
-        if self.logger:
-            for name, param in self.named_parameters():
-                self.logger.experiment.add_histogram(name, param, self.current_epoch)
-
-    def log_all(self, metrics: dict, hparams: bool = False):
-        """Log all metrics."""
-        if self.logger:
-            for k, v in metrics.items():
-                self.logger.experiment.add_scalar(k, v, self.current_epoch)
-            if hparams:
-                self.logger.log_hyperparams(self.hparams, {k.split("_")[-1]: v for k, v in metrics.items()})
-
-    def training_epoch_end(self, outputs: dict):
-        """What to do at the end of a training epoch. Logs everything."""
-        self.log_histograms()
-
-    def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
-        """Configure the optimizer and/or lr schedulers"""
-        opt_params = self.hparams.model["optimizer"]
-        optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[opt_params["module"]]
-        params = [{"params": self.parameters()}]
-        if hasattr(self, "prot_encoder"):
-            params.append({"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]})
-        if hasattr(self, "drug_encoder"):
-            {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
-        optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
-        lr_scheduler = {
-            "monitor": self.hparams["model"]["monitor"],
-            "scheduler": ReduceLROnPlateau(
-                optimizer,
-                verbose=True,
-                factor=opt_params["reduce_lr"]["factor"],
-                patience=opt_params["reduce_lr"]["patience"],
-            ),
-        }
-        return [optimizer], [lr_scheduler]
+    def configure_optimizers(self):
+        """Adam optimizer with linear warmup and cosine annealing."""
+        if self.optimizer == "Adam":
+            optim = torch.optim.AdamW(self.parameters(), lr=self.max_lr, betas=(0.9, 0.95), weight_decay=1e-5)
+        else:
+            optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
+        scheduler = LinearWarmupCosineAnnealingLR(
+            optim,
+            warmup_epochs=40,
+            max_epochs=2000,
+            warmup_start_lr=self.start_lr,
+            eta_min=self.min_lr,
+        )
+        return [optim], [scheduler]
