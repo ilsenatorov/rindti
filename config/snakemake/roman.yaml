@@ -2,9 +2,9 @@
 source: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources
 prots:
   features:
-    method: rinerator # rinerator, distance, esm
+    method: esm # rinerator, distance, esm
 drugs:
-  node_feats: glycan # IUPAC, label, onehot, glycan
+  node_feats: IUPAC # IUPAC, label, onehot, glycan
 split_data:
   method: target # random, drug, target
   train: 1

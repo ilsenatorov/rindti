@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
+from torch import nn
 
 from ...data import TwoGraphData
 from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
@@ -34,9 +35,12 @@ class ClassificationModel(BaseModel):
         """Forward the data though the classification model"""
         prot_embed, _ = self.prot_encoder(prot)
         drug_embed, _ = self.drug_encoder(drug)
-        joint_embedding = self.merge_features(drug_embed, prot_embed)
+        joint_embedding = self.merge_features(drug_embed.to(torch.device("cpu")), prot_embed.to(torch.device("cpu")))
+
+        pred, embed = self.mlp(joint_embedding)
         return dict(
-            pred=self.mlp(joint_embedding),
+            pred=pred,
+            embed=embed,
             prot_embed=prot_embed,
             drug_embed=drug_embed,
             joint_embed=joint_embedding,
@@ -72,8 +76,11 @@ class MultitaskClassification(ClassificationModel):
         kwargs["model"]["mlp"]["hidden_dims"] = [512, 128, 64]
         super(MultitaskClassification, self).__init__(**kwargs)
 
-        self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], hidden_dims=[64, 32], out_dim=21)
-        self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], hidden_dims=[64, 16], out_dim=3)
+        # self.prot_node_classifier = MLP(input_dim=kwargs["model"]["drug"]["hidden_dim"], hidden_dims=[64, 32], out_dim=21)
+        # self.drug_node_classifier = MLP(input_dim=kwargs["model"]["prot"]["hidden_dim"], hidden_dims=[64, 16], out_dim=3)
+
+        self.prot_node_classifier = nn.Linear(in_features=kwargs["model"]["drug"]["hidden_dim"], out_features=21)
+        self.drug_node_classifier = nn.Linear(in_features=kwargs["model"]["prot"]["hidden_dim"], out_features=3)
 
         self.prot_class = "prot" in kwargs["transform"]["graphs"]
         self.drug_class = "drug" in kwargs["transform"]["graphs"]
@@ -98,8 +105,10 @@ class MultitaskClassification(ClassificationModel):
         prot_node_class = self.prot_node_classifier(prot_node_embed) if self.prot_class else None
         drug_node_class = self.drug_node_classifier(drug_node_embed) if self.drug_class else None
 
+        pred, embed = self.mlp(joint_embedding)
         return dict(
-            pred=self.mlp(joint_embedding),
+            pred=pred,
+            embed=embed,
             prot_embed=prot_graph_embed,
             drug_embed=drug_graph_embed,
             joint_embed=joint_embedding,

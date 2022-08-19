@@ -48,7 +48,10 @@ class SweetNetAdapter(SweetNet):
         for y, edges in zip(x, edge_index):
             y = self.item_embedding(torch.tensor(y).cuda())
             y = y.squeeze(1)
-            edges = torch.tensor(edges).cuda()
+            if len(edges) == 0:
+                embeddings.append(y.detach().squeeze())
+                continue
+            edges = torch.tensor(edges).cuda().to(torch.long)
             y = F.leaky_relu(self.conv1(y, edges))
             y, edges, _, batch, _, _ = self.pool1(y, edges, None)
             y1 = torch.cat([gmp(y, batch), gap(y, batch)], dim=1)

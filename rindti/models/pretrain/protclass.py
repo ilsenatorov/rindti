@@ -22,7 +22,7 @@ class ProtClassModel(BaseModel):
     def forward(self, data: dict) -> Tensor:
         """Forward the data through the model"""
         graphs, _ = self.encoder(data)
-        preds = self.mlp(graphs)
+        preds = self.mlp(graphs)[0]
         return preds
 
     def shared_step(self, data: TwoGraphData) -> dict:

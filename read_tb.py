@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 
-def read(path="tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_20/"):
+def read(path="tb_logs/dti_glylec_mbb/elnwIntanc_cda4ea77/version_3/"):
     metrics = {
         "dti_acc": [],
         "dti_mcc": [],
@@ -14,6 +14,7 @@ def read(path="tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_20/"):
         "aa_auroc": [],
     }
     for version in os.listdir(path):
+        print(version)
         ea0 = event_accumulator.EventAccumulator(
             os.path.join(
                 path,
@@ -30,9 +31,9 @@ def read(path="tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_20/"):
         metrics["dti_acc"].append(pd.DataFrame(ea0.Scalars("val_Accuracy"))["value"].max())
         metrics["dti_mcc"].append(pd.DataFrame(ea0.Scalars("val_MatthewsCorrCoef"))["value"].max())
         metrics["dti_auroc"].append(pd.DataFrame(ea0.Scalars("val_AUROC"))["value"].max())
-        metrics["aa_acc"].append(pd.DataFrame(ea0.Scalars("pp_val_Accuracy"))["value"].max())
-        metrics["aa_mcc"].append(pd.DataFrame(ea0.Scalars("pp_val_MatthewsCorrCoef"))["value"].max())
-        metrics["aa_auroc"].append(pd.DataFrame(ea0.Scalars("pp_val_AUROC"))["value"].max())
+        # metrics["aa_acc"].append(pd.DataFrame(ea0.Scalars("pp_val_Accuracy"))["value"].max())
+        # metrics["aa_mcc"].append(pd.DataFrame(ea0.Scalars("pp_val_MatthewsCorrCoef"))["value"].max())
+        # metrics["aa_auroc"].append(pd.DataFrame(ea0.Scalars("pp_val_AUROC"))["value"].max())
 
     for k, v in metrics.items():
         print(k, "|", np.mean(v))
