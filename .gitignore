@@ -19,3 +19,4 @@ results/
 *build*
 *egg-info*
 data/
+!rindti/data/
