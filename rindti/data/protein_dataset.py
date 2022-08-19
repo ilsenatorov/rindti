@@ -9,7 +9,7 @@ from tqdm import tqdm
 from .pdb_parser import PDBStructure
 
 
-class LargePreTrainDataset(Dataset):
+class ProtPreTrainDataset(Dataset):
     r"""Dataset of protein graphs - for each PDB file in the input_dir a point cloud is created (`pos`, `x` and `plddt` attributes are created).
     Each processed graph is saved and loaded individually."""
 
@@ -61,7 +61,7 @@ class LargePreTrainDataset(Dataset):
         return torch.load(self.processed_dir + "/" + f"data_{idx}.pt")
 
 
-class LargePreTrainMemoryDataset(InMemoryDataset):
+class ProtPreTrainMemoryDataset(InMemoryDataset):
     r"""Dataset of protein graphs - for each PDB file in the input_dir a point cloud is created (`pos`, `x` and `plddt` attributes are created).
     All proteins are saved into a single `.pt` file."""
 
