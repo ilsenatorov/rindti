@@ -36,7 +36,7 @@ model:
     lr: 0.001
     weight_decay: 0.01
     momentum: 0.01
-    reduce_lr:
+    lr_schedule:
       module: rlrop
       factor: 0.1
       patience: 20
