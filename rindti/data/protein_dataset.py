@@ -21,6 +21,7 @@ class LargePreTrainDataset(Dataset):
         pre_filter: Callable = None,
         threads: int = 1,
     ):
+        self._len = None
         self.input_dir = Path(root)
         self.threads = threads
         super().__init__(root, transform, pre_transform, pre_filter)
@@ -28,7 +29,7 @@ class LargePreTrainDataset(Dataset):
     @property
     def processed_file_names(self):
         """All generated filenames."""
-        return ["data_0.pt"]
+        return [f"data_{i}.pt" for i in range(self.len())]
 
     def process(self):
         """Convert pdbs into graphs."""
@@ -43,10 +44,17 @@ class LargePreTrainDataset(Dataset):
         Parallel(n_jobs=self.threads)(
             delayed(process)(idx, i) for idx, i in tqdm(enumerate(self.input_dir.glob("*.pdb")))
         )
+        self.num_structs = len([x for x in self.input_dir.glob("*.pdb")])
+
+    def _set_len(self):
+        """Calculating length each time is slow (~1s for 200k structures), setting it to an attribute."""
+        self._len = len([x for x in self.input_dir.glob("*.pdb")])
 
     def len(self):
-        """Number of pdb structures == number of graphs."""
-        return 663
+        """Number of graphs in the dataset."""
+        if self._len is None:
+            self._set_len()
+        return self._len
 
     def get(self, idx: int):
         """Load a single graph."""
@@ -62,7 +70,6 @@ class LargePreTrainMemoryDataset(InMemoryDataset):
         root: str,
         transform: Callable = None,
         pre_transform: Callable = None,
-        pre_filter: Callable = None,
         threads: int = 1,
     ):
         self.input_dir = Path(root)

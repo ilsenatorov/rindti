@@ -2,8 +2,8 @@ from pytorch_lightning import LightningDataModule
 from torch_geometric.loader import DataLoader
 
 from ..utils import split_random
-from .datasets import DTIDataset, PreTrainDataset
-from .large_datasets import LargePreTrainDataset
+from .dti_dataset import DTIDataset
+from .protein_dataset import LargePreTrainDataset, LargePreTrainMemoryDataset
 
 
 class BaseDataModule(LightningDataModule):

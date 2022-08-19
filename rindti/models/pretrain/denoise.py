@@ -1,18 +1,15 @@
-import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
-import seaborn as sns
 import torch
 import torch.nn.functional as F
+import wandb
 from graphgps.layer.gps_layer import GPSLayer
 from pytorch_lightning import LightningModule
 from torch_geometric.data import Data
 from torchmetrics import ConfusionMatrix
 from torchmetrics.functional.classification import accuracy
 
-import wandb
-
-from ...data.large_datasets import node_encode
+from ...data.pdb_parser import node_encode
 from ...utils.optim import LinearWarmupCosineAnnealingLR
 
 
