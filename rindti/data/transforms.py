@@ -21,6 +21,16 @@ class SizeFilter:
         return nnodes > self.min_nnodes and nnodes < self.max_nnodes
 
 
+class AACounts:
+    """Returns class counts for weighted loss."""
+
+    def __call__(self, data) -> torch.Tensor:
+        """Returns class counts for weighted loss."""
+        count = torch.bincount(data.x, minlength=20).unsqueeze(0)
+        data.count = count
+        return data
+
+
 class DataCorruptor:
     """Corrupt or mask the nodes in a graph (or graph pair).
 
@@ -115,6 +125,24 @@ class MaskType:
 
     def __call__(self, batch) -> torch.Tensor:
         mask = torch.rand_like(batch.x, dtype=torch.float32) < self.prob
+        batch.orig_x = batch.x[mask]
+        batch.x[mask] = 20
+        batch.mask = mask
+        return batch
+
+
+class MaskTypeWeighted(MaskType):
+    """Masks the type of the nodes in a graph."""
+
+    def __call__(self, batch) -> torch.Tensor:
+        num_mut = int(batch.x.size(0) * self.prob)
+        num_mut_per_aa = int(num_mut / 20)
+        mask = []
+        for i in range(20):
+            indices = torch.where(batch.x == i)[0]
+            random_pick = torch.randperm(indices.size(0))[:num_mut_per_aa]
+            mask.append(indices[random_pick])
+        mask = torch.cat(mask)
         batch.orig_x = batch.x[mask]
         batch.x[mask] = 20
         batch.mask = mask

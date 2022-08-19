@@ -87,35 +87,8 @@ class DenoiseModel(LightningModule):
         pred_loss = F.cross_entropy(
             batch.type_pred,
             batch.orig_x,
-            weight=torch.tensor(
-                [
-                    0.0189,
-                    0.0299,
-                    0.0479,
-                    0.0311,
-                    0.1520,
-                    0.0449,
-                    0.0254,
-                    0.0232,
-                    0.0780,
-                    0.0291,
-                    0.0180,
-                    0.0316,
-                    0.0698,
-                    0.0469,
-                    0.0383,
-                    0.0301,
-                    0.0332,
-                    0.1637,
-                    0.0638,
-                    0.0243,
-                ],
-                device=self.device,
-            )
-            if self.weighted_loss
-            else None,
         )
-        loss = noise_loss + 0.25 * pred_loss
+        loss = noise_loss + 0.5 * pred_loss
         acc = accuracy(batch.type_pred, batch.orig_x)
         self.log(f"{step}_loss", loss)
         self.log(f"{step}_noise_loss", noise_loss)
@@ -153,8 +126,8 @@ class DenoiseModel(LightningModule):
             optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
         scheduler = LinearWarmupCosineAnnealingLR(
             optim,
-            warmup_epochs=40,
-            max_epochs=2000,
+            warmup_epochs=5,
+            max_epochs=100,
             warmup_start_lr=self.start_lr,
             eta_min=self.min_lr,
         )
