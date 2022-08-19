@@ -65,10 +65,11 @@ if __name__ == "__main__":
         default_hp_metric=False,
     )
     sampler = DynamicBatchSampler(ds, max_num=3000, mode="node")
-    model = DenoiseModel(dropout=0.1, hidden_dim=1024, num_layers=8, num_heads=8, weighted_loss=False)
+    model = DenoiseModel(dropout=0.1, hidden_dim=512, num_layers=4, num_heads=2, weighted_loss=False)
     dl = torch_geometric.loader.DataLoader(ds, batch_sampler=sampler, num_workers=16)
     trainer = Trainer(
         gpus=1,
+        logger=logger,
         # accumulate_grad_batches=4,
         log_every_n_steps=10,
         max_epochs=6000,
