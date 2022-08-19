@@ -15,7 +15,6 @@ class DynamicBatchSampler(Sampler):
     def __iter__(self) -> Iterable[List[int]]:
         idx = 0
         while idx < len(self.dataset):  # create whole epoch
-            print(idx)
             batch = []
             num_nodes = 0
             while idx < len(self.dataset):  # create single batch

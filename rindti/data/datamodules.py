@@ -1,3 +1,4 @@
+import torch_geometric.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch_geometric.data import Dataset
 from torch_geometric.loader import DataLoader
@@ -5,6 +6,7 @@ from torch_geometric.loader import DataLoader
 from .dti_dataset import DTIDataset
 from .protein_dataset import ProtPreTrainDataset
 from .samplers import DynamicBatchSampler
+from .transforms import MaskType, PosNoise
 
 
 class BaseDataModule(LightningDataModule):
@@ -70,12 +72,28 @@ class DTIDataModule(BaseDataModule):
 class ProteinDataModule(BaseDataModule):
     """DataModule for pretraining on prots."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, sigma: float = 0.75, prob: float = 0.15, **kwargs):
         super().__init__(*args, **kwargs)
+        self.sigma = sigma
+        self.prob = prob
 
     def setup(self, stage: str = None):
         """Load the individual datasets."""
-        self.train = ProtPreTrainDataset(self.filename)
+        pre_transform = T.Compose(
+            [
+                T.Center(),
+                T.NormalizeRotation(),
+                T.RadiusGraph(r=7),
+                T.ToUndirected(),
+            ]
+        )
+        transform = T.Compose(
+            [
+                PosNoise(sigma=self.sigma),
+                MaskType(prob=self.prob),
+            ]
+        )
+        self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)
 
     def _dl_kwargs(self, shuffle: bool = False):
         return dict(

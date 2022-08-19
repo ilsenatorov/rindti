@@ -1,4 +1,5 @@
 from .data import TwoGraphData
+from .datamodules import DTIDataModule, ProteinDataModule
 from .dti_dataset import DTIDataset
 from .protein_dataset import ProtPreTrainDataset, ProtPreTrainMemoryDataset
 from .samplers import DynamicBatchSampler
@@ -13,4 +14,6 @@ __all__ = [
     "PosNoise",
     "MaskType",
     "MaskTypeWeighted",
+    "DTIDataModule",
+    "ProteinDataModule",
 ]
