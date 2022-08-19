@@ -1,7 +1,13 @@
 import torch_geometric
 import torch_geometric.transforms as T
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint, RichModelSummary, RichProgressBar, StochasticWeightAveraging
+from pytorch_lightning.callbacks import (
+    EarlyStopping,
+    ModelCheckpoint,
+    RichModelSummary,
+    RichProgressBar,
+    StochasticWeightAveraging,
+)
 from pytorch_lightning.loggers import WandbLogger
 
 from rindti.data import DynamicBatchSampler, LargePreTrainDataset
@@ -49,9 +55,10 @@ if __name__ == "__main__":
         gradient_clip_val=1,
         callbacks=[
             StochasticWeightAveraging(swa_lrs=1e-2),
+            ModelCheckpoint(monitor="train_loss", mode="min"),
+            EarlyStopping(monitor="train_loss", mode="min", patience=10),
             RichProgressBar(),
             RichModelSummary(),
-            ModelCheckpoint(monitor="train_loss", mode="min"),
         ],
         logger=logger,
     )

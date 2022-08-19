@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 
 import pandas as pd
 import torch
-from torch_geometric.data import Data, Dataset, InMemoryDataset
+from torch_geometric.data import Data, InMemoryDataset
 
 from .data import TwoGraphData
 
@@ -24,21 +24,20 @@ class DTIDataset(InMemoryDataset):
     def __init__(
         self,
         filename: str,
-        exp_name: str,
         split: str = "train",
         transform: Callable = None,
         pre_transform: Callable = None,
         pre_filter: Callable = None,
     ):
-        root = self._set_filenames(filename, exp_name)
+        root = self._set_filenames(filename)
         super().__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
 
-    def _set_filenames(self, filename: str, exp_name: str) -> str:
+    def _set_filenames(self, filename: str) -> str:
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         self.filename = filename
-        return os.path.join("data", exp_name, basefilename)
+        return os.path.join("data", basefilename)
 
     def process_(self, data_list: list, split: str):
         if self.pre_filter is not None:

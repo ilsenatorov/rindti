@@ -24,3 +24,7 @@ class TwoGraphData(Data):
     def n_edges(self, prefix: str) -> int:
         """Return number of edges for graph with prefix."""
         return self[prefix + "edge_index"].size(1)
+
+    @property
+    def num_nodes(self) -> int:
+        return self.n_nodes("prot_") + self.n_nodes("drug_")

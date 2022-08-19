@@ -1,6 +1,6 @@
-import os
-import random
+from pprint import pprint
 
+import torch_geometric
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import (
     EarlyStopping,
@@ -9,61 +9,36 @@ from pytorch_lightning.callbacks import (
     RichProgressBar,
     StochasticWeightAveraging,
 )
-from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers import WandbLogger
 
-from rindti.data import DTIDataModule
-from rindti.models import ClassificationModel, RegressionModel
-from rindti.utils import get_git_hash, read_config
-
-models = {
-    "class": ClassificationModel,
-    "reg": RegressionModel,
-}
-
-
-def train(folder, version, **kwargs):
-    """Does a single run."""
-    seed_everything(kwargs["seed"])
-    datamodule = DTIDataModule(**kwargs["datamodule"])
-    datamodule.setup()
-    datamodule.update_config(kwargs)
-
-    logger = TensorBoardLogger(
-        save_dir=folder,
-        name=f"version_{version}",
-        version=kwargs["seed"],
-        default_hp_metric=False,
-    )
-
-    callbacks = [
-        ModelCheckpoint(monitor=kwargs["model"]["monitor"], save_top_k=3, mode="min"),
-        EarlyStopping(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
-        StochasticWeightAveraging(swa_lrs=kwargs["swa_lrs"]),
-        RichModelSummary(),
-        RichProgressBar(),
-    ]
-    trainer = Trainer(
-        callbacks=callbacks,
-        logger=logger,
-        log_every_n_steps=25,
-        enable_model_summary=False,
-        **kwargs["trainer"],
-    )
-    model = models[kwargs["model"]["module"]](**kwargs)
-    from pprint import pprint
-
-    pprint(kwargs)
-    trainer.fit(model, datamodule)
-    trainer.test(model, datamodule)
-
+from rindti.data import DTIDataset, DynamicBatchSampler
+from rindti.models.dti import ClassificationModel
+from rindti.utils.cli import read_config
 
 if __name__ == "__main__":
-    from argparse import ArgumentParser
+    kwargs = read_config("config/test.yaml")
+    seed_everything(kwargs["seed"])
 
-    parser = ArgumentParser(prog="Model Trainer")
-    parser.add_argument("config", type=str, help="Path to YAML config file")
-    args = parser.parse_args()
-
-    orig_config = read_config(args.config)
-    orig_config["git_hash"] = get_git_hash()  # to know the version of the code
-    train(**orig_config)
+    ds = DTIDataset(kwargs["datamodule"]["filename"])
+    pprint(ds.config)
+    kwargs["model"]["prot_encoder"].update(ds.config["snakemake"]["data"]["prot"])
+    kwargs["model"]["drug_encoder"].update(ds.config["snakemake"]["data"]["drug"])
+    sampler = DynamicBatchSampler(ds, max_num=4000)
+    model = ClassificationModel(
+        "graph", kwargs["model"]["prot_encoder"], "graph", kwargs["model"]["drug_encoder"], {}, "concat"
+    )
+    dl = torch_geometric.loader.DataLoader(ds, batch_sampler=sampler, num_workers=32)
+    logger = WandbLogger(name="pretrain_alphafold", save_dir="wandb_logs", log_model=True)
+    trainer = Trainer(
+        gpus=-1,
+        gradient_clip_val=1,
+        callbacks=[
+            StochasticWeightAveraging(swa_lrs=1e-2),
+            ModelCheckpoint(monitor="val_loss", mode="min"),
+            EarlyStopping(monitor="val_loss", mode="min", patience=10),
+            RichProgressBar(),
+            RichModelSummary(),
+        ],
+        logger=logger,
+    )
+    trainer.fit(model, dl)

@@ -24,31 +24,26 @@ class GraphEncoder(LightningModule):
     def __init__(
         self,
         hidden_dim: int,
-        feat_type: str,
-        feat_dim: int,
-        edge_type: str,
-        edge_dim: int,
-        pos_dim: int,
-        max_nodes: int,
+        inputs: dict,
         processor: str,
         processor_config: dict,
         aggregator: str,
         aggregator_config: dict,
     ):
         super().__init__()
-        if feat_type == "label":
-            self.feat_embed = nn.Embedding(feat_dim, hidden_dim // 2)
+        if inputs["feat_type"] == "label":
+            self.feat_embed = nn.Embedding(inputs["feat_dim"], hidden_dim // 2)
         else:
-            self.feat_embed = nn.Linear(feat_dim, hidden_dim // 2)
-        if edge_type == "label":
-            self.edge_embed = nn.Embedding(edge_dim, hidden_dim)
-        elif edge_type == "onehot":
-            self.edge_embed = nn.Linear(edge_dim, hidden_dim)
+            self.feat_embed = nn.Linear(inputs["feat_dim"], hidden_dim // 2)
+        if inputs["edge_type"] == "label":
+            self.edge_embed = nn.Embedding(inputs["edge_dim"], hidden_dim)
+        elif inputs["edge_type"] == "onehot":
+            self.edge_embed = nn.Linear(inputs["edge_dim"], hidden_dim)
         else:
             self.edge_embed = None
-        self.pos_embed = nn.Linear(pos_dim, hidden_dim // 2)
+        self.pos_embed = nn.Linear(3, hidden_dim // 2)
         self.proc = processors[processor](hidden_dim=hidden_dim, **processor_config)
-        self.aggr = aggregators[aggregator](hidden_dim=hidden_dim, max_nodes=max_nodes, **aggregator_config)
+        self.aggr = aggregators[aggregator](hidden_dim=hidden_dim, max_nodes=inputs["max_nodes"], **aggregator_config)
 
     def forward(self, data: Batch) -> Batch:
         """"""
