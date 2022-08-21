@@ -2,12 +2,13 @@ import pandas as pd
 import plotly.express as px
 import torch
 import torch.nn.functional as F
-import wandb
 from graphgps.layer.gps_layer import GPSLayer
 from pytorch_lightning import LightningModule
 from torch_geometric.data import Data
 from torchmetrics import ConfusionMatrix
 from torchmetrics.functional.classification import accuracy
+
+import wandb
 
 from ...data.pdb_parser import node_encode
 from ...utils.optim import LinearWarmupCosineAnnealingLR
@@ -24,6 +25,8 @@ class DenoiseModel(LightningModule):
         num_layers: int = 6,
         num_heads: int = 4,
         dropout: float = 0.1,
+        attn_dropout: float = 0.1,
+        alpha: float = 1.0,
         optimizer: str = "Adam",
         max_lr: float = 1e-4,
         start_lr: float = 1e-5,
@@ -31,12 +34,12 @@ class DenoiseModel(LightningModule):
         weighted_loss: bool = False,
     ):
         super().__init__()
-        self.save_hyperparameters()
         self.max_lr = max_lr
         self.start_lr = start_lr
         self.min_lr = min_lr
         self.optimizer = optimizer
         self.weighted_loss = weighted_loss
+        self.alpha = alpha
         mid_dim = hidden_dim // 2
         self.feat_encode = torch.nn.Embedding(21, mid_dim)
         self.pos_encode = torch.nn.Linear(3, mid_dim)
@@ -48,25 +51,25 @@ class DenoiseModel(LightningModule):
                     global_module,
                     num_heads,
                     dropout=dropout,
-                    attn_dropout=dropout,
+                    attn_dropout=attn_dropout,
                 )
                 for _ in range(num_layers)
             ]
         )
         self.noise_pred = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim, hidden_dim // 2),
+            torch.nn.Linear(hidden_dim, mid_dim),
             torch.nn.ReLU(),
             torch.nn.Dropout(dropout),
-            torch.nn.Linear(hidden_dim // 2, 3),
+            torch.nn.Linear(mid_dim, 3),
         )
         self.type_pred = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim, hidden_dim // 2),
+            torch.nn.Linear(hidden_dim, mid_dim),
             torch.nn.ReLU(),
             torch.nn.Dropout(dropout),
-            torch.nn.Linear(hidden_dim // 2, hidden_dim // 2),
+            torch.nn.Linear(mid_dim, mid_dim),
             torch.nn.ReLU(),
             torch.nn.Dropout(dropout),
-            torch.nn.Linear(hidden_dim // 2, 20),
+            torch.nn.Linear(mid_dim, 20),
         )
         self.confmat = ConfusionMatrix(num_classes=20, normalize="true")
 
@@ -88,7 +91,7 @@ class DenoiseModel(LightningModule):
             batch.type_pred,
             batch.orig_x,
         )
-        loss = noise_loss + 0.5 * pred_loss
+        loss = noise_loss + self.alpha * pred_loss
         acc = accuracy(batch.type_pred, batch.orig_x)
         self.log(f"{step}_loss", loss)
         self.log(f"{step}_noise_loss", noise_loss)

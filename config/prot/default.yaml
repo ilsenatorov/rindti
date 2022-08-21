@@ -5,7 +5,7 @@ datamodule:
   num_workers: 16
   shuffle: true
   batch_sampling: true
-  max_num_nodes: 5000
+  max_num_nodes: 10000
   weighted_mask: true
   sigma: 0.5
   prob: 0.2
@@ -19,7 +19,7 @@ model:
   dropout: 0.1
   attn_dropout: 0.1
   optimizer: Adam
-  max_lr: 1.0e-4
-  start_lr: 1.0e-5
-  min_lr: 1.0e-7
+  max_lr: 1e-4
+  start_lr: 1e-5
+  min_lr: 1e-7
   weighted_loss: false

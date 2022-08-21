@@ -91,7 +91,7 @@ class ProteinDataModule(BaseDataModule):
         transform = T.Compose(
             [
                 PosNoise(sigma=self.sigma),
-                MaskType(prob=self.prob) if self.weighted_mask else MaskTypeWeighted(prob=self.prob),
+                MaskTypeWeighted(prob=self.prob) if self.weighted_mask else MaskType(prob=self.prob),
             ]
         )
         self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)
