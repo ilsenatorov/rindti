@@ -3,12 +3,12 @@ import os
 import torch_geometric
 import torch_geometric.transforms as T
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import StochasticWeightAveraging, ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DynamicBatchSampler
 
 from rindti.data.lectin_datasets import LectinPreTrainDataset
-from rindti.data.transforms import MaskType, PosNoise
+from rindti.data.transforms import MaskType, PosNoise, MaskTypeWeighted, WeightedESMasker
 from rindti.models.pretrain.lectin_denoise import DenoiseModel
 
 if __name__ == "__main__":
@@ -26,7 +26,9 @@ if __name__ == "__main__":
         [
             # AACounts(),
             PosNoise(sigma=0.75),
-            MaskType(prob=0.15),
+            # MaskType(prob=0.15),
+            MaskTypeWeighted(prob=0.15),
+            # WeightedESMasker(prob=0.15),
             # T.RadiusGraph(r=7),
             # T.ToUndirected(),
             # T.RandomRotate(degrees=180, axis=0),

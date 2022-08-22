@@ -147,3 +147,17 @@ class MaskTypeWeighted(MaskType):
         batch.x[mask] = 20
         batch.mask = mask
         return batch
+
+
+class WeightedESMasker(MaskType):
+    """A node masker according to the ESM training, 15% of nodes are masked, equal number for every amino acid type"""
+    def __call__(self, data: Union[Data, TwoGraphData]):
+        """Transform the sample using masking and mutating"""
+        fraction = len(data["x"]) * self.prob
+        num_aa = int(fraction / 20)
+        data["orig_x"] = data["x"].clone()
+        for i in range(20):
+            cand = torch.where(data["x"] == i)[0]
+            mask_idx = np.random.choice(cand, min(num_aa, len(cand)), replace=False)
+            data["x"][mask_idx] = 20
+        return data
