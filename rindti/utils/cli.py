@@ -1,3 +1,4 @@
+import argparse
 import collections
 import itertools
 from typing import Any, Callable, Dict, Union
@@ -115,3 +116,8 @@ def get_git_hash():
     """Get the git hash of the current repository."""
     repo = git.Repo(search_parent_directories=True)
     return repo.head.object.hexsha
+
+
+def namespace_to_dict(namespace):
+    """Nested namespace to dict."""
+    return {k: namespace_to_dict(v) if isinstance(v, argparse.Namespace) else v for k, v in vars(namespace).items()}

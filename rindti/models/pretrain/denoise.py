@@ -97,7 +97,6 @@ class DenoiseModel(LightningModule):
         self.log(f"{step}_noise_loss", noise_loss)
         self.log(f"{step}_pred_loss", pred_loss)
         self.log(f"{step}_acc", acc)
-        self.log("lr", self.optimizers().param_groups[0]["lr"])
         self.confmat.update(batch.type_pred, batch.orig_x)
         return dict(
             loss=loss,

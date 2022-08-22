@@ -1,12 +1,15 @@
+from typing import List
+
 import torch_geometric.transforms as T
 from pytorch_lightning import LightningDataModule
 from torch_geometric.data import Dataset
 from torch_geometric.loader import DataLoader
+from torch_geometric.transforms import BaseTransform
 
 from .dti_dataset import DTIDataset
 from .protein_dataset import ProtPreTrainDataset
 from .samplers import DynamicBatchSampler
-from .transforms import MaskType, MaskTypeWeighted, PosNoise
+from .transforms import MaskType, MaskTypeBERT, PosNoise
 
 
 class BaseDataModule(LightningDataModule):
@@ -72,11 +75,9 @@ class DTIDataModule(BaseDataModule):
 class ProteinDataModule(BaseDataModule):
     """DataModule for pretraining on prots."""
 
-    def __init__(self, *args, sigma: float = 0.75, prob: float = 0.15, weighted_mask: bool = False, **kwargs):
+    def __init__(self, *args, transforms: List[BaseTransform], **kwargs):
         super().__init__(*args, **kwargs)
-        self.sigma = sigma
-        self.prob = prob
-        self.weighted_mask = weighted_mask
+        self.transforms = transforms
 
     def setup(self, stage: str = None):
         """Load the individual datasets."""
@@ -88,13 +89,8 @@ class ProteinDataModule(BaseDataModule):
                 T.ToUndirected(),
             ]
         )
-        transform = T.Compose(
-            [
-                PosNoise(sigma=self.sigma),
-                MaskTypeWeighted(prob=self.prob) if self.weighted_mask else MaskType(prob=self.prob),
-            ]
-        )
-        self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)[:1000]
+        transform = T.Compose(self.transforms)
+        self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)
 
     def _dl_kwargs(self, shuffle: bool = False):
         return dict(

@@ -1,5 +1,6 @@
 import torch
 from torch_geometric.data import Data
+from torch_geometric.transforms import BaseTransform
 
 
 class SizeFilter:
@@ -15,7 +16,7 @@ class SizeFilter:
         return nnodes > self.min_nnodes and nnodes < self.max_nnodes
 
 
-class PosNoise:
+class PosNoise(BaseTransform):
     """Add Gaussian noise to the coordinates of the nodes in a graph."""
 
     def __init__(self, sigma: float = 0.5, plddt_dependent: bool = False):
@@ -25,17 +26,17 @@ class PosNoise:
     def __call__(self, batch) -> torch.Tensor:
         noise = torch.randn_like(batch.pos) * self.sigma
         if self.plddt_dependent:
-            noise *= 2 - batch.plddt / 100
+            noise *= 2 - batch.plddt.unsqueeze(-1) / 100
         batch.pos += noise
         batch.noise = noise
         return batch
 
 
-class MaskType:
+class MaskType(BaseTransform):
     """Masks the type of the nodes in a graph."""
 
-    def __init__(self, prob: float):
-        self.prob = prob
+    def __init__(self, pick_prob: float):
+        self.prob = pick_prob
 
     def __call__(self, batch) -> torch.Tensor:
         mask = torch.rand_like(batch.x, dtype=torch.float32) < self.prob
@@ -45,7 +46,7 @@ class MaskType:
         return batch
 
 
-class MaskTypeBERT:
+class MaskTypeBERT(BaseTransform):
     """Masks the type of the nodes in a graph with BERT-like system."""
 
     def __init__(self, pick_prob: float, mask_prob: float = 0.8, mut_prob: float = 0.1):
@@ -65,6 +66,7 @@ class MaskTypeBERT:
         mut_indices = indices[num_masked_nodes : num_masked_nodes + num_mutated_nodes]  # All nodes that are mutated
         batch.x[mask_indices] = 20
         batch.x[mut_indices] = torch.randint_like(batch.x[mut_indices], low=0, high=20)
+        return batch
 
 
 class MaskTypeWeighted(MaskType):
