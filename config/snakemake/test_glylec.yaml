@@ -1,0 +1,9 @@
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources
+prots:
+  features:
+    method: esm
+drugs:
+  node_feats: IUPAC
+parse_dataset:
+  filtering: all
+  threshold: 1.645

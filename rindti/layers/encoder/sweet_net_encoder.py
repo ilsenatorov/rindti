@@ -40,18 +40,19 @@ class SweetNetAdapter(SweetNet):
         self.apply(lambda module: init_weights(module, mode="sparse"))
         self.load_state_dict(trained_SweetNet)
         self.lin4 = torch.nn.Linear(256, kwargs["hidden_dim"])
+        self.single_embeds = torch.nn.Linear(16, kwargs["hidden_dim"])
 
     def forward(self, x, edge_index=None, batch=None, inference=False):
         """Forward a glycan through the Sweetnet"""
         x, edge_index = list(zip(*[glycan_to_graph(iupac) for iupac in x]))
         embeddings = []
         for y, edges in zip(x, edge_index):
-            y = self.item_embedding(torch.tensor(y).cuda())
+            y = self.item_embedding(torch.tensor(y))
             y = y.squeeze(1)
             if len(edges) == 0:
-                embeddings.append(y.detach().squeeze())
+                embeddings.append(self.single_embeds(y.detach().squeeze()))
                 continue
-            edges = torch.tensor(edges).cuda().to(torch.long)
+            edges = torch.tensor(edges).to(torch.long)
             y = F.leaky_relu(self.conv1(y, edges))
             y, edges, _, batch, _, _ = self.pool1(y, edges, None)
             y1 = torch.cat([gmp(y, batch), gap(y, batch)], dim=1)
