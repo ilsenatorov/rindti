@@ -19,4 +19,5 @@ results/
 *build*
 *egg-info*
 data/
+wandb/
 !rindti/data/
