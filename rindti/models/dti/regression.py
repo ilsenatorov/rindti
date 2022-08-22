@@ -24,4 +24,3 @@ class RegressionModel(ClassificationModel):
 
     def validation_epoch_end(self, outputs: dict):
         super(ClassificationModel, self).validation_epoch_end(outputs)
-

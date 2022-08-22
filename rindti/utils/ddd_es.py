@@ -3,6 +3,7 @@ from pytorch_lightning.callbacks import EarlyStopping
 
 class DeepDoubleDescentEarlyStopping(EarlyStopping):
     """Delayed early stopping with start counting epochs until ES later. This should prevent DeepDoubleDescent"""
+
     def __init__(self, kick_in=50, **kwargs):
         super().__init__(**kwargs)
         self.kick_in = kick_in

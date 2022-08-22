@@ -18,12 +18,7 @@ from ..lr_schedules.LWCA import LinearWarmupCosineAnnealingLR
 from ..lr_schedules.LWCAWR import LinearWarmupCosineAnnealingWarmRestartsLR
 from ..utils.metrics import DistOverlap
 
-optimizers = {
-    "adamw": AdamW,
-    "adam": Adam,
-    "sgd": SGD,
-    "rmsprop": RMSprop
-}
+optimizers = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}
 
 
 class BaseModel(LightningModule):
@@ -45,8 +40,11 @@ class BaseModel(LightningModule):
                 DistOverlap(),
             ]
         )
-        return metrics.clone(prefix=prefix + "train_"), metrics.clone(prefix=prefix + "val_"), \
-            metrics.clone(prefix=prefix + "test_")
+        return (
+            metrics.clone(prefix=prefix + "train_"),
+            metrics.clone(prefix=prefix + "val_"),
+            metrics.clone(prefix=prefix + "test_"),
+        )
 
     def _set_reg_metrics(self):
         """Initialize regression metrics for this model"""
@@ -192,7 +190,7 @@ class BaseModel(LightningModule):
                 start_lr=float(lr_params["start_lr"]),
                 peak_lr=float(opt_params["lr"]),
                 cos_restart_dist=lr_params["cos_restart_dist"],
-                cos_eta_min=float(lr_params["min_lr"])
+                cos_eta_min=float(lr_params["min_lr"]),
             )
         elif lr_params["module"] == "lwca":
             lr_scheduler["scheduler"] = LinearWarmupCosineAnnealingLR(
@@ -205,7 +203,10 @@ class BaseModel(LightningModule):
         else:
             # raise ValueError("Unknown learning rate scheduler")
             lr_scheduler["scheduler"] = ReduceLROnPlateau(
-                optimizer, verbose=True, factor=0.1, patience=20,
+                optimizer,
+                verbose=True,
+                factor=0.1,
+                patience=20,
             )
 
         return lr_scheduler

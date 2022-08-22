@@ -72,4 +72,3 @@ model:
       module: rlrop
       factor: 0.1
       patience: 20
-

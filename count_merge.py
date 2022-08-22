@@ -14,7 +14,7 @@ for name in names:
 with open(f"{folder}/counts/aa_count.tsv", "w") as out:
     for k in aa_counter.keys():
         print(f"{k}\t{aa_counter[k][0]}\t{aa_counter[k][1]}", file=out)
-        
+
 aa_counter = {}
 
 for name in names:

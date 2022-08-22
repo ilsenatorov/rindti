@@ -1,4 +1,4 @@
-from .dti import ClassificationModel, RegressionModel, MultitaskClassification
+from .dti import ClassificationModel, MultitaskClassification, RegressionModel
 from .pretrain import ProtClassModel
 
 __all__ = [
