@@ -20,8 +20,8 @@ if __name__ == "__main__":
     seed_everything(config["seed"])
     dm = ProteinDataModule(**config["datamodule"])
     model = DenoiseModel(**config["model"])
-    wandb.init(config=config, project="pretrain_alphafold", name="overfit")
-    logger = WandbLogger(log_model=True)
+    logger = WandbLogger(log_model=True, project="pretrain_alphafold", name="overfit")
+    logger.experiment.config.update(config)
     trainer = Trainer(
         gpus=-1,
         gradient_clip_val=1,
