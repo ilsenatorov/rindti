@@ -18,11 +18,14 @@ class SizeFilter:
 class PosNoise:
     """Add Gaussian noise to the coordinates of the nodes in a graph."""
 
-    def __init__(self, sigma: float = 0.5):
+    def __init__(self, sigma: float = 0.5, plddt_dependent: bool = False):
         self.sigma = sigma
+        self.plddt_dependent = plddt_dependent
 
     def __call__(self, batch) -> torch.Tensor:
         noise = torch.randn_like(batch.pos) * self.sigma
+        if self.plddt_dependent:
+            noise *= 2 - batch.plddt / 100
         batch.pos += noise
         batch.noise = noise
         return batch
