@@ -134,8 +134,8 @@ class DenoiseModel(LightningModule):
             optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
         scheduler = LinearWarmupCosineAnnealingLR(
             optim,
-            warmup_epochs=5,
-            max_epochs=100,
+            warmup_epochs=50,
+            max_epochs=5000,
             warmup_start_lr=self.start_lr,
             eta_min=self.min_lr,
         )
