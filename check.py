@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+import torch
 from pytorch_lightning import seed_everything
 from torchmetrics import Accuracy
 
@@ -7,7 +8,6 @@ from rindti.data import DTIDataModule
 from rindti.data.transforms import ESMasker, NullTransformer
 from rindti.models import MultitaskClassification
 from rindti.utils import read_config, remove_arg_prefix
-import torch
 
 seed_everything(42)
 

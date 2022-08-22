@@ -1,7 +1,7 @@
-from .max_likelihood import Max
-from .prot_drug_max_likelihood import ProtDrugMax
 from jsonargparse import CLI
 
+from .max_likelihood import Max
+from .prot_drug_max_likelihood import ProtDrugMax
 
 models = {"max": Max, "prot_drug_max": ProtDrugMax}
 

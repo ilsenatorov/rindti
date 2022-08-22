@@ -1,7 +1,8 @@
-from tensorboard.backend.event_processing import event_accumulator
-import pandas as pd
 import os
+
 import numpy as np
+import pandas as pd
+from tensorboard.backend.event_processing import event_accumulator
 
 
 def read(path="tb_logs/dti_glylec_mbb/elnwIntanc_cda4ea77/version_3/"):
@@ -20,10 +21,11 @@ def read(path="tb_logs/dti_glylec_mbb/elnwIntanc_cda4ea77/version_3/"):
                 path,
                 version,
                 sorted(
-                    list(filter(lambda x: x.startswith("events.out.tfevents."),
-                                os.listdir(os.path.join(path, version)))),
-                    key=lambda x: x[-1]
-                )[0]
+                    list(
+                        filter(lambda x: x.startswith("events.out.tfevents."), os.listdir(os.path.join(path, version)))
+                    ),
+                    key=lambda x: x[-1],
+                )[0],
             )
         )
 
@@ -40,5 +42,5 @@ def read(path="tb_logs/dti_glylec_mbb/elnwIntanc_cda4ea77/version_3/"):
         print(k, "|", np.std(v))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     read()

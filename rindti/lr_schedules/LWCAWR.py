@@ -1,10 +1,11 @@
 import torch.nn
-from torch.optim import Optimizer, Adam
+from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 
 class LinearWarmup:
     """Linearly increase the learning rate"""
+
     def __init__(self, optimizer, warmup_epochs, start_lr, end_lr):
         self.optimizer = optimizer
         self.warmup_epochs = warmup_epochs
@@ -39,16 +40,16 @@ class LinearWarmup:
 
 class LinearWarmupCosineAnnealingWarmRestartsLR:
     def __init__(
-            self,
-            optimizer: Optimizer,
-            warmup_epochs: int,
-            start_lr: float,
-            peak_lr: float,
-            cos_restart_dist: int,
-            cos_t_mult: int = 1,
-            cos_eta_min: float = 0.0,
-            cos_last_epoch: int = -1,
-            **kwargs,
+        self,
+        optimizer: Optimizer,
+        warmup_epochs: int,
+        start_lr: float,
+        peak_lr: float,
+        cos_restart_dist: int,
+        cos_t_mult: int = 1,
+        cos_eta_min: float = 0.0,
+        cos_last_epoch: int = -1,
+        **kwargs,
     ):
         self.steps = 0
         self.warmup_epochs = warmup_epochs
@@ -101,7 +102,7 @@ class LinearWarmupCosineAnnealingWarmRestartsLR:
         self.steps = state_dict["steps"]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """Check the visualization of the learning rate"""
     import matplotlib.pyplot as plt
 

@@ -31,7 +31,7 @@ class MLP(BaseLayer):
     ):
         super().__init__()
 
-        '''if hidden_dims is not None:
+        """if hidden_dims is not None:
             self.mlp = nn.Sequential(nn.Linear(input_dim, hidden_dims[0]), nn.ReLU(), nn.Dropout(dropout))
             for i in range(len(hidden_dims) - 1):
                 self.mlp.add_module("hidden_linear{}".format(i), nn.Linear(hidden_dims[i], hidden_dims[i + 1]))
@@ -44,7 +44,7 @@ class MLP(BaseLayer):
                 self.mlp.add_module("hidden_linear{}".format(i), nn.Linear(hidden_dim, hidden_dim))
                 self.mlp.add_module("hidden_relu{}".format(i), nn.ReLU())
                 self.mlp.add_module("hidden_dropout{}".format(i), nn.Dropout(dropout))
-            self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))'''
+            self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))"""
         self.mlp = nn.Sequential(nn.Linear(input_dim, hidden_dim), nn.ReLU(), nn.Dropout(dropout))
 
         for i in range(num_layers - 2):

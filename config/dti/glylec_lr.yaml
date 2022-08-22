@@ -75,4 +75,3 @@ model:
       start_lr: 1e-5
       warmup_epochs: 10
       cos_restart_dist: 500
-

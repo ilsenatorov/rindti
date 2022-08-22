@@ -1,5 +1,5 @@
-from typing import Any
 from statistics import NormalDist
+from typing import Any
 
 import torch
 from torchmetrics import Metric
@@ -7,6 +7,7 @@ from torchmetrics import Metric
 
 class DistOverlap(Metric):
     """A metric keeping track of the distributions of predicted values for positive and negative samples"""
+
     def __init__(self):
         super(DistOverlap, self).__init__()
         self.add_state("pos", default=[], dist_reduce_fx="cat")
@@ -28,6 +29,8 @@ class DistOverlap(Metric):
         pos_mu, pos_sigma = torch.mean(self.pos), torch.std(self.pos)
         neg_mu, neg_sigma = torch.mean(self.neg), torch.std(self.neg)
 
-        return torch.tensor(NormalDist(mu=pos_mu.item(), sigma=pos_sigma.item()).overlap(
-            NormalDist(mu=neg_mu.item(), sigma=neg_sigma.item())
-        ))
+        return torch.tensor(
+            NormalDist(mu=pos_mu.item(), sigma=pos_sigma.item()).overlap(
+                NormalDist(mu=neg_mu.item(), sigma=neg_sigma.item())
+            )
+        )
