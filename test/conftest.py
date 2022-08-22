@@ -39,8 +39,6 @@ def run_snakemake(config: dict, tmpdir_factory: str, data_dir: str = "test/test_
     else:
         config_path = str(tmpdir.join("tmp_config.yaml"))
         source_path = str(tmpdir.join("resources"))
-    print(config_path)
-    print(source_path)
     shutil.copytree(data_dir, source_path)
     config["source"] = source_path
     write_config(config_path, config)
@@ -55,14 +53,11 @@ def run_snakemake(config: dict, tmpdir_factory: str, data_dir: str = "test/test_
 
 
 @pytest.fixture(scope="session")
-def split_data(snakemake_run):
+def split_data(dti_snakemake_run):
     """Return the split data."""
-    if "glylec" in snakemake_run:
-        folder = "glylec/results/split_data"
-    else:
-        folder = "results/split_data"
-    result = os.listdir(snakemake_run.join(folder))[0]
-    return snakemake_run.join(folder, result)
+    folder = "results/split_data"
+    result = os.listdir(dti_snakemake_run.join(folder))[0]
+    return dti_snakemake_run.join(folder, result)
 
 
 @pytest.fixture(scope="session")
