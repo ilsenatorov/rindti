@@ -135,7 +135,7 @@ class DenoiseModel(LightningModule):
         scheduler = LinearWarmupCosineAnnealingLR(
             optim,
             warmup_epochs=50,
-            max_epochs=5000,
+            max_epochs=2000,
             warmup_start_lr=self.start_lr,
             eta_min=self.min_lr,
         )

@@ -20,19 +20,14 @@ if __name__ == "__main__":
     seed_everything(config["seed"])
     dm = ProteinDataModule(**config["datamodule"])
     model = DenoiseModel(**config["model"])
-    wandb.init(config=config, name="pretrain_alphafold")
-    logger = WandbLogger(
-        name="pretrain_alphafold",
-        save_dir="wandb_logs",
-        log_model=True,
-    )
+    wandb.init(config=config, project="pretrain_alphafold", name="overfit")
+    logger = WandbLogger(log_model=True)
     trainer = Trainer(
         gpus=-1,
         gradient_clip_val=1,
         callbacks=[
             StochasticWeightAveraging(swa_lrs=1e-2),
             ModelCheckpoint(monitor="train_loss", mode="min"),
-            EarlyStopping(monitor="train_loss", mode="min", patience=10),
             RichProgressBar(),
             RichModelSummary(),
         ],

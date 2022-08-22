@@ -6,14 +6,14 @@ datamodule:
   shuffle: true
   batch_sampling: true
   max_num_nodes: 10000
-  weighted_mask: true
-  sigma: 1.0
-  prob: 0.05
+  weighted_mask: false
+  sigma: 0.75
+  prob: 0.125
 model:
   local_module: GAT
   global_module: Performer
-  hidden_dim: 256
-  num_layers: 4
+  hidden_dim: 512
+  num_layers: 6
   num_heads: 4
   alpha: 1.0
   dropout: 0.1

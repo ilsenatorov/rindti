@@ -94,7 +94,7 @@ class ProteinDataModule(BaseDataModule):
                 MaskTypeWeighted(prob=self.prob) if self.weighted_mask else MaskType(prob=self.prob),
             ]
         )
-        self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)[:100]
+        self.train = ProtPreTrainDataset(self.filename, transform=transform, pre_transform=pre_transform)[:1000]
 
     def _dl_kwargs(self, shuffle: bool = False):
         return dict(
