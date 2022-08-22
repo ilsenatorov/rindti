@@ -21,6 +21,7 @@ import numpy as np
 
 
 def concat_dataloaders(loaders):
+    """Concatenate dataloaders"""
     for loader in loaders:
         if loader.dataset is None:
             continue
@@ -35,9 +36,9 @@ def modify_protein(prot: dict, mode: str):
     for i in range(-1, len(prot["x"])):
         prot_data = copy.deepcopy(prot)
         if i != -1:
-            if mode == "obfuscate":
+            if mode == "obfuscate":  # mask a single node (suppress all information spreading but keep message flows)
                 prot_data["x"][i] = 0
-            elif mode == "delete":
+            elif mode == "delete":  # delete a node completely
                 prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1):]])
                 prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1):]])
                 e_idx = prot_data["edge_index"].T
@@ -46,28 +47,15 @@ def modify_protein(prot: dict, mode: str):
                     e_idx = torch.cat([e_idx[:d], e_idx[(d + 1):]])
                 e_idx[e_idx > i] -= 1
                 prot_data["edge_index"] = e_idx.T
-            elif mode == "skip":
+            elif mode == "skip":  # delete a node and connect all neighbors with each other
                 pass
             else:
                 raise ValueError(f"Unknown mode of explainability investigation: {mode}")
         yield prot_data
 
 
-def combine(prot, drug, x):
-    comb_dict = {}
-    for k in prot.keys():
-        comb_dict["prot_" + k] = prot[k]
-    for k in drug.keys():
-        comb_dict["drug_" + k] = drug[k]
-    for k, v in x.items():
-        if not k.startswith("drug") and not k.startswith("prot"):
-            comb_dict[k] = x[k]
-    if "drug_IUPAC" in comb_dict:
-        comb_dict["drug_IUPAC"] = comb_dict["drug_IUPAC"][0]
-    return TwoGraphData(**comb_dict)
-
-
 def clean_yaml(config: dict) -> dict:
+    """Clear types in a dictionary to be stored in a readable yaml file"""
     output = {}
     for k, v in config.items():
         if isinstance(v, dict):
@@ -93,49 +81,58 @@ def clean_yaml(config: dict) -> dict:
     return output
 
 
+def load_data(data, dataset_name, split, batch_size, **kwargs):
+    """Load the specified data into a dataloader"""
+    print("\tLoading the data...")
+    datamodule = DTIDataModule(filename=data[dataset_name], exp_name="glylec_mbb", batch_size=batch_size, shuffle=False,
+                               num_workers=16)
+    datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split=split)
+    datamodule.update_config(kwargs)
+    print("\t\tDone")
+    return datamodule
+
+
+def load_models(data, filtering=lambda x: False):
+    """Load the models and create a list to store data in"""
+    print("\tLoading the models...")
+    model_list = []
+    model_data = {}
+    for m in data["models"]:
+        if filtering(m):
+            continue
+        model = models[m["arch"]].load_from_checkpoint(m['checkpoint'])
+        model.eval()
+        model_list.append((m["name"], model, m["neg_params"], m["pos_params"]))
+        model_data[m["name"]] = [], [], ([], []), ([], [])
+    print("\r\t\tDone")
+    return model_list, model_data
+
+
 def fit_dist(filename, **kwargs):
+    """Fit normal distributions to the predicted values of the model on a subset of the training data"""
     print("Fit normal distributions of predictions on training data")
     for data in kwargs["models"]:
         print(f"\t{data['dataset']}")
         seed_everything(42)
-        kwargs["model"]["drug"]["method"] = data["drug_method"]
-        kwargs["model"]["prot"]["method"] = data["prot_method"]
 
-        print("\tLoading the data...")
-        datamodule = DTIDataModule(filename=data["dist_data"], exp_name="glylec_mbb", batch_size=128, shuffle=False, num_workers=16)
-        datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split="train")
-        datamodule.update_config(kwargs)
+        datamodule = load_data(data, dataset_name="dist_data", split="train", batch_size=128, **kwargs)
         dataloader = datamodule.train_dataloader()
-        print("\t\tDone")
 
-        print("\tLoading the models...")
-        model_list = []
-        model_data = {}
-        for m in data["models"]:
-            if m["pos_params"][1] != -1 and m["neg_params"][1] != -1:
-                continue
-            kwargs["model"]["module"] = m["arch"]
-            # model = models[kwargs["model"]["module"]](**kwargs)
-            # model = model.load_from_checkpoint(m['checkpoint'])
-            model = models[kwargs["model"]["module"]].load_from_checkpoint(m['checkpoint'])
-            model.eval()
-            model_list.append((m["name"], model))
-            model_data[m["name"]] = [], []
-        print("\r\t\tDone")
+        model_list, model_data = load_models(data, filtering=lambda x: x["pos_params"][1] != -1 and x["neg_params"][1] != -1)
 
         print("\tCalculate distributions...")
         for i, batch in enumerate(dataloader):
             print(f"\r\tBatch: {i} / {len(dataloader)}", end="")
             if i >= 5:
                 break
-            for n, model in model_list:
+            for n, model, _, _ in model_list:
                 results = model.forward(remove_arg_prefix("prot_", batch), remove_arg_prefix("drug_", batch))
                 model_data[n][0].append(torch.sigmoid(results["pred"][(batch["label"] == 0).squeeze(), :]))
                 model_data[n][1].append(torch.sigmoid(results["pred"][(batch["label"] == 1).squeeze(), :]))
         print("\t\tDone")
 
         print("\tStore parameters...")
-        for i, (n, (v_pos, v_neg)) in enumerate(model_data.items()):
+        for i, (n, (v_pos, v_neg, _, _)) in enumerate(model_data.items()):
             m_data_pos = torch.cat(v_pos).numpy()
             norm_loc_pos, norm_scale_pos = stats.norm.fit(np.array(m_data_pos))
             m_data_neg = torch.cat(v_neg).numpy()
@@ -147,11 +144,12 @@ def fit_dist(filename, **kwargs):
     config = clean_yaml(kwargs)
     with open(filename, "w") as out:
         yaml.dump(config, out)
-    print("Finished")
+    print("Finished\n")
     return config
 
 
 def plot(output_dir, **kwargs):
+    """Plot the distributions estimated in fit_dist()"""
     print("Plot distributions of predictions")
     x = np.linspace(0, 1, 100)
     for data in kwargs["models"]:
@@ -164,109 +162,83 @@ def plot(output_dir, **kwargs):
             plt.legend()
             plt.savefig(os.path.join(output_dir, f"dist_pred_{m['name']}.png"))
             plt.clf()
-    print("Finished")
+    print("Finished\n")
 
 
 def run_tsne(output_dir, **kwargs):
+    """Create some tSNE plots for protein, drug and prediction embeddings"""
     print("Calculate tSNE plots for embeddings for all data")
     for data in kwargs["models"]:
         print(f"\t{data['dataset']}")
         seed_everything(42)
-        kwargs["model"]["drug"]["method"] = data["drug_method"]
-        kwargs["model"]["prot"]["method"] = data["prot_method"]
 
-        print("\tLoading the data...")
-        datamodule = DTIDataModule(filename=data["dist_data"], exp_name="glylec_mbb", batch_size=1, shuffle=False,
-                                   num_workers=16)
-        datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split="train")
-        datamodule.update_config(kwargs)
+        datamodule = load_data(data, dataset_name="dist_data", split=None, batch_size=1, **kwargs)
         dataloader = concat_dataloaders([
             datamodule.train_dataloader(),
             datamodule.val_dataloader(),
             datamodule.test_dataloader(),
         ])
-        print("\t\tDone")
 
-        print("\tLoading the models...")
-        model_list = []
-        model_data = {}
-        for m in data["models"]:
-            kwargs["model"]["module"] = m["arch"]
-            model = models[kwargs["model"]["module"]](**kwargs)
-            model = model.load_from_checkpoint(m['checkpoint'])
-            model.eval()
-            model_list.append((m["name"], model))
-            model_data[m["name"]] = [], [], [], []
-        print("\t\tDone")
+        model_list, model_data = load_models(data)
 
         print("\tCalculate embeddings...")
         seen_prots, seen_drugs = set(), set()
         for i, batch in enumerate(dataloader):
             print(f"\r\tBatch: {i}", end="")
             if batch["prot_id"][0] not in seen_prots:
-                for name, model in model_list:
+                for name, model, _, _ in model_list:
                     graph, _ = model.prot_encoder.forward(remove_arg_prefix("prot_", batch))
                     model_data[name][0].append(graph.cpu().numpy()[0])
                 seen_prots.add(batch["prot_id"][0])
             if batch["drug_id"][0] not in seen_drugs:
-                for name, model in model_list:
+                for name, model, _, _ in model_list:
                     graph, _ = model.drug_encoder.forward(remove_arg_prefix("drug_", batch))
                     model_data[name][1].append(graph.cpu().numpy()[0])
                 seen_drugs.add(batch["drug_id"][0])
             if i < 1_000:
-                for name, model in model_list:
-                    if batch["label"][0] == 0:
-                        model_data[name][2].append(model.forward(remove_arg_prefix("prot_", batch), remove_arg_prefix("drug_", batch))["embed"].cpu().numpy()[0])
-                    if batch["label"][0] == 1:
-                        model_data[name][3].append(model.forward(remove_arg_prefix("prot_", batch), remove_arg_prefix("drug_", batch))["embed"].cpu().numpy()[0])
+                for name, model, _, _ in model_list:
+                    pred = model.forward(remove_arg_prefix("prot_", batch), remove_arg_prefix("drug_", batch))
+                    if batch["label"][0] == 0:  # true binding
+                        model_data[name][2][0 if pred["pred"] <= 0 else 1].append(pred["embed"].cpu().numpy()[0])
+                    if batch["label"][0] == 1:  # true non-binding
+                        model_data[name][3][0 if pred["pred"] <= 0 else 1].append(pred["embed"].cpu().numpy()[0])
         print("\r\t\tDone")
 
         print("\tPlot tSNE embeddings")
-        for name, (prot_embeds, drug_embeds, bind_embeds, non_bind_embeds) in model_data.items():
+        for name, (prot_embeds, drug_embeds, (tp_be, fn_be), (fp_nbe, tn_nbe)) in model_data.items():
             prot_embeds = TSNE(n_components=2, learning_rate="auto", init="random", perplexity=50).fit_transform(np.array(prot_embeds))
             drug_embeds = TSNE(n_components=2, learning_rate="auto", init="random", perplexity=50).fit_transform(np.array(drug_embeds))
-            embeds = bind_embeds + non_bind_embeds
+            embeds = tp_be + fn_be + fp_nbe + tn_nbe
             embeds = TSNE(n_components=2, learning_rate="auto", init="random", perplexity=50).fit_transform(np.array(embeds))
-            fig, ax = plt.subplots(1, 3, figsize=(12, 4))
+            fig, ax = plt.subplots(1, 2, figsize=(12, 8))
             ax[0].scatter(prot_embeds[:, 0], prot_embeds[:, 1], color="b", marker="o", s=10)
             ax[1].scatter(drug_embeds[:, 0], drug_embeds[:, 1], color="b", marker="o", s=10)
-            ax[2].scatter(embeds[:len(bind_embeds), 0], embeds[:len(bind_embeds), 1], color="g", marker="o", label="binding", s=1)
-            ax[2].scatter(embeds[len(bind_embeds):, 0], embeds[len(bind_embeds):, 1], color="r", marker="o", label="non-binding", s=1)
-            fig.suptitle(f"tSNE Plots for Protein, Drug, and Combined Embeddings of Model {name}")
+            fig.suptitle(f"tSNE Plots for Protein and Drug Embeddings of Model {name}")
             plt.savefig(os.path.join(output_dir, f"tsne_prot_drug_{name}.png"))
+            plt.clf()
+            plt.scatter(embeds[:len(tp_be), 0], embeds[:len(tp_be), 1], color="g", marker="o", label="tp", s=20)
+            plt.scatter(embeds[len(tp_be):len(tp_be) + len(fn_be), 0], embeds[len(tp_be):len(tp_be) + len(fn_be), 1], color="r", marker="o", label="fn", s=20)
+            plt.scatter(embeds[len(tp_be) + len(fn_be):-len(tn_nbe), 0], embeds[len(tp_be) + len(fn_be):-len(tn_nbe), 1], color="r", marker="s", label="fp", s=20)
+            plt.scatter(embeds[-len(tn_nbe):, 0], embeds[-len(tn_nbe):, 1], color="g", marker="s", label="tn", s=20)
+            plt.suptitle(f"tSNE Plot for Combined Embeddings of Model {name}")
+            plt.legend()
+            plt.savefig(os.path.join(output_dir, f"tsne_pred_{name}.png"))
+            plt.clf()
         print("\t\tDone")
-    print("Finished")
+    print("Finished\n")
 
 
 def explain(output_dir, **kwargs):
+    """Calculate predictions and p-values for some handcrafted dataset"""
     print("Calculate predictions and p-values for prediction dataset")
     for data in kwargs["models"]:
         print(f"\t{data['dataset']}")
         seed_everything(42)
-        kwargs["model"]["drug"]["method"] = data["drug_method"]
-        kwargs["model"]["prot"]["method"] = data["prot_method"]
 
-        print("\tLoading the data...")
-        datamodule = DTIDataModule(filename=data["dataset"], exp_name="glylec_mbb", batch_size=1, shuffle=False)
-        datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split="train")
-        datamodule.update_config(kwargs)
+        datamodule = load_data(data, dataset_name="dataset", split="train", batch_size=1, **kwargs)
         dataloader = datamodule.train_dataloader()
-        print("\t\tDone")
 
-        print("\tLoading the models...")
-        model_list = []
-        for m in data["models"]:
-            # for method in kwargs["methods"]:
-            #     os.makedirs(f"{kwargs['output_dir']}/{m['name']}/{method}/", exist_ok=True)
-            # os.makedirs(f"{kwargs['output_dir']}/{m['name']}/counts/", exist_ok=True)
-            # os.makedirs(f"{kwargs['output_dir']}/{m['name']}/distance/", exist_ok=True)
-
-            kwargs["model"]["module"] = m["arch"]
-            model = models[kwargs["model"]["module"]](**kwargs)
-            model = model.load_from_checkpoint(m['checkpoint'])
-            model.eval()
-            model_list.append((m['name'], model, m["neg_params"], m["pos_params"]))
-        print("\t\tDone")
+        model_list, _ = load_models(data)
 
         print("\tCalculate predictions...")
         res_table = pt.PrettyTable()
@@ -342,10 +314,11 @@ def explain(output_dir, **kwargs):
         print(res_table.get_csv_string(), file=open(os.path.join(output_dir, "model_predictions.csv"), "w"))
         print(res_table.get_string(), file=open(os.path.join(output_dir, "model_predictions.txt"), "w"))
         print("Done")
-    print("Finished")
+    print("Finished\n")
 
 
 def main():
+    """Run the main routine"""
     parser = ArgumentParser(prog="Model Trainer")
     parser.add_argument("config", type=str, help="Path to YAML config file")
     args = parser.parse_args()
@@ -354,10 +327,10 @@ def main():
     os.makedirs(config["output_dir"], exist_ok=True)
 
     with torch.no_grad():
-        # config = fit_dist(args.config, **config)
+        config = fit_dist(args.config, **config)
         plot(**config)
         run_tsne(**config)
-        # explain(**config)
+        explain(**config)
 
 
 if __name__ == '__main__':

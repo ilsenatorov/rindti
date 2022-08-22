@@ -192,6 +192,7 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         warmup_start_lr: float = 0.0,
         eta_min: float = 0.0,
         last_epoch: int = -1,
+        **kwargs,
     ) -> None:
         """
         Args:

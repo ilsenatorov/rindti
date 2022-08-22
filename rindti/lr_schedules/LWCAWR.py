@@ -48,6 +48,7 @@ class LinearWarmupCosineAnnealingWarmRestartsLR:
             cos_t_mult: int = 1,
             cos_eta_min: float = 0.0,
             cos_last_epoch: int = -1,
+            **kwargs,
     ):
         self.steps = 0
         self.warmup_epochs = warmup_epochs

@@ -1,0 +1,6 @@
+min_lr: 1e-7
+start_lr: 1e-5
+warmup_epochs: 10
+cos_restart_dist: 500
+max_epochs: 100
+peak_lr: 1e-4
