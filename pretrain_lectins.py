@@ -3,7 +3,7 @@ import os
 import torch_geometric
 import torch_geometric.transforms as T
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import StochasticWeightAveraging
+from pytorch_lightning.callbacks import StochasticWeightAveraging, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch_geometric.loader import DynamicBatchSampler
 
@@ -72,8 +72,11 @@ if __name__ == "__main__":
         logger=logger,
         # accumulate_grad_batches=4,
         log_every_n_steps=10,
-        max_epochs=6000,
+        max_epochs=4500,
         gradient_clip_val=1,
-        callbacks=[StochasticWeightAveraging(swa_lrs=1e-2)],
+        callbacks=[
+            ModelCheckpoint(save_last=True, monitor='train_loss', save_top_k=3, mode='min'),
+            # StochasticWeightAveraging(swa_lrs=1e-2),
+        ],
     )
     trainer.fit(model, dl)
