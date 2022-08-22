@@ -79,8 +79,8 @@ class DenoiseModel(LightningModule):
         pos_encode = self.pos_encode(batch.pos)
         batch.x = torch.cat([feat_encode, pos_encode], dim=1)
         batch = self.node_encode(batch)
-        batch.noise_pred = self.noise_pred(batch.x)
         batch.type_pred = self.type_pred(batch.x[batch.mask])
+        batch.noise_pred = self.noise_pred(batch.x)
         return batch
 
     def shared_step(self, batch: Data, step: int) -> dict:
