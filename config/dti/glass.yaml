@@ -1,12 +1,11 @@
-# pytorch_lightning==1.7.2
 seed_everything: true
 trainer:
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
       log_model: true
-      project: pretrain_alphafold
-      name: overfit_10
+      project: rindti
+      name: test
       dir: wandb
   enable_checkpointing: true
   callbacks:
@@ -22,9 +21,8 @@ trainer:
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
   gradient_clip_val: 1.0
   accelerator: gpu
-  devices: -1
+  devices: 1
   enable_progress_bar: true
-  overfit_batches: 10
   accumulate_grad_batches: null
   log_every_n_steps: 5
   max_epochs: 10000
@@ -33,17 +31,42 @@ trainer:
   auto_lr_find: false
   auto_scale_batch_size: false
 model:
+  prot_encoder:
+    class_path: rindti.layers.encoder.GraphEncoder
+    init_args:
+      hidden_dim: 128
+      edge_dim: 0
+      edge_type: none
+      feat_dim: 21
+      feat_type: label
+  drug_encoder:
+    class_path: rindti.layers.encoder.GraphEncoder
+    init_args:
+      hidden_dim: 128
+      edge_dim: 0
+      edge_type: none
+      feat_dim: 14
+      feat_type: label
   merge_features: concat
-  optimizer: Adam
-  max_lr: 0.0001
-  start_lr: 1.0e-05
-  min_lr: 1.0e-07
-  warmup_epochs: 1
-  max_epochs: 10
+  num_layers: 3
+  dropout: 0.1
+optimizer:
+  class_path: torch.optim.AdamW
+  init_args:
+    lr: 1.0e-4
+    weight_decay: 1.0e-5
+    betas: [0.9, 0.95]
+    eps: 1e-8
+lr_scheduler:
+  class_path: rindti.utils.optim.LinearWarmupCosineAnnealingLR
+  init_args:
+    warmup_epochs: 5
+    max_epochs: 2000
+    warmup_start_lr: 1.0e-5
+    eta_min: 1.0e-7
 data:
-  filename: datasets/glass/results/prepare_all/pdlnpnclnr_2deeeb4b.pkl
-  batch_size: 128
-  num_workers: 1
+  filename: datasets/glass/results/prepare_all/pdlnpnclnr_2deeeb4b/output.pkl
+  batch_size: 4
+  num_workers: 4
   shuffle: true
   batch_sampling: false
-  max_num_nodes: 0

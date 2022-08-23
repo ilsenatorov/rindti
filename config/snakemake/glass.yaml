@@ -2,7 +2,7 @@ source: datasets/glass/resources
 
 prots:
   structs:
-    method: plddt
+    method: template
   features:
     method: distance
 parse_dataset:

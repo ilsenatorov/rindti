@@ -1,7 +1,6 @@
 import hashlib
 import json
-import os
-import os.path as osp
+from pathlib import Path
 
 import pandas as pd
 
@@ -63,14 +62,15 @@ class SnakemakeHelper:
         self._set_inputs()
 
     def _set_inputs(self):
-        self.source_dir = self.config["source"]
-        self.target_dir = "/".join(self.source_dir.split("/")[:-1] + ["results"])
-        self.prot_ids = [x.split(".")[0] for x in os.listdir(self._source("structures")) if x.endswith(".pdb")]
-        self.raw_structs = [self._source("structures", x + ".pdb") for x in self.prot_ids]
+        self.source_dir = Path(self.config["source"])
+        self.target_dir = self.source_dir.parent / "results"
+        self.struct_dir = self.source_dir / "structures"
+        self.raw_structs = [x for x in self.struct_dir.glob("*.pdb")]
+        self.prot_ids = [x.stem for x in self.raw_structs]
         self.tables = {k: self._source("tables", k + ".tsv") for k in ["inter", "lig", "prot"]}
 
     def _source(self, *args) -> str:
-        return os.path.join(self.source_dir, *args)
+        return Path(self.source_dir, *args)
 
     def _target(self, *args) -> str:
-        return os.path.join(self.target_dir, *args)
+        return Path(self.target_dir, *args)

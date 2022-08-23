@@ -1,5 +1,5 @@
-final_output = sh._target("prepare_all", sh.namer(config) + ".pkl")
-yaml_config = sh._target("prepare_all", sh.namer(config) + ".yaml")
+final_output = sh._target("prepare_all", sh.namer(config), "output.pkl")
+yaml_config = sh._target("prepare_all", sh.namer(config), "config.yaml")
 
 
 rule parse_dataset:
@@ -31,5 +31,6 @@ rule prepare_all:
         inter=rules.split_data.output.split_data,
     output:
         combined_pickle=final_output,
+        config=yaml_config,
     script:
         "../scripts/prepare_all.py"

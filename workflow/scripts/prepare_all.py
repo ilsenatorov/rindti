@@ -2,6 +2,7 @@ import pickle
 from typing import Iterable
 
 import pandas as pd
+import yaml
 from pandas.core.frame import DataFrame
 from utils import get_config
 
@@ -52,17 +53,22 @@ if __name__ == "__main__":
     drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
 
     full_data = process_df(interactions)
-    snakemake.config["data"] = {
-        "prot": get_config(prots, "prot"),
-        "drug": get_config(drugs, "drug"),
+    config = {
+        "model": {
+            "prot_encoder": {"init_args": get_config(prots, "prot")},
+            "drug_encoder": {"init_args": get_config(drugs, "drug")},
+        },
+        "data": {"filename": snakemake.output.combined_pickle},
     }
 
     final_data = {
         "data": full_data,
-        "config": snakemake.config,
         "prots": prots,
         "drugs": drugs,
     }
 
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)
+
+    with open(snakemake.output.config, "w") as file:
+        yaml.dump(config, file)

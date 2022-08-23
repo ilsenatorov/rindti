@@ -31,7 +31,7 @@ class DTIDataset(InMemoryDataset):
     ):
         root = self._set_filenames(filename)
         super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
+        self.data, self.slices = torch.load(self.processed_paths[self.splits[split]])
 
     def _set_filenames(self, filename: str) -> str:
         basefilename = os.path.basename(filename)
@@ -48,7 +48,7 @@ class DTIDataset(InMemoryDataset):
             data_list = [self.pre_transform(data) for data in data_list]
 
         data, slices = self.collate(data_list)
-        torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
+        torch.save((data, slices), self.processed_paths[self.splits[split]])
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
@@ -67,14 +67,13 @@ class DTIDataset(InMemoryDataset):
         """If the dataset was not seen before, process everything."""
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
-            self.config = all_data["config"]
             for split in self.splits.keys():
                 data_list = []
                 for i in all_data["data"]:
                     if i["split"] != split:
                         continue
-                    data = self._get_datum(all_data, i["prot_id"], "prots", **self.config)
-                    data.update(self._get_datum(all_data, i["drug_id"], "drugs", **self.config))
+                    data = self._get_datum(all_data, i["prot_id"], "prots")
+                    data.update(self._get_datum(all_data, i["drug_id"], "drugs"))
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
                     data_list.append(two_graph_data)
