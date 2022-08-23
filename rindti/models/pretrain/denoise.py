@@ -125,17 +125,17 @@ class DenoiseModel(LightningModule):
         )
         wandb.log({"chart": fig})
 
-    def configure_optimizers(self):
-        """Adam optimizer with linear warmup and cosine annealing."""
-        if self.optimizer == "Adam":
-            optim = torch.optim.AdamW(self.parameters(), lr=self.max_lr, betas=(0.9, 0.95), weight_decay=1e-5)
-        else:
-            optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
-        scheduler = LinearWarmupCosineAnnealingLR(
-            optim,
-            warmup_epochs=50,
-            max_epochs=2000,
-            warmup_start_lr=self.start_lr,
-            eta_min=self.min_lr,
-        )
-        return [optim], [scheduler]
+    # def configure_optimizers(self):
+    #     """Adam optimizer with linear warmup and cosine annealing."""
+    #     if self.optimizer == "Adam":
+    #         optim = torch.optim.AdamW(self.parameters(), lr=self.max_lr, betas=(0.9, 0.95), weight_decay=1e-5)
+    #     else:
+    #         optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
+    #     scheduler = LinearWarmupCosineAnnealingLR(
+    #         optim,
+    #         warmup_epochs=50,
+    #         max_epochs=2000,
+    #         warmup_start_lr=self.start_lr,
+    #         eta_min=self.min_lr,
+    #     )
+    #     return [optim], [scheduler]

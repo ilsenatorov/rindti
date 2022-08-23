@@ -118,6 +118,11 @@ def get_git_hash():
     return repo.head.object.hexsha
 
 
-def namespace_to_dict(namespace):
-    """Nested namespace to dict."""
-    return {k: namespace_to_dict(v) if isinstance(v, argparse.Namespace) else v for k, v in vars(namespace).items()}
+def namespace_to_dict(namespace: argparse.Namespace) -> Union[Dict, Any]:
+    """Convert nested namespace to dict."""
+    if isinstance(namespace, argparse.Namespace):
+        return {k: namespace_to_dict(v) for k, v in vars(namespace).items()}
+    elif isinstance(namespace, list):
+        return [namespace_to_dict(v) for v in namespace]
+    else:
+        return namespace
