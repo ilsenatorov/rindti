@@ -35,7 +35,7 @@ class BaseDataModule(LightningDataModule):
     def _get_dataloader(self, ds: Dataset) -> DataLoader:
         if self.batch_sampling:
             assert self.max_num_nodes > 0
-            sampler = DynamicBatchSampler(ds, self.max_num_nodes)
+            sampler = DynamicBatchSampler(ds, self.max_num_nodes, self.shuffle)
             return DataLoader(ds, batch_sampler=sampler, num_workers=self.num_workers)
         else:
             return DataLoader(ds, **self._dl_kwargs(False))

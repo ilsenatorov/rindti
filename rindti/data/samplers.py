@@ -13,6 +13,8 @@ class DynamicBatchSampler(Sampler):
         self.shuffle = shuffle
 
     def __iter__(self) -> Iterable[List[int]]:
+        if self.shuffle:
+            self.dataset.shuffle()
         idx = 0
         while idx < len(self.dataset):  # create whole epoch
             batch = []

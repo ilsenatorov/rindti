@@ -71,4 +71,4 @@ data:
   num_workers: 16
   shuffle: true
   batch_sampling: true
-  max_num_nodes: 2500
+  max_num_nodes: 3000
