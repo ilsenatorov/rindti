@@ -1,4 +1,4 @@
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources
+source: test/test_data/glylec/resources
 prots:
   features:
     method: esm

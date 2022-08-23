@@ -11,13 +11,13 @@ default_config = read_config(CONFIG_FILE)
 all_configs = IterDict()(default_config)
 
 
-class BaseGlylecTestModel:
+class TestGlylecClassificationModel:
     @pytest.mark.parametrize("config", all_configs)
     @pytest.mark.slow
     def test_full(self, config, glylec_datamodule):
         glylec_datamodule.setup()
         glylec_datamodule.update_config(config)
-        model = self.model_class(**config).cpu()
+        model = ClassificationModel(**config).cpu()
         trainer = Trainer(
             gpus=0,
             fast_dev_run=True,
@@ -33,7 +33,7 @@ class BaseGlylecTestModel:
     def test_full_gpu(self, config, glylec_datamodule):
         glylec_datamodule.setup()
         glylec_datamodule.update_config(config)
-        model = self.model_class(**config)
+        model = ClassificationModel(**config)
         trainer = Trainer(
             gpus=1,
             fast_dev_run=True,
@@ -47,13 +47,9 @@ class BaseGlylecTestModel:
     def test_shared(self, config, glylec_datamodule):
         glylec_datamodule.setup()
         glylec_datamodule.update_config(config)
-        model = self.model_class(**config)
+        model = ClassificationModel(**config).cpu()
         batch = next(iter(glylec_datamodule.train_dataloader()))
-        output = model.shared_step(batch)
+        output = model.shared_step(batch.cpu())
         assert "loss" in output.keys()
         assert "preds" in output.keys()
         assert "labels" in output.keys()
-
-
-class TestGlylecClassificationModel(BaseGlylecTestModel):
-    model_class = ClassificationModel

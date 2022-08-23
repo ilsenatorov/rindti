@@ -15,6 +15,14 @@ GLYLEC_CONFIG = os.path.join(SNAKEMAKE_CONFIG_DIR, "test_glylec.yaml")
 
 
 @pytest.fixture(scope="session")
+def split_data(dti_snakemake_run):
+    """Return the split data."""
+    folder = "dti/results/split_data"
+    result = os.listdir(dti_snakemake_run.join(folder))[0]
+    return dti_snakemake_run.join(folder, result)
+
+
+@pytest.fixture(scope="session")
 def dti_snakemake_config():
     default_test_config = read_config(DEFAULT_CONFIG)
     test_config = read_config(TEST_CONFIG)
@@ -30,15 +38,15 @@ def glylec_snakemake_config():
     return default_glylec_config
 
 
-def run_snakemake(config: dict, tmpdir_factory: str, data_dir: str = "test/test_data/resources"):
+def run_snakemake(config: dict, tmpdir_factory: str, data_dir: str = "test/test_data/dti/resources"):
     """Run snakemake with the given config."""
     tmpdir = tmpdir_factory.mktemp("test")
     if "glylec" in data_dir:
         config_path = str(tmpdir.join("glylec/tmp_config.yaml"))
         source_path = str(tmpdir.join("glylec/resources"))
     else:
-        config_path = str(tmpdir.join("tmp_config.yaml"))
-        source_path = str(tmpdir.join("resources"))
+        config_path = str(tmpdir.join("dti/tmp_config.yaml"))
+        source_path = str(tmpdir.join("dti/resources"))
     shutil.copytree(data_dir, source_path)
     config["source"] = source_path
     write_config(config_path, config)
@@ -50,14 +58,6 @@ def run_snakemake(config: dict, tmpdir_factory: str, data_dir: str = "test/test_
         forceall=True,
     )
     return tmpdir
-
-
-@pytest.fixture(scope="session")
-def split_data(dti_snakemake_run):
-    """Return the split data."""
-    folder = "results/split_data"
-    result = os.listdir(dti_snakemake_run.join(folder))[0]
-    return dti_snakemake_run.join(folder, result)
 
 
 @pytest.fixture(scope="session")
@@ -75,7 +75,7 @@ def glylec_snakemake_run(glylec_snakemake_config: dict, tmpdir_factory):
 @pytest.fixture(scope="session")
 def dti_pickle(dti_snakemake_run: str) -> str:
     """Return the path to the full pickle file."""
-    folder = "results/prepare_all"
+    folder = "dti/results/prepare_all"
     result = os.listdir(dti_snakemake_run.join(folder))[0]
     return dti_snakemake_run.join(folder, result)
 
@@ -91,7 +91,7 @@ def glylec_pickle(glylec_snakemake_run: str) -> str:
 @pytest.fixture(scope="session")
 def pretrain_pickle(dti_snakemake_run: str) -> str:
     """Return the path to the pretrain pickle file."""
-    folder = "results/pretrain_prot_data"
+    folder = "dti/results/pretrain_prot_data"
     result = os.listdir(dti_snakemake_run.join(folder))[0]
     return dti_snakemake_run.join(folder, result)
 
