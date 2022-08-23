@@ -5,7 +5,7 @@ from snakemake.utils import validate
 
 from rindti.utils import read_config
 
-from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake, DEFAULT_CONFIG, TEST_CONFIG
+from .conftest import DEFAULT_CONFIG, SNAKEMAKE_CONFIG_DIR, TEST_CONFIG, run_snakemake
 
 snakemake_configs = [
     os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
