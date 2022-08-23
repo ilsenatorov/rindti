@@ -1,21 +1,15 @@
+import argparse
+import json
+from typing import Union
+
 import torch
+from jsonargparse import lazy_instance
 from pytorch_lightning import LightningModule
 from torch import nn
 from torch_geometric.data import Batch
 
-from ..aggr import DiffPoolNet, GMTNet
-from ..processor import GINConvNet, GraphGPSNet, TransformerNet
-
-processors = {
-    "ginconv": GINConvNet,
-    "transformer": TransformerNet,
-    "graphgps": GraphGPSNet,
-}
-aggregators = {
-    "gmt": GMTNet,
-    "diffpool": DiffPoolNet,
-    "none": None,
-}
+from ..aggr import GMTNet
+from ..processor import GraphGPSNet
 
 
 class GraphEncoder(LightningModule):
@@ -23,14 +17,13 @@ class GraphEncoder(LightningModule):
 
     def __init__(
         self,
-        hidden_dim: int,
-        inputs: dict,
-        processor: str,
-        processor_config: dict,
-        aggregator: str,
-        aggregator_config: dict,
+        inputs: str,
+        hidden_dim: int = 128,
+        processor: LightningModule = lazy_instance(GraphGPSNet),
+        aggregator: LightningModule = lazy_instance(GMTNet),
     ):
         super().__init__()
+        inputs = json.loads(inputs)
         if inputs["feat_type"] == "label":
             self.feat_embed = nn.Embedding(inputs["feat_dim"], hidden_dim // 2)
         else:
@@ -42,8 +35,8 @@ class GraphEncoder(LightningModule):
         else:
             self.edge_embed = None
         self.pos_embed = nn.Linear(3, hidden_dim // 2)
-        self.proc = processors[processor](hidden_dim=hidden_dim, **processor_config)
-        self.aggr = aggregators[aggregator](hidden_dim=hidden_dim, max_nodes=inputs["max_nodes"], **aggregator_config)
+        self.processor = processor
+        self.aggregator = aggregator
 
     def forward(self, data: Batch) -> Batch:
         """"""
@@ -51,6 +44,6 @@ class GraphEncoder(LightningModule):
         data.edge_attr = self.edge_embed(data.edge_attr) if self.edge_embed else data.edge_attr
         data.pos = self.pos_embed(data.pos)
         data.x = torch.cat([data.x, data.pos], dim=-1)
-        data = self.proc(data)
-        data = self.aggr(data)
+        data = self.processor(data)
+        data = self.aggregator(data)
         return data

@@ -1,58 +1,49 @@
-seed: 42
-runs: 1
-exp_name: glass
-datamodule:
-  filename: datasets/glass/results/prepare_all/tdlnpnclnr_9dc97485.pkl
-  exp_name: test
-  batch_size: 512
-  num_workers: 4
+# pytorch_lightning==1.7.2
+seed_everything: true
 trainer:
-  gpus: 1
-  max_epochs: 5
+  logger:
+    class_path: pytorch_lightning.loggers.WandbLogger
+    init_args:
+      log_model: true
+      project: pretrain_alphafold
+      name: overfit_10
+      dir: wandb
+  enable_checkpointing: true
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.StochasticWeightAveraging
+      init_args:
+        swa_lrs: 1e-2
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        monitor: train_loss
+        mode: min
+    - class_path: pytorch_lightning.callbacks.RichProgressBar
+    - class_path: pytorch_lightning.callbacks.RichModelSummary
+    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+  gradient_clip_val: 1.0
+  accelerator: gpu
+  devices: -1
+  enable_progress_bar: true
+  overfit_batches: 10
+  accumulate_grad_batches: null
+  log_every_n_steps: 5
+  max_epochs: 10000
+  precision: 32
   profiler: null
-  gradient_clip_val: 100
-early_stop:
-  patience: 60
+  auto_lr_find: false
+  auto_scale_batch_size: false
 model:
-  monitor: val_loss
-  module: class
-  feat_method: element_l1
-  drug:
-    method: graph
-    hidden_dim: 16
-    node:
-      module: ginconv
-      dropout: 0.1
-      hidden_dim: 16
-      num_layers: 3
-    pool:
-      module: gmt
-      num_heads: 4
-      hidden_dim: 16
-      ratio: 0.25
-  prot:
-    method: graph
-    hidden_dim: 16
-    node:
-      module: ginconv
-      dropout: 0.1
-      hidden_dim: 16
-      num_layers: 3
-    pool:
-      module: gmt
-      num_heads: 4
-      hidden_dim: 16
-      ratio: 0.25
-  mlp:
-    dropout: 0.2
-    hidden_dim: 512
-  optimizer:
-    module: adam
-    lr: 0.0001
-    prot_lr: 0.0001
-    drug_lr: 0.0001
-    weight_decay: 0.01
-    momentum: 0.01
-    reduce_lr:
-      factor: 0.1
-      patience: 20
+  merge_features: concat
+  optimizer: Adam
+  max_lr: 0.0001
+  start_lr: 1.0e-05
+  min_lr: 1.0e-07
+  warmup_epochs: 1
+  max_epochs: 10
+data:
+  filename: datasets/glass/results/prepare_all/pdlnpnclnr_2deeeb4b.pkl
+  batch_size: 128
+  num_workers: 1
+  shuffle: true
+  batch_sampling: false
+  max_num_nodes: 0

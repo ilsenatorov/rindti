@@ -1,13 +1,13 @@
+import argparse
+
 import torch.nn.functional as F
+from pytorch_lightning import LightningModule
 from torch.functional import Tensor
 
 from ...data import TwoGraphData
-from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
 from ...layers.other import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
-
-encoders = {"graph": GraphEncoder, "sweetnet": SweetNetEncoder, "pretrained": PretrainedEncoder}
 
 
 class ClassificationModel(BaseModel):
@@ -15,24 +15,23 @@ class ClassificationModel(BaseModel):
 
     def __init__(
         self,
-        drug_encoder: str,
-        drug_encoder_config: dict,
-        prot_encoder: str,
-        prot_encoder_config: dict,
-        mlp_config: dict,
-        merge_features: str,
+        drug_encoder: LightningModule,
+        prot_encoder: LightningModule,
+        merge_features: str = "concat",
+        num_layers: int = 3,
+        dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.save_hyperparameters()
-        self.drug_encoder = encoders[drug_encoder](**drug_encoder_config)
-        self.prot_encoder = encoders[prot_encoder](**prot_encoder_config)
+        self.drug_encoder = drug_encoder
+        self.prot_encoder = prot_encoder
         self._determine_feat_method(
             merge_features,
-            drug_encoder_config["hidden_dim"],
-            prot_encoder_config["hidden_dim"],
+            drug_encoder.hidden_dim,
+            prot_encoder.hidden_dim,
         )
-        self.mlp = MLP(self.embed_dim, 1, **mlp_config)
+        self.mlp = MLP(self.feat_dim, 1, self.feat_dim, num_layers, dropout)
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
         """"""

@@ -32,6 +32,9 @@ class BaseDataModule(LightningDataModule):
         self.batch_sampling = batch_sampling
         self.max_num_nodes = max_num_nodes
 
+    def link_args(self):
+        raise NotImplementedError
+
     def _get_dataloader(self, ds: Dataset) -> DataLoader:
         if self.batch_sampling:
             assert self.max_num_nodes > 0
@@ -39,9 +42,6 @@ class BaseDataModule(LightningDataModule):
             return DataLoader(ds, batch_sampler=sampler, num_workers=self.num_workers)
         else:
             return DataLoader(ds, **self._dl_kwargs(False))
-
-    def update_config(self, config: dict) -> None:
-        raise NotImplementedError
 
     def train_dataloader(self):
         return self._get_dataloader(self.train)
@@ -61,7 +61,8 @@ class DTIDataModule(BaseDataModule):
         self.train = DTIDataset(self.filename, split="train")
         self.val = DTIDataset(self.filename, split="val")
         self.test = DTIDataset(self.filename, split="test")
-        self.config = self.train.config
+        self.drug_config = self.train.config["data"]["drug"]
+        self.prot_config = self.train.config["data"]["prot"]
 
     def _dl_kwargs(self, shuffle: bool = False):
         return dict(

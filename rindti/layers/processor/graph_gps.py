@@ -12,7 +12,7 @@ class GraphGPSNet(BaseLayer):
         self,
         local_module: str = "GAT",
         global_module: str = "Performer",
-        hidden_dim: int = 512,
+        hidden_dim: int = 128,
         num_layers: int = 6,
         num_heads: int = 4,
         dropout: float = 0.1,

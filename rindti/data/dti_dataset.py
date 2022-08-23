@@ -40,6 +40,7 @@ class DTIDataset(InMemoryDataset):
         return os.path.join("data", basefilename)
 
     def process_(self, data_list: list, split: str):
+        """Single loop process."""
         if self.pre_filter is not None:
             data_list = [data for data in data_list if self.pre_filter(data)]
 
@@ -53,11 +54,7 @@ class DTIDataset(InMemoryDataset):
         """Get either prot or drug data."""
         graph = all_data[which].loc[id, "data"]
         graph["id"] = id
-        if (
-            which == "drugs"
-            and "drugs" in kwargs["snakemake"]
-            and kwargs["snakemake"]["drugs"]["node_feats"] == "IUPAC"
-        ):
+        if which == "drugs" and "drugs" in kwargs and kwargs["drugs"]["node_feats"] == "IUPAC":
             graph["IUPAC"] = all_data[which].loc[id, "IUPAC"]
         return {which.rstrip("s") + "_" + k: v for k, v in graph.items()}
 
@@ -70,8 +67,7 @@ class DTIDataset(InMemoryDataset):
         """If the dataset was not seen before, process everything."""
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
-            self.config = {}
-            self.config["snakemake"] = all_data["config"]
+            self.config = all_data["config"]
             for split in self.splits.keys():
                 data_list = []
                 for i in all_data["data"]:
@@ -81,7 +77,6 @@ class DTIDataset(InMemoryDataset):
                     data.update(self._get_datum(all_data, i["drug_id"], "drugs", **self.config))
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
-                    two_graph_data.num_nodes = 1  # supresses the warning
                     data_list.append(two_graph_data)
                 if data_list:
                     self.process_(data_list, split)

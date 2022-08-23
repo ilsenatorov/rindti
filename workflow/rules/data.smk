@@ -1,4 +1,5 @@
 final_output = sh._target("prepare_all", sh.namer(config) + ".pkl")
+yaml_config = sh._target("prepare_all", sh.namer(config) + ".yaml")
 
 
 rule parse_dataset:
