@@ -1,0 +1,13 @@
+Drug_ID	Drug	IUPAC
+Gly001	O1[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O)[C@H]2O)[C@H](O)[C@@H](O)[C@@H]1O	Gal(b1-4)Glc b
+Gly002	O1[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@@H](O[C@@H]3O[C@H](CO[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O)[C@@H](O)[C@H](O[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O)[C@@H]3O)[C@H](O)[C@H]2NC(C)=O)[C@H](O)[C@@H](NC(C)=O)[C@@H]1O	Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc b
+Gly003	O1[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2NC(C)=O)[C@H](O)[C@@H](NC(C)=O)[C@@H]1O	GlcNAc(b1-4)GlcNAc b
+Gly004	O1[C@H](O[C@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2O)[C@H](O)[C@@H](O)[C@H](O)[C@H]1CO	Glc(a1-1)Glc a
+Gly005	O1[C@H](CO)[C@@H](O)[C@H](O[C@@H]2O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]2O)[C@@H](NC(C)=O)[C@@H]1O	Fuc(a1-3)GlcNAc b
+Gly006	O1[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@@H](O[C@@H]3O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]3O)[C@H](O)[C@H]2NC(C)=O)[C@H](O)[C@@H](NC(C)=O)[C@@H]1O	Man(b1-4)GlcNAc(b1-4)GlcNAc b
+Gly007	O1[C@@H](O)[C@H](O)[C@@H](O)[C@@H](O)[C@H]1CO	Gal b
+Gly008	O1[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@@H](O)[C@H](O)[C@H]2NC(C)=O)[C@H](O[C@@H]2O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]2O)[C@@H](NC(C)=O)[C@@H]1O	Fuc(a1-3)[GlcNAc(b1-4)]GlcNAc b
+Gly00141	O1C(O)[C@H](NC(C)=O)[C@@H](O)[C@H](O[C@@H]2O[C@H](CO)[C@@H](O[C@@H]3O[C@H](CO[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O[C@@H]5O[C@H](CO)[C@@H](O[C@@H]6O[C@H](CO)[C@H](O)[C@H](O)[C@H]6O)[C@H](O[C@H]6O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]6O)[C@H]5NC(C)=O)[C@@H](O)[C@H](O[C@H]4O[C@H](CO)[C@@H](O)[C@H](O)[C@@H]4O[C@@H]5O[C@H](CO)[C@@H](O[C@@H]6O[C@H](CO)[C@H](O)[C@H](O)[C@H]6O)[C@H](O[C@H]6O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]6O)[C@H]5NC(C)=O)[C@@H]3O)[C@H](O)[C@H]2NC(C)=O)[C@H]1CO[C@H]2O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]2O	Fuc(a1-3)[Gal(b1-4)]GlcNAc(b1-2)Man(a1-3)[Fuc(a1-3)[Gal(b1-4)]GlcNAc(b1-2)Man(a1-6)]Man(b1-4)GlcNAc(b1-4)[Fuc(a1-6)]GlcNAc
+Gly00383	O1C(O)[C@H](O)[C@@H](O[C@H]2O[C@H](CO)[C@H](O)[C@H](O)[C@H]2NC(C)=O)[C@@H](O)[C@H]1CO	GalNAc(a1-3)Gal
+
+
