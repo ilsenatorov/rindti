@@ -33,20 +33,20 @@ trainer:
 model:
   prot_encoder:
     class_path: rindti.layers.encoder.GraphEncoder
-    init_args:
-      hidden_dim: 128
-      edge_dim: 0
-      edge_type: none
-      feat_dim: 21
-      feat_type: label
+    # init_args:
+    #   hidden_dim: 128
+    #   edge_dim: 0
+    #   edge_type: none
+    #   feat_dim: 21
+    #   feat_type: label
   drug_encoder:
     class_path: rindti.layers.encoder.GraphEncoder
-    init_args:
-      hidden_dim: 128
-      edge_dim: 0
-      edge_type: none
-      feat_dim: 14
-      feat_type: label
+    # init_args:
+    #   hidden_dim: 128
+    #   edge_dim: 0
+    #   edge_type: none
+    #   feat_dim: 14
+    #   feat_type: label
   merge_features: concat
   num_layers: 3
   dropout: 0.1
@@ -56,17 +56,16 @@ optimizer:
     lr: 1.0e-4
     weight_decay: 1.0e-5
     betas: [0.9, 0.95]
-    eps: 1e-8
 lr_scheduler:
   class_path: rindti.utils.optim.LinearWarmupCosineAnnealingLR
   init_args:
     warmup_epochs: 5
-    max_epochs: 2000
+    max_epochs: 200
     warmup_start_lr: 1.0e-5
     eta_min: 1.0e-7
 data:
   filename: datasets/glass/results/prepare_all/pdlnpnclnr_2deeeb4b/output.pkl
-  batch_size: 4
-  num_workers: 4
+  num_workers: 16
   shuffle: true
-  batch_sampling: false
+  batch_sampling: true
+  max_num_nodes: 20000

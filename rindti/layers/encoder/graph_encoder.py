@@ -21,12 +21,14 @@ class GraphEncoder(LightningModule):
         feat_dim: int,
         edge_type: str,
         edge_dim: int,
+        max_nodes: int,
         pos_dim: int = 0,
         hidden_dim: int = 128,
         processor: LightningModule = lazy_instance(GraphGPSNet),
         aggregator: LightningModule = lazy_instance(MeanPool),
     ):
         super().__init__()
+        self.max_nodes = max_nodes
         if pos_dim > 0:
             self.pos_embed = nn.Linear(pos_dim, hidden_dim // 2)
         if feat_type == "label":
