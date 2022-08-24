@@ -5,7 +5,7 @@ import pytest
 from pytorch_lightning.utilities.seed import seed_everything
 from snakemake import snakemake
 
-from rindti.data import DTIDataModule, PreTrainDataModule
+from rindti.data import DTIDataModule, ProteinDataModule
 from rindti.utils import read_config, write_config
 
 SNAKEMAKE_CONFIG_DIR = "config/snakemake"
@@ -78,7 +78,7 @@ def dti_datamodule(dti_pickle: str):
 @pytest.fixture()
 def pretrain_datamodule(pretrain_pickle: str):
     """Pretrain datamodule from test data proteins."""
-    return PreTrainDataModule(pretrain_pickle, "test", batch_size=4)
+    return ProteinDataModule(pretrain_pickle, "test", batch_size=4)
 
 
 @pytest.fixture(autouse=True)

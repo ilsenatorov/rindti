@@ -25,7 +25,7 @@ class ClassificationModel(BaseModel):
         super().__init__(**kwargs)
         self.drug_encoder = drug_encoder
         self.prot_encoder = prot_encoder
-        self._determine_feat_method(merge_features, 128, 128)
+        self._determine_feat_method(merge_features, 64, 64)
         self.mlp = MLP(self.embed_dim, 1, self.embed_dim, num_layers, dropout)
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
@@ -35,7 +35,7 @@ class ClassificationModel(BaseModel):
         joint_embedding = self.merge_features(drug.aggr, prot.aggr)
         return self.mlp(joint_embedding)
 
-    def shared_step(self, data: TwoGraphData, step: str) -> dict:
+    def shared_step(self, data: TwoGraphData) -> dict:
         """Step that is the same for train, validation and test.
 
         Returns:
@@ -43,10 +43,10 @@ class ClassificationModel(BaseModel):
         """
         prot = Data(**remove_arg_prefix("prot_", data))
         drug = Data(**remove_arg_prefix("drug_", data))
-        pred = self.forward(prot, drug)
-        labels = data.label.unsqueeze(1)
-        bce_loss = F.binary_cross_entropy_with_logits(pred, labels.float())
-        acc = accuracy(pred, labels)
-        auc = auroc(pred, labels, num_classes=2)
-        mcc = matthews_corrcoef(pred, labels, num_classes=2)
-        return dict(loss=bce_loss, acc=acc, auc=auc, mcc=mcc)
+        x = self.forward(prot, drug)
+        y = data.label
+        bce_loss = F.binary_cross_entropy_with_logits(x, y.unsqueeze(-1).float())
+        acc = accuracy(x, y)
+        auc = auroc(x, y.unsqueeze(-1))
+        mcc = matthews_corrcoef(x, y, num_classes=2)
+        return dict(loss=bce_loss, acc=acc.detach(), auc=auc.detach(), mcc=mcc.detach())

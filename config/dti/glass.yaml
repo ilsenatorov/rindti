@@ -1,71 +1,167 @@
+# pytorch_lightning==1.7.2
 seed_everything: true
 trainer:
   logger:
     class_path: pytorch_lightning.loggers.WandbLogger
     init_args:
-      log_model: true
-      project: rindti
       name: test
+      save_dir: null
+      offline: false
+      id: null
+      anonymous: null
+      version: null
+      project: rindti
+      log_model: true
+      experiment: null
+      prefix: ''
+      agg_key_funcs: null
+      agg_default_func: null
+      job_type: null
       dir: wandb
+      config: null
+      entity: null
+      reinit: null
+      tags: null
+      group: null
+      notes: null
+      magic: null
+      config_exclude_keys: null
+      config_include_keys: null
+      mode: null
+      allow_val_change: null
+      resume: null
+      force: null
+      tensorboard: null
+      sync_tensorboard: null
+      monitor_gym: null
+      save_code: null
+      settings: null
   enable_checkpointing: true
   callbacks:
-    - class_path: pytorch_lightning.callbacks.StochasticWeightAveraging
-      init_args:
-        swa_lrs: 1e-2
-    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
-      init_args:
-        monitor: train_loss
-        mode: min
-    - class_path: pytorch_lightning.callbacks.RichProgressBar
-    - class_path: pytorch_lightning.callbacks.RichModelSummary
-    - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+  - class_path: pytorch_lightning.callbacks.StochasticWeightAveraging
+    init_args:
+      swa_lrs: 0.01
+      swa_epoch_start: 0.8
+      annealing_epochs: 10
+      annealing_strategy: cos
+      avg_fn: null
+      device: cpu
+  - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+    init_args:
+      dirpath: null
+      filename: null
+      monitor: train_loss
+      verbose: false
+      save_last: null
+      save_top_k: 1
+      save_weights_only: false
+      mode: min
+      auto_insert_metric_name: true
+      every_n_train_steps: null
+      train_time_interval: null
+      every_n_epochs: null
+      save_on_train_epoch_end: null
+  - class_path: pytorch_lightning.callbacks.RichProgressBar
+    init_args:
+      refresh_rate: 1
+      leave: false
+      theme:
+        description: white
+        progress_bar: '#6206E0'
+        progress_bar_finished: '#6206E0'
+        progress_bar_pulse: '#6206E0'
+        batch_progress: white
+        time: grey54
+        processing_speed: grey70
+        metrics: white
+      console_kwargs: null
+  - class_path: pytorch_lightning.callbacks.RichModelSummary
+    init_args:
+      max_depth: 1
+  - class_path: pytorch_lightning.callbacks.LearningRateMonitor
+    init_args:
+      logging_interval: null
+      log_momentum: false
+  default_root_dir: null
   gradient_clip_val: 1.0
-  accelerator: gpu
+  gradient_clip_algorithm: null
   devices: 1
-  enable_progress_bar: true
+  overfit_batches: 0.0
+  track_grad_norm: -1
   accumulate_grad_batches: null
-  log_every_n_steps: 5
   max_epochs: 10000
-  precision: 32
-  profiler: null
-  auto_lr_find: false
-  auto_scale_batch_size: false
+  log_every_n_steps: 5
+  accelerator: gpu
+  strategy: null
 model:
-  prot_encoder:
-    class_path: rindti.layers.encoder.GraphEncoder
-    # init_args:
-    #   hidden_dim: 128
-    #   edge_dim: 0
-    #   edge_type: none
-    #   feat_dim: 21
-    #   feat_type: label
   drug_encoder:
     class_path: rindti.layers.encoder.GraphEncoder
-    # init_args:
-    #   hidden_dim: 128
-    #   edge_dim: 0
-    #   edge_type: none
-    #   feat_dim: 14
-    #   feat_type: label
+    init_args:
+      feat_type: label
+      feat_dim: 14
+      edge_type: none
+      edge_dim: 0
+      max_nodes: 150
+      pos_dim: 0
+      hidden_dim: 64
+      processor:
+        class_path: rindti.layers.processor.GraphGPSNet
+        init_args:
+          local_module: GAT
+          global_module: Performer
+          hidden_dim: 64
+          num_layers: 3
+          num_heads: 4
+          dropout: 0.1
+      aggregator:
+        class_path: rindti.layers.aggr.MeanPool
+  prot_encoder:
+    class_path: rindti.layers.encoder.GraphEncoder
+    init_args:
+      feat_type: label
+      feat_dim: 20
+      edge_type: none
+      edge_dim: 0
+      max_nodes: 328
+      pos_dim: 0
+      hidden_dim: 64
+      processor:
+        class_path: rindti.layers.processor.GraphGPSNet
+        init_args:
+          local_module: GAT
+          global_module: Performer
+          hidden_dim: 64
+          num_layers: 3
+          num_heads: 4
+          dropout: 0.1
+      aggregator:
+        class_path: rindti.layers.aggr.MeanPool
   merge_features: concat
   num_layers: 3
   dropout: 0.1
+data:
+  filename: datasets/glass/results/prepare_all/tdlnpnclnr_9dc97485/output.pkl
+  batch_size: 64
+  num_workers: 16
+  shuffle: true
+  batch_sampling: false
+  max_num_nodes: 0
 optimizer:
   class_path: torch.optim.AdamW
   init_args:
-    lr: 1.0e-4
-    weight_decay: 1.0e-5
-    betas: [0.9, 0.95]
+    lr: 0.001
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    weight_decay: 1.0e-05
+    amsgrad: false
+    maximize: false
 lr_scheduler:
-  class_path: rindti.utils.optim.LinearWarmupCosineAnnealingLR
+  class_path: rindti.utils.LinearWarmupCosineAnnealingLR
   init_args:
     warmup_epochs: 5
     max_epochs: 200
-    warmup_start_lr: 1.0e-5
-    eta_min: 1.0e-7
-data:
-  filename: datasets/glass/results/prepare_all/pdlnpnclnr_2deeeb4b/output.pkl
-  num_workers: 16
-  shuffle: true
-  batch_sampling: true
-  max_num_nodes: 20000
+    warmup_start_lr: 1.0e-05
+    eta_min: 1.0e-07
+    last_epoch: -1

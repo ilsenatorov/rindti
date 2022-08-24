@@ -1,4 +1,4 @@
-from rindti.data import DTIDataset, PreTrainDataset
+from rindti.data import DTIDataset, ProtPreTrainDataset
 
 
 def test_dti_dataset(dti_pickle):
@@ -8,6 +8,6 @@ def test_dti_dataset(dti_pickle):
 
 
 def test_pretrain_dataset(pretrain_pickle):
-    ds = PreTrainDataset(pretrain_pickle)
+    ds = ProtPreTrainDataset(pretrain_pickle)
     ds.process()
     assert len(ds) == 5
