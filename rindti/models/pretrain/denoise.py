@@ -11,7 +11,7 @@ from torchmetrics.functional.classification import accuracy
 import wandb
 
 from ...data.pdb_parser import node_encode
-from ...utils.optim import LinearWarmupCosineAnnealingLR
+from ...utils import plot_aa_tsne
 
 
 class DenoiseModel(LightningModule):
@@ -114,7 +114,7 @@ class DenoiseModel(LightningModule):
         confmat = self.confmat.compute().detach().cpu().numpy()
         confmat = pd.DataFrame(confmat, index=node_encode.keys(), columns=node_encode.keys()).round(2)
         self.confmat.reset()
-        fig = px.imshow(
+        confmat = px.imshow(
             confmat,
             zmin=0,
             zmax=1,
@@ -123,19 +123,7 @@ class DenoiseModel(LightningModule):
             height=400,
             color_continuous_scale=px.colors.sequential.Viridis,
         )
-        wandb.log({"chart": fig})
-
-    # def configure_optimizers(self):
-    #     """Adam optimizer with linear warmup and cosine annealing."""
-    #     if self.optimizer == "Adam":
-    #         optim = torch.optim.AdamW(self.parameters(), lr=self.max_lr, betas=(0.9, 0.95), weight_decay=1e-5)
-    #     else:
-    #         optim = torch.optim.SGD(self.parameters(), lr=self.max_lr, momentum=0.9, weight_decay=1e-5)
-    #     scheduler = LinearWarmupCosineAnnealingLR(
-    #         optim,
-    #         warmup_epochs=50,
-    #         max_epochs=2000,
-    #         warmup_start_lr=self.start_lr,
-    #         eta_min=self.min_lr,
-    #     )
-    #     return [optim], [scheduler]
+        aa = torch.tensor(range(20), dtype=torch.long, device=self.device)
+        emb = self.feat_encode(aa).detach().cpu()
+        aa_tsne_fig = plot_aa_tsne(emb)
+        wandb.log({"confmat": confmat, "aa_pca": aa_tsne_fig})
