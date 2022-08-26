@@ -5,8 +5,9 @@ trainer:
     init_args:
       log_model: true
       project: pretrain_alphafold
-      name: overfit_10
+      name: overfit_1000
       dir: wandb
+      tags: [overfit]
   enable_checkpointing: true
   callbacks:
     - class_path: pytorch_lightning.callbacks.StochasticWeightAveraging
@@ -19,13 +20,13 @@ trainer:
     - class_path: pytorch_lightning.callbacks.RichProgressBar
     - class_path: pytorch_lightning.callbacks.RichModelSummary
     - class_path: pytorch_lightning.callbacks.LearningRateMonitor
-  gradient_clip_val: 5.0
+  gradient_clip_val: 1.0
   accelerator: gpu
   devices: -1
   enable_progress_bar: true
-  overfit_batches: 10
+  overfit_batches: 1000
   accumulate_grad_batches: null
-  log_every_n_steps: 5
+  log_every_n_steps: 50
   max_epochs: 10000
   precision: 32
   profiler: null
@@ -34,9 +35,9 @@ trainer:
 model:
   local_module: GAT
   global_module: Performer
-  hidden_dim: 512
-  num_layers: 16
-  num_heads: 16
+  hidden_dim: 256
+  num_layers: 12
+  num_heads: 8
   dropout: 0.1
   attn_dropout: 0.1
   alpha: 1.0
@@ -44,30 +45,30 @@ model:
 optimizer:
   class_path: torch.optim.AdamW
   init_args:
-    lr: 5.0e-4
+    lr: 1.0e-4
     weight_decay: 1.0e-2
-    betas: [0.9, 0.98]
+    betas: [0.9, 0.999]
 lr_scheduler:
   class_path: rindti.utils.optim.LinearWarmupCosineAnnealingLR
   init_args:
-    warmup_epochs: 1
-    max_epochs: 20
+    warmup_epochs: 10
+    max_epochs: 500
     warmup_start_lr: 0
-    eta_min: 5.0e-5
+    eta_min: 1.0e-5
 data:
   transforms:
     - class_path: rindti.data.PosNoise
       init_args:
-        sigma: 0.5
-        plddt_dependent: true
-    - class_path: rindti.data.MaskTypeBERT
+        sigma: 1.0
+        plddt_dependent: false
+    - class_path: rindti.data.MaskType
       init_args:
         pick_prob: 0.15
-        mask_prob: 0.8
-        mut_prob: 0.1
+        # mask_prob: 0.8
+        # mut_prob: 0.1
   filename: /scratch/SCRATCH_NVME/ilya/datasets/uniref50/resources/structures/
   batch_size: -1
   num_workers: 16
   shuffle: true
   batch_sampling: true
-  max_num_nodes: 3000
+  max_num_nodes: 5000

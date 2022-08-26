@@ -11,7 +11,7 @@ from torchmetrics.functional.classification import accuracy
 import wandb
 
 from ...data.pdb_parser import node_encode
-from ...utils import plot_aa_tsne
+from ...utils import plot_aa_tsne, plot_confmat, plot_node_embeddings, plot_noise_pred
 
 
 class DenoiseModel(LightningModule):
@@ -27,22 +27,13 @@ class DenoiseModel(LightningModule):
         dropout: float = 0.1,
         attn_dropout: float = 0.1,
         alpha: float = 1.0,
-        optimizer: str = "Adam",
-        max_lr: float = 1e-4,
-        start_lr: float = 1e-5,
-        min_lr: float = 1e-7,
         weighted_loss: bool = False,
     ):
         super().__init__()
-        self.max_lr = max_lr
-        self.start_lr = start_lr
-        self.min_lr = min_lr
-        self.optimizer = optimizer
         self.weighted_loss = weighted_loss
         self.alpha = alpha
-        mid_dim = hidden_dim // 2
-        self.feat_encode = torch.nn.Embedding(21, mid_dim)
-        self.pos_encode = torch.nn.Linear(3, mid_dim)
+        self.feat_encode = torch.nn.Embedding(21, hidden_dim)
+        self.pos_encode = torch.nn.Linear(3, hidden_dim)
         self.node_encode = torch.nn.Sequential(
             *[
                 GPSLayer(
@@ -57,47 +48,79 @@ class DenoiseModel(LightningModule):
             ]
         )
         self.noise_pred = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim, mid_dim),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(dropout),
-            torch.nn.Linear(mid_dim, 3),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.LayerNorm(hidden_dim),
+            torch.nn.GELU(),
+            torch.nn.Linear(hidden_dim, 3),
         )
         self.type_pred = torch.nn.Sequential(
-            torch.nn.Linear(hidden_dim, mid_dim),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(dropout),
-            torch.nn.Linear(mid_dim, mid_dim),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(dropout),
-            torch.nn.Linear(mid_dim, 20),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.LayerNorm(hidden_dim),
+            torch.nn.GELU(),
+            torch.nn.Linear(hidden_dim, 21),
         )
-        self.confmat = ConfusionMatrix(num_classes=20, normalize="true")
+        self.confmat = ConfusionMatrix(num_classes=21, normalize="true")
 
     def forward(self, batch: Data) -> Data:
         """Return updated batch with noise and node type predictions."""
         feat_encode = self.feat_encode(batch.x)
         pos_encode = self.pos_encode(batch.pos)
-        batch.x = torch.cat([feat_encode, pos_encode], dim=1)
+        batch.x = ((feat_encode - pos_encode).pow(2) + 1e-8).sqrt()
         batch = self.node_encode(batch)
         batch.type_pred = self.type_pred(batch.x[batch.mask])
         batch.noise_pred = self.noise_pred(batch.x)
         return batch
 
+    def log_confmat(self):
+        """Log confusion matrix to wandb."""
+        confmat_df = self.confmat.compute().detach().cpu().numpy()
+        confmat_df = pd.DataFrame(confmat_df, index=node_encode.keys(), columns=node_encode.keys()).round(2)
+        self.confmat.reset()
+        return plot_confmat(confmat_df)
+
+    def log_aa_embed(self):
+        """Log t-SNE plot of amino acid embeddings."""
+        aa = torch.tensor(range(21), dtype=torch.long, device=self.device)
+        emb = self.feat_encode(aa).detach().cpu()
+        return plot_aa_tsne(emb)
+
+    def log_figs(self, step: str):
+        """Log figures to wandb."""
+        test_batch = self.forward(self.test_batch.clone())
+        node_pca = plot_node_embeddings(
+            test_batch.x, self.test_batch.x, [self.test_batch.uniprot_id[x] for x in self.test_batch.batch]
+        )
+        figs = {
+            f"{step}/confmat": self.log_confmat(),
+            f"{step}/aa_pca": self.log_aa_embed(),
+            f"{step}/node_pca": node_pca,
+        }
+        for i in range(5):
+            figs[f"{step}/noise_pred/{test_batch[i].uniprot_id}"] = plot_noise_pred(
+                test_batch[i].pos - test_batch[i].noise,
+                test_batch[i].pos - test_batch.noise_pred[test_batch.batch == i],
+                test_batch[i].edge_index,
+                test_batch[i].uniprot_id,
+            )
+        wandb.log(figs)
+
     def shared_step(self, batch: Data, step: int) -> dict:
         """Shared step for training and validation."""
+        if self.global_step == 0:
+            self.test_batch = batch.clone()
         batch = self.forward(batch)
         noise_loss = F.mse_loss(batch.noise_pred, batch.noise)
-        pred_loss = F.cross_entropy(
-            batch.type_pred,
-            batch.orig_x,
-        )
+        pred_loss = F.cross_entropy(batch.type_pred, batch.orig_x)
         loss = noise_loss + self.alpha * pred_loss
         acc = accuracy(batch.type_pred, batch.orig_x)
-        self.log(f"{step}_loss", loss)
-        self.log(f"{step}_noise_loss", noise_loss)
-        self.log(f"{step}_pred_loss", pred_loss)
-        self.log(f"{step}_acc", acc)
         self.confmat.update(batch.type_pred, batch.orig_x)
+        if self.global_step % 100 == 0:
+            self.log(f"{step}/loss", loss)
+            self.log(f"{step}/acc", acc)
+            self.log(f"{step}/noise_loss", noise_loss)
+            self.log(f"{step}/pred_loss", pred_loss)
+        if self.global_step % 500 == 0:
+            self.log_figs(step)
         return dict(
             loss=loss,
             noise_loss=noise_loss.detach(),
@@ -108,22 +131,3 @@ class DenoiseModel(LightningModule):
     def training_step(self, batch):
         """Just shared step"""
         return self.shared_step(batch, "train")
-
-    def training_epoch_end(self, outputs) -> None:
-        """Log the confusion matrix and the histograms"""
-        confmat = self.confmat.compute().detach().cpu().numpy()
-        confmat = pd.DataFrame(confmat, index=node_encode.keys(), columns=node_encode.keys()).round(2)
-        self.confmat.reset()
-        confmat = px.imshow(
-            confmat,
-            zmin=0,
-            zmax=1,
-            text_auto=True,
-            width=400,
-            height=400,
-            color_continuous_scale=px.colors.sequential.Viridis,
-        )
-        aa = torch.tensor(range(20), dtype=torch.long, device=self.device)
-        emb = self.feat_encode(aa).detach().cpu()
-        aa_tsne_fig = plot_aa_tsne(emb)
-        wandb.log({"confmat": confmat, "aa_pca": aa_tsne_fig})

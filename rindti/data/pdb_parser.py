@@ -21,6 +21,7 @@ node_encode = {
     "trp": 17,
     "tyr": 18,
     "val": 19,
+    "mask": 20,
 }
 
 
