@@ -35,7 +35,7 @@ class ClassificationModel(BaseModel):
         """Forward the data though the classification model"""
         prot_embed, _ = self.prot_encoder(prot)
         drug_embed, _ = self.drug_encoder(drug)
-        joint_embedding = self.merge_features(drug_embed.to(torch.device("cpu")), prot_embed.to(torch.device("cpu")))
+        joint_embedding = self.merge_features(drug_embed, prot_embed)
 
         pred, embed = self.mlp(joint_embedding)
         return dict(

@@ -1,12 +1,12 @@
 runs: 3
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
-  exp_name: glylec_mbb
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_fold/results/prepare_all/rlnwgntanc_956e52ae.pkl
+  exp_name: glylec_fold
   batch_size: 64
-  num_workers: 0
+  num_workers: 16
 transform:
-  mode: esm  # neighbors
+  mode: none  # esm  # neighbors
   k: 3
   spots: 3
   graphs:
@@ -21,8 +21,14 @@ trainer:
   gradient_clip_val: 100
 early_stop:
   patience: 40
+  monitor: val_loss
+  mode: min
+checkpoints:
+  monitor: val_acc
+  save_top_k: 3
+  mode: max
 model:
-  module: multiclass
+  module: class
   feat_method: concat
   monitor: val_loss
   drug:
@@ -39,7 +45,7 @@ model:
       hidden_dim: 128
       ratio: 0.25
   prot:
-    hidden_dim: 256
+    hidden_dim: 128
     method: graph
     node:
       module: ginconv
@@ -53,16 +59,18 @@ model:
       ratio: 0.25
   mlp:
     dropout: 0.2
-    hidden_dim: 1024
+    hidden_dim: 512
     num_layers: 3
   optimizer:
     module: adam
-    lr: 0.001
-    prot_lr: 0.01
-    drug_lr: 0.01
+    lr: 0.0001
+    single_lr: True
+    prot_lr: 0.001
+    drug_lr: 0.001
     weight_decay: 0.01
     momentum: 0.01
-    reduce_lr:
+    lr_schedule:
+      module: rlrop
       factor: 0.1
       patience: 20
       monitor: val_loss

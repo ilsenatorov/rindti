@@ -21,6 +21,8 @@
     - New name in `config`: `reduce_lr` → `lr_schedule`
 - MLP not outputs the prediction and the last-layer as embedding of the input (for explainability)
 - Tests for SweetNet and ESM encoders based on some Lectin-Glycan interactions
+- Explainability
+- Multitasking for protein models
 
 ## [v1.5.0]
 
