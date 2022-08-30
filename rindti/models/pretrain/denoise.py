@@ -1,5 +1,4 @@
 import pandas as pd
-import plotly.express as px
 import torch
 import torch.nn.functional as F
 from graphgps.layer.gps_layer import GPSLayer
@@ -11,7 +10,7 @@ from torchmetrics.functional.classification import accuracy
 import wandb
 
 from ...data.pdb_parser import node_encode
-from ...utils import plot_aa_tsne, plot_confmat, plot_node_embeddings, plot_noise_pred
+from ...utils import plot_aa_tsne, plot_confmat, plot_node_embeddings, plot_noise_loss_vs_plddt, plot_noise_pred
 
 
 class DenoiseModel(LightningModule):
@@ -51,15 +50,21 @@ class DenoiseModel(LightningModule):
             torch.nn.Linear(hidden_dim, hidden_dim),
             torch.nn.LayerNorm(hidden_dim),
             torch.nn.GELU(),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.LayerNorm(hidden_dim),
+            torch.nn.GELU(),
             torch.nn.Linear(hidden_dim, 3),
         )
         self.type_pred = torch.nn.Sequential(
             torch.nn.Linear(hidden_dim, hidden_dim),
             torch.nn.LayerNorm(hidden_dim),
             torch.nn.GELU(),
-            torch.nn.Linear(hidden_dim, 21),
+            torch.nn.Linear(hidden_dim, hidden_dim),
+            torch.nn.LayerNorm(hidden_dim),
+            torch.nn.GELU(),
+            torch.nn.Linear(hidden_dim, 20),
         )
-        self.confmat = ConfusionMatrix(num_classes=21, normalize="true")
+        self.confmat = ConfusionMatrix(num_classes=20, normalize="true")
 
     def forward(self, batch: Data) -> Data:
         """Return updated batch with noise and node type predictions."""
@@ -74,7 +79,8 @@ class DenoiseModel(LightningModule):
     def log_confmat(self):
         """Log confusion matrix to wandb."""
         confmat_df = self.confmat.compute().detach().cpu().numpy()
-        confmat_df = pd.DataFrame(confmat_df, index=node_encode.keys(), columns=node_encode.keys()).round(2)
+        indices = list(node_encode.keys())[:-1]
+        confmat_df = pd.DataFrame(confmat_df, index=indices, columns=indices).round(2)
         self.confmat.reset()
         return plot_confmat(confmat_df)
 
@@ -94,8 +100,11 @@ class DenoiseModel(LightningModule):
             f"{step}/confmat": self.log_confmat(),
             f"{step}/aa_pca": self.log_aa_embed(),
             f"{step}/node_pca": node_pca,
+            f"{step}/noise_vs_plddt": plot_noise_loss_vs_plddt(
+                test_batch.noise, test_batch.noise_pred, test_batch.plddt
+            ),
         }
-        for i in range(5):
+        for i in range(3):
             figs[f"{step}/noise_pred/{test_batch[i].uniprot_id}"] = plot_noise_pred(
                 test_batch[i].pos - test_batch[i].noise,
                 test_batch[i].pos - test_batch.noise_pred[test_batch.batch == i],
@@ -114,11 +123,10 @@ class DenoiseModel(LightningModule):
         loss = noise_loss + self.alpha * pred_loss
         acc = accuracy(batch.type_pred, batch.orig_x)
         self.confmat.update(batch.type_pred, batch.orig_x)
-        if self.global_step % 100 == 0:
-            self.log(f"{step}/loss", loss)
-            self.log(f"{step}/acc", acc)
-            self.log(f"{step}/noise_loss", noise_loss)
-            self.log(f"{step}/pred_loss", pred_loss)
+        self.log(f"{step}/loss", loss)
+        self.log(f"{step}/acc", acc)
+        self.log(f"{step}/noise_loss", noise_loss)
+        self.log(f"{step}/pred_loss", pred_loss)
         if self.global_step % 500 == 0:
             self.log_figs(step)
         return dict(

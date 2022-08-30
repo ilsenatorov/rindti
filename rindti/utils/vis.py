@@ -32,7 +32,7 @@ def plot_aa_tsne(emb: torch.Tensor):
     tsne = PCA(n_components=2)
     emb_trans = tsne.fit_transform(emb)
     emb_trans = pd.DataFrame(emb_trans)
-    emb_trans["size"] = 30
+    emb_trans["size"] = 50
     emb_trans["name"] = emb_trans.index.to_series().apply(lambda x: node_decode[x])
     emb_trans["type"] = [
         "hydrophobic",
@@ -58,7 +58,17 @@ def plot_aa_tsne(emb: torch.Tensor):
         "mask",
     ]
     return px.scatter(
-        emb_trans, 0, 1, text="name", color="type", opacity=0.5, width=400, height=400, size="size", title="AA PCA"
+        emb_trans,
+        0,
+        1,
+        text="name",
+        color="type",
+        symbol="type",
+        opacity=0.5,
+        width=400,
+        height=400,
+        size="size",
+        title="AA UMAP",
     )
 
 
@@ -72,6 +82,7 @@ def plot_noise_pred(
 ):
 
     """Plot the predicted coords vs real coords."""
+    loss = F.mse_loss(pos, pred_pos, reduction="none").mean(dim=1).detach().cpu().numpy()
     df = pd.DataFrame(pos.detach().cpu().numpy(), columns=["x", "y", "z"])
     pred_df = pd.DataFrame(pred_pos.detach().cpu().numpy(), columns=["x", "y", "z"])
     edges = pd.DataFrame(edge_index.t().detach().cpu().numpy(), columns=["source", "target"])
@@ -84,7 +95,12 @@ def plot_noise_pred(
         z=df["z"],
         mode="markers",
         name="nodes",
-        marker=dict(size=7, color="blue"),
+        marker=dict(size=7, color=loss, colorscale="Viridis", showscale=True, cmin=0, cmax=4),
+        text=[i for i in range(len(df))],
+        customdata=loss,
+        hovertemplate="<b> x:</b> %{x:.2f}<b> y:</b> %{y:.2f}<b> z:</b> %{z:.2f}<br>"
+        + "<b>Number: %{text}</b><br>"
+        + "<b>Loss: %{customdata:.2f}</b>",
     )
     x_lines = list()
     y_lines = list()
@@ -105,6 +121,7 @@ def plot_noise_pred(
         mode="lines",
         name="edges",
         line=dict(color="gray", width=0.5),
+        hoverinfo="skip",
     )
     predicted_nodes = go.Scatter3d(
         x=pred_df["x"],
@@ -114,16 +131,19 @@ def plot_noise_pred(
         name="predicted nodes",
         marker=dict(
             size=7,
-            color="cyan",
+            color=loss,
+            colorscale="Viridis",
             opacity=0.5,
+            showscale=False,
         ),
+        hoverinfo="skip",
     )
     fig = go.Figure(data=[nodes, predicted_nodes, edges])
     fig.update_layout(
         width=width,
         height=height,
-        showlegend=True,
-        title=f"{uniprot_id}, Loss: {F.mse_loss(pos, pred_pos).item():.4f}",
+        showlegend=False,
+        title=f"{uniprot_id}, Loss: {loss.mean().item():.4f}",
     )
     return fig
 
@@ -143,19 +163,43 @@ def plot_confmat(confmat):
 
 def plot_node_embeddings(embeds: torch.Tensor, labels: torch.LongTensor, uniprot_ids: list):
     """Plot UMAP embeddings of the node embeddings."""
+    numbers = []
+    cur_prot = uniprot_ids[0]
+    i = 0
+    for prot in uniprot_ids:
+        if prot == cur_prot:
+            numbers.append(i)
+            i += 1
+        else:
+            numbers.append(0)
+            i = 1
+            cur_prot = prot
     pca = UMAP(n_components=2)
     embedded_nodes = pca.fit_transform(embeds.detach().cpu().numpy())
     embedded_nodes = pd.DataFrame(embedded_nodes, columns=["x", "y"])
     embedded_nodes["name"] = labels.detach().cpu().numpy()
     embedded_nodes["name"] = embedded_nodes["name"].apply(lambda x: node_decode[x])
     embedded_nodes["uniprot_id"] = uniprot_ids
+    embedded_nodes["number"] = numbers
     return px.scatter(
         embedded_nodes,
         x="x",
         y="y",
-        color="name",
-        hover_data=["uniprot_id", "name"],
+        color="uniprot_id",
+        hover_data=["uniprot_id", "name", "number"],
         width=400,
         height=400,
         color_discrete_sequence=px.colors.qualitative.Alphabet,
+    )
+
+
+def plot_noise_loss_vs_plddt(noise: torch.Tensor, noise_pred: torch.Tensor, plddt: torch.Tensor):
+    """Plot the noise loss vs PLDDT loss."""
+    loss = F.mse_loss(noise, noise_pred, reduction="none").mean(dim=1).detach().cpu().numpy()
+    return px.scatter(
+        x=loss,
+        y=plddt.detach().cpu().numpy(),
+        width=400,
+        height=400,
+        title="Noise Loss vs PLDDT",
     )

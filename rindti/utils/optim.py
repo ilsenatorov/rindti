@@ -16,7 +16,8 @@ class LinearWarmupCosineAnnealingLR(_LRScheduler):
         eta_min: float = 0.0,
         last_epoch: int = -1,
     ) -> None:
-
+        assert isinstance(warmup_start_lr, float) and warmup_start_lr >= 0.0, "Invalid type for warmup_start_lr"
+        assert isinstance(eta_min, float) and eta_min >= 0.0, "Invalid type for eta_min"
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
         self.warmup_start_lr = warmup_start_lr
