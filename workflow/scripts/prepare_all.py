@@ -64,6 +64,7 @@ if __name__ == "__main__":
         "prots": prots,
         "drugs": drugs,
     }
+    print(np.average(interactions["Y"]))
     print(len(full_data))
     print(drugs.shape)
     print(prots.shape)

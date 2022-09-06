@@ -2,10 +2,10 @@ runs: 1
 name: lectinoracle_full
 seed: 42
 datamodule:
-  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInranc_e7b53363.pkl
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInrbnc_8b492165.pkl
-  exp_name: glylec_mbb
-  batch_size: 64
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInranc_e7b53363.pkl
+  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInrbnc_8b492165.pkl
+  exp_name: glylec_esm
+  batch_size: 128
   num_workers: 16
   dyn_sampler: False
 transform:
@@ -23,7 +23,7 @@ trainer:
   profiler: null
   gradient_clip_val: 100
 early_stop:
-  patience: 125
+  patience: 20
   monitor: val_loss
   mode: min
 checkpoints:
@@ -71,13 +71,12 @@ model:
   optimizer:
     module: adam
     single_lr: True
-    lr: 0.0001
+    lr: 0.0005
     prot_lr: 0.001
     drug_lr: 0.001
     weight_decay: 0.01
     momentum: 0.01
     lr_schedule:
       monitor: val_loss
-      module: rlrop
-      factor: 0.1
-      patience: 20
+      module: calr
+      max_epochs: 80

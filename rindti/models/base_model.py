@@ -2,7 +2,7 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingLR
 from torchmetrics import (
     AUROC,
     Accuracy,
@@ -189,6 +189,11 @@ class BaseModel(LightningModule):
                 max_epochs=lr_params["cos_restart_dist"],
                 eta_min=float(lr_params["min_lr"]),
                 warmup_start_lr=float(lr_params["start_lr"]),
+            )
+        elif lr_params["module"] == "calr":
+            lr_scheduler["scheduler"] = CosineAnnealingLR(
+                optimizer,
+                T_max=float(lr_params["max_epochs"]),
             )
         else:
             # raise ValueError("Unknown learning rate scheduler")

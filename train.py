@@ -4,6 +4,7 @@ from pprint import pprint
 
 import numpy as np
 import torch
+import wandb
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
 from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
@@ -82,6 +83,7 @@ def single_run(folder, version, **kwargs):
         project="glylec_dti",
         name=kwargs["name"],
     )
+    # wandb.config.update(kwargs)
     logger.experiment.config.update(kwargs)
 
     callbacks = [
@@ -94,9 +96,9 @@ def single_run(folder, version, **kwargs):
     trainer = Trainer(
         callbacks=callbacks,
         logger=logger,
-        limit_train_batches=10,
-        limit_val_batches=10,
-        limit_test_batches=10,
+        # limit_train_batches=10,
+        # limit_val_batches=10,
+        # limit_test_batches=10,
         log_every_n_steps=25,
         enable_model_summary=False,
         **kwargs["trainer"],
