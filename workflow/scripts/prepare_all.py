@@ -40,7 +40,6 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
-
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
     # interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
 
@@ -56,7 +55,7 @@ if __name__ == "__main__":
     full_data = process_df(interactions)
     snakemake.config["data"] = {}
     snakemake.config["data"]["prot"] = get_config(prots, "prot")
-    if not snakemake.config["sequence_only"]["drugs"]:
+    if "sequence_only" not in snakemake.config or not snakemake.config["sequence_only"]["drugs"]:
         snakemake.config["data"]["drug"] = get_config(drugs, "drug")
 
     final_data = {
@@ -65,6 +64,9 @@ if __name__ == "__main__":
         "prots": prots,
         "drugs": drugs,
     }
+    print(len(full_data))
+    print(drugs.shape)
+    print(prots.shape)
 
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)

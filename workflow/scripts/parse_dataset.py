@@ -50,6 +50,14 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
     return pd.concat(total)
 
 
+def sample_balanced(inter):
+    min_count = min(list(inter["Y"].value_counts()))
+    samples = []
+    for c in inter["Y"].unique():
+        samples.append(inter[inter["Y"] == c].sample(n=min_count))
+    return pd.concat(samples)
+
+
 if __name__ == "__main__":
 
     from pytorch_lightning import seed_everything
@@ -76,6 +84,8 @@ if __name__ == "__main__":
 
     if config["filtering"] == "posneg":
         inter = posneg_filter(inter)
+    if config["filtering"] == "balanced":
+        inter = sample_balanced(inter)
     elif config["filtering"] != "all":
         raise ValueError("No such type of filtering!")
 
