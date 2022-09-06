@@ -1,11 +1,13 @@
 import copy
 import os
 from argparse import ArgumentParser
+from pathlib import Path
 
 import numpy as np
 import prettytable as pt
 import scipy.stats as stats
 import torch
+import wandb
 import yaml
 from matplotlib import pyplot as plt
 from pytorch_lightning import seed_everything
@@ -15,6 +17,9 @@ from torch_geometric.loader import DataLoader
 from rindti.data import DTIDataModule, TwoGraphData
 from rindti.utils import read_config, remove_arg_prefix
 from train import models, transformers
+
+
+run = wandb.init("glylec_dti")
 
 
 def concat_dataloaders(loaders):
@@ -98,7 +103,10 @@ def load_models(data, filtering=lambda x: False):
     for m in data["models"]:
         if filtering(m):
             continue
-        model = models[m["arch"]].load_from_checkpoint(m["checkpoint"]).cuda()
+        artifact = run.use_artifact("rindti/glylec_dti/model-37l2122e:v0", type="model")
+        artifact_dir = artifact.download()
+        model = models[m["arch"]].load_from_checkpoint(Path(artifact_dir) / "model.ckpt")
+        # model = models[m["arch"]].load_from_checkpoint(m["checkpoint"]).cuda()
         model.eval()
         model_list.append((m["name"], model, m["neg_params"], m["pos_params"]))
         model_data[m["name"]] = [], [], ([], []), ([], [])
@@ -133,9 +141,9 @@ def fit_dist(filename, **kwargs):
 
         print("\tStore parameters...")
         for i, (n, (v_pos, v_neg, _, _)) in enumerate(model_data.items()):
-            m_data_pos = torch.cat(v_pos).numpy()
+            m_data_pos = torch.cat(v_pos).cpu().numpy()
             norm_loc_pos, norm_scale_pos = stats.norm.fit(np.array(m_data_pos))
-            m_data_neg = torch.cat(v_neg).numpy()
+            m_data_neg = torch.cat(v_neg).cpu().numpy()
             norm_loc_neg, norm_scale_neg = stats.norm.fit(np.array(m_data_neg))
             data["models"][i]["pos_params"] = [norm_loc_pos, norm_scale_pos]
             data["models"][i]["neg_params"] = [norm_loc_neg, norm_scale_neg]

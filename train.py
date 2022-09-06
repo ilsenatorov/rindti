@@ -15,7 +15,7 @@ from rindti.utils import get_git_hash, read_config
 from rindti.utils.ddd_es import DeepDoubleDescentEarlyStopping as DDDES
 
 torch.multiprocessing.set_sharing_strategy("file_system")
-os.environ["WANDB_CACHE_DIR"] = "/scratch/SCRATCH_SAS/roman/.config/wandb"
+os.environ["WANDB_CACHE_DIR"] = "/scratch/SCRATCH_SAS/roman/.cache/wandb"
 
 
 models = {
