@@ -40,8 +40,9 @@ if __name__ == "__main__":
     with open(snakemake.input.prots, "rb") as file:
         prots = pickle.load(file)
 
+
     interactions = interactions[interactions["Target_ID"].isin(prots.index)]
-    interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
+    # interactions = interactions[interactions["Drug_ID"].isin(drugs.index)]
 
     prots = prots[prots.index.isin(interactions["Target_ID"].unique())]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"].unique())]
@@ -50,13 +51,13 @@ if __name__ == "__main__":
     drug_count = interactions["Drug_ID"].value_counts()
 
     prots["data"] = prots.apply(lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1)
-    drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
+    # drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
 
     full_data = process_df(interactions)
-    snakemake.config["data"] = {
-        "prot": get_config(prots, "prot"),
-        "drug": get_config(drugs, "drug"),
-    }
+    snakemake.config["data"] = {}
+    snakemake.config["data"]["prot"] = get_config(prots, "prot")
+    if not snakemake.config["sequence_only"]["drugs"]:
+        snakemake.config["data"]["drug"] = get_config(drugs, "drug")
 
     final_data = {
         "data": full_data,
@@ -64,8 +65,6 @@ if __name__ == "__main__":
         "prots": prots,
         "drugs": drugs,
     }
-
-    print(np.average(interactions["Y"]))
 
     with open(snakemake.output.combined_pickle, "wb") as file:
         pickle.dump(final_data, file, protocol=-1)

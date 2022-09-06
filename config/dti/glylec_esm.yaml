@@ -1,7 +1,8 @@
-runs: 3
+runs: 1
+name: lectinoracle_full
 seed: 42
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/elnwIntanc_cda4ea77.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/elnwIntanc_7793195a.pkl
   exp_name: glylec_mbb
   batch_size: 64
   num_workers: 16
@@ -25,7 +26,7 @@ early_stop:
   monitor: val_loss
   mode: min
 checkpoints:
-  monitor: val_acc
+  monitor: val_Accuracy
   save_top_k: 3
   mode: max
 model:
@@ -57,6 +58,12 @@ model:
       num_heads: 4
       hidden_dim: 128
       ratio: 0.25
+    data:
+      max_nodes: 1
+      edge_type: none
+      feat_type: onehot
+      feat_dim: 1280
+      edge_dim: 0
   mlp:
     dropout: 0.2
     hidden_dim: 512
@@ -69,6 +76,7 @@ model:
     weight_decay: 0.01
     momentum: 0.01
     lr_schedule:
+      monitor: val_loss
       module: rlrop
       factor: 0.1
       patience: 20

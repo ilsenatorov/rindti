@@ -18,7 +18,7 @@ config = read_config(args.config)
 train = False
 
 if train:
-    data_name = "/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl"
+    data_name = "/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgntanc_5e01134f.pkl"
 else:
     data_name = "/scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a40936e4.pkl"
 

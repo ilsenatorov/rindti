@@ -98,7 +98,7 @@ def load_models(data, filtering=lambda x: False):
     for m in data["models"]:
         if filtering(m):
             continue
-        model = models[m["arch"]].load_from_checkpoint(m["checkpoint"])
+        model = models[m["arch"]].load_from_checkpoint(m["checkpoint"]).cuda()
         model.eval()
         model_list.append((m["name"], model, m["neg_params"], m["pos_params"]))
         model_data[m["name"]] = [], [], ([], []), ([], [])
@@ -333,8 +333,8 @@ def explain(output_dir, **kwargs):
             res_table.add_row(pos_line)
             res_table.add_row(neg_line)
 
-        print(res_table.get_csv_string(), file=open(os.path.join(output_dir, "model_predictions.csv"), "w"))
-        print(res_table.get_string(), file=open(os.path.join(output_dir, "model_predictions.txt"), "w"))
+        print(res_table.get_csv_string(), file=open(os.path.join(output_dir, data["name"] + "_model_predictions.csv"), "w"))
+        print(res_table.get_string(), file=open(os.path.join(output_dir, data["name"] + "_model_predictions.txt"), "w"))
         print("Done")
     print("Finished\n")
 

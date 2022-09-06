@@ -1,6 +1,10 @@
+import os
+
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
+from utils import tsv_to_dict
 
 
 def split_groups(
@@ -71,6 +75,19 @@ def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float =
     return inter
 
 
+def split_custom(inter, mode, **kwargs):
+    if mode == "prot":
+        col = "Target_ID"
+    elif mode == "drug":
+        col = "Drug_ID"
+    else:
+        raise ValueError("Unknown mode for custom splits")
+
+    mapping = tsv_to_dict(os.path.join(snakemake.config["source"], "tables", "split.tsv"))
+    inter["split"] = inter[col].apply(lambda x: mapping[x])
+    return inter
+
+
 if __name__ == "__main__":
     from pytorch_lightning import seed_everything
 
@@ -84,6 +101,8 @@ if __name__ == "__main__":
         inter = split_groups(inter, col_name="Drug_ID", **fracs)
     elif snakemake.params.method == "random":
         inter = split_random(inter, **fracs)
+    elif snakemake.params.method == "custom":
+        inter = split_custom(inter, snakemake.config["split_data"]["mode"], **fracs)
     else:
         raise NotImplementedError("Unknown split type!")
     inter.to_csv(snakemake.output.split_data, sep="\t")

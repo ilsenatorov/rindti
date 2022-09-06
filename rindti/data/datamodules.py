@@ -94,7 +94,8 @@ class DTIDataModule(BaseDataModule):
         """Update the main config with the config of the dataset."""
         print(self.config)
         for i in ["prot", "drug"]:
-            config["model"][i]["data"] = self.config["snakemake"]["data"][i]
+            if i in self.config["snakemake"]["data"] and i in config["model"]:
+                config["model"][i]["data"] = self.config["snakemake"]["data"][i]
 
 
 class PreTrainDataModule(BaseDataModule):

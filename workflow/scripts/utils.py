@@ -73,3 +73,12 @@ def get_config(df: pd.DataFrame, which: str) -> dict:
         "feat_dim": feat_dim(df, which),
         "edge_dim": edge_dim(df, which),
     }
+
+
+def tsv_to_dict(filepath, sep="\t"):
+    output = {}
+    with open(filepath, "r") as data:
+        for line in data.readlines():
+            key, val = line.strip().split(sep)
+            output[key] = val
+    return output

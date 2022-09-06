@@ -116,23 +116,13 @@ class BaseModel(LightningModule):
         self.log("test_loss", ss["loss"], batch_size=self.batch_size)
         return ss
 
-    def log_histograms(self):
-        """Logs the histograms of all the available parameters."""
-        if self.logger:
-            for name, param in self.named_parameters():
-                self.logger.experiment.add_histogram(name, param, self.current_epoch)
-
-    def log_all(self, metrics: dict, hparams: bool = False):
+    def log_all(self, metrics: dict):
         """Log all metrics."""
-        if self.logger:
-            for k, v in metrics.items():
-                self.logger.experiment.add_scalar(k, v, self.current_epoch)
-            if hparams:
-                self.logger.log_hyperparams(self.hparams, {k.split("_")[-1]: v for k, v in metrics.items()})
+        for k, v in metrics.items():
+            self.log(k, v)
 
     def training_epoch_end(self, outputs: dict):
         """What to do at the end of a training epoch. Logs everything."""
-        self.log_histograms()
         metrics = self.train_metrics.compute()
         self.train_metrics.reset()
         self.log_all(metrics)
@@ -141,7 +131,7 @@ class BaseModel(LightningModule):
         """What to do at the end of a validation epoch. Logs everything."""
         metrics = self.val_metrics.compute()
         self.val_metrics.reset()
-        self.log_all(metrics, hparams=True)
+        self.log_all(metrics)
 
     def test_epoch_end(self, outputs: dict):
         """What to do at the end of a test epoch. Logs everything."""

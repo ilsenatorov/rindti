@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
-from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
 
 from rindti.data import DTIDataModule
 from rindti.data.transforms import DataCorruptor, ESMasker, NeighborhoodMasker, NullTransformer
@@ -15,6 +15,7 @@ from rindti.utils import get_git_hash, read_config
 from rindti.utils.ddd_es import DeepDoubleDescentEarlyStopping as DDDES
 
 torch.multiprocessing.set_sharing_strategy("file_system")
+os.environ["WANDB_CACHE_DIR"] = "/scratch/SCRATCH_SAS/roman/.config/wandb"
 
 
 models = {
@@ -70,12 +71,18 @@ def single_run(folder, version, **kwargs):
     datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]))
     datamodule.update_config(kwargs)
 
-    logger = TensorBoardLogger(
-        save_dir=folder,
-        name=f"version_{version}",
-        version=kwargs["seed"],
-        default_hp_metric=False,
+    # logger = TensorBoardLogger(
+    #     save_dir=folder,
+    #     name=f"version_{version}",
+    #     version=kwargs["seed"],
+    #     default_hp_metric=False,
+    # )
+    logger = WandbLogger(
+        log_model='all',
+        project="glylec_dti",
+        name=kwargs["name"],
     )
+    logger.experiment.config.update(kwargs)
 
     callbacks = [
         ModelCheckpoint(save_last=True, **kwargs["checkpoints"]),
@@ -87,6 +94,9 @@ def single_run(folder, version, **kwargs):
     trainer = Trainer(
         callbacks=callbacks,
         logger=logger,
+        limit_train_batches=10,
+        limit_val_batches=10,
+        limit_test_batches=10,
         log_every_n_steps=25,
         enable_model_summary=False,
         **kwargs["trainer"],

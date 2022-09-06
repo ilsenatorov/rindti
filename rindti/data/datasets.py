@@ -75,6 +75,8 @@ class DTIDataset(InMemoryDataset):
         """Get either prot or drug data."""
         # MEME comment to see if test difference works
         graph = all_data[which].loc[id, "data"]
+        if graph != graph:
+            graph = {}
         graph["id"] = id
         if (
             which == "drugs"

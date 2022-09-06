@@ -79,7 +79,7 @@ model:
       ratio: 0.25
 models:
 - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/elnwIntanc_51b704fd.pkl
-  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/elnwIntanc_cda4ea77.pkl
+  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/elnwIntanc_cda4ea77.pkl
   models:
   - arch: class
     checkpoint: tb_logs/dti_glylec_mbb/elnwIntanc_cda4ea77/version_3/version_4/checkpoints/epoch=38-step=6707.ckpt
@@ -108,9 +108,10 @@ models:
     pos_params:
     - 0.27549806237220764
     - 0.21544913947582245
+  name: Seq
   sequences: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources/tables/prot.tsv
 - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a40936e4.pkl
-  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
+  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgntanc_5e01134f.pkl
   models:
   - arch: multiclass
     checkpoint: tb_logs/dti_glylec_mbb/rlnwgntanc_5e01134f/version_22/version_82/checkpoints/epoch=423-step=72927.ckpt
@@ -166,6 +167,7 @@ models:
     pos_params:
     - 0.08801200240850449
     - 0.0846514105796814
+  name: Struct
   sequences: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/resources/tables/prot.tsv
 output_dir: explain
 transform:
@@ -173,5 +175,4 @@ transform:
     main:
       weight: 4
     prot:
-      weight: 1
-  mode: none
+  

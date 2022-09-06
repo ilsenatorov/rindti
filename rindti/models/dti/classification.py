@@ -24,7 +24,7 @@ class ClassificationModel(BaseModel):
         )
         self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
         self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
-        self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
+        self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"]).cuda()
 
         self.pos_weight = torch.tensor(pos_weight)
         self.neg_weight = torch.tensor(neg_weight)
@@ -35,7 +35,7 @@ class ClassificationModel(BaseModel):
         """Forward the data though the classification model"""
         prot_embed, _ = self.prot_encoder(prot)
         drug_embed, _ = self.drug_encoder(drug)
-        joint_embedding = self.merge_features(drug_embed, prot_embed)
+        joint_embedding = self.merge_features(drug_embed, prot_embed.cuda())
 
         pred, embed = self.mlp(joint_embedding)
         return dict(
@@ -67,8 +67,7 @@ class ClassificationModel(BaseModel):
         """WHat to do at the end of a validation epoch. Logs everthing."""
         metrics = self.val_metrics.compute()
         self.val_metrics.reset()
-        self.log_all(metrics, hparams=True)
-        self.log("val_acc", metrics["val_Accuracy"])
+        self.log_all(metrics)
 
 
 class MultitaskClassification(ClassificationModel):

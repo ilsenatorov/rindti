@@ -2,7 +2,7 @@ runs: 3
 seed: 42
 output_dir: exp/multi
 models:
-  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
+  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgntanc_5e01134f.pkl
   # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/results/prepare_all/rlnwgntanc_001893e0.pkl
   - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a40936e4.pkl
     drug_method: graph

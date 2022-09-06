@@ -1,6 +1,6 @@
 output_dir: exp/shot2
 models:
-  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle/results/prepare_all/rlnwgntanc_5e01134f.pkl
+  # - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgntanc_5e01134f.pkl
   - dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/ACG/results/prepare_all/rlnwgnranc_7cfb529f.pkl
     drug_method: graph
     prot_method: graph
