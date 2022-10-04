@@ -1,10 +1,10 @@
 # the two root directories to take the data from and to store the data in
-source: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/resources
+source: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/resources
 prots:
   features:
-    method: rinerator # rinerator, distance, esm
+    method: esm # rinerator, distance, esm
 drugs:
-  node_feats: glycan # IUPAC, label, onehot, glycan
+  node_feats: IUPAC # IUPAC, label, onehot, glycan
 split_data:
   method: random # custom, random, drug, target
   train: 0.7
@@ -12,3 +12,6 @@ split_data:
 parse_dataset:
   filtering: balanced
   threshold: 1.645
+sequence_only:
+  drugs: True
+

@@ -1,9 +1,9 @@
 runs: 1
 seed: 42
-name: rindti_full
+name: rindti_bal
 datamodule:
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnranc_6a3905bf.pkl
-  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnrbnc_fe97f132.pkl
+        # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnranc_6a3905bf.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnrbnc_fe97f132.pkl
   exp_name: glylec_full
   batch_size: 64
   num_workers: 16
@@ -18,11 +18,11 @@ transform:
       weight: 1
 trainer:
   gpus: 1
-  max_epochs: 3000
+  max_epochs: 1700
   profiler: null
   gradient_clip_val: 100
 early_stop:
-  patience: 750
+  patience: 20
   monitor: val_loss
   mode: min
 checkpoints:

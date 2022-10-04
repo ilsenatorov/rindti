@@ -109,5 +109,5 @@ if __name__ == "__main__":
     drug_enc = DrugEncoder(snakemake.params.node_feats, snakemake.params.edge_feats, snakemake.params.max_num_atoms)
     ligs = pd.read_csv(snakemake.input.lig, sep="\t").set_index("Drug_ID")
     ligs["data"] = ligs["Drug"].apply(drug_enc)
-    ligs = ligs[ligs["data"].notna()]
+    # ligs = ligs[ligs["data"].notna()]
     ligs = ligs.to_pickle(snakemake.output.pickle)
