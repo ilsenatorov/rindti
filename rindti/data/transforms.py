@@ -14,9 +14,12 @@ class NullTransformer:
     transformed data
     """
 
-    def __init__(self, graphs, **kwargs):
+    def __init__(self, **kwargs):
         """Store which graphs should be transformed"""
-        self.graphs = [x for x in graphs.keys() if x != "main"]
+        if "graphs" in kwargs:
+            self.graphs = [x for x in kwargs["graphs"].keys() if x != "main"]
+        else:
+            self.graphs = []
 
     def __call__(self, data: Union[Data, TwoGraphData]):
         """Add the _x_orig filed equal to _x field, mimicking an unchanged, transformed sample"""

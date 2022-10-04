@@ -106,10 +106,12 @@ class DTIDataset(InMemoryDataset):
                     data.update(self._get_datum(all_data, i["drug_id"], "drugs", **self.config))
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
-                    two_graph_data.num_nodes = 1  # supresses the warning
+                    two_graph_data.num_nodes = 1  # suppresses the warning
                     data_list.append(two_graph_data)
                 if data_list:
                     # data_list = balance_data(data_list)
+                    # data_list = list(sorted(data_list, key=lambda x: (x["prot_id"], x["drug_id"])))
+                    # print('\n'.join([f"{x['prot_id']} <> {x['drug_id']}" for x in data_list[:5]]))
                     self.process_(data_list, split)
 
 
