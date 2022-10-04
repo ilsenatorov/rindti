@@ -19,7 +19,7 @@ from rindti.utils import read_config, remove_arg_prefix
 from train import models, transformers
 
 
-run = wandb.init("glylec_dti")
+# run = wandb.init("glylec_dti")
 
 
 def concat_dataloaders(loaders):
@@ -29,6 +29,10 @@ def concat_dataloaders(loaders):
             continue
         for x in loader:
             yield x
+
+
+def sorted_dataloader(loader):
+    return DataLoader(sorted([x for x in loader], key=lambda x: x["prot_id", "drug_id"]))
 
 
 def modify_protein(prot: dict, mode: str):
@@ -90,7 +94,6 @@ def load_data(data, dataset_name, split, batch_size, **kwargs):
         filename=data[dataset_name], exp_name="glylec_mbb", batch_size=batch_size, shuffle=False, num_workers=16
     )
     datamodule.setup(transform=transformers[kwargs["transform"]["mode"]](**kwargs["transform"]), split=split)
-    datamodule.update_config(kwargs)
     print("\t\tDone")
     return datamodule
 
@@ -103,11 +106,11 @@ def load_models(data, filtering=lambda x: False):
     for m in data["models"]:
         if filtering(m):
             continue
-        artifact = run.use_artifact("rindti/glylec_dti/model-37l2122e:v0", type="model")
+        artifact = run.use_artifact(m["checkpoint"], type="model")
         artifact_dir = artifact.download()
         model = models[m["arch"]].load_from_checkpoint(Path(artifact_dir) / "model.ckpt")
-        # model = models[m["arch"]].load_from_checkpoint(m["checkpoint"]).cuda()
         model.eval()
+        model = model.cuda()
         model_list.append((m["name"], model, m["neg_params"], m["pos_params"]))
         model_data[m["name"]] = [], [], ([], []), ([], [])
     print("\r\t\tDone")
@@ -134,6 +137,7 @@ def fit_dist(filename, **kwargs):
             if i >= 5:
                 break
             for n, model, _, _ in model_list:
+                batch = batch.cuda()
                 results = model.forward(remove_arg_prefix("prot_", batch), remove_arg_prefix("drug_", batch))
                 model_data[n][0].append(torch.sigmoid(results["pred"][(batch["label"] == 0).squeeze(), :]))
                 model_data[n][1].append(torch.sigmoid(results["pred"][(batch["label"] == 1).squeeze(), :]))
@@ -194,6 +198,7 @@ def run_tsne(output_dir, **kwargs):
         print("\tCalculate embeddings...")
         seen_prots, seen_drugs = set(), set()
         for i, batch in enumerate(dataloader):
+            batch = batch.cuda()
             print(f"\r\tBatch: {i}", end="")
             if batch["prot_id"][0] not in seen_prots:
                 for name, model, _, _ in model_list:
@@ -265,84 +270,42 @@ def explain(output_dir, **kwargs):
         print(f"\t{data['dataset']}")
         seed_everything(42)
 
-        datamodule = load_data(data, dataset_name="dataset", split="train", batch_size=1, **kwargs)
-        dataloader = datamodule.train_dataloader()
+        exp_datamodule = load_data(data, dataset_name="dataset", split="train", batch_size=1, **kwargs)
+        exp_dataloader = exp_datamodule.train_dataloader()
+
+        train_datamodule = load_data(data, dataset_name="dist_data", split="train", batch_size=1, **kwargs)
+        train_dataloader = train_datamodule.train_dataloader()
+        # train_dataloader = sorted_dataloader(train_datamodule.train_dataloader())
 
         model_list, _ = load_models(data)
 
         print("\tCalculate predictions...")
         res_table = pt.PrettyTable()
         res_table.field_names = ["Sample", "Label"] + [n for n, _, _, _ in model_list]
+        for j, (set_name, loader) in enumerate([("Expl.", exp_dataloader), ("Train", train_dataloader)]):
+            res_table.add_row([set_name, "Dataset"] + ["" for _ in model_list])
 
-        for i, x in enumerate(dataloader):
-            p_line = [f"{x['prot_id'][0]}-{x['drug_id'][0]}", x["label"][0].item()]
-            pos_line, neg_line = ["", "p+"], ["", "p-"]
-            print("\tSample", i + 1, "|", x["prot_id"][0], "-", x["drug_id"][0], "| Label:", x["label"][0].item())
-            # with open(kwargs["sequences"], "r") as dist_file:
-            #     aa_seq, dists = [], []
-            #     for line in dist_file.readlines()[1:]:
-            #         line = line.strip().split("\t")
-            #         if line[0][:4] == x["prot_id"][0]:
-            #             aa_seq = line[1]
-            #         dists.append(float(y.strip().split(" ")[1]) // 10)
-            #
-            # drug_data = remove_arg_prefix("drug_", x)
-            # prot_data = remove_arg_prefix("prot_", x)
-            #
-            # for method in kwargs["methods"]:
-            # print("\t\tMethod", method)
-            #     comb_data = [combine(prot, drug_data, x) for prot in modify_protein(prot_data, method)]
-            #     loader = DataLoader(comb_data, batch_size=len(comb_data))
-            #     for name, model, (neg_loc, neg_scale), (pos_loc, pos_scale) in model_list:
-            #         print("\t\t\tModel", name)
-            #         results = model.shared_step(next(iter(loader)))
-            #         results = model.shared_step(x)
-            #         predictions = torch.sigmoid(results["preds"])
-            #         print("\t\t\t\tAvg  :", torch.mean(predictions).item())
-            #         print("\t\t\t\tPred:", predictions[0].item())
-            #         neg_p_val = stats.norm.cdf(predictions[0].item(), loc=neg_loc, scale=neg_scale)
-            #         pos_p_val = stats.norm.cdf(predictions[0].item(), loc=pos_loc, scale=pos_scale)
-            #         print("\t\t\t\tneg. p-val:", neg_p_val)
-            #         print("\t\t\t\tpos. p-val:", pos_p_val)
-            #         p_line.append(predictions[0].item())
-            #         neg_line.append(round(neg_p_val, 5))
-            #         pos_line.append(round(1 - pos_p_val, 5))
-            #         predictions = predictions[0].expand(len(predictions) - 1) -
-            #                   torch.tensor(predictions[1:].squeeze())
-            #         predictions = predictions.detach().numpy()
+            for i, x in enumerate(loader):
+                if j == 1 and i >= kwargs["control_count"]:
+                    break
+                p_line = [f"{x['prot_id'][0]}-{x['drug_id'][0]}", x["label"][0].item()]
+                pos_line, neg_line = ["", "p+"], ["", "p-"]
+                print("\tSample", i + 1, "|", x["prot_id"][0], "-", x["drug_id"][0], "| Label:", x["label"][0].item())
+                for name, model, (neg_loc, neg_scale), (pos_loc, pos_scale) in model_list:
+                    x = x.cuda()
+                    results = model.forward(remove_arg_prefix("prot_", x), remove_arg_prefix("drug_", x))
+                    predictions = torch.sigmoid(results["pred"])
+                    neg_p_val = stats.norm.cdf(predictions[0].item(), loc=neg_loc, scale=neg_scale)
+                    pos_p_val = stats.norm.cdf(predictions[0].item(), loc=pos_loc, scale=pos_scale)
+                    p_line.append(predictions[0].item())
+                    neg_line.append(round(neg_p_val, 5))
+                    pos_line.append(round(1 - pos_p_val, 5))
+                res_table.add_row(p_line)
+                res_table.add_row(pos_line)
+                res_table.add_row(neg_line)
 
-            #         aa_counter = {}
-            #
-            #         for aa, p in zip(aa_seq, list(predictions)):
-            #             if aa not in aa_counter:
-            #                 aa_counter[aa] = [0, 0]
-            #             aa_counter[aa][0] += 1
-            #             aa_counter[aa][1] += p
-
-            #         with open(f"{kwargs['output_dir']}/{name}/counts/aa_count_{method}.tsv", "w") as out:
-            #             for k in aa_counter.keys():
-            #                 print(f"{k}\t{aa_counter[k][0]}\t{aa_counter[k][1]}", file=out)
-            #         with open(f"{kwargs['output_dir']}/{name}/distance/aa_dists_{method}.tsv", "w") as out:
-            #             for k in aa_dist.keys():
-            #                 print(f"{k}\t{aa_dist[k][0]}\t{aa_dist[k][1]}", file=out)'''"""
-            #         del predictions
-            #         del results
-            #     del loader
-            #     del comb_data
-            for name, model, (neg_loc, neg_scale), (pos_loc, pos_scale) in model_list:
-                results = model.forward(remove_arg_prefix("prot_", x), remove_arg_prefix("drug_", x))
-                predictions = torch.sigmoid(results["pred"])
-                neg_p_val = stats.norm.cdf(predictions[0].item(), loc=neg_loc, scale=neg_scale)
-                pos_p_val = stats.norm.cdf(predictions[0].item(), loc=pos_loc, scale=pos_scale)
-                p_line.append(predictions[0].item())
-                neg_line.append(round(neg_p_val, 5))
-                pos_line.append(round(1 - pos_p_val, 5))
-            res_table.add_row(p_line)
-            res_table.add_row(pos_line)
-            res_table.add_row(neg_line)
-
-        print(res_table.get_csv_string(), file=open(os.path.join(output_dir, data["name"] + "_model_predictions.csv"), "w"))
-        print(res_table.get_string(), file=open(os.path.join(output_dir, data["name"] + "_model_predictions.txt"), "w"))
+        print(res_table.get_csv_string(), file=open(os.path.join(output_dir, f"{data['name']}_model_predictions.csv"), "w"))
+        print(res_table.get_string(), file=open(os.path.join(output_dir, f"{data['name']}_model_predictions.txt"), "w"))
         print("Done")
     print("Finished\n")
 
@@ -358,10 +321,44 @@ def main():
 
     with torch.no_grad():
         config = fit_dist(args.config, **config)
-        plot(**config)
-        run_tsne(**config)
-        explain(**config)
+        if "plot" in config["steps"]:
+            plot(**config)
+        if "tsne" in config["steps"]:
+            run_tsne(**config)
+        if "explain" in config["steps"]:
+            explain(**config)
+
+
+def test():
+    gnn_datamodule = DTIDataModule(
+        filename="/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnrbnc_fe97f132.pkl",
+        exp_name="glylec_mbb",
+        batch_size=1,
+        shuffle=False,
+        num_workers=16
+    )
+    gnn_datamodule.setup(transform=transformers["none"](), split="train")
+    gnn_loader = gnn_datamodule.train_dataloader()
+    for i, x in enumerate(gnn_loader):
+        if i > 5:
+            break
+        print(x["prot_id"], "<>", x["drug_id"])
+
+    lo_datamodule = DTIDataModule(
+        filename="/scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInrbnc_8b492165.pkl",
+        exp_name="glylec_mbb",
+        batch_size=1,
+        shuffle=False,
+        num_workers=16
+    )
+    lo_datamodule.setup(transform=transformers["none"](), split="train")
+    lo_loader = lo_datamodule.train_dataloader()
+    for i, x in enumerate(lo_loader):
+        if i > 5:
+            break
+        print(x["prot_id"], "<>", x["drug_id"])
 
 
 if __name__ == "__main__":
-    main()
+    test()
+    # main()
