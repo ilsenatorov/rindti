@@ -1,0 +1,37 @@
+control_count: 5
+methods:
+- obfuscate
+models:
+- dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a435b5f3.pkl
+  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnrbnc_fe97f132.pkl
+  models:
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-2s0gz9df:best
+    name: GNNrand
+    neg_params:
+    - 0.9999838471412659
+    - 0.00010262108844472095
+    pos_params:
+    - 2.2572428861167282e-05
+    - 0.00011053043999709189
+  name: RandExpGNN
+- dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/elnwIntanc_f71aaa7f.pkl
+  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInrbnc_8b492165.pkl
+  models:
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-1i3f2y7m:best
+    name: Swerand
+    neg_params:
+    - 0.912619948387146
+    - 0.2638043463230133
+    pos_params:
+    - 0.5829592347145081
+    - 0.4607132375240326
+  name: RandExpLO
+output_dir: explain/wandba
+steps:
+- plot
+- explain
+- tsne
+transform:
+  mode: none

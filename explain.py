@@ -18,8 +18,7 @@ from rindti.data import DTIDataModule, TwoGraphData
 from rindti.utils import read_config, remove_arg_prefix
 from train import models, transformers
 
-
-# run = wandb.init("glylec_dti")
+run = wandb.init("glylec_dti")  # , mode="disabled")
 
 
 def concat_dataloaders(loaders):
@@ -45,12 +44,12 @@ def modify_protein(prot: dict, mode: str):
             if mode == "obfuscate":  # mask a single node (suppress all information spreading but keep message flows)
                 prot_data["x"][i] = 0
             elif mode == "delete":  # delete a node completely
-                prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1) :]])
-                prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1) :]])
+                prot_data["x"] = torch.cat([prot_data["x"][:i], prot_data["x"][(i + 1):]])
+                prot_data["batch"] = torch.cat([prot_data["batch"][:i], prot_data["batch"][(i + 1):]])
                 e_idx = prot_data["edge_index"].T
                 del_indices = [j for j, e in enumerate(e_idx) if i in e]
                 for d in reversed(del_indices):
-                    e_idx = torch.cat([e_idx[:d], e_idx[(d + 1) :]])
+                    e_idx = torch.cat([e_idx[:d], e_idx[(d + 1):]])
                 e_idx[e_idx > i] -= 1
                 prot_data["edge_index"] = e_idx.T
             elif mode == "skip":  # delete a node and connect all neighbors with each other
@@ -133,7 +132,7 @@ def fit_dist(filename, **kwargs):
 
         print("\tCalculate distributions...")
         for i, batch in enumerate(dataloader):
-            print(f"\r\tBatch: {i} / {len(dataloader)}", end="")
+            print(f"\r\t\tBatch: {i} / {len(dataloader)}", end="")
             if i >= 5:
                 break
             for n, model, _, _ in model_list:
@@ -141,7 +140,7 @@ def fit_dist(filename, **kwargs):
                 results = model.forward(remove_arg_prefix("prot_", batch), remove_arg_prefix("drug_", batch))
                 model_data[n][0].append(torch.sigmoid(results["pred"][(batch["label"] == 0).squeeze(), :]))
                 model_data[n][1].append(torch.sigmoid(results["pred"][(batch["label"] == 1).squeeze(), :]))
-        print("\t\tDone")
+        print("\r\t\tDone")
 
         print("\tStore parameters...")
         for i, (n, (v_pos, v_neg, _, _)) in enumerate(model_data.items()):
@@ -156,7 +155,7 @@ def fit_dist(filename, **kwargs):
     config = clean_yaml(kwargs)
     with open(filename, "w") as out:
         yaml.dump(config, out)
-    print("Finished\n")
+    print("\tFinished\n")
     return config
 
 
@@ -174,7 +173,7 @@ def plot(output_dir, **kwargs):
             plt.legend()
             plt.savefig(os.path.join(output_dir, f"dist_pred_{m['name']}.png"))
             plt.clf()
-    print("Finished\n")
+    print("\tFinished\n")
 
 
 def run_tsne(output_dir, **kwargs):
@@ -199,7 +198,7 @@ def run_tsne(output_dir, **kwargs):
         seen_prots, seen_drugs = set(), set()
         for i, batch in enumerate(dataloader):
             batch = batch.cuda()
-            print(f"\r\tBatch: {i}", end="")
+            print(f"\r\t\tBatch: {i}", end="")
             if batch["prot_id"][0] not in seen_prots:
                 for name, model, _, _ in model_list:
                     graph, _ = model.prot_encoder.forward(remove_arg_prefix("prot_", batch))
@@ -239,28 +238,28 @@ def run_tsne(output_dir, **kwargs):
             plt.clf()
             plt.scatter(embeds[: len(tp_be), 0], embeds[: len(tp_be), 1], color="g", marker="o", label="tp", s=20)
             plt.scatter(
-                embeds[len(tp_be) : len(tp_be) + len(fn_be), 0],
-                embeds[len(tp_be) : len(tp_be) + len(fn_be), 1],
+                embeds[len(tp_be): len(tp_be) + len(fn_be), 0],
+                embeds[len(tp_be): len(tp_be) + len(fn_be), 1],
                 color="r",
                 marker="o",
                 label="fn",
                 s=20,
             )
             plt.scatter(
-                embeds[len(tp_be) + len(fn_be) : -len(tn_nbe), 0],
-                embeds[len(tp_be) + len(fn_be) : -len(tn_nbe), 1],
+                embeds[len(tp_be) + len(fn_be): -len(tn_nbe), 0],
+                embeds[len(tp_be) + len(fn_be): -len(tn_nbe), 1],
                 color="r",
                 marker="s",
                 label="fp",
                 s=20,
             )
-            plt.scatter(embeds[-len(tn_nbe) :, 0], embeds[-len(tn_nbe) :, 1], color="g", marker="s", label="tn", s=20)
+            plt.scatter(embeds[-len(tn_nbe):, 0], embeds[-len(tn_nbe):, 1], color="g", marker="s", label="tn", s=20)
             plt.suptitle(f"tSNE Plot for Combined Embeddings of Model {name}")
             plt.legend()
             plt.savefig(os.path.join(output_dir, f"tsne_pred_{name}.png"))
             plt.clf()
         print("\t\tDone")
-    print("Finished\n")
+    print("\tFinished\n")
 
 
 def explain(output_dir, **kwargs):
@@ -304,10 +303,11 @@ def explain(output_dir, **kwargs):
                 res_table.add_row(pos_line)
                 res_table.add_row(neg_line)
 
-        print(res_table.get_csv_string(), file=open(os.path.join(output_dir, f"{data['name']}_model_predictions.csv"), "w"))
+        print(res_table.get_csv_string(),
+              file=open(os.path.join(output_dir, f"{data['name']}_model_predictions.csv"), "w"))
         print(res_table.get_string(), file=open(os.path.join(output_dir, f"{data['name']}_model_predictions.txt"), "w"))
         print("Done")
-    print("Finished\n")
+    print("\tFinished\n")
 
 
 def main():
@@ -360,5 +360,6 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
-    # main()
+    # test()
+    main()
+    wandb.finish()
