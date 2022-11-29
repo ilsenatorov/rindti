@@ -1,10 +1,10 @@
 runs: 1
 seed: 42
-name: rindti_bal
+name: rindti_full_rand_pregly
 datamodule:
-        # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnranc_6a3905bf.pkl
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnrbnc_fe97f132.pkl
-  exp_name: glylec_full
+  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgntanc_25c35c9c.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_pdb/results/prepare_all/rlnwgnranc_a4f304c7.pkl
+  exp_name: glylec_pdb
   batch_size: 64
   num_workers: 16
 transform:
@@ -18,7 +18,7 @@ transform:
       weight: 1
 trainer:
   gpus: 1
-  max_epochs: 1700
+  max_epochs: 150
   profiler: null
   gradient_clip_val: 100
 early_stop:
@@ -35,7 +35,8 @@ model:
   monitor: val_loss
   drug:
     hidden_dim: 128
-    method: graph
+    method: pickle
+    file: data/lo_glycans.pkl
     node:
       module: ginconv
       dropout: 0.1
@@ -74,7 +75,7 @@ model:
     lr_schedule:
       module: lwca
       monitor: val_loss
-      cos_restart_dist: 500
-      warmup_epochs: 250
+      cos_restart_dist: 50
+      warmup_epochs: 25
       min_lr: 1e-7
       start_lr: 1e-5

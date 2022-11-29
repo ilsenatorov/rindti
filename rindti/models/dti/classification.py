@@ -5,11 +5,17 @@ from torch import nn
 
 from ...data import TwoGraphData
 from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
+from ...layers.encoder.pickle_encoder import PickleEncoder
 from ...layers.other import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 
-encoders = {"graph": GraphEncoder, "sweetnet": SweetNetEncoder, "pretrained": PretrainedEncoder}
+encoders = {
+    "graph": GraphEncoder,
+    "sweetnet": SweetNetEncoder,
+    "pretrained": PretrainedEncoder,
+    "pickle": PickleEncoder,
+}
 
 
 class ClassificationModel(BaseModel):
@@ -35,7 +41,7 @@ class ClassificationModel(BaseModel):
         """Forward the data though the classification model"""
         prot_embed, _ = self.prot_encoder(prot)
         drug_embed, _ = self.drug_encoder(drug)
-        joint_embedding = self.merge_features(drug_embed, prot_embed.cuda())
+        joint_embedding = self.merge_features(drug_embed, prot_embed)
 
         pred, embed = self.mlp(joint_embedding)
         return dict(

@@ -93,6 +93,7 @@ def single_run(folder, version, **kwargs):
         RichModelSummary(),
         RichProgressBar(),
     ]
+    # kwargs["trainer"]["max_epochs"] = 10
     trainer = Trainer(
         callbacks=callbacks,
         logger=logger,
@@ -113,7 +114,8 @@ def single_run(folder, version, **kwargs):
 
     # pprint(kwargs)
     trainer.fit(model, datamodule)
-    trainer.test(model, datamodule)
+    # trainer.test(model, datamodule)
+    trainer.test(ckpt_path="best", datamodule=datamodule)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
 runs: 1
-name: lectinoracle_bal
+# name: lectinoracle_full_cd
+name: lectinoracle_full
 seed: 42
 datamodule:
-  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInranc_e7b53363.pkl
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInrbnc_8b492165.pkl
+  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwIndanc_a73e0fe2.pkl
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInranc_e7b53363.pkl
   exp_name: glylec_esm
   batch_size: 128
   num_workers: 16
@@ -19,7 +20,7 @@ transform:
       weight: 1
 trainer:
   gpus: 1
-  max_epochs: 1700
+  max_epochs: 150
   profiler: null
   gradient_clip_val: 100
 early_stop:
@@ -79,4 +80,4 @@ model:
     lr_schedule:
       monitor: val_loss
       module: calr
-      max_epochs: 900
+      max_epochs: 90

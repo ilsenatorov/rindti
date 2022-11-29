@@ -8,17 +8,22 @@ pretrain_prot_data = sh._target("pretrain_prot_data", sh.namer(config["prots"]) 
 
 if config["prots"]["features"]["method"] == "rinerator":
 
-    ruleorder: parse_rinerator > distance_based > esm
+    ruleorder: parse_rinerator > distance_based > esm > step
 
 
 elif config["prots"]["features"]["method"] == "distance":
 
-    ruleorder: distance_based > parse_rinerator > esm
+    ruleorder: distance_based > parse_rinerator > esm > step
 
 
 elif config["prots"]["features"]["method"] == "esm":
 
-    ruleorder: esm > parse_rinerator > distance_based
+    ruleorder: esm > parse_rinerator > distance_based > step
+
+
+elif config["prots"]["features"]["method"] == "step":
+
+    ruleorder: step > esm > parse_rinerator > distance_based
 
 
 else:
@@ -73,6 +78,15 @@ rule esm:
         pickle=prot_data,
     script:
         "../scripts/prot_esm.py"
+
+
+rule step:
+    input:
+        pdbs=expand(parsed_structs, prot=sh.prot_ids),
+    output:
+        pickle=prot_data,
+    script:
+        "../scripts/run_step.py"
 
 
 rule pretrain_prots:
