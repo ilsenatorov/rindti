@@ -41,6 +41,8 @@ class ClassificationModel(BaseModel):
         """Forward the data though the classification model"""
         prot_embed, _ = self.prot_encoder(prot)
         drug_embed, _ = self.drug_encoder(drug)
+        # print(prot_embed.shape)
+        # print(drug_embed.shape)
         joint_embedding = self.merge_features(drug_embed, prot_embed)
 
         pred, embed = self.mlp(joint_embedding)

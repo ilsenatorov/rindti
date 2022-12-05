@@ -1,12 +1,12 @@
 runs: 1
 seed: 42
-name: rindti_full_rand_pregly
+name: rindti_gcn_rand
 datamodule:
-  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgntanc_25c35c9c.pkl
-  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_pdb/results/prepare_all/rlnwgnranc_a4f304c7.pkl
-  exp_name: glylec_pdb
+  filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnranc_6a3905bf.pkl
+  # filename: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_pdb/results/prepare_all/rlnwgnranc_a4f304c7.pkl
+  exp_name: glylec
   batch_size: 64
-  num_workers: 16
+  num_workers: 13
 transform:
   mode: none  # esm  # neighbors
   k: 3
@@ -35,15 +35,14 @@ model:
   monitor: val_loss
   drug:
     hidden_dim: 128
-    method: pickle
-    file: data/lo_glycans.pkl
+    method: graph
     node:
-      module: ginconv
+      module: gcn
       dropout: 0.1
       hidden_dim: 128
       num_layers: 3
     pool:
-      module: gmt
+      module: mean
       num_heads: 4
       hidden_dim: 128
       ratio: 0.25
@@ -51,12 +50,12 @@ model:
     hidden_dim: 128
     method: graph
     node:
-      module: ginconv
+      module: gcn
       dropout: 0.1
       hidden_dim: 128
       num_layers: 3
     pool:
-      module: gmt
+      module: mean
       num_heads: 4
       hidden_dim: 128
       ratio: 0.25
