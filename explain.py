@@ -156,6 +156,7 @@ def fit_dist(filename, **kwargs):
     with open(filename, "w") as out:
         yaml.dump(config, out)
     print("\tFinished\n")
+    del datamodule, dataloader, model_list, model_data
     return config
 
 
@@ -281,12 +282,19 @@ def explain(output_dir, **kwargs):
         print("\tCalculate predictions...")
         res_table = pt.PrettyTable()
         res_table.field_names = ["Sample", "Label"] + [n for n, _, _, _ in model_list]
+        class_counts = {0: 0, 1: 0}
         for j, (set_name, loader) in enumerate([("Expl.", exp_dataloader), ("Train", train_dataloader)]):
             res_table.add_row([set_name, "Dataset"] + ["" for _ in model_list])
 
             for i, x in enumerate(loader):
-                if j == 1 and i >= kwargs["control_count"]:
-                    break
+                if j == 1:
+                    if x["label"].item() not in class_counts:
+                        class_counts[x["label"].item()] = 0
+                    if all(z >= kwargs["control_count"] for z in class_counts.values()):
+                        break
+                    if class_counts[x["label"].item()] >= kwargs["control_count"]:
+                        continue
+                    class_counts[x["label"].item()] += 1
                 p_line = [f"{x['prot_id'][0]}-{x['drug_id'][0]}", x["label"][0].item()]
                 pos_line, neg_line = ["", "p+"], ["", "p-"]
                 print("\tSample", i + 1, "|", x["prot_id"][0], "-", x["drug_id"][0], "| Label:", x["label"][0].item())
@@ -302,6 +310,8 @@ def explain(output_dir, **kwargs):
                 res_table.add_row(p_line)
                 res_table.add_row(pos_line)
                 res_table.add_row(neg_line)
+
+                del x, results, predictions
 
         print(res_table.get_csv_string(),
               file=open(os.path.join(output_dir, f"{data['name']}_model_predictions.csv"), "w"))

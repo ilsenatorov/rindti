@@ -113,6 +113,8 @@ def single_run(folder, version, **kwargs):
     model = models[kwargs["model"]["module"]](pos_weight=weights[0], neg_weight=weights[1], **kwargs)
 
     # pprint(kwargs)
+    for x in datamodule.train_dataloader():
+        print(x.label)
     trainer.fit(model, datamodule)
     # trainer.test(model, datamodule)
     trainer.test(ckpt_path="best", datamodule=datamodule)

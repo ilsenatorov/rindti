@@ -7,11 +7,13 @@ from torch_geometric.data import Data
 
 from ..graphconv import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, TransformerNet
 from ..graphconv.gcnet import GCNet
+from ..graphconv.sagenet import SAGENet
 from ..graphpool import DiffPoolNet, GMTNet, MeanPool
 
 node_embedders = {
     "gcn": GCNet,
     "ginconv": GINConvNet,
+    "sage": SAGENet,
     "chebconv": ChebConvNet,
     "gatconv": GatConvNet,
     "filmconv": FilmConvNet,

@@ -1,0 +1,62 @@
+control_count: 3
+methods:
+- obfuscate
+models:
+- dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/rlnwgntanc_a435b5f3.pkl
+  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_full/results/prepare_all/rlnwgnranc_6a3905bf.pkl
+  models:
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-3kzh0bf7:best
+    name: GIN_Mean
+    neg_params:
+    - 0.984268307685852
+    - 0.045200519263744354
+    pos_params:
+    - 0.2923181653022766
+    - 0.28877633810043335
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-1a3yqd7t:best
+    name: GIN_GMT
+    neg_params:
+    - 0.9845505952835083
+    - 0.0433134064078331
+    pos_params:
+    - 0.3838566541671753
+    - 0.385820597410202
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-2ll4y3nk:best
+    name: SAGE_Mean
+    neg_params:
+    - 0.9657699465751648
+    - 0.03673079237341881
+    pos_params:
+    - 0.8677468299865723
+    - 0.11124709248542786
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-36nwutlr:best
+    name: GCN_Mean
+    neg_params:
+    - 0.9712722897529602
+    - 0.02887929417192936
+    pos_params:
+    - 0.930289626121521
+    - 0.04402906820178032
+  name: RandExpGNN
+- dataset: /scratch/SCRATCH_SAS/roman/rindti/datasets/glylex/Ricin/results/prepare_all/elnwIntanc_f71aaa7f.pkl
+  dist_data: /scratch/SCRATCH_SAS/roman/rindti/datasets/oracle_esm/results/prepare_all/elnwInranc_e7b53363.pkl
+  models:
+  - arch: class
+    checkpoint: old-shatterhand/glylec_dti/model-240ub9tp:best
+    name: LectinOracle
+    neg_params:
+    - 0.9996411800384521
+    - 0.0026238663122057915
+    pos_params:
+    - 0.9991200566291809
+    - 0.003229137510061264
+  name: LOExp
+output_dir: explain/wandb_full
+steps:
+- explain
+transform:
+  mode: none
