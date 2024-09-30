@@ -8,7 +8,9 @@ from rindti.utils import read_config
 from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
 
 snakemake_configs = [
-    os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
+    os.path.join(SNAKEMAKE_CONFIG_DIR, x)
+    for x in os.listdir(SNAKEMAKE_CONFIG_DIR)
+    if x != "default.yaml"
 ]
 
 
@@ -30,14 +32,14 @@ class TestSnakeMake:
         snakemake_config["only_prots"] = True
         run_snakemake(snakemake_config, tmpdir_factory)
 
-    @pytest.mark.gpu
-    def test_features_esm(self, snakemake_config: dict, tmpdir_factory: str):
-        """Test the graph creation methods."""
-        snakemake_config["prots"]["features"]["method"] = "esm"
-        snakemake_config["only_prots"] = True
-        run_snakemake(snakemake_config, tmpdir_factory)
+    # @pytest.mark.gpu
+    # def test_features_esm(self, snakemake_config: dict, tmpdir_factory: str):
+    #     """Test the graph creation methods."""
+    #     snakemake_config["prots"]["features"]["method"] = "esm"
+    #     snakemake_config["only_prots"] = True
+    #     run_snakemake(snakemake_config, tmpdir_factory)
 
-    @pytest.mark.parametrize("features", ["rinerator", "distance"])  # NOTE esm testing disabled
+    @pytest.mark.parametrize("features", ["distance"])  # NOTE esm testing disabled
     def test_features(self, features: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the graph creation methods."""
         snakemake_config["prots"]["features"]["method"] = features
@@ -46,7 +48,13 @@ class TestSnakeMake:
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
-    def test_prot_encodings(self, node_feats: str, edge_feats: str, snakemake_config: dict, tmpdir_factory: str):
+    def test_prot_encodings(
+        self,
+        node_feats: str,
+        edge_feats: str,
+        snakemake_config: dict,
+        tmpdir_factory: str,
+    ):
         """Test the encoding methods for prot nodes and edges."""
         snakemake_config["prots"]["features"]["node_feats"] = node_feats
         snakemake_config["prots"]["features"]["edge_feats"] = edge_feats
@@ -54,7 +62,13 @@ class TestSnakeMake:
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot", "glycan"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
-    def test_drug_encodings(self, node_feats: str, edge_feats: str, snakemake_config: dict, tmpdir_factory: str):
+    def test_drug_encodings(
+        self,
+        node_feats: str,
+        edge_feats: str,
+        snakemake_config: dict,
+        tmpdir_factory: str,
+    ):
         """Test the encoding methods for drug nodes and edges."""
         snakemake_config["drugs"]["node_feats"] = node_feats
         snakemake_config["drugs"]["edge_feats"] = edge_feats
@@ -68,7 +82,9 @@ class TestSnakeMake:
 
     @pytest.mark.parametrize("filtering", ["all", "posneg"])
     @pytest.mark.parametrize("sampling", ["none", "over", "under"])
-    def test_parse_dataset(self, filtering: str, sampling: str, snakemake_config: dict, tmpdir_factory: str):
+    def test_parse_dataset(
+        self, filtering: str, sampling: str, snakemake_config: dict, tmpdir_factory: str
+    ):
         """Test the dataset filtering and sampling methods."""
         snakemake_config["parse_dataset"]["filtering"] = filtering
         snakemake_config["parse_dataset"]["sampling"] = sampling

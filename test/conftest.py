@@ -2,7 +2,7 @@ import os
 import shutil
 
 import pytest
-from pytorch_lightning.utilities.seed import seed_everything
+from pytorch_lightning import seed_everything
 from snakemake import snakemake
 
 from rindti.data import DTIDataModule, PreTrainDataModule

@@ -9,7 +9,7 @@ def config():
     return {
         "hidden_dim": 16,
         "node": {"module": "ginconv", "hidden_dim": 16},
-        "pool": {"module": "gmt", "hidden_dim": 16},
+        "pool": {"module": "mean", "hidden_dim": 16},
     }
 
 

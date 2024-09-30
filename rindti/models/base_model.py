@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 import torch
 from pytorch_lightning import LightningModule
@@ -13,7 +13,6 @@ from torchmetrics import (
     MeanAbsoluteError,
     MeanSquaredError,
     MetricCollection,
-    R2Score,
 )
 
 from ..data import TwoGraphData
@@ -31,9 +30,14 @@ class BaseModel(LightningModule):
     def _set_class_metrics(self, num_classes: int = 2):
         metrics = MetricCollection(
             [
-                Accuracy(num_classes=None if num_classes == 2 else num_classes),
-                AUROC(num_classes=None if num_classes == 2 else num_classes),
-                MatthewsCorrCoef(num_classes=num_classes),
+                Accuracy(
+                    num_classes=None if num_classes == 2 else num_classes,
+                    task="binary",
+                ),
+                AUROC(
+                    num_classes=None if num_classes == 2 else num_classes, task="binary"
+                ),
+                MatthewsCorrCoef(num_classes=num_classes, task="binary"),
             ]
         )
         self.train_metrics = metrics.clone(prefix="train_")
@@ -41,7 +45,9 @@ class BaseModel(LightningModule):
         self.test_metrics = metrics.clone(prefix="test_")
 
     def _set_reg_metrics(self):
-        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
+        metrics = MetricCollection(
+            [MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()]
+        )
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
@@ -121,34 +127,44 @@ class BaseModel(LightningModule):
             for k, v in metrics.items():
                 self.logger.experiment.add_scalar(k, v, self.current_epoch)
             if hparams:
-                self.logger.log_hyperparams(self.hparams, {k.split("_")[-1]: v for k, v in metrics.items()})
+                self.logger.log_hyperparams(
+                    self.hparams, {k.split("_")[-1]: v for k, v in metrics.items()}
+                )
 
-    def training_epoch_end(self, outputs: dict):
-        """What to do at the end of a training epoch. Logs everything."""
-        self.log_histograms()
-        metrics = self.train_metrics.compute()
-        self.train_metrics.reset()
-        self.log_all(metrics)
+    ## FIXME the logic of epoch end got changed, need to update the code
 
-    def validation_epoch_end(self, outputs: dict):
-        """What to do at the end of a validation epoch. Logs everything."""
-        metrics = self.val_metrics.compute()
-        self.val_metrics.reset()
-        self.log_all(metrics, hparams=True)
+    # def on_train_epoch_end(self, outputs: dict):
+    #     """What to do at the end of a training epoch. Logs everything."""
+    #     self.log_histograms()
+    #     metrics = self.train_metrics.compute()
+    #     self.train_metrics.reset()
+    #     self.log_all(metrics)
 
-    def test_epoch_end(self, outputs: dict):
-        """What to do at the end of a test epoch. Logs everything."""
-        metrics = self.test_metrics.compute()
-        self.test_metrics.reset()
-        self.log_all(metrics)
+    # def on_validation_epoch_end(self, outputs: dict):
+    #     """What to do at the end of a validation epoch. Logs everything."""
+    #     metrics = self.val_metrics.compute()
+    #     self.val_metrics.reset()
+    #     self.log_all(metrics, hparams=True)
 
-    def configure_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+    # def on_test_epoch_end(self, outputs: dict):
+    #     """What to do at the end of a test epoch. Logs everything."""
+    #     metrics = self.test_metrics.compute()
+    #     self.test_metrics.reset()
+    #     self.log_all(metrics)
+
+    def configure_optimizers(
+        self,
+    ) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimizer and/or lr schedulers"""
         opt_params = self.hparams.model["optimizer"]
-        optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[opt_params["module"]]
+        optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[
+            opt_params["module"]
+        ]
         params = [{"params": self.parameters()}]
         if hasattr(self, "prot_encoder"):
-            params.append({"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]})
+            params.append(
+                {"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]}
+            )
         if hasattr(self, "drug_encoder"):
             {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
         optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])

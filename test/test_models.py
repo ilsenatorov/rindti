@@ -19,7 +19,7 @@ class BaseTestModel:
         dti_datamodule.update_config(config)
         model = self.model_class(**config)
         trainer = Trainer(
-            gpus=0,
+            accelerator="cpu",
             fast_dev_run=True,
             enable_checkpointing=False,
             logger=None,
@@ -35,7 +35,7 @@ class BaseTestModel:
         dti_datamodule.update_config(config)
         model = self.model_class(**config)
         trainer = Trainer(
-            gpus=1,
+            devices=1,
             fast_dev_run=True,
             enable_checkpointing=False,
             logger=None,

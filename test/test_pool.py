@@ -2,7 +2,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
-from rindti.layers.graphpool import DiffPoolNet, GMTNet, MeanPool
+from rindti.layers.graphpool import DiffPoolNet, MeanPool
 
 default_config = {
     "K": 1,
@@ -22,7 +22,9 @@ fake_data = {
     "x": torch.rand(size=(13, 16)),
 }
 
-fake_data = next(iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_workers=1)))
+fake_data = next(
+    iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_workers=1))
+)
 
 
 class BaseTestGraphPool:
@@ -47,18 +49,11 @@ class BaseTestGraphPool:
         assert ((length - 1.0).abs() < 1e-6).all()  # soft equal
 
 
-class TestGMTNet(BaseTestGraphPool):
-
-    module = GMTNet
-
-
 class TestDiffPool(BaseTestGraphPool):
-
     module = DiffPoolNet
 
 
 class TestMeanPool(BaseTestGraphPool):
-
     module = MeanPool
 
     def test_forward(self):

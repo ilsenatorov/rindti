@@ -11,7 +11,7 @@ model:
       module: [ginconv, gatconv]
       hidden_dim: 16
     pool:
-      module: [diffpool, gmt]
+      module: [diffpool, mean]
       hidden_dim: 16
       num_heads: 1
 
@@ -22,7 +22,7 @@ model:
       module: ginconv
       hidden_dim: 16
     pool:
-      module: gmt
+      module: mean
       hidden_dim: 16
   mlp:
     hidden_dim: 16

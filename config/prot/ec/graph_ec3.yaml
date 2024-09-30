@@ -1,7 +1,7 @@
 data: /scratch/SCRATCH_NVME/ilya/pretrain_data/swissprot_ec3_label_none.pkl
 # Hardware
 batch_size: 256
-gpus: 1
+devices: 1
 max_epochs: 10000
 num_workers: 16
 profiler: null
@@ -27,5 +27,5 @@ alpha: 1
 node_embed: ginconv
 num_heads: 1
 num_layers: 3
-pool: gmt
+pool: mean
 ratio: 0.25

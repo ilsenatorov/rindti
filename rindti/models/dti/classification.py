@@ -2,12 +2,16 @@ import torch.nn.functional as F
 from torch.functional import Tensor
 
 from ...data import TwoGraphData
-from ...layers.encoder import GraphEncoder, PretrainedEncoder, SweetNetEncoder
+from ...layers.encoder import GraphEncoder
 from ...layers.other import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 
-encoders = {"graph": GraphEncoder, "sweetnet": SweetNetEncoder, "pretrained": PretrainedEncoder}
+encoders = {
+    "graph": GraphEncoder,
+    # "sweetnet": SweetNetEncoder,
+    # "pretrained": PretrainedEncoder,
+}
 
 
 class ClassificationModel(BaseModel):
@@ -20,8 +24,12 @@ class ClassificationModel(BaseModel):
             kwargs["model"]["prot"]["hidden_dim"],
             kwargs["model"]["drug"]["hidden_dim"],
         )
-        self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
-        self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
+        self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](
+            **kwargs["model"]["prot"]
+        )
+        self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](
+            **kwargs["model"]["drug"]
+        )
         self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
         self._set_class_metrics()
 
@@ -48,4 +56,6 @@ class ClassificationModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
-        return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
+        return dict(
+            loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach()
+        )
