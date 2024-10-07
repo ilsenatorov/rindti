@@ -20,4 +20,6 @@ class RegressionModel(ClassificationModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         mse_loss = F.mse_loss(torch.sigmoid(fwd_dict["pred"]), labels.float())
-        return dict(loss=mse_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())
+        return dict(
+            loss=mse_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach()
+        )

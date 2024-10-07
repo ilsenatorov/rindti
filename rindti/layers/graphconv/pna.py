@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch.functional import Tensor
 from torch.nn import Embedding
 from torch_geometric.nn import PNAConv
@@ -22,7 +20,13 @@ class PNAConvNet(BaseLayer):
     """
 
     def __init__(
-        self, input_dim: int, output_dim: int, hidden_dim: int = 32, edge_dim: int = None, deg: Tensor = None, **kwargs
+        self,
+        input_dim: int,
+        output_dim: int,
+        hidden_dim: int = 32,
+        edge_dim: int = None,
+        deg: Tensor = None,
+        **kwargs,
     ):
         super().__init__()
         self.edge_embedding = Embedding(edge_dim, edge_dim)
