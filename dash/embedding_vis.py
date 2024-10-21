@@ -37,7 +37,10 @@ app.layout = html.Div(
         dcc.Store(id="highlighted_prot"),  # store highlighted protein
         dcc.Store(id="sample_index"),  # store highlighted family
         html.Div(  # left side, visualising protein structure and info
-            [dashbio.NglMoleculeViewer(id="molecule"), html.Table(id="prot_table", children=[])],
+            [
+                dashbio.NglMoleculeViewer(id="molecule"),
+                html.Table(id="prot_table", children=[]),
+            ],
             style={"width": "30%"},
         ),
         html.Div([dcc.Graph(id="embedding-fig")]),  # center, embedding plot
@@ -59,10 +62,19 @@ app.layout = html.Div(
                     max=len(df),
                     step=1,
                     value=1000,
-                    marks={i: str(i)[:-3] + "K" for i in range(1000, len(df) - 1000, 1000)},
+                    marks={
+                        i: str(i)[:-3] + "K" for i in range(1000, len(df) - 1000, 1000)
+                    },
                 ),
                 html.H4("Size"),
-                dcc.Slider(id="size", min=1, max=20, step=1, value=10, marks={k: str(k) for k in range(1, 21)}),
+                dcc.Slider(
+                    id="size",
+                    min=1,
+                    max=20,
+                    step=1,
+                    value=10,
+                    marks={k: str(k) for k in range(1, 21)},
+                ),
                 html.H4("Family Search"),
                 dcc.Dropdown(
                     id="fam_search",
@@ -73,7 +85,10 @@ app.layout = html.Div(
                 ),
                 dcc.RadioItems(
                     id="fam_search_highlight",
-                    options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
+                    options=[
+                        {"label": "Highlight", "value": "on"},
+                        {"label": "Show Only", "value": "off"},
+                    ],
                     value="on",
                     labelStyle={"display": "inline-block"},
                 ),
@@ -86,21 +101,29 @@ app.layout = html.Div(
                 ),
                 dcc.RadioItems(
                     id="organism_search_highlight",
-                    options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
+                    options=[
+                        {"label": "Highlight", "value": "on"},
+                        {"label": "Show Only", "value": "off"},
+                    ],
                     value="on",
                     labelStyle={"display": "inline-block"},
                 ),
                 html.H4("UniProt ID Search"),
                 dcc.Dropdown(
                     id="prot_search",
-                    options=[{"label": x, "value": x} for x in df["id"].value_counts().index],
+                    options=[
+                        {"label": x, "value": x} for x in df["id"].value_counts().index
+                    ],
                     placeholder="UniProt ID",
                 ),
                 html.H4("Name search"),
                 dcc.Input(id="name_search", placeholder="Keywords...", value=""),
                 dcc.RadioItems(
                     id="name_search_highlight",
-                    options=[{"label": "Highlight", "value": "on"}, {"label": "Show Only", "value": "off"}],
+                    options=[
+                        {"label": "Highlight", "value": "on"},
+                        {"label": "Show Only", "value": "off"},
+                    ],
                     value="on",
                     labelStyle={"display": "inline-block"},
                 ),
@@ -134,7 +157,11 @@ def update_sample_idx(sample):
     return random.sample(range(len(df)), sample)
 
 
-@app.callback(Output("molecule", "data"), Output("molecule", "molStyles"), Input("highlighted_prot", "data"))
+@app.callback(
+    Output("molecule", "data"),
+    Output("molecule", "molStyles"),
+    Input("highlighted_prot", "data"),
+)
 def plot_molecule(fam_highlight):
     """Get molecular visualisation on click"""
     if fam_highlight is None:
@@ -195,17 +222,23 @@ def update_figure(
     data["opacity"] = opacity
     if organism_search:  # highlight an organism
         for i, organism in enumerate(organism_search):
-            data.loc[data["organism"] == organism, "color"] = px.colors.qualitative.Dark24[i]
+            data.loc[data["organism"] == organism, "color"] = (
+                px.colors.qualitative.Dark24[i]
+            )
         if organism_highlight == "off":
             data = data[data["organism"].isin(organism_search)]
     if fam_search:  # many families can be chosen
         for i, fam in enumerate(fam_search):
-            data.loc[data["fam"].str.contains(fam), "color"] = px.colors.qualitative.Light24[i]
+            data.loc[data["fam"].str.contains(fam), "color"] = (
+                px.colors.qualitative.Light24[i]
+            )
         if fam_highlight == "off":
             data = data[data["fam"].str.contains("|".join(fam_search))]
     if name_search:  # search by name
         if name_highlight == "on":
-            data.loc[data["name"].str.contains(name_search, case=False), "color"] = "red"
+            data.loc[data["name"].str.contains(name_search, case=False), "color"] = (
+                "red"
+            )
         else:
             data = data[data["name"].str.contains(name_search, case=False)]
     if highlighted_prot:
@@ -238,8 +271,12 @@ def update_figure(
         margin=dict(l=5, r=5, t=5, b=5),
     )
     if relayoutData and "xaxis.range[0]" in relayoutData:
-        fig.update_xaxes(range=[relayoutData["xaxis.range[0]"], relayoutData["xaxis.range[1]"]])
-        fig.update_yaxes(range=[relayoutData["yaxis.range[0]"], relayoutData["yaxis.range[1]"]])
+        fig.update_xaxes(
+            range=[relayoutData["xaxis.range[0]"], relayoutData["xaxis.range[1]"]]
+        )
+        fig.update_yaxes(
+            range=[relayoutData["yaxis.range[0]"], relayoutData["yaxis.range[1]"]]
+        )
     return fig
 
 
@@ -250,12 +287,19 @@ def update_prot_table(highlighted_prot: str) -> list:
         return []
     series = df.set_index("id").loc[highlighted_prot]
     renames = {"organism": "Organism", "name": "Protein name"}
-    table = [html.Tr([html.Th(renames[key]), value]) for key, value in series.items() if key in renames]
+    table = [
+        html.Tr([html.Th(renames[key]), value])
+        for key, value in series.items()
+        if key in renames
+    ]
     table.append(
         html.Tr(
             [
                 html.Th("UniProt ID"),
-                html.A(series.name, href="https://www.uniprot.org/uniprot/{}".format(series.name)),
+                html.A(
+                    series.name,
+                    href="https://www.uniprot.org/uniprot/{}".format(series.name),
+                ),
             ]
         )
     )
