@@ -8,7 +8,7 @@ import argparse
 import pathlib
 
 import torch
-from esm import Alphabet, FastaBatchedDataset, ProteinBertModel, pretrained
+from esm import FastaBatchedDataset, pretrained
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -33,7 +33,9 @@ def create_parser() -> argparse.ArgumentParser:
         help="output directory for extracted representations",
     )
 
-    parser.add_argument("--toks_per_batch", type=int, default=128, help="maximum batch size")
+    parser.add_argument(
+        "--toks_per_batch", type=int, default=128, help="maximum batch size"
+    )
     parser.add_argument(
         "--repr_layers",
         type=int,
@@ -55,7 +57,9 @@ def create_parser() -> argparse.ArgumentParser:
         help="Truncate sequences longer than 1024 to match the training setup",
     )
 
-    parser.add_argument("--nogpu", action="store_true", help="Do not use GPU even if available")
+    parser.add_argument(
+        "--nogpu", action="store_true", help="Do not use GPU even if available"
+    )
     return parser
 
 
@@ -77,12 +81,18 @@ def main(args):
     args.output_dir.mkdir(parents=True, exist_ok=True)
     return_contacts = "contacts" in args.include
 
-    assert all(-(model.num_layers + 1) <= i <= model.num_layers for i in args.repr_layers)
-    repr_layers = [(i + model.num_layers + 1) % (model.num_layers + 1) for i in args.repr_layers]
+    assert all(
+        -(model.num_layers + 1) <= i <= model.num_layers for i in args.repr_layers
+    )
+    repr_layers = [
+        (i + model.num_layers + 1) % (model.num_layers + 1) for i in args.repr_layers
+    ]
 
     with torch.no_grad():
         for batch_idx, (labels, strs, toks) in enumerate(data_loader):
-            print(f"Processing {batch_idx + 1} of {len(batches)} batches ({toks.size(0)} sequences)")
+            print(
+                f"Processing {batch_idx + 1} of {len(batches)} batches ({toks.size(0)} sequences)"
+            )
             if torch.cuda.is_available() and not args.nogpu:
                 toks = toks.to(device="cuda", non_blocking=True)
 
@@ -93,7 +103,9 @@ def main(args):
 
             out = model(toks, repr_layers=repr_layers, return_contacts=return_contacts)
 
-            representations = {layer: t.to(device="cpu") for layer, t in out["representations"].items()}
+            representations = {
+                layer: t.to(device="cpu") for layer, t in out["representations"].items()
+            }
             if return_contacts:
                 contacts = out["contacts"].to(device="cpu")
 
@@ -105,16 +117,22 @@ def main(args):
                 # See https://github.com/pytorch/pytorch/issues/1995
                 if "per_tok" in args.include:
                     result["representations"] = {
-                        layer: t[i, 1 : len(strs[i]) + 1].clone() for layer, t in representations.items()
+                        layer: t[i, 1 : len(strs[i]) + 1].clone()
+                        for layer, t in representations.items()
                     }
                 if "mean" in args.include:
                     result["mean_representations"] = {
-                        layer: t[i, 1 : len(strs[i]) + 1].mean(0).clone() for layer, t in representations.items()
+                        layer: t[i, 1 : len(strs[i]) + 1].mean(0).clone()
+                        for layer, t in representations.items()
                     }
                 if "bos" in args.include:
-                    result["bos_representations"] = {layer: t[i, 0].clone() for layer, t in representations.items()}
+                    result["bos_representations"] = {
+                        layer: t[i, 0].clone() for layer, t in representations.items()
+                    }
                 if return_contacts:
-                    result["contacts"] = contacts[i, : len(strs[i]), : len(strs[i])].clone()
+                    result["contacts"] = contacts[
+                        i, : len(strs[i]), : len(strs[i])
+                    ].clone()
 
                 torch.save(
                     result,

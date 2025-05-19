@@ -37,7 +37,11 @@ def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
     Returns:
         dict: Sub-dict of arguments
     """
-    return {prefix + k: v for (k, v) in kwargs.items() if k != "index_mapping" and v is not None}
+    return {
+        prefix + k: v
+        for (k, v) in kwargs.items()
+        if k != "index_mapping" and v is not None
+    }
 
 
 def read_config(filename: str) -> dict:

@@ -4,7 +4,7 @@ from typing import Callable, Iterable
 
 import pandas as pd
 import torch
-from torch_geometric.data import Data, Dataset, InMemoryDataset
+from torch_geometric.data import Data, InMemoryDataset
 
 from .data import TwoGraphData
 
@@ -32,7 +32,9 @@ class DTIDataset(InMemoryDataset):
     ):
         root = self._set_filenames(filename, exp_name)
         super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
+        self.data, self.slices, self.config = torch.load(
+            self.processed_paths[self.splits[split]]
+        )
 
     def _set_filenames(self, filename: str, exp_name: str) -> str:
         basefilename = os.path.basename(filename)
@@ -48,7 +50,9 @@ class DTIDataset(InMemoryDataset):
             data_list = [self.pre_transform(data) for data in data_list]
 
         data, slices = self.collate(data_list)
-        torch.save((data, slices, self.config), self.processed_paths[self.splits[split]])
+        torch.save(
+            (data, slices, self.config), self.processed_paths[self.splits[split]]
+        )
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
         """Get either prot or drug data."""
@@ -79,8 +83,12 @@ class DTIDataset(InMemoryDataset):
                 for i in all_data["data"]:
                     if i["split"] != split:
                         continue
-                    data = self._get_datum(all_data, i["prot_id"], "prots", **self.config)
-                    data.update(self._get_datum(all_data, i["drug_id"], "drugs", **self.config))
+                    data = self._get_datum(
+                        all_data, i["prot_id"], "prots", **self.config
+                    )
+                    data.update(
+                        self._get_datum(all_data, i["drug_id"], "drugs", **self.config)
+                    )
                     data["label"] = i["label"]
                     two_graph_data = TwoGraphData(**data)
                     two_graph_data.num_nodes = 1  # supresses the warning
@@ -99,7 +107,9 @@ class PreTrainDataset(InMemoryDataset):
         pre_transform (Callable, optional): pre-transformer to apply once before. Defaults to None.
     """
 
-    def __init__(self, filename: str, transform: Callable = None, pre_transform: Callable = None):
+    def __init__(
+        self, filename: str, transform: Callable = None, pre_transform: Callable = None
+    ):
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         root = os.path.join("data", basefilename)

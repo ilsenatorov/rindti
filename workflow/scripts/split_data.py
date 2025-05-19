@@ -32,10 +32,14 @@ def split_groups(
     test = []
     for i in range(0, len(sorted_index), bin_size):
         subset = sorted_index[i : i + bin_size]
-        train_bin = list(np.random.choice(subset, min(len(subset), train_prop), replace=False))
+        train_bin = list(
+            np.random.choice(subset, min(len(subset), train_prop), replace=False)
+        )
         train += train_bin
         subset = [x for x in subset if x not in train_bin]
-        val_bin = list(np.random.choice(subset, min(len(subset), val_prop), replace=False))
+        val_bin = list(
+            np.random.choice(subset, min(len(subset), val_prop), replace=False)
+        )
         val += val_bin
         subset = [x for x in subset if x not in val_bin]
         test += subset
@@ -48,7 +52,9 @@ def split_groups(
     return inter
 
 
-def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float = 0.2) -> pd.DataFrame:
+def split_random(
+    inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float = 0.2
+) -> pd.DataFrame:
     """Split the dataset in a completely random fashion
 
     Args:

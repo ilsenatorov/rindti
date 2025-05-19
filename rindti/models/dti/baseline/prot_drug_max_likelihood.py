@@ -14,8 +14,16 @@ class ProtDrugMax(BaseBaseline):
     def fit(self, train: pd.DataFrame):
         """Fit the model to the training dataframe. Has to have 'Drug_ID', 'Target_ID' and 'Y' columns."""
         train["count"] = 1
-        self.protgroup = train.groupby("Target_ID").agg({"Y": ["mean", "std"], "count": "sum"}).loc[:, "Y"]
-        self.druggroup = train.groupby("Drug_ID").agg({"Y": ["mean", "std"], "count": "sum"}).loc[:, "Y"]
+        self.protgroup = (
+            train.groupby("Target_ID")
+            .agg({"Y": ["mean", "std"], "count": "sum"})
+            .loc[:, "Y"]
+        )
+        self.druggroup = (
+            train.groupby("Drug_ID")
+            .agg({"Y": ["mean", "std"], "count": "sum"})
+            .loc[:, "Y"]
+        )
 
     def _get_val(self, group: pd.DataFrame, id: str) -> float:
         if id not in group.index:
@@ -27,7 +35,10 @@ class ProtDrugMax(BaseBaseline):
     def predict_pair(self, prot_id: str, drug_id: str) -> float:
         """Predict the outcome for a pair of a protein and a drug."""
         if self.which == "both":
-            return (self._get_val(self.protgroup, prot_id) + self._get_val(self.druggroup, drug_id)) / 2
+            return (
+                self._get_val(self.protgroup, prot_id)
+                + self._get_val(self.druggroup, drug_id)
+            ) / 2
         elif self.which == "prot":
             return self._get_val(self.protgroup, prot_id)
         elif self.which == "drug":

@@ -7,7 +7,9 @@ from rindti.losses import GeneralisedLiftedStructureLoss, SoftNearestNeighborLos
 @pytest.fixture
 def embeds() -> torch.Tensor:
     """Embeddings for testing. Ones and zeros, in order of 4 ones 1 zeros, 4 ones 1 zeros."""
-    return torch.cat([torch.ones(4, 10), torch.zeros(1, 10), torch.ones(4, 10), torch.zeros(1, 10)])
+    return torch.cat(
+        [torch.ones(4, 10), torch.zeros(1, 10), torch.ones(4, 10), torch.zeros(1, 10)]
+    )
 
 
 @pytest.fixture
@@ -15,7 +17,9 @@ def fam_idx() -> torch.Tensor:
     return torch.tensor([0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
 
 
-@pytest.mark.parametrize("loss_class", [GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss])
+@pytest.mark.parametrize(
+    "loss_class", [GeneralisedLiftedStructureLoss, SoftNearestNeighborLoss]
+)
 def test_graph_struct(loss_class, embeds: torch.Tensor, fam_idx: torch.Tensor) -> None:
     """8 points belong to the 'correct' class, 2 don't, loss has to be lower for the correct class."""
     loss = loss_class()
