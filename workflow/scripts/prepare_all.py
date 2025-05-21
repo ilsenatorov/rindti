@@ -30,7 +30,6 @@ def del_index_mapping(x: dict) -> dict:
 
 
 if __name__ == "__main__":
-
     interactions = pd.read_csv(snakemake.input.inter, sep="\t")
 
     with open(snakemake.input.drugs, "rb") as file:
@@ -48,8 +47,12 @@ if __name__ == "__main__":
     prot_count = interactions["Target_ID"].value_counts()
     drug_count = interactions["Drug_ID"].value_counts()
 
-    prots["data"] = prots.apply(lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1)
-    drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
+    prots["data"] = prots.apply(
+        lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1
+    )
+    drugs["data"] = drugs.apply(
+        lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1
+    )
 
     full_data = process_df(interactions)
     snakemake.config["data"] = {

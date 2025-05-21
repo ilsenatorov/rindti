@@ -16,5 +16,7 @@ class TestTwoGraphData:
         assert tgd.n_nodes("a_") == 3
 
     def test_n_edges(self):
-        tgd = TwoGraphData(a_edge_index=torch.tensor([[0, 1], [1, 0]]), dtype=torch.long)
+        tgd = TwoGraphData(
+            a_edge_index=torch.tensor([[0, 1], [1, 0]]), dtype=torch.long
+        )
         assert tgd.n_edges("a_") == 2
