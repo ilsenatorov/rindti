@@ -1,5 +1,4 @@
 from pytorch_lightning import LightningDataModule
-from torch.utils.data.sampler import Sampler
 from torch_geometric.loader import DataLoader
 
 from ..utils import split_random
@@ -10,7 +9,12 @@ class BaseDataModule(LightningDataModule):
     """Base data module, contains all the datasets for train, val and test."""
 
     def __init__(
-        self, filename: str, exp_name: str, batch_size: int = 128, num_workers: int = 1, shuffle: bool = True
+        self,
+        filename: str,
+        exp_name: str,
+        batch_size: int = 128,
+        num_workers: int = 1,
+        shuffle: bool = True,
     ):
         super().__init__()
         self.filename = filename

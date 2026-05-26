@@ -1,9 +1,20 @@
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
+from pytorch_lightning.callbacks import (
+    EarlyStopping,
+    ModelCheckpoint,
+    RichModelSummary,
+    RichProgressBar,
+)
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import PreTrainDataModule
-from rindti.models import BGRLModel, DistanceModel, GraphLogModel, InfoGraphModel, ProtClassModel
+from rindti.models import (
+    BGRLModel,
+    DistanceModel,
+    GraphLogModel,
+    InfoGraphModel,
+    ProtClassModel,
+)
 from rindti.utils import read_config
 
 models = {

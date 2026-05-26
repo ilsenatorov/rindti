@@ -52,7 +52,12 @@ class Structure:
 
     def get_nodes(self) -> torch.Tensor:
         """Get features of all nodes of a graph"""
-        return torch.tensor([encode_residue(res.name, self.node_feats) for res in self.residues.values()])
+        return torch.tensor(
+            [
+                encode_residue(res.name, self.node_feats)
+                for res in self.residues.values()
+            ]
+        )
 
     def get_edges(self, threshold: float) -> torch.Tensor:
         """Get edges of a graph using threshold as a cutoff"""
@@ -71,8 +76,6 @@ class Structure:
 
 
 if __name__ == "__main__":
-    import pickle
-
     import pandas as pd
     from joblib import Parallel, delayed
     from tqdm import tqdm
@@ -85,7 +88,9 @@ if __name__ == "__main__":
             """Single function to be run in parallel."""
             return Structure(filename, snakemake.params.node_feats).get_graph(threshold)
 
-        data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
+        data = Parallel(n_jobs=snakemake.threads)(
+            delayed(get_graph)(i) for i in tqdm(all_structures)
+        )
         df = pd.DataFrame(pd.Series(data, name="data"))
         df["filename"] = all_structures
         df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
@@ -98,7 +103,13 @@ if __name__ == "__main__":
 
         from jsonargparse import CLI
 
-        def run(pdb_dir: str, output: str, threads: int = 1, threshold: float = 5, node_feats: str = "label"):
+        def run(
+            pdb_dir: str,
+            output: str,
+            threads: int = 1,
+            threshold: float = 5,
+            node_feats: str = "label",
+        ):
             """Run the pipeline"""
 
             def get_graph(filename: str) -> dict:
