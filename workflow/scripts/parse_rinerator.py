@@ -26,7 +26,9 @@ class ProteinEncoder:
         if self.node_feats == "label":
             return encd["prot"]["node"][residue] + 1
         elif self.node_feats == "onehot":
-            return onehot_encode(encd["prot"]["node"][residue], len(encd["prot"]["node"]))
+            return onehot_encode(
+                encd["prot"]["node"][residue], len(encd["prot"]["node"])
+            )
         else:
             raise ValueError("Unknown node_feats type!")
 
@@ -58,7 +60,10 @@ class ProteinEncoder:
                 chain2, resn2, x2, resaa2 = node2split
                 if x1 != "_" or x2 != "_":
                     continue
-                if resaa1.lower() not in encd["prot"]["node"] or resaa2.lower() not in encd["prot"]["node"]:
+                if (
+                    resaa1.lower() not in encd["prot"]["node"]
+                    or resaa2.lower() not in encd["prot"]["node"]
+                ):
                     continue
                 resn1 = int(resn1)
                 resn2 = int(resn2)
@@ -86,7 +91,12 @@ class ProteinEncoder:
                 edges.append(edge2)
         nodes = pd.DataFrame(nodes).drop_duplicates()
         try:
-            nodes = nodes.sort_values("resn").reset_index(drop=True).reset_index().set_index("resn")
+            nodes = (
+                nodes.sort_values("resn")
+                .reset_index(drop=True)
+                .reset_index()
+                .set_index("resn")
+            )
         except Exception as e:
             print(nodes)
             print(filename)
@@ -138,7 +148,9 @@ class ProteinEncoder:
             edge_feats = torch.tensor(edge_feats, dtype=torch.long)
             return edge_index, edge_feats
         elif self.edge_feats == "onehot":
-            edge_feats = edge_feats.apply(onehot_encode, count=len(encd["prot"]["edge"]))
+            edge_feats = edge_feats.apply(
+                onehot_encode, count=len(encd["prot"]["edge"])
+            )
             edge_feats = torch.tensor(edge_feats, dtype=torch.float)
             return edge_index, edge_feats
 
@@ -178,7 +190,9 @@ if __name__ == "__main__":
         prots = pd.DataFrame(prots)
         prots["ID"] = prots["sif"].apply(extract_name)
         prots.set_index("ID", inplace=True)
-        prot_encoder = ProteinEncoder(snakemake.params.node_feats, snakemake.params.edge_feats)
+        prot_encoder = ProteinEncoder(
+            snakemake.params.node_feats, snakemake.params.edge_feats
+        )
         prots["data"] = prots["sif"].apply(prot_encoder)
         prots.to_pickle(snakemake.output.pickle)
     else:
@@ -187,18 +201,26 @@ if __name__ == "__main__":
         from joblib import Parallel, delayed
         from tqdm import tqdm
 
-        parser = argparse.ArgumentParser(description="Prepare protein data from rinerator")
-        parser.add_argument("--sifs", nargs="+", required=True, help="Rinerator output folders")
+        parser = argparse.ArgumentParser(
+            description="Prepare protein data from rinerator"
+        )
+        parser.add_argument(
+            "--sifs", nargs="+", required=True, help="Rinerator output folders"
+        )
         parser.add_argument("--output", required=True, help="Output pickle file")
         parser.add_argument("--node_feats", type=str, default="label")
         parser.add_argument("--edge_feats", type=str, default="none")
-        parser.add_argument("--threads", type=int, default=1, help="Number of threads to use")
+        parser.add_argument(
+            "--threads", type=int, default=1, help="Number of threads to use"
+        )
         args = parser.parse_args()
 
         prots = pd.DataFrame(pd.Series(args.sifs, name="sif"))
         prots["ID"] = prots["sif"].apply(extract_name)
         prots.set_index("ID", inplace=True)
         prot_encoder = ProteinEncoder(args.node_feats, args.edge_feats)
-        data = Parallel(n_jobs=args.threads)(delayed(prot_encoder)(i) for i in tqdm(prots["sif"]))
+        data = Parallel(n_jobs=args.threads)(
+            delayed(prot_encoder)(i) for i in tqdm(prots["sif"])
+        )
         prots["data"] = data
         prots.to_pickle(args.output)

@@ -1,7 +1,6 @@
-from typing import Tuple, Union
+from typing import Union
 
 from pytorch_lightning import LightningModule
-from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
 

@@ -1,8 +1,5 @@
-from typing import no_type_check
-
 import numpy as np
 import pandas as pd
-from numpy.core.fromnumeric import squeeze
 
 plddt_scores = {}
 for structure in snakemake.input.structs:
