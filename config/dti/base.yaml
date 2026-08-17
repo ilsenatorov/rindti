@@ -1,0 +1,62 @@
+# Shared training settings for the benchmark runs.
+#
+# Copy this and override `datamodule.filename` / `datamodule.exp_name` per dataset,
+# or pass a dataset config on top of it. The hyperparameters below are internally
+# consistent: max_epochs is large enough that early stopping is what ends training,
+# and the LR-plateau patience is comfortably shorter than the early-stop patience.
+seed: 42
+runs: 5 # report mean +- std over 5 seeds
+
+datamodule:
+  filename: null # set me: datasets/<name>/results/prepare_all/<hash>.pkl
+  exp_name: null # set me: used to name the tb_logs/ directory
+  batch_size: 128
+  num_workers: 4
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  max_epochs: 300
+  gradient_clip_val: 100
+  profiler: null
+
+early_stop:
+  patience: 30
+
+model:
+  module: class
+  monitor: val_loss
+  feat_method: concat
+  prot:
+    method: graph
+    hidden_dim: 128
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      hidden_dim: 128
+  drug:
+    method: graph
+    hidden_dim: 128
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      hidden_dim: 128
+  mlp:
+    hidden_dim: 256
+    num_layers: 2
+    dropout: 0.2
+  optimizer:
+    module: adam
+    lr: 0.0005
+    weight_decay: 0.0001
+    reduce_lr:
+      factor: 0.1
+      patience: 10

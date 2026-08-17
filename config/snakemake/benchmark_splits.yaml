@@ -1,0 +1,17 @@
+# Sweep config for run_snakemake.py: builds every split variant of one dataset.
+#
+#   python run_snakemake.py config/snakemake/benchmark_splits.yaml --threads 8
+#
+# IterDict expands the list below into one snakemake run per split, so this
+# produces three prepare_all pickles: random, cold-drug and cold-target.
+# Point `source` at the dataset you want, and copy the parse_dataset block from
+# that dataset's own config (KIBA in particular needs unit: score).
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: nM
+  threshold: 100
+split_data:
+  method: [random, drug, target]

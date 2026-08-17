@@ -32,14 +32,13 @@ uv pip install -e ".[dev,workflow]"
 
 On a CPU-only machine, add `--torch-backend=cpu` to get much smaller wheels.
 
-Two pipeline options need external tools that are **not** pip-installable:
+One pipeline option needs an external tool that is **not** pip-installable:
 
 | Feature | Requirement | How |
 |---|---|---|
 | `prots.structs.method` = `bsite` / `template` / `plddt` | PyMOL, psico, TMalign | Provided by `workflow/envs/pymol.yaml`; run snakemake with `--software-deployment-method conda` |
-| `prots.features.method` = `rinerator` | `rinerator` on `$PATH` | Install separately |
 
-The default config (`structs.method: whole`, `features.method: distance`) needs neither.
+The default config (`structs.method: whole`, `features.method: distance`) does not need it.
 
 ## Quick start
 
@@ -57,6 +56,46 @@ rindti-train config/test/default_dti.yaml
 # 3. Inspect
 tensorboard --logdir=tb_logs
 ```
+
+## Running the benchmarks
+
+`config/dti/base.yaml` holds shared training settings; override per run rather than
+copying the file:
+
+```bash
+rindti-train config/dti/base.yaml \
+    --set datamodule.filename=datasets/davis/results/prepare_all/<hash>.pkl \
+    --set datamodule.exp_name=davis_random
+```
+
+Unknown keys are rejected, so a typo fails immediately instead of being ignored.
+
+To build every split variant of a dataset, use the sweep config:
+
+```bash
+python run_snakemake.py config/snakemake/benchmark_splits.yaml --threads 8
+```
+
+Then turn the TensorBoard logs into a table:
+
+```bash
+python -m rindti.utils.results --logdir tb_logs --output results.csv --summary true
+```
+
+### Binarization thresholds
+
+`parse_dataset.threshold` is interpreted on the scale given by `parse_dataset.unit`:
+
+| Dataset | unit | threshold | meaning |
+|---|---|---|---|
+| Davis, GLASS, BindingDB | `nM` | 100 | Kd/Ki ≤ 100 nM is a positive (pKd ≥ 7) |
+| KIBA | `score` | 12.1 | KIBA score ≥ 12.1 is a positive |
+
+The direction differs: for `nM` a lower value is a stronger interaction, for `score`
+a higher one is. Getting this wrong yields a single-class dataset, which the
+pipeline now rejects rather than silently emitting an empty file.
+
+## Using your own data
 
 To use your own data, point `source` in a config at a directory laid out as:
 
@@ -79,8 +118,20 @@ it in an isolated environment:
 uv run workflow/scripts/get_datasets.py davis --min_num_aa 100 --download_structures true
 ```
 
-Structures must end up **flat** in `resources/structures/` — the pipeline fails
-with an explicit error if it finds them nested in a subdirectory.
+Structures must end up **flat** in `resources/structures/`, named by `Target_ID` —
+the pipeline fails with an explicit error if it finds them nested in a subdirectory.
+
+If the structures are named differently from the `Target_ID`s in your tables (Davis,
+for instance, uses gene names in its tables and UniProt accessions for its AlphaFold
+models), reconcile them by sequence:
+
+```bash
+python workflow/scripts/link_structures.py datasets/davis/resources            # dry run
+python workflow/scripts/link_structures.py datasets/davis/resources --apply true
+```
+
+It writes `structure_mapping.tsv` so the rename is reversible, and reports anything
+it could not match confidently instead of guessing.
 
 ## Testing
 
