@@ -67,7 +67,12 @@ class SnakemakeHelper:
         structures = self._source("structures")
         if not os.path.isdir(structures):
             raise FileNotFoundError(f"Missing the structures directory {structures}")
-        self.prot_ids = [x.split(".")[0] for x in os.listdir(structures) if x.endswith(".pdb")]
+        # splitext, not split("."): Davis target IDs contain dots
+        # (e.g. "RSK1(KinDom.1-N-terminal)"), and truncating at the first one
+        # produced ids whose files do not exist. The distance_based rule then had
+        # unsatisfiable inputs and snakemake silently fell back to the esm rule,
+        # quietly changing the protein featurisation method.
+        self.prot_ids = [os.path.splitext(x)[0] for x in os.listdir(structures) if x.endswith(".pdb")]
         if not self.prot_ids:
             nested = [d for d in os.listdir(structures) if os.path.isdir(os.path.join(structures, d))]
             hint = (

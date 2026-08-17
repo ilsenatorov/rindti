@@ -60,7 +60,10 @@ def split_random(inter: pd.DataFrame, train_frac: float = 0.7, val_frac: float =
         pd.DataFrame: DataFrame with a new 'split' column
     """
     train, valtest = train_test_split(inter, train_size=train_frac)
-    val, test = train_test_split(valtest, train_size=val_frac)
+    # val_frac is a fraction of the whole dataset, but is applied to what is left
+    # after the train split, so it has to be rescaled. Without this, train=0.7 /
+    # val=0.2 silently produced 70/6/24 instead of 70/20/10.
+    val, test = train_test_split(valtest, train_size=val_frac / (1 - train_frac))
     train.loc[:, "split"] = "train"
     val.loc[:, "split"] = "val"
     test.loc[:, "split"] = "test"
@@ -80,7 +83,7 @@ if __name__ == "__main__":
     elif snakemake.params.method == "drug":
         inter = split_groups(inter, col_name="Drug_ID", **fracs)
     elif snakemake.params.method == "random":
-        inter = split_random(inter)
+        inter = split_random(inter, **fracs)
     else:
         raise NotImplementedError("Unknown split type!")
     inter.to_csv(snakemake.output.split_data, sep="\t")

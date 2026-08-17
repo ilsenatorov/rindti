@@ -1,3 +1,5 @@
+import os.path as osp
+
 import torch
 from encd import encd
 from utils import onehot_encode
@@ -6,14 +8,18 @@ node_encoding = encd["prot"]["node"]
 
 
 def encode_residue(residue: str, node_feats: str):
-    """Encode a residue"""
+    """Encode a residue.
+
+    Non-standard residues (modified amino acids, ligands, nucleotides) are treated
+    as unknown: label 0, which is the padding/unknown index reserved by the
+    embedding, or an all-zero one-hot vector.
+    """
     residue = residue.lower()
+    label = node_encoding.get(residue)
     if node_feats == "label":
-        if residue not in node_encoding:
-            return node_encoding["unk"]
-        return node_encoding[residue] + 1
+        return 0 if label is None else label + 1
     elif node_feats == "onehot":
-        return onehot_encode(node_encoding[residue], len(node_encoding))
+        return onehot_encode(label, len(node_encoding))
     else:
         raise ValueError("Unknown node_feats type!")
 
@@ -39,11 +45,15 @@ class Structure:
         self.node_feats = node_feats
 
     def parse_file(self, filename: str) -> None:
-        """Parse PDB file"""
+        """Parse PDB file.
+
+        Residues are keyed by (chain, number): residue numbering restarts per chain,
+        so keying on the number alone silently collapsed every chain onto the first.
+        """
         for line in open(filename):
             if line.startswith("ATOM") and line[12:16].strip() == "CA":
                 res = Residue(line)
-                self.residues[res.num] = res
+                self.residues[(res.chainID, res.num)] = res
 
     def get_coords(self) -> torch.Tensor:
         """Get coordinates of all atoms"""
@@ -54,20 +64,38 @@ class Structure:
         """Get features of all nodes of a graph"""
         return torch.tensor([encode_residue(res.name, self.node_feats) for res in self.residues.values()])
 
-    def get_edges(self, threshold: float) -> torch.Tensor:
-        """Get edges of a graph using threshold as a cutoff"""
+    def get_edges(self, threshold: float) -> tuple:
+        """Get edges of a graph using threshold as a cutoff.
+
+        Returns both the edge index and the CA-CA distance for each edge, so the
+        distance can be kept as an edge attribute instead of being thrown away
+        once it has been thresholded.
+        """
         coords = self.get_coords()
         dist = torch.cdist(coords, coords)
         edges = torch.where(dist < threshold)
+        distances = dist[edges]
         edges = torch.cat([arr.view(-1, 1) for arr in edges], axis=1)
-        edges = edges[edges[:, 0] != edges[:, 1]]
-        return edges.t()
+        keep = edges[:, 0] != edges[:, 1]
+        return edges[keep].t(), distances[keep]
 
-    def get_graph(self, threshold: float) -> dict:
-        """Get a graph using threshold as a cutoff"""
+    def get_graph(self, threshold: float, edge_feats: str = "none") -> dict:
+        """Get a graph using threshold as a cutoff.
+
+        Args:
+            threshold: contact cutoff in Angstrom.
+            edge_feats: ``distance`` keeps the CA-CA distance as a continuous edge
+                attribute; ``none`` produces an unlabelled contact graph. Note that
+                only the ``transformer`` node module consumes continuous edge
+                attributes - GIN/GAT/Cheb ignore edges, and FiLM expects discrete
+                relation types.
+        """
         nodes = self.get_nodes()
-        edges = self.get_edges(threshold)
-        return dict(x=nodes, edge_index=edges)
+        edges, distances = self.get_edges(threshold)
+        graph = dict(x=nodes, edge_index=edges)
+        if edge_feats == "distance":
+            graph["edge_feats"] = distances.unsqueeze(1).float()
+        return graph
 
 
 if __name__ == "__main__":
@@ -79,20 +107,23 @@ if __name__ == "__main__":
         all_structures = snakemake.input.pdbs
         threshold = snakemake.params.threshold
 
+        edge_feats = snakemake.params.edge_feats
+
         def get_graph(filename: str) -> dict:
             """Single function to be run in parallel."""
-            return Structure(filename, snakemake.params.node_feats).get_graph(threshold)
+            return Structure(filename, snakemake.params.node_feats).get_graph(threshold, edge_feats)
 
         data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
         df = pd.DataFrame(pd.Series(data, name="data"))
         df["filename"] = all_structures
-        df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+        # splitext, not split("."): target IDs may contain dots, and truncating
+        # there produced IDs that no longer joined against the interaction table.
+        df["ID"] = df["filename"].apply(lambda x: osp.splitext(osp.basename(x))[0])
         df.set_index("ID", inplace=True)
         df.drop("filename", axis=1, inplace=True)
         df = df.to_pickle(snakemake.output.pickle)
     else:
         import os
-        import os.path as osp
 
         from jsonargparse import CLI
 
@@ -113,7 +144,7 @@ if __name__ == "__main__":
             data = Parallel(n_jobs=threads)(delayed(get_graph)(i) for i in tqdm(pdbs))
             df = pd.DataFrame(pd.Series(data, name="data"))
             df["filename"] = pdbs
-            df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])
+            df["ID"] = df["filename"].apply(lambda x: osp.splitext(osp.basename(x))[0])
             df.set_index("ID", inplace=True)
             df.drop("filename", axis=1, inplace=True)
             df = df.to_dict("index")

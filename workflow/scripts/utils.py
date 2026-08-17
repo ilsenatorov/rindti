@@ -4,15 +4,24 @@ from torch import FloatTensor, LongTensor
 
 
 def onehot_encode(position: int, count: int) -> list:
-    """One-hot encode position
+    """One-hot encode position.
+
+    ``position`` is a 0-based index into a vocabulary built by
+    :func:`encd.list_to_dict`. Pass ``None`` for an out-of-vocabulary entry to get
+    an all-zero vector.
+
     Args:
-        position (int): Which entry to set to 1
+        position (int): Which entry to set to 1, 0-based. ``None`` for unknown.
         count (int): Max number of entries.
     Returns:
         list: list with zeroes and 1 in <position>
     """
-    t = [0] * (count)
-    t[position - 1] = 1
+    t = [0] * count
+    if position is None:
+        return t
+    if not 0 <= position < count:
+        raise IndexError(f"position {position} out of range for a vocabulary of {count}")
+    t[position] = 1
     return t
 
 
