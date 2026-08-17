@@ -1,22 +1,43 @@
-.*
-!.gitattributes
-!.gitignore
-!.gitmodules
-!.pre-commit-config.yaml
-!.flake8
-!.readthedocs.yaml
-!.github
-__*__/
+# Python
 __pycache__/
-*.csv
-*.pkl
-*.pyc
-data/
-report/
-results/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Tooling caches
+.coverage
+coverage.xml
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Snakemake
+.snakemake/
+
+# Docs
+docs/_build/
+docs/build/
+docs/source/_build/
+docs/source/_autosummary/
+
+# Data & results (fetched via scripts/, archived on Zenodo)
 datasets/
+data/
+results/
+report/
 *logs/
-*Untitled*
-*build*
-*egg-info*
-dist
+*.pkl
+
+# Editor
+.vscode/
+.idea/
+
+# uv lockfile is intentionally tracked
+!uv.lock
+
+# Hypothesis
+.hypothesis/

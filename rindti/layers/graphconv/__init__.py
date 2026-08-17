@@ -2,7 +2,6 @@ from .cheb import ChebConvNet
 from .film import FilmConvNet
 from .gat import GatConvNet
 from .ginconv import GINConvNet
-from .pna import PNAConvNet
 from .transformer import TransformerNet
 
 __all__ = [
@@ -10,6 +9,5 @@ __all__ = [
     "FilmConvNet",
     "GatConvNet",
     "GINConvNet",
-    "PNAConvNet",
     "TransformerNet",
 ]
