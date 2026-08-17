@@ -1,5 +1,5 @@
 import pytest
-from pytorch_lightning import Trainer
+from lightning.pytorch import Trainer
 
 from rindti.models import ClassificationModel, RegressionModel
 from rindti.utils import IterDict, read_config
@@ -12,6 +12,9 @@ all_configs = IterDict()(default_config)
 
 
 class BaseTestModel:
+    # `dti_datamodule` is produced by the full snakemake pipeline.
+    pytestmark = pytest.mark.snakemake
+
     @pytest.mark.parametrize("config", all_configs)
     @pytest.mark.slow
     def test_full(self, config, dti_datamodule):
@@ -35,6 +38,7 @@ class BaseTestModel:
         dti_datamodule.update_config(config)
         model = self.model_class(**config)
         trainer = Trainer(
+            accelerator="gpu",
             devices=1,
             fast_dev_run=True,
             enable_checkpointing=False,

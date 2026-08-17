@@ -3,6 +3,9 @@ import pytest
 
 from rindti.models.dti.baseline.run import run
 
+# `split_data` is produced by the full snakemake pipeline.
+pytestmark = pytest.mark.snakemake
+
 
 @pytest.fixture
 def train() -> pd.DataFrame:

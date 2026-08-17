@@ -1,16 +1,14 @@
 import os
 
 import pytest
-from snakemake.utils import validate
+from snakemake.utils import update_config, validate
 
 from rindti.utils import read_config
 
 from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
 
 snakemake_configs = [
-    os.path.join(SNAKEMAKE_CONFIG_DIR, x)
-    for x in os.listdir(SNAKEMAKE_CONFIG_DIR)
-    if x != "default.yaml"
+    os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
 ]
 
 
@@ -22,14 +20,13 @@ class TestSnakeMake:
     @pytest.mark.parametrize("config_file", snakemake_configs)
     def test_configs(self, snakemake_config: dict, config_file: dict):
         """Test all snakemake configs."""
-        snakemake_config.update(read_config(config_file))
+        update_config(snakemake_config, read_config(config_file))
         validate(snakemake_config, "workflow/schemas/config.schema.yaml")
 
     @pytest.mark.parametrize("method", ["whole", "plddt", "bsite", "template"])
     def test_structures(self, method: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the various structure-parsing methods."""
         snakemake_config["prots"]["structs"]["method"] = method
-        snakemake_config["only_prots"] = True
         run_snakemake(snakemake_config, tmpdir_factory)
 
     # @pytest.mark.gpu
@@ -43,7 +40,6 @@ class TestSnakeMake:
     def test_features(self, features: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the graph creation methods."""
         snakemake_config["prots"]["features"]["method"] = features
-        snakemake_config["only_prots"] = True
         run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot"])
@@ -82,9 +78,7 @@ class TestSnakeMake:
 
     @pytest.mark.parametrize("filtering", ["all", "posneg"])
     @pytest.mark.parametrize("sampling", ["none", "over", "under"])
-    def test_parse_dataset(
-        self, filtering: str, sampling: str, snakemake_config: dict, tmpdir_factory: str
-    ):
+    def test_parse_dataset(self, filtering: str, sampling: str, snakemake_config: dict, tmpdir_factory: str):
         """Test the dataset filtering and sampling methods."""
         snakemake_config["parse_dataset"]["filtering"] = filtering
         snakemake_config["parse_dataset"]["sampling"] = sampling

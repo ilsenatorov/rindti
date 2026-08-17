@@ -22,9 +22,7 @@ fake_data = {
     "x": torch.rand(size=(13, 16)),
 }
 
-fake_data = next(
-    iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_workers=1))
-)
+fake_data = next(iter(DataLoader([Data(**fake_data)] * 10, batch_size=5, num_workers=1)))
 
 
 class BaseTestGraphPool:
