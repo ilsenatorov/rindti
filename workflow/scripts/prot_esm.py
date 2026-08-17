@@ -24,9 +24,7 @@ def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
 
     sequence_representations = []
     for i, (_, seq) in enumerate(data):
-        sequence_representations.append(
-            token_representations[i, 1 : len(seq) + 1].mean(0)
-        )
+        sequence_representations.append(token_representations[i, 1 : len(seq) + 1].mean(0))
     data = [{"x": x} for x in sequence_representations]
     prot["data"] = data
     prot = prot.to_dict("index")
@@ -35,10 +33,10 @@ def generate_esm_python(prot: pd.DataFrame) -> pd.DataFrame:
 
 def generate_esm_script(prot: pd.DataFrame) -> pd.DataFrame:
     """Create an ESM script for btach processing."""
-    prot_ids, seqs = list(zip(*[(k, v) for k, v in prot["Target"].to_dict().items()]))
+    prot_ids, seqs = zip(*prot["Target"].to_dict().items(), strict=True)
     os.makedirs("./esms", exist_ok=True)
     with open("./esms/prots.fasta", "w") as fasta:
-        for prot_id, seq in zip(prot_ids, seqs):
+        for prot_id, seq in zip(prot_ids, seqs, strict=True):
             fasta.write(f">{prot_id}\n{seq[:1022]}\n")
 
     esm_parser = create_parser()
@@ -56,13 +54,7 @@ def generate_esm_script(prot: pd.DataFrame) -> pd.DataFrame:
     extract_main(esm_args)
     data = []
     for prot_id in prot_ids:
-        data.append(
-            {
-                "x": torch.load(f"./esms/{prot_id}.pt")["mean_representations"][
-                    33
-                ].unsqueeze(0)
-            }
-        )
+        data.append({"x": torch.load(f"./esms/{prot_id}.pt")["mean_representations"][33].unsqueeze(0)})
     # os.rmdir("./esms")
     prot["data"] = data
     # prot = prot.to_dict("index")

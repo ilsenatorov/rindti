@@ -1,5 +1,5 @@
 import pickle
-from typing import Iterable
+from collections.abc import Iterable
 
 import pandas as pd
 from pandas.core.frame import DataFrame
@@ -47,12 +47,8 @@ if __name__ == "__main__":
     prot_count = interactions["Target_ID"].value_counts().to_dict()
     drug_count = interactions["Drug_ID"].value_counts().to_dict()
 
-    prots["data"] = prots.apply(
-        lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1
-    )
-    drugs["data"] = drugs.apply(
-        lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1
-    )
+    prots["data"] = prots.apply(lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1)
+    drugs["data"] = drugs.apply(lambda x: {**x["data"], "count": drug_count[x.name]}, axis=1)
 
     full_data = process_df(interactions)
     snakemake.config["data"] = {

@@ -1,8 +1,10 @@
-$schema: "http://json-schema.org/draft-06/schema#"
+$schema: "https://json-schema.org/draft/2020-12/schema"
 
 description: snakemake configuration file
 
 type: object
+additionalProperties: false
+required: [source, prots, drugs, split_data, parse_dataset]
 
 properties:
   seed:
@@ -11,70 +13,102 @@ properties:
     type: string
   prots:
     type: object
+    additionalProperties: false
+    required: [structs, features]
     properties:
       structs:
         type: object
+        additionalProperties: false
+        required: [method]
         properties:
           method:
             type: string
+            enum: [whole, template, bsite, plddt]
           bsite:
             type: object
+            additionalProperties: false
             properties:
               radius:
                 type: number
           template:
             type: object
+            additionalProperties: false
             properties:
               radius:
                 type: number
           plddt:
             type: object
+            additionalProperties: false
             properties:
               threshold:
                 type: number
       features:
         type: object
+        additionalProperties: false
+        required: [method, node_feats, edge_feats]
         properties:
           method:
             type: string
+            enum: [distance, rinerator, esm]
           distance:
             type: object
+            additionalProperties: false
             properties:
               threshold:
                 type: number
           node_feats:
             type: string
+            enum: [label, onehot]
           edge_feats:
             type: string
+            enum: [label, onehot, none]
   drugs:
     type: object
+    additionalProperties: false
+    required: [max_num_atoms, node_feats, edge_feats]
     properties:
       max_num_atoms:
         type: number
       node_feats:
         type: string
+        enum: [label, onehot, glycan]
       edge_feats:
         type: string
+        enum: [label, onehot, none]
   split_data:
     type: object
+    additionalProperties: false
+    required: [method, train, val]
     properties:
       method:
         type: string
+        enum: [random, target, drug]
       train:
         type: number
+        exclusiveMinimum: 0
+        exclusiveMaximum: 1
       val:
         type: number
+        exclusiveMinimum: 0
+        exclusiveMaximum: 1
       test:
         type: number
+        exclusiveMinimum: 0
+        exclusiveMaximum: 1
   parse_dataset:
     type: object
+    additionalProperties: false
+    required: [filtering, sampling, task, threshold]
     properties:
       filtering:
         type: string
+        enum: [all, posneg, balanced]
       sampling:
         type: string
+        enum: [over, under, none]
       task:
         type: string
+        enum: [class, reg]
       threshold:
         type: number
       log:

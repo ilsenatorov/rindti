@@ -64,17 +64,21 @@ class SnakemakeHelper:
     def _set_inputs(self):
         self.source_dir = self.config["source"]
         self.target_dir = "/".join(self.source_dir.split("/")[:-1] + ["results"])
-        self.prot_ids = [
-            x.split(".")[0]
-            for x in os.listdir(self._source("structures"))
-            if x.endswith(".pdb")
-        ]
-        self.raw_structs = [
-            self._source("structures", x + ".pdb") for x in self.prot_ids
-        ]
-        self.tables = {
-            k: self._source("tables", k + ".tsv") for k in ["inter", "lig", "prot"]
-        }
+        structures = self._source("structures")
+        if not os.path.isdir(structures):
+            raise FileNotFoundError(f"Missing the structures directory {structures}")
+        self.prot_ids = [x.split(".")[0] for x in os.listdir(structures) if x.endswith(".pdb")]
+        if not self.prot_ids:
+            nested = [d for d in os.listdir(structures) if os.path.isdir(os.path.join(structures, d))]
+            hint = (
+                f" It contains the subdirector{'y' if len(nested) == 1 else 'ies'} "
+                f"{nested} - the PDBs are probably one level too deep."
+                if nested
+                else ""
+            )
+            raise ValueError(f"No .pdb files found in {structures}.{hint}")
+        self.raw_structs = [self._source("structures", x + ".pdb") for x in self.prot_ids]
+        self.tables = {k: self._source("tables", k + ".tsv") for k in ["inter", "lig", "prot"]}
 
     def _source(self, *args) -> str:
         return os.path.join(self.source_dir, *args)

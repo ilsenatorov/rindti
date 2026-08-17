@@ -40,7 +40,7 @@ class Structure:
 
     def parse_file(self, filename: str) -> None:
         """Parse PDB file"""
-        for line in open(filename, "r"):
+        for line in open(filename):
             if line.startswith("ATOM") and line[12:16].strip() == "CA":
                 res = Residue(line)
                 self.residues[res.num] = res
@@ -52,12 +52,7 @@ class Structure:
 
     def get_nodes(self) -> torch.Tensor:
         """Get features of all nodes of a graph"""
-        return torch.tensor(
-            [
-                encode_residue(res.name, self.node_feats)
-                for res in self.residues.values()
-            ]
-        )
+        return torch.tensor([encode_residue(res.name, self.node_feats) for res in self.residues.values()])
 
     def get_edges(self, threshold: float) -> torch.Tensor:
         """Get edges of a graph using threshold as a cutoff"""
@@ -88,9 +83,7 @@ if __name__ == "__main__":
             """Single function to be run in parallel."""
             return Structure(filename, snakemake.params.node_feats).get_graph(threshold)
 
-        data = Parallel(n_jobs=snakemake.threads)(
-            delayed(get_graph)(i) for i in tqdm(all_structures)
-        )
+        data = Parallel(n_jobs=snakemake.threads)(delayed(get_graph)(i) for i in tqdm(all_structures))
         df = pd.DataFrame(pd.Series(data, name="data"))
         df["filename"] = all_structures
         df["ID"] = df["filename"].apply(lambda x: x.split("/")[-1].split(".")[0])

@@ -41,15 +41,3 @@ rule run_pymol:
         "../envs/pymol.yaml"
     shell:
         "pymol -k -y -c {input.script} > {log} 2>&1"
-
-
-# rule save_structure_info:
-#     input:
-#         structs=expand(structs, protein=targets),
-#     output:
-#         tsv="{results}/structure_info/{type}_info.tsv".format(
-#             results=target,
-#             type=config["structs"],
-#         ),
-#     script:
-#         "scripts/save_structure_info.py"

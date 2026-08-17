@@ -30,13 +30,9 @@ def create_script(protein: str, inp: str, params: dict):
 
         fmt_keywords["radius"] = params.other_params[params.method]["radius"]
         if params.method == "bsite":
-            script.append(
-                'cmd.select("result", "br. {protein} within {radius} of organic")'
-            )
+            script.append('cmd.select("result", "br. {protein} within {radius} of organic")')
         elif params.method == "template":
-            script.append(
-                'cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")'
-            )
+            script.append('cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")')
     script.append('cmd.save("{parsed_structs_dir}/{protein}.pdb", "result")')
     fmt_keywords["parsed_structs_dir"] = params.parsed_structs_dir
     fmt_keywords["structs"] = params.method
@@ -45,7 +41,7 @@ def create_script(protein: str, inp: str, params: dict):
 
 
 if __name__ == "__main__":
-    for inp, out in zip(snakemake.input, snakemake.output):
+    for inp, out in zip(snakemake.input, snakemake.output, strict=True):
         protein = os.path.basename(out).split(".")[0]
 
         with open(out, "w") as file:

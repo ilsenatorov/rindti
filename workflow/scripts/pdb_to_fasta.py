@@ -29,7 +29,7 @@ threetoone = {
 def pdb_to_sequence(pdb_filename: str) -> str:
     """Extract sequence from PDB file and return it as a string."""
     sequence = ""
-    with open(pdb_filename, "r") as file:
+    with open(pdb_filename) as file:
         for line in file.readlines():
             if line.startswith("ATOM") and line[12:16].strip() == "CA":
                 sequence += threetoone[line[17:20].strip()]
