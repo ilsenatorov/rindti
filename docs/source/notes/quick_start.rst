@@ -28,7 +28,7 @@ Once our dataset is downloaded, we can run the snakemake pipline with the follow
 
 .. code:: console
 
-    snakemake -j 10 --use-conda --configfile config/snakemake/glass.yaml
+    snakemake -j 10 --software-deployment-method conda --configfile config/snakemake/glass.yaml
 
 
 This will create the final pickle file for the GLASS dataset, which will be located in ``datasets/glass/resources/prepare_all`` folder.
@@ -44,7 +44,7 @@ We can run the training script with the following code:
 
 .. code:: console
 
-    python train.py config/dti/glass.yaml
+    rindti-train config/dti/glass.yaml
 
 
 

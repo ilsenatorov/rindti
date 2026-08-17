@@ -30,7 +30,6 @@ This is a collection of various models and utilities that are focused on using p
    modules/models
    modules/layers
    modules/data
-   modules/losses
    modules/utils
 
 .. autosummary::

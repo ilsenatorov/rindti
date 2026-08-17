@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "RINDTI: drug-target interaction prediction from protein residue interaction networks"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: Ilya
+    family-names: Senatorov
+    email: ilya.senatorov@helmholtz-hips.de
+    affiliation: Helmholtz Institute for Pharmaceutical Research Saarland
+repository-code: "https://github.com/ilsenatorov/rindti"
+url: "https://rindti.readthedocs.io"
+abstract: >-
+  RINDTI predicts drug-target interactions by representing proteins as residue
+  interaction networks (RINs) and drugs as molecular graphs, encoding both with
+  graph neural networks. It ships a reproducible Snakemake pipeline that turns
+  protein structures and interaction tables into ready-to-train graph datasets.
+keywords:
+  - drug-target interaction
+  - graph neural networks
+  - residue interaction network
+  - structural bioinformatics
+license: MIT
+version: 2.0.0

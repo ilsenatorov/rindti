@@ -3,8 +3,6 @@ import doctest
 import os
 import sys
 
-import sphinx_rtd_theme
-
 sys.path.append(os.path.abspath("../.."))
 
 import rindti
@@ -34,25 +32,17 @@ copyright = f"{datetime.datetime.now().year}, {author}"
 version = rindti.__version__
 release = rindti.__version__
 
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "furo"
 
 doctest_default_flags = doctest.NORMALIZE_WHITESPACE
 autodoc_member_order = "bysource"
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/", None),
-    "numpy": ("http://docs.scipy.org/doc/numpy", None),
-    "pandas": ("http://pandas.pydata.org/pandas-docs/dev", None),
-    "torch": ("https://pytorch.org/docs/master", None),
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
     "torch_geometric": ("https://pytorch-geometric.readthedocs.io/en/latest/", None),
-    "pytorch_lightning": ("https://pytorch-lightning.readthedocs.io/en/latest/", None),
-}
-
-html_theme_options = {
-    "collapse_navigation": False,
-    "display_version": True,
-    "logo_only": True,
-    "navigation_depth": 2,
+    "lightning": ("https://lightning.ai/docs/pytorch/stable/", None),
 }
 
 rst_context = {"rindti": rindti}

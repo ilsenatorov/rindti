@@ -64,27 +64,14 @@ Thus to create DTI datasets one needs to specialize the split:
         test = DTIDataset(pickle_file, split="test")
 
 
-Pretraining datasets
-^^^^^^^^^^^^^^^^^^^^
-
-The datasets for pretraining are also obtained from the snakemake workflow, however, the splitting is done internally.
-
-.. code:: python
-
-        pickle_file = "filename.pkl"
-        dataset = PreTrainDataset(pickle_file)
-
-
 DataModules
 -----------
 
-Datamodules are based on `pytorch_lightning DataModules <https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html>`_ and aim to put all data-related functionality (dataloaders, splitting, sampling) into a single object.
+Datamodules are based on `Lightning DataModules <https://lightning.ai/docs/pytorch/stable/data/datamodule.html>`_ and aim to put all data-related functionality (dataloaders, splitting, sampling) into a single object.
 Can be invoked simply with:
 
 .. code:: python
 
-  from rindti.data import DTIDataModule, PreTrainDataModule
+  from rindti.data import DTIDataModule
   dti_pickle_file = "dti.pkl"
-  dti_dm = DTIDataModule(dti_pickle_file)
-  pretrain_pickle_file = "pretrain.pkl"
-  pretrain_dm = PreTrainDataModule(pretrain_pickle_file)
+  dti_dm = DTIDataModule(dti_pickle_file, exp_name="my_experiment")

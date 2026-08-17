@@ -4,13 +4,13 @@ Snakemake workflows
 Introduction
 ------------
 
-A workflow is a collection of rules that define the construction both the DTI and the protein pretraining datasets.
+A workflow is a collection of rules that define the construction of the DTI dataset.
 It should be run with the following command:
 
 
 .. code:: console
 
-  snakemake -j 1 --use-conda --configfile your_config_file.yaml
+  snakemake -j 1 --software-deployment-method conda --configfile your_config_file.yaml
 
 Confuguration
 -------------
@@ -95,9 +95,8 @@ In order to create a DTI dataset, the following requirements have to be met:
   - ``<source>/resources/tables/inter.tsv`` -  The interactions data, has to contain *Drug_ID*, *Target_ID* and *Y* columns,
   - ``<source>/resources/tables/lig.tsv`` -  The ligand data, has to contain *Drug_ID* and *Drug* columns, where *Drug* contains SMILES representation of the drug.
   - ``<source>/resources/tables/prot.tsv`` -  The protein data, has to contain *Target_ID* and *Target* columns, where *Target* contains the protein sequence.
-- ``only_proteins`` entry in the snakemake config has to be *false*
 
-After running the pipeline with ``snakemake -j 16 --use-conda --configfile your_config_file.yaml``, the pickle file should be created in ``<target>/results/prepare_all/`` folder.
+After running the pipeline with ``snakemake -j 16 --software-deployment-method conda --configfile your_config_file.yaml``, the pickle file should be created in ``<target>/results/prepare_all/`` folder.
 
 File validation
 ^^^^^^^^^^^^^^^
@@ -124,16 +123,3 @@ The following code can be used to validate the tables:
   for i in ['inter', 'lig', 'prot']:
     df = pd.read_csv(f'test/test_data/resources/tables/{i}.tsv', sep='\t')
     validate(df, f'workflow/schemas/{i}.schema.yaml'.format(i))
-
-
-
-Protein dataset creation
-------------------------
-
-
-In order to create the protein-only dataset (for pretraining), the following requirements have to be met:
-
-- PDB structures, located in the ``<source>/resources/structures`` directory
-- ``only_proteins`` entry in the snakemake config has to be *true*
-
-After running the pipeline with ``snakemake -j 16 --use-conda``, the pickle file should be created in ``<target>/results/prot_data/`` folder.

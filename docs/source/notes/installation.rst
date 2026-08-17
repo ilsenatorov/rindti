@@ -1,39 +1,63 @@
 Installation
 ============
 
+RINDTI requires **Python 3.11 or newer**.
 
-Conda installation
--------------------
-
-One can install the packages necessary through conda (mamba) using the following commands:
+Installing the package
+----------------------
 
 .. code:: console
 
-    conda install -c conda-forge mamba # mamba is much faster than conda
-    mamba env create --quiet --name rindti --file workflow/envs/main.yaml
+    git clone https://github.com/ilsenatorov/rindti
+    cd rindti
+    uv pip install -e ".[dev,workflow]"
 
+On a machine without a GPU, add ``--torch-backend=cpu`` to pull much smaller wheels.
 
-Then one can run optionally run `pip install .` in the root directory of the repository to install rindti as a package.
+``pip`` works just as well if you prefer it:
 
-Manual installation
--------------------
+.. code:: console
 
-In order to use this module, you must first install the following packages (preferably in the order listed here):
+    python -m venv .venv && source .venv/bin/activate
+    pip install -e ".[dev,workflow]"
 
-  - pytorch
-  - torch_geometric
-  - pytorch_lightning
-  - snakemake
-  - rdkit
-  - seaborn
-  - plotly
+Optional dependency groups:
 
-Then one can run optionally ``pip install .`` in the root directory of the repository to install rindti as a package.
+  - ``workflow`` - snakemake and the data-preparation pipeline
+  - ``esm`` - protein language model features (``prots.features.method: esm``)
+  - ``data`` - dataset download helpers (PyTDC, gdown)
+  - ``baseline`` - XGBoost baselines
+  - ``dev`` - pytest, ruff, pre-commit
+  - ``docs`` - sphinx
 
+External tools
+--------------
+
+Two pipeline options rely on programs that cannot be installed from PyPI.
+
+**PyMOL** is needed for ``prots.structs.method`` set to ``bsite``, ``template`` or
+``plddt``. It is declared in ``workflow/envs/pymol.yaml``, so snakemake will build
+the environment for you provided you pass:
+
+.. code:: console
+
+    snakemake --software-deployment-method conda ...
+
+**rinerator** is needed for ``prots.features.method: rinerator`` and must be
+available on your ``$PATH``.
+
+The default configuration (``structs.method: whole``, ``features.method: distance``)
+requires neither of them.
 
 Testing
 -------
 
-In order to asses whether the installation of the packages was succesfull, please run ``pytest`` in the root directory.
-If the packages were not installed into path using pip, please use ``python -m pytest`` instead.
-Furthermore, if your device has no GPU support, please use ``pytest -m "not gpu"``
+To check the installation:
+
+.. code:: console
+
+    pytest -m "not gpu and not snakemake"   # fast unit tests
+    pytest -m "not gpu"                     # also runs the full pipeline
+
+The ``snakemake``-marked tests build a conda environment for PyMOL the first time
+they run, so expect the first invocation to be slow.
