@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Tuple
+from typing import Literal, Tuple
 
 import numpy as np
 import pandas as pd
@@ -32,14 +32,16 @@ class DatasetFetcher:
     def __init__(
         self,
         dataset_name: str,
-        dataset_dir: str = "datasets",
+        dataset_dir: Literal["davis", "kiba", "glass", "BindingDB"] = "datasets",
         min_num_aa: int = 0,
         max_num_aa: int = float("inf"),
+        download_structures: bool = False,
     ):
         self.dataset_name = dataset_name
         self.dataset_dir = dataset_dir
         self.min_num_aa = min_num_aa
         self.max_num_aa = max_num_aa
+        self.download_structures = download_structures
         self.dataset_folder = f"{dataset_dir}/{dataset_name}/resources"
         self.structures_folder = f"{self.dataset_folder}/structures"
         self.tables_folder = f"{self.dataset_folder}/tables"
@@ -90,7 +92,7 @@ class DatasetFetcher:
         elif self.dataset_name == "glass":
             return self._get_glass()
         elif self.dataset_name.lower() == "davis":
-            raise NotImplementedError("Davis dataset is not available yet.")
+            data = DTI("Davis").get_data()
         else:
             data = DTI(name=self.dataset_name).get_data()
         return (
@@ -116,13 +118,14 @@ class DatasetFetcher:
         inter, lig, prot = self.load_data()
         inter = inter[inter["Y"].notna()]
         inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
-        for i in tqdm(inter["Target_ID"].unique()):
-            self.get_pdb(i)
-        available_structures = [
-            x.split(".")[0] for x in os.listdir(self.structures_folder)
-        ]
-        inter = inter[inter["Target_ID"].isin(available_structures)]
-        prot = prot[prot["Target_ID"].isin(available_structures)]
+        if self.download_structures:
+            for i in tqdm(inter["Target_ID"].unique()):
+                self.get_pdb(i)
+            available_structures = [
+                x.split(".")[0] for x in os.listdir(self.structures_folder)
+            ]
+            inter = inter[inter["Target_ID"].isin(available_structures)]
+            prot = prot[prot["Target_ID"].isin(available_structures)]
         lig = lig[lig["Drug_ID"].isin(inter["Drug_ID"].unique())]
 
         inter.to_csv(f"{self.tables_folder}/inter.tsv", sep="\t", index=False)
@@ -140,8 +143,11 @@ if __name__ == "__main__":
         dataset_dir: str = "datasets",
         min_num_aa: int = 0,
         max_num_aa: Union[int, float] = float("inf"),
+        download_structures: bool = False,
     ):
         """Run the script."""
-        DatasetFetcher(dataset_name, dataset_dir, min_num_aa, max_num_aa).run()
+        DatasetFetcher(
+            dataset_name, dataset_dir, min_num_aa, max_num_aa, download_structures
+        ).run()
 
     cli = CLI(run)

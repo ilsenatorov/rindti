@@ -1,1 +1,4 @@
 source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole # whole, template, bsite, plddt

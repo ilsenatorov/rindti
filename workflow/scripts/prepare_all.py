@@ -44,8 +44,8 @@ if __name__ == "__main__":
     prots = prots[prots.index.isin(interactions["Target_ID"].unique())]
     drugs = drugs[drugs.index.isin(interactions["Drug_ID"].unique())]
 
-    prot_count = interactions["Target_ID"].value_counts()
-    drug_count = interactions["Drug_ID"].value_counts()
+    prot_count = interactions["Target_ID"].value_counts().to_dict()
+    drug_count = interactions["Drug_ID"].value_counts().to_dict()
 
     prots["data"] = prots.apply(
         lambda x: {**x["data"], "count": prot_count[x.name]}, axis=1
