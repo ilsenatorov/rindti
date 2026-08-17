@@ -81,7 +81,6 @@ After running the snakemake workflow for dataset1 and dataset2, the following fi
   ├── prot_data
   ├── pymol_logs
   ├── pymol_scripts
-  ├── rinerator
   └── split_data
 
 

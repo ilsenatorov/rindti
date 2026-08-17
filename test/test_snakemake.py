@@ -3,7 +3,7 @@ import os
 import pytest
 from snakemake.utils import update_config, validate
 
-from rindti.utils import read_config
+from rindti.utils import IterDict, read_config
 
 from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
 
@@ -19,9 +19,16 @@ class TestSnakeMake:
 
     @pytest.mark.parametrize("config_file", snakemake_configs)
     def test_configs(self, snakemake_config: dict, config_file: dict):
-        """Test all snakemake configs."""
+        """Every shipped config must validate against the schema.
+
+        Sweep configs hold lists where the schema wants scalars, since
+        ``run_snakemake.py`` expands them into one run each. Expand them the same
+        way here so that each resulting run is validated, rather than exempting
+        them from the check.
+        """
         update_config(snakemake_config, read_config(config_file))
-        validate(snakemake_config, "workflow/schemas/config.schema.yaml")
+        for expanded in IterDict()(snakemake_config):
+            validate(expanded, "workflow/schemas/config.schema.yaml")
 
     @pytest.mark.parametrize("method", ["whole", "plddt", "bsite", "template"])
     def test_structures(self, method: str, snakemake_config: dict, tmpdir_factory: str):
@@ -43,7 +50,7 @@ class TestSnakeMake:
         run_snakemake(snakemake_config, tmpdir_factory)
 
     @pytest.mark.parametrize("node_feats", ["label", "onehot"])
-    @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
+    @pytest.mark.parametrize("edge_feats", ["distance", "none"])
     def test_prot_encodings(
         self,
         node_feats: str,
@@ -56,7 +63,7 @@ class TestSnakeMake:
         snakemake_config["prots"]["features"]["edge_feats"] = edge_feats
         run_snakemake(snakemake_config, tmpdir_factory)
 
-    @pytest.mark.parametrize("node_feats", ["label", "onehot", "glycan"])
+    @pytest.mark.parametrize("node_feats", ["label", "onehot", "rich", "glycan"])
     @pytest.mark.parametrize("edge_feats", ["label", "onehot", "none"])
     def test_drug_encodings(
         self,

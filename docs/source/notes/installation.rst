@@ -33,7 +33,7 @@ Optional dependency groups:
 External tools
 --------------
 
-Two pipeline options rely on programs that cannot be installed from PyPI.
+One pipeline option relies on a program that cannot be installed from PyPI.
 
 **PyMOL** is needed for ``prots.structs.method`` set to ``bsite``, ``template`` or
 ``plddt``. It is declared in ``workflow/envs/pymol.yaml``, so snakemake will build
@@ -43,11 +43,8 @@ the environment for you provided you pass:
 
     snakemake --software-deployment-method conda ...
 
-**rinerator** is needed for ``prots.features.method: rinerator`` and must be
-available on your ``$PATH``.
-
 The default configuration (``structs.method: whole``, ``features.method: distance``)
-requires neither of them.
+does not require PyMOL.
 
 Testing
 -------

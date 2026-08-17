@@ -7,22 +7,60 @@ from rdkit.Chem import rdmolfiles, rdmolops
 from torch_geometric.utils import to_undirected
 from utils import onehot_encode
 
+# Buckets for the `rich` atom featuriser. Values outside a bucket land in a
+# trailing "other" slot, so every list below encodes len(bucket) + 1 features.
+DEGREES = [0, 1, 2, 3, 4, 5]
+CHARGES = [-2, -1, 0, 1, 2]
+NUM_HS = [0, 1, 2, 3, 4]
+HYBRIDIZATIONS = ["SP", "SP2", "SP3", "SP3D", "SP3D2"]
+CHIRALITIES = [
+    "CHI_UNSPECIFIED",
+    "CHI_TETRAHEDRAL_CW",
+    "CHI_TETRAHEDRAL_CCW",
+    "CHI_OTHER",
+]
+
+
+def _bucket(value, options: list) -> list:
+    """One-hot over ``options`` with a trailing slot for anything unlisted."""
+    encoded = [0] * (len(options) + 1)
+    encoded[options.index(value) if value in options else len(options)] = 1
+    return encoded
+
 
 class DrugEncoder:
     """Drug encoder, goes from SMILES to dictionary of torch data
 
     Args:
-        node_feats (str): 'label' or 'onehot'
+        node_feats (str): 'label', 'onehot', 'rich' or 'glycan'
         edge_feats (str): 'label' or 'onehot
         max_num_atoms (int, optional): filter out molecules that are too big. Defaults to 150.
     """
 
     def __init__(self, node_feats: str, edge_feats: str, max_num_atoms: int = 150):
-        assert node_feats in {"label", "onehot", "glycan", "glycanone", "IUPAC"}
+        assert node_feats in {"label", "onehot", "rich", "glycan", "glycanone", "IUPAC"}
         assert edge_feats in {"label", "onehot", "none"}
         self.node_feats = node_feats
         self.edge_feats = edge_feats
         self.max_num_atoms = max_num_atoms
+
+    def encode_node_rich(self, atom_num, atom) -> list:
+        """Standard atom featurisation.
+
+        ``label``/``onehot`` describe an atom by its element alone, which is far
+        leaner than any published DTI baseline uses. This adds the usual
+        OGB/DeepChem descriptors: connectivity, charge, hydrogens, hybridisation,
+        aromaticity, ring membership and chirality.
+        """
+        return (
+            _bucket(atom_num, list(encd["drug"]["node"]))
+            + _bucket(atom.GetDegree(), DEGREES)
+            + _bucket(atom.GetFormalCharge(), CHARGES)
+            + _bucket(atom.GetTotalNumHs(), NUM_HS)
+            + _bucket(str(atom.GetHybridization()), HYBRIDIZATIONS)
+            + _bucket(str(atom.GetChiralTag()), CHIRALITIES)
+            + [int(atom.GetIsAromatic()), int(atom.IsInRing())]
+        )
 
     def encode_node(self, atom_num, atom):
         """Encode single atom"""
@@ -34,6 +72,9 @@ class DrugEncoder:
                 return encd["glycan"][atom_num] + encd["chirality"][atom.GetChiralTag()]
             else:
                 return encd["glycan"]["other"] + encd["chirality"][atom.GetChiralTag()]
+
+        if self.node_feats == "rich":
+            return self.encode_node_rich(atom_num, atom)
 
         label = encd["drug"]["node"][atom_num]
         if self.node_feats == "onehot":

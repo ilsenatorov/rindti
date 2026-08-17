@@ -32,11 +32,12 @@ encd = {
                 "val",
             ]
         ),
-        "edge": list_to_dict(["cnt", "combi", "hbond", "pept", "ovl"]),
     },
     "drug": {
         "node": list_to_dict(["other", 6, 7, 8, 9, 16, 17, 35, 15, 53, 5, 11, 14, 34]),
-        "edge": list_to_dict(["SINGLE", "DOUBLE", "AROMATIC"]),
+        # TRIPLE used to be absent, which silently dropped every molecule
+        # containing a triple bond (nitriles, alkynes) from the dataset.
+        "edge": list_to_dict(["SINGLE", "DOUBLE", "TRIPLE", "AROMATIC"]),
     },
     "glycan": {
         "other": [0, 0, 0],
