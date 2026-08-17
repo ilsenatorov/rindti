@@ -2,3 +2,7 @@ source: datasets/davis/resources
 prots:
   structs:
     method: whole # whole, template, bsite, plddt
+parse_dataset:
+  # Davis reports Kd in nM; 100 nM is pKd >= 7, the conventional cutoff.
+  unit: nM
+  threshold: 100

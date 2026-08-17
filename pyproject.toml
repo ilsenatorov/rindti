@@ -96,6 +96,9 @@ include = '\.smk$|^Snakefile'
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["test"]
+# workflow/scripts are snakemake scripts, not an installed package; put them on the
+# path so their pure helper functions can be unit-tested.
+pythonpath = ["workflow/scripts"]
 markers = [
     "slow: long-running tests",
     "gpu: requires a CUDA device",

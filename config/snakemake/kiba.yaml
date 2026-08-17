@@ -2,3 +2,8 @@ source: datasets/kiba/resources
 prots:
   structs:
     method: whole # whole, template, bsite, plddt
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default. 12.1 is the conventional cutoff.
+  unit: score
+  threshold: 12.1

@@ -10,14 +10,14 @@ prots:
     plddt:
       threshold: 70
   features:
-    method: distance # distance, rinerator, esm
+    method: distance # distance or esm
     distance:
       threshold: 7
     node_feats: label # label or onehot
-    edge_feats: none # label, onehot, none
+    edge_feats: none # distance (needs node.module: transformer) or none
 drugs:
   max_num_atoms: 150
-  node_feats: label # label, onehot, glycan
+  node_feats: label # label, onehot, rich, glycan
   edge_feats: none # label, onehot, none
 split_data:
   method: random # random, target, drug
@@ -27,5 +27,6 @@ parse_dataset:
   filtering: posneg # all, posneg, balanced
   sampling: none # over, under, none
   task: class # class, reg
-  threshold: 100 # threshold values for class problem
+  unit: nM # nM (lower = stronger, e.g. Davis/GLASS) or score (higher = stronger, e.g. KIBA)
+  threshold: 100 # binarization cutoff on the scale of `unit`
   log: false # Whether to apply logarithm with base of 10 to values (for reg, doesn't affect threshold  )

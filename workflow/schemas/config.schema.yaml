@@ -49,7 +49,7 @@ properties:
         properties:
           method:
             type: string
-            enum: [distance, rinerator, esm]
+            enum: [distance, esm]
           distance:
             type: object
             additionalProperties: false
@@ -61,7 +61,11 @@ properties:
             enum: [label, onehot]
           edge_feats:
             type: string
-            enum: [label, onehot, none]
+            enum: [distance, none]
+            description: >-
+              'distance' keeps the CA-CA distance as a continuous edge attribute.
+              Only the 'transformer' node module consumes it; GIN/GAT/Cheb ignore
+              edges entirely and FiLM expects discrete relation types.
   drugs:
     type: object
     additionalProperties: false
@@ -71,7 +75,11 @@ properties:
         type: number
       node_feats:
         type: string
-        enum: [label, onehot, glycan]
+        enum: [label, onehot, rich, glycan]
+        description: >-
+          'label'/'onehot' describe an atom by element only. 'rich' adds degree,
+          formal charge, hydrogen count, hybridisation, aromaticity, ring
+          membership and chirality.
       edge_feats:
         type: string
         enum: [label, onehot, none]
@@ -98,7 +106,7 @@ properties:
   parse_dataset:
     type: object
     additionalProperties: false
-    required: [filtering, sampling, task, threshold]
+    required: [filtering, sampling, task, threshold, unit]
     properties:
       filtering:
         type: string
@@ -109,7 +117,19 @@ properties:
       task:
         type: string
         enum: [class, reg]
+      unit:
+        type: string
+        enum: [nM, score]
+        description: >-
+          Scale of the Y column. 'nM' means a dissociation/inhibition constant where
+          LOWER is a stronger interaction (Davis, GLASS, BindingDB); positives are
+          Y < threshold. 'score' means a unitless affinity score where HIGHER is
+          stronger (KIBA); positives are Y >= threshold. Getting this wrong yields a
+          single-class dataset, which the pipeline now rejects.
       threshold:
         type: number
+        description: >-
+          Binarization cutoff, on the scale given by 'unit'. Conventional values:
+          Davis 100 nM (pKd 7), GLASS 100 nM, KIBA 12.1 (score).
       log:
         type: boolean
