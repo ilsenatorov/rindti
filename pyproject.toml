@@ -1,33 +1,110 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rindti"
+dynamic = ["version"]
+description = "Drug-target interaction prediction using protein residue interaction networks"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "Ilya Senatorov", email = "ilya.senatorov@helmholtz-hips.de" }]
+keywords = [
+    "deep-learning",
+    "pytorch",
+    "drug-target-interaction",
+    "residue-interaction-network",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "torch>=2.6",
+    "torch-geometric>=2.7",
+    "lightning>=2.5",
+    "torchmetrics>=1.7",
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+    "scipy>=1.13",
+    "rdkit>=2025.3",
+    "jsonargparse[signatures]>=4.28",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "tensorboard>=2.18",
+    "gitpython>=3.1",
+    "rich>=13.9",
+]
+
+[project.optional-dependencies]
+workflow = ["snakemake>=9", "pulp>=2.8", "jsonschema>=4.23", "joblib>=1.4"]
+esm = ["fair-esm>=2.0"]
+# NOTE: the dataset downloader (workflow/scripts/get_datasets.py) needs PyTDC,
+# which pins numpy<2 and cannot share an environment with modern torch.
+# It declares its own deps inline (PEP 723): `uv run workflow/scripts/get_datasets.py`.
+data = ["gdown>=5.2", "requests>=2.32"]
+baseline = ["xgboost>=2.1"]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "ruff>=0.14",
+    "pre-commit>=4.0",
+    "snakefmt>=0.10",
+]
+docs = ["sphinx>=8.1", "furo>=2024.8", "sphinx-autodoc-typehints>=2.5"]
+
+[project.urls]
+Homepage = "https://github.com/ilsenatorov/rindti"
+Documentation = "https://rindti.readthedocs.io"
+Repository = "https://github.com/ilsenatorov/rindti"
+
+[project.scripts]
+rindti-train = "rindti.cli:train_cli"
+
+[tool.hatch.version]
+path = "rindti/version.py"
+pattern = "version = \"(?P<version>[^\"]+)\""
+
+[tool.hatch.build.targets.wheel]
+packages = ["rindti"]
+
+[tool.ruff]
+line-length = 119
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Snakemake injects the `snakemake` object into script globals at runtime.
+"workflow/scripts/*.py" = ["F821"]
+
 [tool.snakefmt]
 line_length = 119
 include = '\.smk$|^Snakefile'
 
-
-[tool.interrogate]
-ignore-init-method = true
-ignore-init-module = false
-ignore-magic = true
-ignore-semiprivate = true
-ignore-private = true
-ignore-module = true
-fail-under = 80
-exclude = ["^test/*"]
-ignore-regex = ["^Base*", "^forward*", "^shared*", "^test*"]
-verbose = 0
-quiet = false
-whitelist-regex = []
-color = true
-
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "8.0"
+testpaths = ["test"]
 markers = [
-    "slow",
-    "gpu",
-    "snakemake",
+    "slow: long-running tests",
+    "gpu: requires a CUDA device",
+    "snakemake: runs the full snakemake pipeline",
+]
+filterwarnings = [
+    "error::DeprecationWarning:rindti.*",
+    "error::FutureWarning:rindti.*",
 ]
 
-[tool.pydocstyle]
-ignore = ["D1"]
-
-[tool.ruff]
-ignore = ["F821"]
+[tool.coverage.run]
+source = ["rindti"]
