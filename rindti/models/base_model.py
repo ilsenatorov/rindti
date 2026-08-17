@@ -6,11 +6,14 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import (
     AUROC,
     Accuracy,
+    AveragePrecision,
     ExplainedVariance,
     MatthewsCorrCoef,
     MeanAbsoluteError,
     MeanSquaredError,
     MetricCollection,
+    PearsonCorrCoef,
+    SpearmanCorrCoef,
 )
 
 from ..data import TwoGraphData
@@ -31,6 +34,9 @@ class BaseModel(LightningModule):
             [
                 Accuracy(task=task, **kwargs),
                 AUROC(task=task, **kwargs),
+                # DTI datasets are heavily imbalanced (Davis is ~7% positive), where
+                # AUROC flatters and average precision is the informative metric.
+                AveragePrecision(task=task, **kwargs),
                 MatthewsCorrCoef(task=task, **kwargs),
             ]
         )
@@ -39,7 +45,17 @@ class BaseModel(LightningModule):
         self.test_metrics = metrics.clone(prefix="test_")
 
     def _set_reg_metrics(self):
-        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
+        # Pearson/Spearman are what the affinity-regression literature reports;
+        # Spearman is the rank-based analogue of the concordance index.
+        metrics = MetricCollection(
+            [
+                MeanAbsoluteError(),
+                MeanSquaredError(),
+                ExplainedVariance(),
+                PearsonCorrCoef(),
+                SpearmanCorrCoef(),
+            ]
+        )
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
@@ -86,12 +102,31 @@ class BaseModel(LightningModule):
         """Multiplication."""
         return drug_embed * prot_embed
 
+    def collect_aux_loss(self) -> Tensor:
+        """Sum the auxiliary losses stashed by submodules during the forward pass.
+
+        DiffPool's link-prediction and entropy regularizers are produced inside the
+        pooling layer, which has no way to return them through the encoder, so it
+        stores them on ``aux_loss`` and they are gathered here.
+        """
+        total = None
+        for module in self.modules():
+            aux = getattr(module, "aux_loss", None)
+            if aux is not None:
+                total = aux if total is None else total + aux
+        return total
+
     def training_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during training step."""
         ss = self.shared_step(data)
         self.train_metrics.update(ss["preds"], ss["labels"])
         self.log("train_loss", ss["loss"], batch_size=self.batch_size, on_epoch=True)
-        return ss["loss"]
+        loss = ss["loss"]
+        aux = self.collect_aux_loss()
+        if aux is not None:
+            self.log("train_aux_loss", aux, batch_size=self.batch_size, on_epoch=True)
+            loss = loss + aux
+        return loss
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during validation step. Also logs the values for various callbacks."""

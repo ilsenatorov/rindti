@@ -30,12 +30,21 @@ class GraphEncoder(nn.Module):
         self.return_nodes = return_nodes
 
     def update_params(self, kwargs: dict):
-        """Update the params to connect parts of the encoder together (hidden dims)."""
+        """Update the params to connect parts of the encoder together (hidden dims).
+
+        Edge information has to be forwarded explicitly: the dataset reports
+        ``edge_type``/``edge_dim`` at the encoder's top level, but the node embedders
+        read them from their own config. Without this, ``TransformerNet`` and
+        ``FilmConvNet`` silently fell back to their ``edge_type="none"`` defaults and
+        every edge feature in the dataset was ignored.
+        """
         data_params = kwargs["data"]
         kwargs["pool"]["max_nodes"] = data_params["max_nodes"]
         kwargs.update(data_params)
         kwargs["node"]["input_dim"] = kwargs["hidden_dim"]
         kwargs["node"]["output_dim"] = kwargs["hidden_dim"]
+        kwargs["node"]["edge_type"] = kwargs.get("edge_type", "none")
+        kwargs["node"]["edge_dim"] = kwargs.get("edge_dim")
         kwargs["pool"]["input_dim"] = kwargs["hidden_dim"]
         kwargs["pool"]["output_dim"] = kwargs["hidden_dim"]
 

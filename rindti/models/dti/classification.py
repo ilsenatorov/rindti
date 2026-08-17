@@ -21,8 +21,8 @@ class ClassificationModel(BaseModel):
         super().__init__(**kwargs)
         self._determine_feat_method(
             kwargs["model"]["feat_method"],
-            kwargs["model"]["prot"]["hidden_dim"],
-            kwargs["model"]["drug"]["hidden_dim"],
+            drug_hidden_dim=kwargs["model"]["drug"]["hidden_dim"],
+            prot_hidden_dim=kwargs["model"]["prot"]["hidden_dim"],
         )
         self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
         self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])

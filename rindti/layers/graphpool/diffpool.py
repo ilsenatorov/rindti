@@ -57,7 +57,13 @@ class DiffPoolNet(BaseLayer):
         self.lin1 = torch.nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
-        """"""
+        """Pool the graph, stashing the auxiliary losses on ``self.aux_loss``.
+
+        ``dense_diff_pool``/``dense_mincut_pool`` return link-prediction and entropy
+        regularizers that are meant to be added to the training objective. They used
+        to be computed and dropped, leaving the pooling unregularized; ``BaseModel``
+        now collects ``aux_loss`` from every submodule.
+        """
 
         x, _ = torch_geometric.utils.to_dense_batch(x, batch, max_num_nodes=self.max_nodes)
         adj = torch_geometric.utils.to_dense_adj(edge_index, batch, max_num_nodes=self.max_nodes)
@@ -69,6 +75,8 @@ class DiffPoolNet(BaseLayer):
         s = self.poolblock2(x, adj)  # (256, 70, 35)
         x = self.embedblock2(x, adj)  # (256, 70, 96)
         x, adj, lp_loss2, e_loss2 = self.pool(x, adj, s)
+
+        self.aux_loss = lp_loss1 + e_loss1 + lp_loss2 + e_loss2
 
         x = self.embedblock3(x, adj)  # (256, 35, 96)
         x = F.relu(x)

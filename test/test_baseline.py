@@ -41,4 +41,11 @@ def test_baselines(
     prob: bool,
     which: str,
 ):
-    run(model, split_data, prob=prob, which=which)
+    summary = run(model, split_data, prob=prob, which=which, n_runs=3)
+    assert set(summary) == {"acc", "auc", "auprc", "mcc"}
+    for metric, (mean, std) in summary.items():
+        assert std >= 0, metric
+        if metric in ("acc", "auc", "auprc"):
+            assert 0 <= mean <= 1, f"{metric} out of range: {mean}"
+        else:  # MCC
+            assert -1 <= mean <= 1, f"{metric} out of range: {mean}"

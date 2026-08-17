@@ -1,6 +1,12 @@
+import numpy as np
 import pandas as pd
 import torch
-from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
+from torchmetrics.functional import (
+    accuracy,
+    auroc,
+    average_precision,
+    matthews_corrcoef,
+)
 
 
 class BaseBaseline:
@@ -23,9 +29,10 @@ class BaseBaseline:
         y_hat = torch.tensor(pred["pred"].values)
         y = torch.tensor(pred["Y"].values)
         return dict(
-            acc=accuracy(y_hat, y, task="binary").float(),
-            auc=auroc(y_hat, y, task="binary").float(),
-            mcc=matthews_corrcoef(y_hat, y, num_classes=2, task="binary").float(),
+            acc=accuracy(y_hat, y, task="binary").float().item(),
+            auc=auroc(y_hat, y, task="binary").float().item(),
+            auprc=average_precision(y_hat, y, task="binary").float().item(),
+            mcc=matthews_corrcoef(y_hat, y, task="binary").float().item(),
         )
 
     def predict(self, test: pd.DataFrame) -> pd.DataFrame:
@@ -33,11 +40,32 @@ class BaseBaseline:
         test["pred"] = test.apply(lambda x: self.predict_pair(x["Target_ID"], x["Drug_ID"]), axis=1)
         return test
 
-    def assess_dataset(self, filename: str, train_frac: float = 0.8, n_runs: int = 10):
-        """Assess the performance of the model on a dataset."""
+    def assess_dataset(self, filename: str, split: str = "test", n_runs: int = 10) -> dict:
+        """Assess the performance of the model on a dataset.
+
+        Evaluates on the held-out ``test`` split by default. This used to report on
+        ``val``, and to accept ``train_frac``/``n_runs`` while ignoring both, so it
+        produced a single number with no error bars.
+
+        ``n_runs`` only varies the result for probabilistic models (``prob=True``);
+        the deterministic frequency priors are re-run anyway so the reported std is
+        an honest 0 rather than an absent one.
+
+        Returns:
+            dict: ``{metric: (mean, std)}`` over ``n_runs`` repeats.
+        """
         dataset = pd.read_csv(filename, sep="\t")
         train = dataset[dataset["split"] == "train"]
-        val = dataset[dataset["split"] == "val"]
-        self.fit(train)
-        metrics = self.test_metrics(val)
-        print(f"Results\tAcc : {metrics['acc']:.3}\tAUROC: {metrics['auc']:.3}\tMCC: {metrics['mcc']:.3}")
+        held_out = dataset[dataset["split"] == split]
+        if held_out.empty:
+            raise ValueError(f"No rows with split={split!r} in {filename}")
+
+        runs = []
+        for _ in range(n_runs if self.prob else 1):
+            self.fit(train)
+            runs.append(self.test_metrics(held_out.copy()))
+
+        summary = {k: (float(np.mean([r[k] for r in runs])), float(np.std([r[k] for r in runs]))) for k in runs[0]}
+        pretty = "\t".join(f"{k.upper()}: {m:.3f}+-{s:.3f}" for k, (m, s) in summary.items())
+        print(f"Results ({split}, n={len(runs)})\t{pretty}")
+        return summary

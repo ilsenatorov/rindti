@@ -7,14 +7,23 @@ models = {"max": Max, "prot_drug_max": ProtDrugMax}
 def run(
     model: str,
     filename: str,
-    train_frac: float = 0.8,
+    split: str = "test",
     n_runs: int = 10,
     which: str = "both",
     prob: bool = False,
-):
-    """Assess the performance of the model on a dataset."""
+) -> dict:
+    """Assess the performance of a baseline model on a dataset.
+
+    Args:
+        model: which baseline, one of ``max`` or ``prot_drug_max``.
+        filename: split_data TSV with a ``split`` column.
+        split: which held-out split to report on. Defaults to ``test``.
+        n_runs: repeats, only meaningful for ``prob=True``.
+        which: for ``prot_drug_max``, use ``prot``, ``drug`` or ``both`` priors.
+        prob: sample predictions instead of returning the mean.
+    """
     model = models[model](which=which, prob=prob)
-    model.assess_dataset(filename, train_frac, n_runs)
+    return model.assess_dataset(filename, split=split, n_runs=n_runs)
 
 
 if __name__ == "__main__":
