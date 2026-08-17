@@ -1,7 +1,5 @@
-from typing import Tuple
-
 import torch
-from pytorch_lightning import LightningModule
+from lightning.pytorch import LightningModule
 from torch import Tensor
 from torch.optim import SGD, Adam, AdamW, RMSprop
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -25,19 +23,15 @@ class BaseModel(LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.batch_size = kwargs["datamodule"]["batch_size"]
-        return kwargs["model"]
 
     def _set_class_metrics(self, num_classes: int = 2):
+        task = "binary" if num_classes == 2 else "multiclass"
+        kwargs = {} if num_classes == 2 else {"num_classes": num_classes}
         metrics = MetricCollection(
             [
-                Accuracy(
-                    num_classes=None if num_classes == 2 else num_classes,
-                    task="binary",
-                ),
-                AUROC(
-                    num_classes=None if num_classes == 2 else num_classes, task="binary"
-                ),
-                MatthewsCorrCoef(num_classes=num_classes, task="binary"),
+                Accuracy(task=task, **kwargs),
+                AUROC(task=task, **kwargs),
+                MatthewsCorrCoef(task=task, **kwargs),
             ]
         )
         self.train_metrics = metrics.clone(prefix="train_")
@@ -45,9 +39,7 @@ class BaseModel(LightningModule):
         self.test_metrics = metrics.clone(prefix="test_")
 
     def _set_reg_metrics(self):
-        metrics = MetricCollection(
-            [MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()]
-        )
+        metrics = MetricCollection([MeanAbsoluteError(), MeanSquaredError(), ExplainedVariance()])
         self.train_metrics = metrics.clone(prefix="train_")
         self.val_metrics = metrics.clone(prefix="val_")
         self.test_metrics = metrics.clone(prefix="test_")
@@ -94,87 +86,81 @@ class BaseModel(LightningModule):
         """Multiplication."""
         return drug_embed * prot_embed
 
-    def training_step(self, data: TwoGraphData, data_idx: int) -> dict:
+    def training_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during training step."""
         ss = self.shared_step(data)
         self.train_metrics.update(ss["preds"], ss["labels"])
-        self.log("train_loss", ss["loss"], batch_size=self.batch_size)
-        return ss
+        self.log("train_loss", ss["loss"], batch_size=self.batch_size, on_epoch=True)
+        return ss["loss"]
 
-    def validation_step(self, data: TwoGraphData, data_idx: int) -> dict:
+    def validation_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during validation step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
         self.val_metrics.update(ss["preds"], ss["labels"])
-        self.log("val_loss", ss["loss"], batch_size=self.batch_size)
-        return ss
+        self.log("val_loss", ss["loss"], batch_size=self.batch_size, on_epoch=True)
+        return ss["loss"]
 
-    def test_step(self, data: TwoGraphData, data_idx: int) -> dict:
+    def test_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during test step. Also logs the values for various callbacks."""
         ss = self.shared_step(data)
         self.test_metrics.update(ss["preds"], ss["labels"])
-        self.log("test_loss", ss["loss"], batch_size=self.batch_size)
-        return ss
+        self.log("test_loss", ss["loss"], batch_size=self.batch_size, on_epoch=True)
+        return ss["loss"]
 
-    def log_histograms(self):
-        """Logs the histograms of all the available parameters."""
-        if self.logger:
-            for name, param in self.named_parameters():
-                self.logger.experiment.add_histogram(name, param, self.current_epoch)
+    def _log_metrics(self, metrics: MetricCollection) -> None:
+        """Compute, log and reset an accumulated metric collection.
 
-    def log_all(self, metrics: dict, hparams: bool = False):
-        """Log all metrics."""
-        if self.logger:
-            for k, v in metrics.items():
-                self.logger.experiment.add_scalar(k, v, self.current_epoch)
-            if hparams:
-                self.logger.log_hyperparams(
-                    self.hparams, {k.split("_")[-1]: v for k, v in metrics.items()}
-                )
+        Values are cast to float: MatthewsCorrCoef can come back as an integer
+        tensor, which Lightning cannot reduce.
+        """
+        self.log_dict({k: v.float() for k, v in metrics.compute().items()})
+        metrics.reset()
 
-    ## FIXME the logic of epoch end got changed, need to update the code
+    def on_train_epoch_end(self):
+        """Compute, log and reset the accumulated training metrics."""
+        self._log_metrics(self.train_metrics)
 
-    # def on_train_epoch_end(self, outputs: dict):
-    #     """What to do at the end of a training epoch. Logs everything."""
-    #     self.log_histograms()
-    #     metrics = self.train_metrics.compute()
-    #     self.train_metrics.reset()
-    #     self.log_all(metrics)
+    def on_validation_epoch_end(self):
+        """Compute, log and reset the accumulated validation metrics."""
+        self._log_metrics(self.val_metrics)
 
-    # def on_validation_epoch_end(self, outputs: dict):
-    #     """What to do at the end of a validation epoch. Logs everything."""
-    #     metrics = self.val_metrics.compute()
-    #     self.val_metrics.reset()
-    #     self.log_all(metrics, hparams=True)
+    def on_test_epoch_end(self):
+        """Compute, log and reset the accumulated test metrics."""
+        self._log_metrics(self.test_metrics)
 
-    # def on_test_epoch_end(self, outputs: dict):
-    #     """What to do at the end of a test epoch. Logs everything."""
-    #     metrics = self.test_metrics.compute()
-    #     self.test_metrics.reset()
-    #     self.log_all(metrics)
-
-    def configure_optimizers(
-        self,
-    ) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
-        """Configure the optimizer and/or lr schedulers"""
+    def configure_optimizers(self) -> dict:
+        """Configure the optimizer and the lr scheduler."""
         opt_params = self.hparams.model["optimizer"]
-        optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[
-            opt_params["module"]
-        ]
-        params = [{"params": self.parameters()}]
-        if hasattr(self, "prot_encoder"):
-            params.append(
-                {"params": self.prot_encoder.parameters(), "lr": opt_params["prot_lr"]}
-            )
-        if hasattr(self, "drug_encoder"):
-            {"params": self.drug_encoder.parameters(), "lr": opt_params["drug_lr"]}
-        optimizer = optimizer(params=self.parameters(), lr=opt_params["lr"])
-        lr_scheduler = {
-            "monitor": self.hparams["model"]["monitor"],
-            "scheduler": ReduceLROnPlateau(
-                optimizer,
-                verbose=True,
-                factor=opt_params["reduce_lr"]["factor"],
-                patience=opt_params["reduce_lr"]["patience"],
-            ),
+        optimizer_class = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[opt_params["module"]]
+        kwargs = {"lr": opt_params["lr"]}
+        if "weight_decay" in opt_params:
+            kwargs["weight_decay"] = opt_params["weight_decay"]
+        if optimizer_class in (SGD, RMSprop) and "momentum" in opt_params:
+            kwargs["momentum"] = opt_params["momentum"]
+
+        # Per-encoder learning rates: each encoder forms its own param group, and the
+        # default group holds everything that is not already covered by one of them.
+        groups, claimed = [], set()
+        for name in ("prot", "drug"):
+            encoder = getattr(self, f"{name}_encoder", None)
+            lr = opt_params.get(f"{name}_lr")
+            if encoder is None or lr is None:
+                continue
+            params = list(encoder.parameters())
+            groups.append({"params": params, "lr": lr})
+            claimed.update(id(p) for p in params)
+        rest = [p for p in self.parameters() if id(p) not in claimed]
+        groups.insert(0, {"params": rest})
+
+        optimizer = optimizer_class(groups, **kwargs)
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "monitor": self.hparams["model"]["monitor"],
+                "scheduler": ReduceLROnPlateau(
+                    optimizer,
+                    factor=opt_params["reduce_lr"]["factor"],
+                    patience=opt_params["reduce_lr"]["patience"],
+                ),
+            },
         }
-        return [optimizer], [lr_scheduler]

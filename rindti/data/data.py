@@ -1,5 +1,6 @@
 from typing import Any
 
+import torch
 from torch_geometric.data import Data
 
 
@@ -24,3 +25,8 @@ class TwoGraphData(Data):
     def n_edges(self, prefix: str) -> int:
         """Return number of edges for graph with prefix."""
         return self[prefix + "edge_index"].size(1)
+
+
+# torch>=2.6 loads checkpoints with weights_only=True by default; the processed
+# datasets contain TwoGraphData instances, so it has to be allowlisted.
+torch.serialization.add_safe_globals([TwoGraphData])

@@ -1,6 +1,7 @@
 import collections
 import itertools
-from typing import Any, Callable, Dict, Union
+from collections.abc import Callable
+from typing import Any
 
 import git
 import yaml
@@ -37,16 +38,12 @@ def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
     Returns:
         dict: Sub-dict of arguments
     """
-    return {
-        prefix + k: v
-        for (k, v) in kwargs.items()
-        if k != "index_mapping" and v is not None
-    }
+    return {prefix + k: v for (k, v) in kwargs.items() if k != "index_mapping" and v is not None}
 
 
 def read_config(filename: str) -> dict:
     """Read in yaml config for training."""
-    with open(filename, "r") as file:
+    with open(filename) as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
     return config
 
@@ -83,10 +80,10 @@ class IterDict:
         hparams_small = {k: v for k, v in self.flat.items() if isinstance(v, list)}
         if hparams_small == {}:
             return [self.flat]
-        keys, values = zip(*hparams_small.items())
+        keys, values = zip(*hparams_small.items(), strict=True)
         for v in itertools.product(*values):
             config = self.flat.copy()
-            config.update(dict(zip(keys, v)))
+            config.update(dict(zip(keys, v, strict=True)))
             configs.append(config)
         return configs
 
@@ -107,7 +104,7 @@ class IterDict:
         return [self._unflatten(v) for v in variants]
 
 
-def recursive_apply(ob: Union[Dict, Any], func: Callable) -> Union[Dict, Any]:
+def recursive_apply(ob: dict | Any, func: Callable) -> dict | Any:
     """Apply a function to the nested dict recursively."""
     if isinstance(ob, dict):
         return {k: recursive_apply(v, func) for k, v in ob.items()}
@@ -115,7 +112,13 @@ def recursive_apply(ob: Union[Dict, Any], func: Callable) -> Union[Dict, Any]:
         return func(ob)
 
 
-def get_git_hash():
-    """Get the git hash of the current repository."""
-    repo = git.Repo(search_parent_directories=True)
-    return repo.head.object.hexsha
+def get_git_hash() -> str:
+    """Get the git hash of the current repository.
+
+    Returns "unknown" when not run from a checkout, which is the normal case
+    for an installed package.
+    """
+    try:
+        return git.Repo(search_parent_directories=True).head.object.hexsha
+    except (git.InvalidGitRepositoryError, ValueError):
+        return "unknown"

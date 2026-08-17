@@ -1,14 +1,12 @@
 from .data import TwoGraphData
-from .datamodules import DTIDataModule, PreTrainDataModule
-from .datasets import DTIDataset, PreTrainDataset
+from .datamodules import DTIDataModule
+from .datasets import DTIDataset
 from .transforms import DataCorruptor, SizeFilter, corrupt_features, mask_features
 
 __all__ = [
     "TwoGraphData",
     "DTIDataModule",
     "DTIDataset",
-    "PreTrainDataModule",
-    "PreTrainDataset",
     "DataCorruptor",
     "SizeFilter",
     "corrupt_features",

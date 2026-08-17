@@ -1,4 +1,4 @@
-from torch.functional import Tensor
+from torch import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import GATConv
 from torch_geometric.typing import Adj
@@ -31,10 +31,7 @@ class GatConvNet(BaseLayer):
         super().__init__()
         self.inp = GATConv(input_dim, hidden_dim, heads, concat=False)
         self.mid_layers = ModuleList(
-            [
-                GATConv(hidden_dim, hidden_dim, heads, concat=False)
-                for _ in range(num_layers - 2)
-            ]
+            [GATConv(hidden_dim, hidden_dim, heads, concat=False) for _ in range(num_layers - 2)]
         )
 
         self.out = GATConv(hidden_dim, output_dim, concat=False)

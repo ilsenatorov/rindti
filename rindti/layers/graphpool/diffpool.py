@@ -3,7 +3,7 @@ from math import ceil
 import torch
 import torch.nn.functional as F
 import torch_geometric
-from torch.functional import Tensor
+from torch import Tensor
 from torch_geometric.nn import DenseSAGEConv, dense_diff_pool, dense_mincut_pool
 from torch_geometric.typing import Adj
 
@@ -59,12 +59,8 @@ class DiffPoolNet(BaseLayer):
     def forward(self, x: Tensor, edge_index: Adj, batch: Tensor, **kwargs) -> Tensor:
         """"""
 
-        x, _ = torch_geometric.utils.to_dense_batch(
-            x, batch, max_num_nodes=self.max_nodes
-        )
-        adj = torch_geometric.utils.to_dense_adj(
-            edge_index, batch, max_num_nodes=self.max_nodes
-        )
+        x, _ = torch_geometric.utils.to_dense_batch(x, batch, max_num_nodes=self.max_nodes)
+        adj = torch_geometric.utils.to_dense_adj(edge_index, batch, max_num_nodes=self.max_nodes)
 
         s = self.poolblock1(x, adj)  # (256, 140, 75)
         x = self.embedblock1(x, adj)  # (256, 140, 96)
@@ -105,7 +101,7 @@ class DiffPoolBlock(torch.nn.Module):
         batch_size, num_nodes, num_channels = x.size()
 
         x = x.view(-1, num_channels)
-        x = getattr(self, "bn{}".format(i))(x)
+        x = getattr(self, f"bn{i}")(x)
         x = x.view(batch_size, num_nodes, num_channels)
         return x
 

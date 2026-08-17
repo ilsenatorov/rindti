@@ -70,9 +70,7 @@ class TransformerNet(BaseLayer):
             concat=False,
         )
 
-    def forward(
-        self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs
-    ) -> Tensor:
+    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """"""
         if self.edge_type == "none":
             edge_feats = None

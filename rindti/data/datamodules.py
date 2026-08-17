@@ -1,8 +1,7 @@
-from pytorch_lightning import LightningDataModule
+from lightning.pytorch import LightningDataModule
 from torch_geometric.loader import DataLoader
 
-from ..utils import split_random
-from .datasets import DTIDataset, PreTrainDataset
+from .datasets import DTIDataset
 
 
 class BaseDataModule(LightningDataModule):
@@ -59,31 +58,5 @@ class DTIDataModule(BaseDataModule):
 
     def update_config(self, config: dict) -> None:
         """Update the main config with the config of the dataset."""
-        print(self.config)
         for i in ["prot", "drug"]:
             config["model"][i]["data"] = self.config["snakemake"]["data"][i]
-
-
-class PreTrainDataModule(BaseDataModule):
-    """DataModule for pretraining on prots."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def setup(self, stage: str = None):
-        """Load the individual datasets."""
-        ds = PreTrainDataset(self.filename)
-        self.train, self.val, self.test = split_random(ds, [0.7, 0.2, 0.1])
-        self.config = ds.config
-
-    def _dl_kwargs(self, shuffle: bool = False):
-        return dict(
-            batch_size=self.batch_size,
-            shuffle=self.shuffle if shuffle else False,
-            num_workers=self.num_workers,
-        )
-
-    def update_config(self, config: dict) -> None:
-        """Update the main config with the config of the dataset."""
-        config["model"]["encoder"]["data"] = self.config["data"]
-        config["model"]["num_classes"] = self.config["data"]["num_classes"]

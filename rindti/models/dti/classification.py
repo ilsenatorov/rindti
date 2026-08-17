@@ -1,5 +1,5 @@
 import torch.nn.functional as F
-from torch.functional import Tensor
+from torch import Tensor
 
 from ...data import TwoGraphData
 from ...layers.encoder import GraphEncoder
@@ -24,13 +24,13 @@ class ClassificationModel(BaseModel):
             kwargs["model"]["prot"]["hidden_dim"],
             kwargs["model"]["drug"]["hidden_dim"],
         )
-        self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](
-            **kwargs["model"]["prot"]
-        )
-        self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](
-            **kwargs["model"]["drug"]
-        )
+        self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
+        self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
         self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
+        self._setup_metrics()
+
+    def _setup_metrics(self):
+        """Which metric collection this model reports. Overridden by subclasses."""
         self._set_class_metrics()
 
     def forward(self, prot: dict, drug: dict) -> Tensor:
@@ -56,6 +56,4 @@ class ClassificationModel(BaseModel):
         fwd_dict = self.forward(prot, drug)
         labels = data.label.unsqueeze(1)
         bce_loss = F.binary_cross_entropy_with_logits(fwd_dict["pred"], labels.float())
-        return dict(
-            loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach()
-        )
+        return dict(loss=bce_loss, preds=fwd_dict["pred"].detach(), labels=labels.detach())

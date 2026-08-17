@@ -1,4 +1,4 @@
-from torch.functional import Tensor
+from torch import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import ChebConv
 from torch_geometric.typing import Adj
@@ -29,9 +29,7 @@ class ChebConvNet(BaseLayer):
     ):
         super().__init__()
         self.inp = ChebConv(input_dim, hidden_dim, K)
-        mid_layers = [
-            ChebConv(hidden_dim, hidden_dim, K) for _ in range(num_layers - 2)
-        ]
+        mid_layers = [ChebConv(hidden_dim, hidden_dim, K) for _ in range(num_layers - 2)]
         self.mid_layers = ModuleList(mid_layers)
         self.out = ChebConv(hidden_dim, output_dim, K)
 

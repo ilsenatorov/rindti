@@ -1,5 +1,4 @@
-from torch import nn
-from torch.functional import Tensor
+from torch import Tensor, nn
 from torch_geometric.nn import GINConv
 from torch_geometric.typing import Adj
 
