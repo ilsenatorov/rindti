@@ -1,0 +1,9 @@
+# BindingDB restricted to a single measurement type:
+# Ki, the inhibition constant.
+source: datasets/bindingdb_ki/resources
+prots:
+  structs:
+    method: whole # whole, template, bsite, plddt
+parse_dataset:
+  unit: nM
+  threshold: 100

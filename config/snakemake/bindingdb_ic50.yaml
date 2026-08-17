@@ -1,0 +1,9 @@
+# BindingDB restricted to a single measurement type:
+# IC50. Assay-dependent, so not directly comparable to Kd/Ki - do not pool these with the other two.
+source: datasets/bindingdb_ic50/resources
+prots:
+  structs:
+    method: whole # whole, template, bsite, plddt
+parse_dataset:
+  unit: nM
+  threshold: 100
