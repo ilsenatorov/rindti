@@ -59,6 +59,19 @@ jobs:
         shell: bash -el {0}
         run: uv run pytest -m "snakemake and not gpu"
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install
+        run: uv pip install -e ".[docs]" --torch-backend=cpu
+      - name: Build docs
+        run: uv run sphinx-build -b html docs/source docs/_build
+
   build:
     runs-on: ubuntu-latest
     steps:

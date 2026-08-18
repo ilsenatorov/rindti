@@ -20,6 +20,7 @@ This is a collection of various models and utilities that are focused on using p
    notes/quick_start
    notes/snakemake
    notes/data
+   notes/training
 
 
 .. toctree::

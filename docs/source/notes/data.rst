@@ -59,9 +59,11 @@ Thus to create DTI datasets one needs to specialize the split:
 
         from rindti.data import DTIDataset
         pickle_file = "filename.pkl"
-        train = DTIDataset(pickle_file, split="train")
-        val = DTIDataset(pickle_file, split="val")
-        test = DTIDataset(pickle_file, split="test")
+        # exp_name names the cache directory under data/, so that datasets built
+        # from different experiments do not overwrite each other.
+        train = DTIDataset(pickle_file, "my_experiment", split="train")
+        val = DTIDataset(pickle_file, "my_experiment", split="val")
+        test = DTIDataset(pickle_file, "my_experiment", split="test")
 
 
 DataModules

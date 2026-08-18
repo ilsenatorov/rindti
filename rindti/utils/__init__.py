@@ -8,6 +8,7 @@ from .cli import (
     write_config,
 )
 from .math import minmax_normalise, split_random, to_prob
+from .results import collect, summarise
 from .vis import plot_loss_count_dist
 
 __all__ = [
@@ -21,5 +22,7 @@ __all__ = [
     "minmax_normalise",
     "split_random",
     "to_prob",
+    "collect",
+    "summarise",
     "plot_loss_count_dist",
 ]
