@@ -1,0 +1,39 @@
+# Pipeline-side ablation: every axis the dataset construction exposes.
+#
+#   python run_snakemake.py config/snakemake/ablation.yaml --threads 8
+#
+# IterDict takes the FULL CROSS PRODUCT of every list below, and each combination
+# builds a complete dataset. As written this is 2 x 2 x 3 x 3 x 3 x 2 = 216 runs.
+# Adding structs.method (4 values) quadruples that and needs PyMOL for three of
+# them, so that axis is commented out - enable it deliberately (it would make 864).
+#
+# For a one-factor-at-a-time ablation, keep a single list and scalars elsewhere,
+# then re-run per axis. That is far fewer runs and is usually what you
+# want to report.
+#
+# Point `source` at the dataset, and copy the parse_dataset unit/threshold from
+# that dataset's own config - KIBA needs `unit: score, threshold: 12.1`.
+source: datasets/davis/resources
+
+prots:
+  structs:
+    # method: [whole, plddt, bsite, template]  # bsite/template need templates/ + PyMOL
+    method: whole
+  features:
+    method: distance
+    node_feats: [label, onehot]
+    edge_feats: [none, distance] # distance is only consumed by node.module: transformer
+
+drugs:
+  node_feats: [label, onehot, rich]
+
+split_data:
+  method: [random, drug, target]
+
+parse_dataset:
+  unit: nM
+  threshold: 100
+  filtering: [all, posneg, balanced]
+  # `over` fabricates negatives by relabelling other targets' rows - see the
+  # warning in workflow/scripts/parse_dataset.py before using it.
+  sampling: [none, under]

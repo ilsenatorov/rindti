@@ -1,0 +1,70 @@
+# Model-side ablation. A single `rindti-train` call expands every list below into
+# one configuration, each repeated over `runs` seeds:
+#
+#   rindti-train config/dti/ablation.yaml \
+#       --set datamodule.filename=datasets/davis/results/prepare_all/<hash>.pkl
+#
+# As written: 4 feat_method x 5 prot node modules x 2 pools = 40 configurations
+# x 3 seeds = 120 runs. Trim to one list at a time for a one-factor-at-a-time
+# ablation, which is what you normally want to report.
+seed: 42
+runs: 3
+
+datamodule:
+  filename: null # set me
+  exp_name: ablation
+  batch_size: 128
+  num_workers: 4
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  max_epochs: 300
+  gradient_clip_val: 100
+  profiler: null
+
+early_stop:
+  patience: 30
+
+model:
+  module: class
+  monitor: val_loss
+  # concat doubles the joint embedding; the element-wise merges require the two
+  # towers to share hidden_dim, which they do here.
+  feat_method: [concat, element_l1, element_l2, mult]
+  prot:
+    method: graph
+    hidden_dim: 128
+    node:
+      # transformer is the only one that consumes continuous edge attributes;
+      # filmconv expects discrete relation types; gin/gat/cheb ignore edges.
+      module: [ginconv, gatconv, chebconv, filmconv, transformer]
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: [mean, diffpool]
+      hidden_dim: 128
+      ratio: 0.25
+  drug:
+    method: graph
+    hidden_dim: 128
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      hidden_dim: 128
+  mlp:
+    hidden_dim: 256
+    num_layers: 2
+    dropout: 0.2
+  optimizer:
+    module: adam
+    lr: 0.0005
+    weight_decay: 0.0001
+    reduce_lr:
+      factor: 0.1
+      patience: 10

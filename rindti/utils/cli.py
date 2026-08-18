@@ -54,6 +54,18 @@ def write_config(filename: str, config: dict) -> None:
         yaml.dump(config, file)
 
 
+def _plain(node):
+    """Convert the nested defaultdict tree back to plain dicts.
+
+    A defaultdict leaks into whatever consumes the config - Lightning writes it
+    into hparams.yaml as a `!!python/object/apply:collections.defaultdict` tag,
+    which yaml.safe_load then refuses to read back.
+    """
+    if isinstance(node, dict):
+        return {k: _plain(v) for k, v in node.items()}
+    return node
+
+
 def _tree():
     """Defaultdict of defaultdicts"""
     return collections.defaultdict(_tree)
@@ -96,9 +108,13 @@ class IterDict:
                 curr = curr[part]
             part = parts[-1]
             curr[part] = v
-        return root
+        return _plain(root)
 
     def __call__(self, d: dict):
+        # Reset: the instance keeps state between calls, so reusing one would
+        # accumulate keys from every config it had ever seen.
+        self.current_path = []
+        self.flat = {}
         self._flatten(d)
         variants = self._get_variants()
         return [self._unflatten(v) for v in variants]

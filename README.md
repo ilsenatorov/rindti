@@ -82,6 +82,40 @@ Then turn the TensorBoard logs into a table:
 python -m rindti.utils.results --logdir tb_logs --output results.csv --summary true
 ```
 
+## Ablations
+
+Any list in a config is expanded into a sweep, on both sides of the pipeline.
+
+**Dataset construction** — `config/snakemake/ablation.yaml` covers filtering,
+sampling, splitting, node/edge features and structure preprocessing. Each
+combination builds a full dataset, so mind the cross product (216 as shipped):
+
+```bash
+python run_snakemake.py config/snakemake/ablation.yaml --threads 8
+```
+
+**Model** — `config/dti/ablation.yaml` covers the merge method, convolution and
+pooling. One command runs every combination over `runs` seeds:
+
+```bash
+rindti-train config/dti/ablation.yaml \
+    --set datamodule.filename=datasets/davis/results/prepare_all/<hash>.pkl
+```
+
+Each configuration logs to its own directory named by what it changed
+(`node.module=gatconv-pool.module=diffpool`), and the collector reads the
+`hparams.yaml` Lightning writes beside each run, keeping the hyperparameters that
+vary as columns:
+
+```
+hp:model,feat_method hp:model,prot,node,module     mean      std  n
+              concat                   ginconv 0.416667 0.117851  2
+          element_l1                   gatconv 0.750000 0.353553  2
+```
+
+Both files take the full cross product. For a one-factor-at-a-time ablation —
+usually what you want to report — vary one list at a time and re-run per axis.
+
 ### Binarization thresholds
 
 `parse_dataset.threshold` is interpreted on the scale given by `parse_dataset.unit`:
