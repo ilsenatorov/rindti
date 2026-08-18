@@ -31,7 +31,7 @@ jobs:
       - name: Create virtual environment
         run: uv venv
       - name: Install
-        run: uv pip install -e ".[docs]" --torch-backend=cpu
+        run: uv pip install -e ".[dev, workflow]" --torch-backend=cpu
       - name: Unit tests
         run: uv run pytest -m "not gpu and not snakemake" --cov=rindti --cov-report=xml
       - uses: codecov/codecov-action@v5
@@ -51,6 +51,8 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
+      - name: Create virtual environment
+        run: uv venv
       - name: Install
         run: uv pip install -e ".[dev,workflow]" --torch-backend=cpu
       - name: Pipeline integration tests
