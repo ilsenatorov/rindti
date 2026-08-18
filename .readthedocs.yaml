@@ -6,6 +6,10 @@ build:
     python: "3.12"
   jobs:
     post_create_environment:
+      # conf.py imports rindti, so the whole dependency tree has to install.
+      # Pull the CPU build of torch explicitly: the default wheel drags in the
+      # CUDA runtime, several GB that will not fit in a Read the Docs builder.
+      - pip install torch --index-url https://download.pytorch.org/whl/cpu
       - pip install -e .[docs]
 
 sphinx:

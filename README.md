@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/ilsenatorov/rindti/actions/workflows/ci.yaml/badge.svg)](https://github.com/ilsenatorov/rindti/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/ilsenatorov/rindti/branch/master/graph/badge.svg?token=KWEX1R7FVS)](https://codecov.io/gh/ilsenatorov/rindti)
-[![Documentation](https://readthedocs.org/projects/rindti/badge/?version=latest)](https://rindti.readthedocs.io/en/latest/)
+[![Documentation](https://readthedocs.org/projects/rindti/badge/?version=master)](https://rindti.readthedocs.io/en/master/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Drug–target interaction (DTI) prediction from protein **residue interaction networks**.
@@ -176,7 +176,7 @@ pytest -m "not gpu"                     # includes full pipeline integration tes
 
 ## Documentation
 
-<https://rindti.readthedocs.io>
+<https://rindti.readthedocs.io/en/master/>
 
 ## Citation
 
