@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.models.base_model &mdash; RINDTI 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../../../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/quick_start.html">Quick start guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/quick_start.html#downloading-the-dataset">Downloading the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/quick_start.html#running-the-snakemake-pipeline">Running the Snakemake pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/quick_start.html#running-the-training">Running the training</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#file-naming">File naming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#file-structure">File structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#datasets">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../notes/data.html#datamodules">DataModules</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/models.html#baseline-models">Baseline models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#other-layers">Other layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/layers.html#encoder">Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/data.html">rindti.data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.TwoGraphData"><code class="docutils literal notranslate"><span class="pre">TwoGraphData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.DTIDataModule"><code class="docutils literal notranslate"><span class="pre">DTIDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.DTIDataset"><code class="docutils literal notranslate"><span class="pre">DTIDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.PreTrainDataModule"><code class="docutils literal notranslate"><span class="pre">PreTrainDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.PreTrainDataset"><code class="docutils literal notranslate"><span class="pre">PreTrainDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.DataCorruptor"><code class="docutils literal notranslate"><span class="pre">DataCorruptor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.SizeFilter"><code class="docutils literal notranslate"><span class="pre">SizeFilter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.corrupt_features"><code class="docutils literal notranslate"><span class="pre">corrupt_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/data.html#rindti.data.mask_features"><code class="docutils literal notranslate"><span class="pre">mask_features()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/losses.html">rindti.losses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/losses.html#generalized-lifted-structure-loss">Generalized Lifted Structure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/losses.html#soft-nearest-neighbor-loss">Soft Nearest Neighbor Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/utils.html">rindti.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.IterDict"><code class="docutils literal notranslate"><span class="pre">IterDict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.add_arg_prefix"><code class="docutils literal notranslate"><span class="pre">add_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.get_git_hash"><code class="docutils literal notranslate"><span class="pre">get_git_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.read_config"><code class="docutils literal notranslate"><span class="pre">read_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.recursive_apply"><code class="docutils literal notranslate"><span class="pre">recursive_apply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.remove_arg_prefix"><code class="docutils literal notranslate"><span class="pre">remove_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.write_config"><code class="docutils literal notranslate"><span class="pre">write_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.minmax_normalise"><code class="docutils literal notranslate"><span class="pre">minmax_normalise()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.split_random"><code class="docutils literal notranslate"><span class="pre">split_random()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.to_prob"><code class="docutils literal notranslate"><span class="pre">to_prob()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modules/utils.html#rindti.utils.plot_loss_count_dist"><code class="docutils literal notranslate"><span class="pre">plot_loss_count_dist()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">rindti.models.base_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for rindti.models.base_model</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pytorch_lightning</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightningModule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.optim</span><span class="w"> </span><span class="kn">import</span> <span class="n">SGD</span><span class="p">,</span> <span class="n">Adam</span><span class="p">,</span> <span class="n">AdamW</span><span class="p">,</span> <span class="n">RMSprop</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.optim.lr_scheduler</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReduceLROnPlateau</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchmetrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AUROC</span><span class="p">,</span>
+    <span class="n">Accuracy</span><span class="p">,</span>
+    <span class="n">ExplainedVariance</span><span class="p">,</span>
+    <span class="n">MatthewsCorrCoef</span><span class="p">,</span>
+    <span class="n">MeanAbsoluteError</span><span class="p">,</span>
+    <span class="n">MeanSquaredError</span><span class="p">,</span>
+    <span class="n">MetricCollection</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TwoGraphData</span>
+
+
+<div class="viewcode-block" id="BaseModel">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseModel</span><span class="p">(</span><span class="n">LightningModule</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BaseModel is an abstract base class built on PyTorch Lightning&#39;s LightningModule. Its constructor accepts variable number of keyword arguments, which are stored in self.hparams. The base class has helper methods available for combining protein-drug representations, setting classification and regression metrics. Available methods for concatenating drug and protein representations: Concatenation, L2 distance, L1 distance, Multiplication. Available classification metrics: Accuracy, AUROC, Matthews Correlation Coefficient. Available regression metrics: MAE, MSE, Explained Variance. Inheriting sub-classes must define the function shared_step().&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;datamodule&quot;</span><span class="p">][</span><span class="s2">&quot;batch_size&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_class_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricCollection</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">Accuracy</span><span class="p">(</span>
+                    <span class="n">num_classes</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">num_classes</span><span class="p">,</span>
+                    <span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">AUROC</span><span class="p">(</span>
+                    <span class="n">num_classes</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">num_classes</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span>
+                <span class="p">),</span>
+                <span class="n">MatthewsCorrCoef</span><span class="p">(</span><span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;binary&quot;</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;train_&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;val_&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;test_&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_reg_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricCollection</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">MeanAbsoluteError</span><span class="p">(),</span> <span class="n">MeanSquaredError</span><span class="p">(),</span> <span class="n">ExplainedVariance</span><span class="p">()]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;train_&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;val_&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;test_&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_determine_feat_method</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feat_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">drug_hidden_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">prot_hidden_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Which method to use for concatenating drug and protein representations. Available methods: Concatenation, L2 distance, L1 distance, Multiplication&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">feat_method</span> <span class="o">==</span> <span class="s2">&quot;concat&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">merge_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_concat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="n">drug_hidden_dim</span> <span class="o">+</span> <span class="n">prot_hidden_dim</span>
+        <span class="k">elif</span> <span class="n">feat_method</span> <span class="o">==</span> <span class="s2">&quot;element_l2&quot;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">drug_hidden_dim</span> <span class="o">==</span> <span class="n">prot_hidden_dim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">merge_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_l2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="n">drug_hidden_dim</span>
+        <span class="k">elif</span> <span class="n">feat_method</span> <span class="o">==</span> <span class="s2">&quot;element_l1&quot;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">drug_hidden_dim</span> <span class="o">==</span> <span class="n">prot_hidden_dim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">merge_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_l1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="n">drug_hidden_dim</span>
+        <span class="k">elif</span> <span class="n">feat_method</span> <span class="o">==</span> <span class="s2">&quot;mult&quot;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">drug_hidden_dim</span> <span class="o">==</span> <span class="n">prot_hidden_dim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">merge_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mult</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="n">drug_hidden_dim</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unsupported feature method&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_concat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drug_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">prot_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">drug_embed</span><span class="p">,</span> <span class="n">prot_embed</span><span class="p">),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_element_l2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drug_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">prot_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;L2 distance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(((</span><span class="n">drug_embed</span> <span class="o">-</span> <span class="n">prot_embed</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-6</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_element_l1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drug_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">prot_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;L1 distance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">drug_embed</span> <span class="o">-</span> <span class="n">prot_embed</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drug_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">prot_embed</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Multiplication.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">drug_embed</span> <span class="o">*</span> <span class="n">prot_embed</span>
+
+<div class="viewcode-block" id="BaseModel.training_step">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel.training_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">TwoGraphData</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What to do during training step.&quot;&quot;&quot;</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_step</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">&quot;preds&quot;</span><span class="p">],</span> <span class="n">ss</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ss</span></div>
+
+
+<div class="viewcode-block" id="BaseModel.validation_step">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel.validation_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">TwoGraphData</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What to do during validation step. Also logs the values for various callbacks.&quot;&quot;&quot;</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_step</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">&quot;preds&quot;</span><span class="p">],</span> <span class="n">ss</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;val_loss&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ss</span></div>
+
+
+<div class="viewcode-block" id="BaseModel.test_step">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel.test_step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">TwoGraphData</span><span class="p">,</span> <span class="n">data_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;What to do during test step. Also logs the values for various callbacks.&quot;&quot;&quot;</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_step</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ss</span><span class="p">[</span><span class="s2">&quot;preds&quot;</span><span class="p">],</span> <span class="n">ss</span><span class="p">[</span><span class="s2">&quot;labels&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;test_loss&quot;</span><span class="p">,</span> <span class="n">ss</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ss</span></div>
+
+
+<div class="viewcode-block" id="BaseModel.log_histograms">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel.log_histograms">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_histograms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Logs the histograms of all the available parameters.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">add_histogram</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseModel.log_all">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel.log_all">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">hparams</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log all metrics.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_epoch</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hparams</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_hyperparams</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metrics</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="p">)</span></div>
+
+
+    <span class="c1">## FIXME the logic of epoch end got changed, need to update the code</span>
+
+    <span class="c1"># def on_train_epoch_end(self, outputs: dict):</span>
+    <span class="c1">#     &quot;&quot;&quot;What to do at the end of a training epoch. Logs everything.&quot;&quot;&quot;</span>
+    <span class="c1">#     self.log_histograms()</span>
+    <span class="c1">#     metrics = self.train_metrics.compute()</span>
+    <span class="c1">#     self.train_metrics.reset()</span>
+    <span class="c1">#     self.log_all(metrics)</span>
+
+    <span class="c1"># def on_validation_epoch_end(self, outputs: dict):</span>
+    <span class="c1">#     &quot;&quot;&quot;What to do at the end of a validation epoch. Logs everything.&quot;&quot;&quot;</span>
+    <span class="c1">#     metrics = self.val_metrics.compute()</span>
+    <span class="c1">#     self.val_metrics.reset()</span>
+    <span class="c1">#     self.log_all(metrics, hparams=True)</span>
+
+    <span class="c1"># def on_test_epoch_end(self, outputs: dict):</span>
+    <span class="c1">#     &quot;&quot;&quot;What to do at the end of a test epoch. Logs everything.&quot;&quot;&quot;</span>
+    <span class="c1">#     metrics = self.test_metrics.compute()</span>
+    <span class="c1">#     self.test_metrics.reset()</span>
+    <span class="c1">#     self.log_all(metrics)</span>
+
+<div class="viewcode-block" id="BaseModel.configure_optimizers">
+<a class="viewcode-back" href="../../../modules/models.html#rindti.models.base_model.BaseModel.configure_optimizers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">configure_optimizers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">_LRScheduler</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure the optimizer and/or lr schedulers. Available optimizers: AdamW, Adam, SGD, RMSprop. Learning-rate (lr) scheduler: ReduceLROnPlateau&quot;&quot;&quot;</span>
+        <span class="n">opt_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;adamw&quot;</span><span class="p">:</span> <span class="n">AdamW</span><span class="p">,</span> <span class="s2">&quot;adam&quot;</span><span class="p">:</span> <span class="n">Adam</span><span class="p">,</span> <span class="s2">&quot;sgd&quot;</span><span class="p">:</span> <span class="n">SGD</span><span class="p">,</span> <span class="s2">&quot;rmsprop&quot;</span><span class="p">:</span> <span class="n">RMSprop</span><span class="p">}[</span>
+            <span class="n">opt_params</span><span class="p">[</span><span class="s2">&quot;module&quot;</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">()}]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;prot_encoder&quot;</span><span class="p">):</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">prot_encoder</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">opt_params</span><span class="p">[</span><span class="s2">&quot;prot_lr&quot;</span><span class="p">]}</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;drug_encoder&quot;</span><span class="p">):</span>
+            <span class="p">{</span><span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">drug_encoder</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">opt_params</span><span class="p">[</span><span class="s2">&quot;drug_lr&quot;</span><span class="p">]}</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">opt_params</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">])</span>
+        <span class="n">lr_scheduler</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;monitor&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">][</span><span class="s2">&quot;monitor&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;scheduler&quot;</span><span class="p">:</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+                <span class="n">optimizer</span><span class="p">,</span>
+                <span class="c1"># verbose=True,</span>
+                <span class="n">factor</span><span class="o">=</span><span class="n">opt_params</span><span class="p">[</span><span class="s2">&quot;reduce_lr&quot;</span><span class="p">][</span><span class="s2">&quot;factor&quot;</span><span class="p">],</span>
+                <span class="n">patience</span><span class="o">=</span><span class="n">opt_params</span><span class="p">[</span><span class="s2">&quot;reduce_lr&quot;</span><span class="p">][</span><span class="s2">&quot;patience&quot;</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">optimizer</span><span class="p">],</span> <span class="p">[</span><span class="n">lr_scheduler</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

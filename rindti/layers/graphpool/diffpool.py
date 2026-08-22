@@ -12,7 +12,7 @@ from ..base_layer import BaseLayer
 
 
 class DiffPoolNet(BaseLayer):
-    """Differential Pooling module.
+    """Differential Pooling module: Introduces a differentiable graph pooling operator that hierarchically coarsens graphs using dense learned assignments to generate a pooled node feature matrix and a coarsened adjacency matrix.
 
     Refer to :class:`torch_geometric.nn.dense.dense_diff_pool` and :class:`torch_geometric.nn.dense.dense_mincut_pool` for more details.
 

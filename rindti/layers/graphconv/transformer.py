@@ -8,7 +8,7 @@ from ..base_layer import BaseLayer
 
 
 class TransformerNet(BaseLayer):
-    """Transformer Network.
+    """Transformer Network: It adapts the original natural language processing Transformer architecture to graphs. More powerful than GAT as it can model long-range dependencies inside protein structures by projecting node features into Query (Q), Key (K), and Value (V) spaces using separate weight matrices.
 
     Refer to :class:`torch_geometric.nn.conv.TransformerConv` for more details.
 

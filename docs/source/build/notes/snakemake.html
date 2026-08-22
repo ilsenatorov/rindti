@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snakemake workflows &mdash; RINDTI 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data" href="data.html" />
+    <link rel="prev" title="Quick start guide" href="quick_start.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick start guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#downloading-the-dataset">Downloading the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#running-the-snakemake-pipeline">Running the Snakemake pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#running-the-training">Running the training</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-naming">File naming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-structure">File structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#datasets">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#datamodules">DataModules</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#baseline-models">Baseline models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#other-layers">Other layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#encoder">Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data.html">rindti.data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.TwoGraphData"><code class="docutils literal notranslate"><span class="pre">TwoGraphData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.DTIDataModule"><code class="docutils literal notranslate"><span class="pre">DTIDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.DTIDataset"><code class="docutils literal notranslate"><span class="pre">DTIDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.PreTrainDataModule"><code class="docutils literal notranslate"><span class="pre">PreTrainDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.PreTrainDataset"><code class="docutils literal notranslate"><span class="pre">PreTrainDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.DataCorruptor"><code class="docutils literal notranslate"><span class="pre">DataCorruptor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.SizeFilter"><code class="docutils literal notranslate"><span class="pre">SizeFilter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.corrupt_features"><code class="docutils literal notranslate"><span class="pre">corrupt_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.mask_features"><code class="docutils literal notranslate"><span class="pre">mask_features()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/losses.html">rindti.losses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/losses.html#generalized-lifted-structure-loss">Generalized Lifted Structure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/losses.html#soft-nearest-neighbor-loss">Soft Nearest Neighbor Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">rindti.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.IterDict"><code class="docutils literal notranslate"><span class="pre">IterDict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.add_arg_prefix"><code class="docutils literal notranslate"><span class="pre">add_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.get_git_hash"><code class="docutils literal notranslate"><span class="pre">get_git_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.read_config"><code class="docutils literal notranslate"><span class="pre">read_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.recursive_apply"><code class="docutils literal notranslate"><span class="pre">recursive_apply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.remove_arg_prefix"><code class="docutils literal notranslate"><span class="pre">remove_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.write_config"><code class="docutils literal notranslate"><span class="pre">write_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.minmax_normalise"><code class="docutils literal notranslate"><span class="pre">minmax_normalise()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.split_random"><code class="docutils literal notranslate"><span class="pre">split_random()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.to_prob"><code class="docutils literal notranslate"><span class="pre">to_prob()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.plot_loss_count_dist"><code class="docutils literal notranslate"><span class="pre">plot_loss_count_dist()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Snakemake workflows</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/snakemake.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snakemake-workflows">
+<h1>Snakemake workflows<a class="headerlink" href="#snakemake-workflows" title="Link to this heading">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<p>A workflow is a collection of rules that define the construction both the DTI and the protein pretraining datasets.
+It should be run with the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">snakemake -j 1 --use-conda --configfile your_config_file.yaml</span>
+</pre></div>
+</div>
+</section>
+<section id="confuguration">
+<h2>Confuguration<a class="headerlink" href="#confuguration" title="Link to this heading">¶</a></h2>
+<p>The config files for the snakemake workflow are located in the <code class="docutils literal notranslate"><span class="pre">config/snakemake/</span></code> file.
+<cite>source</cite> field is required to set the correct working directory, the results of the pipeline will be put in the <code class="docutils literal notranslate"><span class="pre">results</span></code> directory in the same folder.
+Examples of files for most standard DTI datasets are provided in the aforementioned directory.</p>
+</section>
+<section id="file-naming">
+<h2>File naming<a class="headerlink" href="#file-naming" title="Link to this heading">¶</a></h2>
+<p>The resulting files are named according the the string entries in the config file, followed by a string representing a hashed config dictionary.
+While this decreases human readability, it is necessary to ensure that the once the config changes, the results are not overwritten.</p>
+<p>For example, given the following config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prots</span><span class="p">:</span>
+  <span class="n">structs</span><span class="p">:</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">whole</span>
+  <span class="n">features</span><span class="p">:</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">distance</span>
+    <span class="n">node_feats</span><span class="p">:</span> <span class="n">onehot</span>
+    <span class="n">edge_feats</span><span class="p">:</span> <span class="n">none</span>
+<span class="n">drugs</span><span class="p">:</span>
+  <span class="n">max_num_atoms</span><span class="p">:</span> <span class="mi">150</span>
+  <span class="n">node_feats</span><span class="p">:</span> <span class="n">label</span>
+  <span class="n">edge_feats</span><span class="p">:</span> <span class="n">none</span>
+<span class="n">split_data</span><span class="p">:</span>
+  <span class="n">method</span><span class="p">:</span> <span class="n">random</span>
+<span class="n">parse_dataset</span><span class="p">:</span>
+  <span class="n">filtering</span><span class="p">:</span> <span class="nb">all</span>
+  <span class="n">sampling</span><span class="p">:</span> <span class="n">none</span>
+  <span class="n">task</span><span class="p">:</span> <span class="k">class</span>
+</pre></div>
+</div>
+<p>The resulting file will be <code class="docutils literal notranslate"><span class="pre">&lt;target&gt;/results/prepare_all/wdonlnranc_0f6b0ac6.pkl</span></code>.
+In this file, the first part (<code class="docutils literal notranslate"><span class="pre">wdonlnranc</span></code>) is human-readable compression of the config (<code class="docutils literal notranslate"><span class="pre">w</span></code> for <code class="docutils literal notranslate"><span class="pre">whole</span></code>, <code class="docutils literal notranslate"><span class="pre">d</span></code> for <code class="docutils literal notranslate"><span class="pre">distance</span></code>, etc), while the second part (<code class="docutils literal notranslate"><span class="pre">0f6b0ac6</span></code>) is a hashed version of the config.</p>
+</section>
+<section id="file-structure">
+<h2>File structure<a class="headerlink" href="#file-structure" title="Link to this heading">¶</a></h2>
+<p>It is recommended to organise your datasets folder as following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>dataset1
+└── resources
+├── structures
+│   ├── struct1.pdb
+│   ├── struct2.pdb
+│   ├── struct3.pdb
+├── tables
+│   ├── inter.tsv
+│   ├── lig.tsv
+│   └── prot.tsv
+└── templates
+        └── template1.pdb
+</pre></div>
+</div>
+<p>After running the snakemake workflow for dataset1 and dataset2, the following files and directories will be generated (the actual directories might differ, depending on your config):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>test_data
+├── resources
+│   ├── structures
+│   ├── tables
+│   └── templates
+└── results
+├── parse_dataset
+├── parsed_structs
+├── prepare_all
+├── prepare_drugs
+├── prot_data
+├── pymol_logs
+├── pymol_scripts
+├── rinerator
+└── split_data
+</pre></div>
+</div>
+</section>
+<section id="dti-dataset-creation">
+<h2>DTI dataset creation<a class="headerlink" href="#dti-dataset-creation" title="Link to this heading">¶</a></h2>
+<p>In order to create a DTI dataset, the following requirements have to be met:</p>
+<ul class="simple">
+<li><p>PDB structures, located in the <code class="docutils literal notranslate"><span class="pre">&lt;source&gt;/resources/structures</span></code> directory</p></li>
+<li><p>Necessary tsv tables located in the  <code class="docutils literal notranslate"><span class="pre">&lt;source&gt;/resources/tables</span></code> directory:
+- <code class="docutils literal notranslate"><span class="pre">&lt;source&gt;/resources/tables/inter.tsv</span></code> -  The interactions data, has to contain <em>Drug_ID</em>, <em>Target_ID</em> and <em>Y</em> columns,
+- <code class="docutils literal notranslate"><span class="pre">&lt;source&gt;/resources/tables/lig.tsv</span></code> -  The ligand data, has to contain <em>Drug_ID</em> and <em>Drug</em> columns, where <em>Drug</em> contains SMILES representation of the drug.
+- <code class="docutils literal notranslate"><span class="pre">&lt;source&gt;/resources/tables/prot.tsv</span></code> -  The protein data, has to contain <em>Target_ID</em> and <em>Target</em> columns, where <em>Target</em> contains the protein sequence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">only_proteins</span></code> entry in the snakemake config has to be <em>false</em></p></li>
+</ul>
+<p>After running the pipeline with <code class="docutils literal notranslate"><span class="pre">snakemake</span> <span class="pre">-j</span> <span class="pre">16</span> <span class="pre">--use-conda</span> <span class="pre">--configfile</span> <span class="pre">your_config_file.yaml</span></code>, the pickle file should be created in <code class="docutils literal notranslate"><span class="pre">&lt;target&gt;/results/prepare_all/</span></code> folder.</p>
+<section id="file-validation">
+<h3>File validation<a class="headerlink" href="#file-validation" title="Link to this heading">¶</a></h3>
+<p>The following code can be used to validate the configuration file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">snakemake.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rindti.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_config</span>
+
+<span class="n">default_config</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="s1">&#39;config/snakemake/default.yaml&#39;</span><span class="p">)</span>
+<span class="n">your_config</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="s1">&#39;config/snakemake/your_config.yaml&#39;</span><span class="p">)</span>
+<span class="n">default_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">your_config</span><span class="p">)</span>
+<span class="n">validate</span><span class="p">(</span><span class="n">default_config</span><span class="p">,</span> <span class="s1">&#39;workflow/schemas/config.schema.yaml&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following code can be used to validate the tables:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">snakemake.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;inter&#39;</span><span class="p">,</span> <span class="s1">&#39;lig&#39;</span><span class="p">,</span> <span class="s1">&#39;prot&#39;</span><span class="p">]:</span>
+  <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;test/test_data/resources/tables/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.tsv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+  <span class="n">validate</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;workflow/schemas/</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.schema.yaml&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="protein-dataset-creation">
+<h2>Protein dataset creation<a class="headerlink" href="#protein-dataset-creation" title="Link to this heading">¶</a></h2>
+<p>In order to create the protein-only dataset (for pretraining), the following requirements have to be met:</p>
+<ul class="simple">
+<li><p>PDB structures, located in the <code class="docutils literal notranslate"><span class="pre">&lt;source&gt;/resources/structures</span></code> directory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">only_proteins</span></code> entry in the snakemake config has to be <em>true</em></p></li>
+</ul>
+<p>After running the pipeline with <code class="docutils literal notranslate"><span class="pre">snakemake</span> <span class="pre">-j</span> <span class="pre">16</span> <span class="pre">--use-conda</span></code>, the pickle file should be created in <code class="docutils literal notranslate"><span class="pre">&lt;target&gt;/results/prot_data/</span></code> folder.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quick_start.html" class="btn btn-neutral float-left" title="Quick start guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data.html" class="btn btn-neutral float-right" title="Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

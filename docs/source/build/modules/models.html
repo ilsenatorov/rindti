@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rindti.models &mdash; RINDTI 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="rindti.layers" href="layers.html" />
+    <link rel="prev" title="Data" href="../notes/data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../notes/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/quick_start.html">Quick start guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/quick_start.html#downloading-the-dataset">Downloading the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/quick_start.html#running-the-snakemake-pipeline">Running the Snakemake pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/quick_start.html#running-the-training">Running the training</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#file-naming">File naming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#file-structure">File structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../notes/data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#datasets">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../notes/data.html#datamodules">DataModules</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#baseline-models">Baseline models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#other-layers">Other layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="layers.html#encoder">Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">rindti.data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.TwoGraphData"><code class="docutils literal notranslate"><span class="pre">TwoGraphData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.DTIDataModule"><code class="docutils literal notranslate"><span class="pre">DTIDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.DTIDataset"><code class="docutils literal notranslate"><span class="pre">DTIDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.PreTrainDataModule"><code class="docutils literal notranslate"><span class="pre">PreTrainDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.PreTrainDataset"><code class="docutils literal notranslate"><span class="pre">PreTrainDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.DataCorruptor"><code class="docutils literal notranslate"><span class="pre">DataCorruptor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.SizeFilter"><code class="docutils literal notranslate"><span class="pre">SizeFilter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.corrupt_features"><code class="docutils literal notranslate"><span class="pre">corrupt_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#rindti.data.mask_features"><code class="docutils literal notranslate"><span class="pre">mask_features()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="losses.html">rindti.losses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="losses.html#generalized-lifted-structure-loss">Generalized Lifted Structure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="losses.html#soft-nearest-neighbor-loss">Soft Nearest Neighbor Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">rindti.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.IterDict"><code class="docutils literal notranslate"><span class="pre">IterDict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.add_arg_prefix"><code class="docutils literal notranslate"><span class="pre">add_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.get_git_hash"><code class="docutils literal notranslate"><span class="pre">get_git_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.read_config"><code class="docutils literal notranslate"><span class="pre">read_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.recursive_apply"><code class="docutils literal notranslate"><span class="pre">recursive_apply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.remove_arg_prefix"><code class="docutils literal notranslate"><span class="pre">remove_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.write_config"><code class="docutils literal notranslate"><span class="pre">write_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.minmax_normalise"><code class="docutils literal notranslate"><span class="pre">minmax_normalise()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.split_random"><code class="docutils literal notranslate"><span class="pre">split_random()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.to_prob"><code class="docutils literal notranslate"><span class="pre">to_prob()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#rindti.utils.plot_loss_count_dist"><code class="docutils literal notranslate"><span class="pre">plot_loss_count_dist()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">rindti.models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/models.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rindti-models">
+<h1>rindti.models<a class="headerlink" href="#rindti-models" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#base-model" id="id1">Base Model</a></p></li>
+<li><p><a class="reference internal" href="#dti-models" id="id2">DTI models</a></p></li>
+<li><p><a class="reference internal" href="#baseline-models" id="id3">Baseline models</a></p></li>
+</ul>
+</nav>
+<section id="base-model">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Base Model</a><a class="headerlink" href="#base-model" title="Link to this heading">¶</a></h2>
+<p>The base model defines a lot of common methods that are identical for all models - logging, saving, etc.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">BaseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></p>
+<p>BaseModel is an abstract base class built on PyTorch Lightning’s LightningModule. Its constructor accepts variable number of keyword arguments, which are stored in self.hparams. The base class has helper methods available for combining protein-drug representations, setting classification and regression metrics. Available methods for concatenating drug and protein representations: Concatenation, L2 distance, L1 distance, Multiplication. Available classification metrics: Accuracy, AUROC, Matthews Correlation Coefficient. Available regression metrics: MAE, MSE, Explained Variance. Inheriting sub-classes must define the function shared_step().</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.training_step">
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.training_step" title="Link to this definition">¶</a></dt>
+<dd><p>What to do during training step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.validation_step">
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.validation_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.validation_step" title="Link to this definition">¶</a></dt>
+<dd><p>What to do during validation step. Also logs the values for various callbacks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.test_step">
+<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="data.html#rindti.data.TwoGraphData" title="rindti.data.data.TwoGraphData"><span class="pre">TwoGraphData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.test_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.test_step" title="Link to this definition">¶</a></dt>
+<dd><p>What to do during test step. Also logs the values for various callbacks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.log_histograms">
+<span class="sig-name descname"><span class="pre">log_histograms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.log_histograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.log_histograms" title="Link to this definition">¶</a></dt>
+<dd><p>Logs the histograms of all the available parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.log_all">
+<span class="sig-name descname"><span class="pre">log_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">hparams</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.log_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.log_all" title="Link to this definition">¶</a></dt>
+<dd><p>Log all metrics.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.base_model.BaseModel.configure_optimizers">
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/master/optim.html#torch.optim.Optimizer" title="(in PyTorch main (2.13.0a0+git7e49a76 ))"><span class="pre">Optimizer</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_LRScheduler</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/rindti/models/base_model.html#BaseModel.configure_optimizers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.base_model.BaseModel.configure_optimizers" title="Link to this definition">¶</a></dt>
+<dd><p>Configure the optimizer and/or lr schedulers. Available optimizers: AdamW, Adam, SGD, RMSprop. Learning-rate (lr) scheduler: ReduceLROnPlateau</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="dti-models">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">DTI models</a><a class="headerlink" href="#dti-models" title="Link to this heading">¶</a></h2>
+<p>Drug-target interaction prediction models.
+Calculate embeddings for drugs and proteins, then use an MLP to predict the final result.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="py class" id="module-rindti.models.dti">
+<dt class="sig sig-object py" id="rindti.models.dti.ClassificationModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ClassificationModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/classification.html#ClassificationModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.ClassificationModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.base_model.BaseModel" title="rindti.models.base_model.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Model for DTI prediction as a classification problem using a Multilayer Perceptron (MLP) and a logits based binary cross-entropy (bce) loss function. Available encoders: GraphEncoder.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.ClassificationModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">drug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.pytorch.org/docs/master/tensors.html#torch.Tensor" title="(in PyTorch main (2.13.0a0+git7e49a76 ))"><span class="pre">Tensor</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/classification.html#ClassificationModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.ClassificationModel.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Embed and merge protein and drug representations along with the specified model and method. The output is the MLP prediction coupled with the embedding.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.dti.RegressionModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">RegressionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/regression.html#RegressionModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.RegressionModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.dti.ClassificationModel" title="rindti.models.dti.classification.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Model for DTI prediction as a reg problem. Based on the same MLP architecture of the classification class but using mean square error (mse) loss function.</p>
+</dd></dl>
+
+</section>
+<section id="baseline-models">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Baseline models</a><a class="headerlink" href="#baseline-models" title="Link to this heading">¶</a></h2>
+<p>These models are used to predict the baseline values for datasets.
+They do not have access to the actual features and operate solely on the labels of drugs and proteins.</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+</tbody>
+</table>
+<dl class="py class" id="module-rindti.models.dti.baseline">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.BaseBaseline">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">BaseBaseline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/base_baseline.html#BaseBaseline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.BaseBaseline" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base (Parent) class for all baseline models that use simple, non-neural network based strategies to predict the outcome for a pair of a protein and a drug interaction.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.BaseBaseline.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/base_baseline.html#BaseBaseline.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.BaseBaseline.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the model to the training dataframe. Has to have ‘Drug_ID’, ‘Target_ID’ and ‘Y’ columns. Implemented by sub-classes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.BaseBaseline.predict_pair">
+<span class="sig-name descname"><span class="pre">predict_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prot_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">drug_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/base_baseline.html#BaseBaseline.predict_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.BaseBaseline.predict_pair" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the outcome for a pair of a protein and a drug. Implemented by sub-classes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.BaseBaseline.test_metrics">
+<span class="sig-name descname"><span class="pre">test_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/base_baseline.html#BaseBaseline.test_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.BaseBaseline.test_metrics" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the metrics for the test dataframe. Available options: Accuracy, AUROC, Matthews correlation coefficient</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.BaseBaseline.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/base_baseline.html#BaseBaseline.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.BaseBaseline.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Apply prediction to the whole test dataframe.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.BaseBaseline.assess_dataset">
+<span class="sig-name descname"><span class="pre">assess_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_frac</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_runs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/base_baseline.html#BaseBaseline.assess_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.BaseBaseline.assess_dataset" title="Link to this definition">¶</a></dt>
+<dd><p>Assess the performance of the model on a dataset and output tab-separated metrics with accuracy of 3 decimal digits.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.Max">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/max_likelihood.html#Max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.Max" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.dti.baseline.BaseBaseline" title="rindti.models.dti.baseline.base_baseline.BaseBaseline"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBaseline</span></code></a></p>
+<p>Take the most popular label. If the prob flag is false (binary output), then the prediction is the mean of the labels (“Y”).  Otherwise, it outputs a random value from a normal distribution centered at the mean and scaled up to the standard deviation of the labels (“Y”).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.Max.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/max_likelihood.html#Max.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.Max.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the model to the training dataframe. Has to have ‘Drug_ID’, ‘Target_ID’ and ‘Y’ columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.Max.predict_pair">
+<span class="sig-name descname"><span class="pre">predict_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prot_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">drug_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/max_likelihood.html#Max.predict_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.Max.predict_pair" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the outcome for a pair of a protein and a drug.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.Max.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/max_likelihood.html#Max.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.Max.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Apply prediction to the whole test dataframe.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.ProtDrugMax">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ProtDrugMax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/prot_drug_max_likelihood.html#ProtDrugMax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.ProtDrugMax" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rindti.models.dti.baseline.BaseBaseline" title="rindti.models.dti.baseline.base_baseline.BaseBaseline"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBaseline</span></code></a></p>
+<p>Take the average of the drug and prot labels.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.ProtDrugMax.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1.0.dev0+1590.g8dfcb75ba0)"><span class="pre">DataFrame</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/prot_drug_max_likelihood.html#ProtDrugMax.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.ProtDrugMax.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit the model to the training dataframe. Has to have ‘Drug_ID’, ‘Target_ID’ and ‘Y’ columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rindti.models.dti.baseline.ProtDrugMax.predict_pair">
+<span class="sig-name descname"><span class="pre">predict_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prot_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">drug_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/rindti/models/dti/baseline/prot_drug_max_likelihood.html#ProtDrugMax.predict_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rindti.models.dti.baseline.ProtDrugMax.predict_pair" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the outcome for a pair of a protein and a drug.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../notes/data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="layers.html" class="btn btn-neutral float-right" title="rindti.layers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

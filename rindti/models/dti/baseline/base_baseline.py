@@ -4,21 +4,21 @@ from torchmetrics.functional import accuracy, auroc, matthews_corrcoef
 
 
 class BaseBaseline:
-    """Parent of all baseline models."""
+    """Base (Parent) class for all baseline models that use simple, non-neural network based strategies to predict the outcome for a pair of a protein and a drug interaction."""
 
     def __init__(self, prob: bool = False, **kwargs):
         self.prob = prob
 
     def fit(self, train: pd.DataFrame):
-        """Fit the model to the training dataframe. Has to have 'Drug_ID', 'Target_ID' and 'Y' columns."""
+        """Fit the model to the training dataframe. Has to have 'Drug_ID', 'Target_ID' and 'Y' columns. Implemented by sub-classes."""
         raise NotImplementedError()
 
     def predict_pair(self, prot_id: str, drug_id: str) -> float:
-        """Predict the outcome for a pair of a protein and a drug."""
+        """Predict the outcome for a pair of a protein and a drug. Implemented by sub-classes."""
         raise NotImplementedError()
 
     def test_metrics(self, test: pd.DataFrame) -> dict:
-        """Calculate the metrics for the test dataframe."""
+        """Calculate the metrics for the test dataframe. Available options: Accuracy, AUROC, Matthews correlation coefficient"""
         pred = self.predict(test)
         y_hat = torch.tensor(pred["pred"].values)
         y = torch.tensor(pred["Y"].values)
@@ -36,7 +36,7 @@ class BaseBaseline:
         return test
 
     def assess_dataset(self, filename: str, train_frac: float = 0.8, n_runs: int = 10):
-        """Assess the performance of the model on a dataset."""
+        """Assess the performance of the model on a dataset and output tab-separated metrics with accuracy of 3 decimal digits."""
         dataset = pd.read_csv(filename, sep="\t")
         train = dataset[dataset["split"] == "train"]
         val = dataset[dataset["split"] == "val"]

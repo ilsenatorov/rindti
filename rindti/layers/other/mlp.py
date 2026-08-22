@@ -7,7 +7,7 @@ from ..base_layer import BaseLayer
 
 
 class MLP(BaseLayer):
-    """Simple Multi-layer perceptron.
+    """Simple Multi-layer perceptron: The final predictor used by ClassificationModel and RegressionModel to model DTIs encoded by the GNN.
 
     Refer to :class:`torch.nn.Sequential` for more details.
 
@@ -30,10 +30,11 @@ class MLP(BaseLayer):
     ):
         super().__init__()
 
-        self.mlp = nn.Sequential(nn.Linear(input_dim, hidden_dim), nn.ReLU(), nn.Dropout(dropout))
+        self.mlp = nn.Sequential(nn.Linear(input_dim, hidden_dim), nn.BatchNorm1d(hidden_dim), nn.ReLU(), nn.Dropout(dropout))
 
         for i in range(num_layers - 2):
             self.mlp.add_module("hidden_linear{}".format(i), nn.Linear(hidden_dim, hidden_dim))
+            self.mlp.add_module("hidden_bn{}".format(i), nn.BatchNorm1d(hidden_dim))
             self.mlp.add_module("hidden_relu{}".format(i), nn.ReLU())
             self.mlp.add_module("hidden_dropout{}".format(i), nn.Dropout(dropout))
         self.mlp.add_module("final_linear", nn.Linear(hidden_dim, out_dim))

@@ -6,7 +6,7 @@ from torch import LongTensor, Tensor
 
 
 class GeneralisedLiftedStructureLoss(LightningModule):
-    r"""Gerneralised lifted structure loss.
+    r"""Gerneralised lifted structure loss: Explicitly pushes positive embedding pair values together and negative embedding pair values apart using all pairwise distances within a batch. The positive and negative distances are modeled by margins. It can be used to form a cluster in embedding space for proteins from the same family.
 
     `[paper] <https://arxiv.org/abs/1511.06452>`_
 

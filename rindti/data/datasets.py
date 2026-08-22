@@ -32,7 +32,7 @@ class DTIDataset(InMemoryDataset):
     ):
         root = self._set_filenames(filename, exp_name)
         super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]])
+        self.data, self.slices, self.config = torch.load(self.processed_paths[self.splits[split]], weights_only=False)
 
     def _set_filenames(self, filename: str, exp_name: str) -> str:
         basefilename = os.path.basename(filename)
@@ -105,7 +105,7 @@ class PreTrainDataset(InMemoryDataset):
         root = os.path.join("data", basefilename)
         self.filename = filename
         super().__init__(root, transform, pre_transform)
-        self.data, self.slices, self.config = torch.load(self.processed_paths[0])
+        self.data, self.slices, self.config = torch.load(self.processed_paths[0], weights_only=False)
 
     def index(self, id: str):
         """Find protein by id."""

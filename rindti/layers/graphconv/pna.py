@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class PNAConvNet(BaseLayer):
-    r"""Principal Neighborhood Aggregation.
+    r"""Principal Neighborhood Aggregation: Utilizes multiple aggregation functions and degree-scalers to better handle continuous features and complex, real-world data. This can be used to simultaneously model different neighborhood statistics that capture different biological signals.
 
     Refer to :class:`torch_geometric.nn.conv.PNAConv` for more details.
 

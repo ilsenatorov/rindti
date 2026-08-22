@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data &mdash; RINDTI 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="rindti.models" href="../modules/models.html" />
+    <link rel="prev" title="Snakemake workflows" href="snakemake.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html">
+            
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#conda-installation">Conda installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#manual-installation">Manual installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick start guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#downloading-the-dataset">Downloading the dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#running-the-snakemake-pipeline">Running the Snakemake pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quick_start.html#running-the-training">Running the training</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snakemake.html">Snakemake workflows</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#confuguration">Confuguration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#file-naming">File naming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#file-structure">File structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#dti-dataset-creation">DTI dataset creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snakemake.html#protein-dataset-creation">Protein dataset creation</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#twographdata">TwoGraphData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#datasets">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#datamodules">DataModules</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/models.html">rindti.models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#base-model">Base Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#dti-models">DTI models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/models.html#baseline-models">Baseline models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/layers.html">rindti.layers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#base-layer">Base layer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#node-layers">Node layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#pooling-layers">Pooling layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#other-layers">Other layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/layers.html#encoder">Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data.html">rindti.data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.TwoGraphData"><code class="docutils literal notranslate"><span class="pre">TwoGraphData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.DTIDataModule"><code class="docutils literal notranslate"><span class="pre">DTIDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.DTIDataset"><code class="docutils literal notranslate"><span class="pre">DTIDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.PreTrainDataModule"><code class="docutils literal notranslate"><span class="pre">PreTrainDataModule</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.PreTrainDataset"><code class="docutils literal notranslate"><span class="pre">PreTrainDataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.DataCorruptor"><code class="docutils literal notranslate"><span class="pre">DataCorruptor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.SizeFilter"><code class="docutils literal notranslate"><span class="pre">SizeFilter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.corrupt_features"><code class="docutils literal notranslate"><span class="pre">corrupt_features()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/data.html#rindti.data.mask_features"><code class="docutils literal notranslate"><span class="pre">mask_features()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/losses.html">rindti.losses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/losses.html#generalized-lifted-structure-loss">Generalized Lifted Structure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/losses.html#soft-nearest-neighbor-loss">Soft Nearest Neighbor Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/utils.html">rindti.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.IterDict"><code class="docutils literal notranslate"><span class="pre">IterDict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.add_arg_prefix"><code class="docutils literal notranslate"><span class="pre">add_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.get_git_hash"><code class="docutils literal notranslate"><span class="pre">get_git_hash()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.read_config"><code class="docutils literal notranslate"><span class="pre">read_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.recursive_apply"><code class="docutils literal notranslate"><span class="pre">recursive_apply()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.remove_arg_prefix"><code class="docutils literal notranslate"><span class="pre">remove_arg_prefix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.write_config"><code class="docutils literal notranslate"><span class="pre">write_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.minmax_normalise"><code class="docutils literal notranslate"><span class="pre">minmax_normalise()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.split_random"><code class="docutils literal notranslate"><span class="pre">split_random()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.to_prob"><code class="docutils literal notranslate"><span class="pre">to_prob()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/utils.html#rindti.utils.plot_loss_count_dist"><code class="docutils literal notranslate"><span class="pre">plot_loss_count_dist()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">RINDTI</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notes/data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data">
+<h1>Data<a class="headerlink" href="#data" title="Link to this heading">¶</a></h1>
+<section id="twographdata">
+<h2>TwoGraphData<a class="headerlink" href="#twographdata" title="Link to this heading">¶</a></h2>
+<p>A subclass of <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.data.Data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code></a> that stores two independent graphs (here, a protein and a drug) within a single data object. Such an architecture allows batching of multiple samples (protein-drug pairs) for GPU-based training.</p>
+<p>Usually, an <cite>Data</cite> object stores all information associated with a graph. Some of its core fields include <cite>x</cite>: node feature matrix; <cite>edge_index</cite>: defines the graph connectivity in COO format; <cite>y</cite>: stores graph or node labels. Each attribute is represented as a tensor, with dimensions corresponding to the number of nodes, edges, or associated features. Further details can be found at <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.data.Data.html#torch_geometric.data.Data" title="(in pytorch_geometric v2.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code></a>.</p>
+<p>To distinguish the attributes of the two graphs stored in the same <cite>Data</cite> object, they are indicated by prefixes. For example, <cite>x</cite> and <cite>edge_index</cite> become <cite>drug_x</cite> and <cite>drug_edge_index</cite>. However, the prefixes are removed in the <cite>shared_step</cite> function of the classification and regression tasks for further processing.</p>
+<p><cite>Batching</cite> is the process of combining multiple graph samples (drug-target pairs) into a single disconnected graph, which allows parallel processing of all samples in a single forward pass. To create a correct independent graph, node indices in <cite>edge_index</cite> are shifted to reference the correct nodes after concatenation.</p>
+<p>For example, There are two proteins in a batch: Protein A (5 nodes) and Protein B (7 nodes) which are concatenated. Then, each <cite>edge_index</cite> of Protein B is automatically shifted by +5 so they refer to the correct nodes. However, there are two <cite>edge_index</cite> (one each associated with the drug and the protein), hence, the <cite>__inc__</cite> function was modified to address this.</p>
+<p><a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/loader.html#torch_geometric.loader.DataLoader" title="(in pytorch_geometric v2.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code></a> is responsible for merging data objects from a <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.data.Dataset.html#torch_geometric.data.Dataset" title="(in pytorch_geometric v2.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Dataset</span></code></a> to a mini-batch. For further information, see the <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs">standard processing rules of torch_geometric.</a></p>
+<p>Apart from the batching functionality, an <cite>Data</cite> object is just a dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rindti.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TwoGraphData</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="n">num_prot_nodes</span><span class="p">,</span> <span class="n">num_drug_nodes</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">30</span>
+<span class="n">num_prot_edges</span><span class="p">,</span> <span class="n">num_drug_edges</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">30</span>
+<span class="n">prot_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_prot_nodes</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span> <span class="c1"># prot_x: 100 protein nodes, each with 32 features</span>
+<span class="n">drug_x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_drug_nodes</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span> <span class="c1"># drug_x: 30 drug nodes, each with 32 features</span>
+<span class="n">prot_edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_prot_nodes</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_prot_edges</span><span class="p">))</span>
+<span class="c1"># Returns a tensor of size (2, num_edges) filled with random integers generated uniformly between 0 to num_nodes. Each column represents one edge (source_node, target_node).</span>
+<span class="n">drug_edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_drug_nodes</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_drug_edges</span><span class="p">))</span>
+<span class="n">tgd</span> <span class="o">=</span> <span class="n">TwoGraphData</span><span class="p">(</span><span class="n">prot_x</span><span class="o">=</span><span class="n">prot_x</span><span class="p">,</span> <span class="n">drug_x</span><span class="o">=</span><span class="n">drug_x</span><span class="p">,</span> <span class="n">prot_edge_index</span><span class="o">=</span><span class="n">prot_edge_index</span><span class="p">,</span> <span class="n">drug_edge_index</span><span class="o">=</span><span class="n">drug_edge_index</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tgd</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">TwoGraphData</span><span class="p">(</span><span class="n">prot_x</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">drug_x</span><span class="o">=</span><span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">prot_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="n">drug_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Then such objects can be given directly to the <cite>DataLoader</cite> with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_geometric.loader</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="n">dl</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">([</span><span class="n">tgd</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># Create a dataset of 10 identical samples, for example, and batch 5 samples together.</span>
+<span class="n">batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dl</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="c1"># edge indices automatically offset and concatenated</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">TwoGraphDataBatch</span><span class="p">(</span><span class="n">prot_x</span><span class="o">=</span><span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">drug_x</span><span class="o">=</span><span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">prot_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span> <span class="n">drug_edge_index</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">150</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="datasets">
+<h2>Datasets<a class="headerlink" href="#datasets" title="Link to this heading">¶</a></h2>
+<p>Custom datasets are based on <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/notes/create_dataset.html">torch_geometric Datasets</a></p>
+<p>They are designed to take in the results of the snakemake workflows, and create a quick-to-load pytorch objects.</p>
+<p>For example, it specifies how protein structures and features are generated (<cite>prots</cite>), how drug graphs are constructed (<cite>drugs</cite>), how the dataset is split into training/validation/test sets (<cite>split_data</cite>), and how samples are filtered or labeled (<cite>parse_dataset</cite>).</p>
+<p>Every dataset loads these preprocessed files as <cite>Data</cite> objects, avoiding repeated preprocessing during training. This is implemented using <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.data.InMemoryDataset.html#torch_geometric.data.InMemoryDataset" title="(in pytorch_geometric v2.9.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.InMemoryDataset</span></code></a>, which processes the raw data only once, saves the processed representation to disk, and then loads the complete dataset into memory when called upon. Both <cite>DTIDataset</cite> and <cite>PreTrainDataset</cite> inherit from <cite>InMemoryDataset</cite>.</p>
+<section id="dti-datasets">
+<h3>DTI datasets<a class="headerlink" href="#dti-datasets" title="Link to this heading">¶</a></h3>
+<p>They represent a dataset of drug–target interaction (DTI) samples. The model learns to predict interactions between proteins and drugs. The samples have two graph stored as a <cite>TwoGraphData</cite> object, along with the interaction label. The dataset assumes that the input is a pickle file produced by the preprocessing (<cite>Snakemake</cite>) pipeline.</p>
+<p>Since the splits in DTI predictions are often non-random (scaffold split/cold target split), for each DTI pair a string indicating the split is provided.</p>
+<p>Thus to create DTI datasets one needs to specialize the split:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rindti.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTIDataset</span>
+<span class="n">pickle_file</span> <span class="o">=</span> <span class="s2">&quot;filename.pkl&quot;</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">DTIDataset</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">DTIDataset</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;val&quot;</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">DTIDataset</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pretraining-datasets">
+<h3>Pretraining datasets<a class="headerlink" href="#pretraining-datasets" title="Link to this heading">¶</a></h3>
+<p>They represent individual protein (target) graphs. The purpose of these datasets is to learn general protein representations. The datasets for pretraining are also obtained from the snakemake workflow, however, the splitting is done internally.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pickle_file</span> <span class="o">=</span> <span class="s2">&quot;filename.pkl&quot;</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">PreTrainDataset</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="datamodules">
+<h2>DataModules<a class="headerlink" href="#datamodules" title="Link to this heading">¶</a></h2>
+<p>Datamodules are based on <a class="reference external" href="https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html">pytorch_lightning DataModules</a> and aim to put all data-related functionality (dataloaders, splitting, sampling) into a single object. <cite>BaseDataModule</cite> provides the aforementioned shared functionality. <cite>DTIDataModule</cite> implements loading the splits from <cite>DTIDataset</cite> and using dataloaders to create batches. <cite>PreTrainDataModule</cite> loads a single <cite>PreTrainDataset</cite> and performing a random train/validation/test split internally. Both modules propagate dataset metadata to the model configuration through <cite>update_config()</cite>. This ensures consistency between preprocessing and training.</p>
+<p>Both the modules can be invoked simply with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rindti.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTIDataModule</span><span class="p">,</span> <span class="n">PreTrainDataModule</span>
+<span class="n">dti_pickle_file</span> <span class="o">=</span> <span class="s2">&quot;dti.pkl&quot;</span>
+<span class="n">dti_dm</span> <span class="o">=</span> <span class="n">DTIDataModule</span><span class="p">(</span><span class="n">dti_pickle_file</span><span class="p">)</span>
+<span class="n">pretrain_pickle_file</span> <span class="o">=</span> <span class="s2">&quot;pretrain.pkl&quot;</span>
+<span class="n">pretrain_dm</span> <span class="o">=</span> <span class="n">PreTrainDataModule</span><span class="p">(</span><span class="n">pretrain_pickle_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snakemake.html" class="btn btn-neutral float-left" title="Snakemake workflows" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules/models.html" class="btn btn-neutral float-right" title="rindti.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Ilya Senatorov.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

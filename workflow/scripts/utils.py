@@ -36,12 +36,12 @@ def max_nodes(df: pd.DataFrame) -> int:
 
 def feat_type(df: pd.DataFrame) -> str:
     """Return the type of the features."""
-    return get_type(df["data"][0], "x")
+    return get_type(df["data"].iloc[0], "x") #changed from df["data"][0]
 
 
 def edge_type(df: pd.DataFrame) -> str:
     """Return the type of the edges."""
-    return get_type(df["data"][0], "edge_feats")
+    return get_type(df["data"].iloc[0], "edge_feats")
 
 
 def feat_dim(df: pd.DataFrame, which: str) -> int:
@@ -50,7 +50,7 @@ def feat_dim(df: pd.DataFrame, which: str) -> int:
     if ftype == "label":
         return len(encd[which]["node"])
     else:
-        return df["data"][0]["x"].shape[-1]
+        return df["data"].iloc[0]["x"].shape[-1]
 
 
 def edge_dim(df: pd.DataFrame, which: str) -> int:
@@ -59,7 +59,7 @@ def edge_dim(df: pd.DataFrame, which: str) -> int:
     if ftype == "label":
         return len(encd[which]["edge"])
     elif ftype == "onehot":
-        return df["data"][0]["edge_feats"].size(1)
+        return df["data"].iloc[0]["edge_feats"].size(1)
     else:
         return 0
 

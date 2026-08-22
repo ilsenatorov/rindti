@@ -5,7 +5,8 @@ from .base_baseline import BaseBaseline
 
 
 class Max(BaseBaseline):
-    """Take the most popular label."""
+    """Take the most popular label. If the prob flag is false (binary output), then the prediction is the mean of the labels (“Y”).  Otherwise, it outputs a random value from a normal distribution centered at the mean and scaled up to the standard deviation of the labels (“Y”). 
+"""
 
     def fit(self, train: pd.DataFrame):
         """Fit the model to the training dataframe. Has to have 'Drug_ID', 'Target_ID' and 'Y' columns."""

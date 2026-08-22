@@ -19,7 +19,7 @@ from ..data import TwoGraphData
 
 
 class BaseModel(LightningModule):
-    """Base model, defines a lot of helper functions."""
+    """BaseModel is an abstract base class built on PyTorch Lightning's LightningModule. Its constructor accepts variable number of keyword arguments, which are stored in self.hparams. The base class has helper methods available for combining protein-drug representations, setting classification and regression metrics. Available methods for concatenating drug and protein representations: Concatenation, L2 distance, L1 distance, Multiplication. Available classification metrics: Accuracy, AUROC, Matthews Correlation Coefficient. Available regression metrics: MAE, MSE, Explained Variance. Inheriting sub-classes must define the function shared_step()."""
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -59,7 +59,7 @@ class BaseModel(LightningModule):
         prot_hidden_dim: int = None,
         **kwargs,
     ):
-        """Which method to use for concatenating drug and protein representations."""
+        """Which method to use for concatenating drug and protein representations. Available methods: Concatenation, L2 distance, L1 distance, Multiplication"""
         if feat_method == "concat":
             self.merge_features = self._concat
             self.embed_dim = drug_hidden_dim + prot_hidden_dim
@@ -155,7 +155,7 @@ class BaseModel(LightningModule):
     def configure_optimizers(
         self,
     ) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
-        """Configure the optimizer and/or lr schedulers"""
+        """Configure the optimizer and/or lr schedulers. Available optimizers: AdamW, Adam, SGD, RMSprop. Learning-rate (lr) scheduler: ReduceLROnPlateau"""
         opt_params = self.hparams.model["optimizer"]
         optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[
             opt_params["module"]
@@ -172,7 +172,7 @@ class BaseModel(LightningModule):
             "monitor": self.hparams["model"]["monitor"],
             "scheduler": ReduceLROnPlateau(
                 optimizer,
-                verbose=True,
+                # verbose=True,
                 factor=opt_params["reduce_lr"]["factor"],
                 patience=opt_params["reduce_lr"]["patience"],
             ),

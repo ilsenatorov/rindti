@@ -7,9 +7,10 @@ from torch import LongTensor, Tensor
 
 
 class SoftNearestNeighborLoss(LightningModule):
-    """Soft Nearest Neighbor Loss.
+    """Soft Nearest Neighbor Loss: Instead of using hard margins, model the probability of the embedded neighbors belonging to the same class, without explicitly predicting those labels. Temperature parameter determines the shape of the resulting cluster. High temperature -> Everyone influences everyone -> Smoother clusters. Low temperature -> Only very close neighbors matter -> Sharper clusters.
+  
 
-    `[paper] <https://arxiv.org/pdf/1902.01889.pdf>_`
+    `[paper] <https://arxiv.org/pdf/1902.01889.pdf>`_
 
     Args:
         temperature (float, optional): Temperature. Defaults to 1.

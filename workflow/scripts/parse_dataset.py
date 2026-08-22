@@ -60,7 +60,10 @@ if __name__ == "__main__":
 
     config = snakemake.config["parse_dataset"]
     # If duplicates, take median of entries
-    inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
+    # PREVIOUSLY: inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
+    # change: calculate median only from the "Y" column
+    inter = inter.groupby(["Drug_ID", "Target_ID"], as_index=False)["Y"].median()
+
     if config["task"] == "class":
         inter["Y"] = inter["Y"].apply(lambda x: int(x < config["threshold"]))
     elif config["task"] == "reg":

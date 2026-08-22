@@ -4,7 +4,7 @@ from torch_geometric.data import Data
 
 
 class TwoGraphData(Data):
-    """Subclass of torch_geometric.data.Data for protein and drug data."""
+    """Subclass of torch_geometric.data.Data for protein and drug data. The helper function __inc__ is responsible for correctly incrementing drug and target protein graph edge indices. The helper methods n_nodes(prefix) and n_edges(prefix) provide a convenient interface for querying graph sizes."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

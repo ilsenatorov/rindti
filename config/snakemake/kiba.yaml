@@ -1,1 +1,14 @@
-source: datasets/kiba/resources
+source: /wibicomfs/STBS/RINDTI_data/rindti/dataset/rindti_kiba/kiba_C2_1/kiba/resources/
+seed: 42
+prots:
+  structs: 
+    method: plddt
+  features:
+    method: distance
+parse_dataset:
+  filtering: all
+  task: reg
+  log: false
+split_data:
+  method: drug
+  split_loc: interS.tsv

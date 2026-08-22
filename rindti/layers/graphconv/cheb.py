@@ -9,7 +9,7 @@ from ..base_layer import BaseLayer
 
 
 class ChebConvNet(BaseLayer):
-    r"""Chebyshev Convolution.
+    r"""Chebyshev Convolution: ChebConv uses a polynomial approximation of graph convolutions. The parameter `K` controls how many hops away a node can aggregate information from within a single layer. ChebConv can capture wider (protein residue) structural context efficiently.
 
     Refer to :class:`torch_geometric.nn.conv.ChebConv` for more details.
 

@@ -2,8 +2,9 @@ source: datasets/glass/resources
 
 prots:
   structs:
-    method: plddt
+    method: whole
   features:
     method: distance
 parse_dataset:
-  filtering: posneg
+  filtering: all
+  task: reg

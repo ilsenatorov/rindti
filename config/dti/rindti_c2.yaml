@@ -1,0 +1,58 @@
+runs: 1
+seed: 42
+datamodule:
+  filename: /wibicomfs/STBS/RINDTI_data/rindti/dataset/rindti_kiba/kiba_C2_1/kiba/resources/results/prepare_all/pdlnarndiln_4b70251a.pkl
+  exp_name: rindti
+  batch_size: 64
+  num_workers: 0
+trainer:
+  devices: 1
+  max_epochs: 100
+  profiler: null
+  gradient_clip_val: 100
+early_stop:
+  patience: 40
+model:
+  module: reg
+  feat_method: concat
+  monitor: val_loss
+  drug:
+    hidden_dim: 128
+    method: graph
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      num_heads: 4
+      hidden_dim: 128
+      ratio: 0.25
+  prot:
+    hidden_dim: 128
+    method: graph
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      num_heads: 4
+      hidden_dim: 128
+      ratio: 0.25
+  mlp:
+    dropout: 0.2
+    hidden_dim: 256
+  optimizer:
+    module: adam
+    lr: 0.0001
+    prot_lr: 0.001
+    drug_lr: 0.001
+    weight_decay: 0.01
+    momentum: 0.01
+    reduce_lr:
+      factor: 0.1
+      patience: 20
+      monitor: val_loss
