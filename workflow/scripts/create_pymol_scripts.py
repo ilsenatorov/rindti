@@ -1,5 +1,4 @@
 import os
-import resource
 
 
 def create_script(protein: str, inp: str, params: dict):
@@ -31,9 +30,13 @@ def create_script(protein: str, inp: str, params: dict):
 
         fmt_keywords["radius"] = params.other_params[params.method]["radius"]
         if params.method == "bsite":
-            script.append('cmd.select("result", "br. {protein} within {radius} of organic")')
+            script.append(
+                'cmd.select("result", "br. {protein} within {radius} of organic")'
+            )
         elif params.method == "template":
-            script.append('cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")')
+            script.append(
+                'cmd.select("result", "br. {protein} within {radius} of not {protein} and name CA")'
+            )
     script.append('cmd.save("{parsed_structs_dir}/{protein}.pdb", "result")')
     fmt_keywords["parsed_structs_dir"] = params.parsed_structs_dir
     fmt_keywords["structs"] = params.method

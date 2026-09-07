@@ -22,16 +22,19 @@ def calculate_nnodes_nedges(df: DataFrame, esm=False) -> DataFrame:
 
 
 if __name__ == "__main__":
-
     with open(snakemake.input.pickle, "rb") as file:
         all_data = pickle.load(file)
 
     prot = all_data["prots"]
     drug = all_data["drugs"]
     inter = pd.DataFrame(all_data["data"])
-    struct_info = pd.read_csv(snakemake.input.struct_info, sep="\t", index_col=0).squeeze("columns")
+    struct_info = pd.read_csv(
+        snakemake.input.struct_info, sep="\t", index_col=0
+    ).squeeze("columns")
 
-    prot = calculate_nnodes_nedges(prot, snakemake.config["prepare_prots"]["node_feats"] == "esm")
+    prot = calculate_nnodes_nedges(
+        prot, snakemake.config["prepare_prots"]["node_feats"] == "esm"
+    )
     prot["plddt"] = struct_info
     drug = calculate_nnodes_nedges(drug)
 
@@ -60,7 +63,9 @@ if __name__ == "__main__":
             y=prot["nedges"],
             mode="markers",
             name="prots",
-            text=prot.index.to_series() + ", Mean pLDDT: " + prot["plddt"].round().astype(str),
+            text=prot.index.to_series()
+            + ", Mean pLDDT: "
+            + prot["plddt"].round().astype(str),
             marker_color=prot["plddt"],
             marker=dict(colorbar=dict(title="mean pLDDT", len=0.45, y=0.8, x=0.45)),
         ),
@@ -112,7 +117,8 @@ if __name__ == "__main__":
         width=1800,
         title={
             "text": "Data summary. Structure: {struct}. Filtering: {filt}.".format(
-                struct=snakemake.config["structures"], filt=snakemake.config["parse_dataset"]["filtering"]
+                struct=snakemake.config["structures"],
+                filt=snakemake.config["parse_dataset"]["filtering"],
             ),
             "y": 1,
             "x": 0.5,
