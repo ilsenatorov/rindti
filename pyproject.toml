@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "rindti"
 dynamic = ["version"]
-description = "Drug-target interaction prediction using protein residue interaction networks"
+description = "Drug-target interaction prediction from protein structure contact graphs"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
@@ -14,7 +14,7 @@ keywords = [
     "deep-learning",
     "pytorch",
     "drug-target-interaction",
-    "residue-interaction-network",
+    "protein-contact-graph",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

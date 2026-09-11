@@ -86,11 +86,36 @@ properties:
   split_data:
     type: object
     additionalProperties: false
-    required: [method, train, val]
+    required: [method, train, val, cluster]
     properties:
       method:
         type: string
-        enum: [random, target, drug]
+        enum: [random, target, drug, cluster_target, cluster_drug]
+        description: >-
+          'random' splits interactions; 'target'/'drug' are cold-entity splits on the
+          raw ID, except that 'target' additionally merges exact duplicate sequences,
+          which Davis and friends contain. 'cluster_target'/'cluster_drug' are cold
+          splits on similarity clusters, so no test entity resembles a training one.
+          One factor at a time deliberately: clustering both sides at once leaves
+          roughly (1-train-val)^2 of the interactions in test, which is a different
+          and much harder experiment.
+      cluster:
+        type: object
+        additionalProperties: false
+        required: [prot_identity, drug_similarity]
+        properties:
+          prot_identity:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 1
+            description: >-
+              MMseqs2 --min-seq-id for 'cluster_target'. 0.3 is the PDB/PDBbind
+              convention for "not homologous".
+          drug_similarity:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 1
+            description: Tanimoto cutoff on ECFP4 fingerprints, for 'cluster_drug'.
       train:
         type: number
         exclusiveMinimum: 0

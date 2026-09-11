@@ -1,3 +1,5 @@
-The distribution of number of nodes and number of edges for the RINs in the dataset.
+The distribution of number of nodes and number of edges for the protein contact graphs in the dataset.
 
-The radius was {{ snakemake.config['bsite']['radius'] }} and {{ snakemake.config['bsite']['template'] }} templates were used.
+Each node is a residue; an edge joins two residues whose C-alpha atoms lie within the contact
+cutoff. The cutoff was {{ snakemake.config['prots']['features']['distance']['threshold'] }} Angstrom,
+over structures prepared with the ``{{ snakemake.config['prots']['structs']['method'] }}`` method.

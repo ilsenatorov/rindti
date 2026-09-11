@@ -2,13 +2,16 @@ import torch.nn.functional as F
 from torch import Tensor
 
 from ...data import TwoGraphData
-from ...layers.encoder import GraphEncoder
+from ...layers.encoder import GraphEncoder, VectorEncoder
 from ...layers.other import MLP
 from ...utils import remove_arg_prefix
 from ..base_model import BaseModel
 
 encoders = {
     "graph": GraphEncoder,
+    # For entities with no graph structure - notably `prots.features.method: esm`,
+    # which is a single mean-pooled vector per protein.
+    "vector": VectorEncoder,
     # "sweetnet": SweetNetEncoder,
     # "pretrained": PretrainedEncoder,
 }

@@ -30,7 +30,11 @@ class FilmConvNet(BaseLayer):
         **kwargs,
     ):
         super().__init__()
-        if edge_dim is None:
+        # `not edge_dim`, not `is None`: workflow/scripts/utils.py reports edge_dim 0
+        # for a dataset with no edge features, which is the shipped default. Passing
+        # num_relations=0 to FiLMConv builds no relation weights at all and raises
+        # `IndexError: index 0 is out of range` on the first forward pass.
+        if not edge_dim:
             edge_dim = 1
         self.edge_dim = edge_dim
         self.inp = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
@@ -41,6 +45,11 @@ class FilmConvNet(BaseLayer):
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """"""
+        # FiLMConv takes discrete relation types, not a continuous attribute, so a
+        # 1-dimensional edge feature (`prots.features.edge_feats: distance`) is
+        # dropped here. A filmconv run with distance edges is therefore identical to
+        # one without - do not read the null difference as a scientific result; use
+        # `transformer` to actually measure continuous edge features.
         if self.edge_dim <= 1:
             edge_feats = None
         x = self.inp(x, edge_index, edge_feats)

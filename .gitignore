@@ -24,13 +24,14 @@ docs/build/
 docs/source/_build/
 docs/source/_autosummary/
 
-# Data & results (fetched via scripts/, archived on Zenodo)
+# Data & results (fetched and built via workflow/scripts/, never committed)
 datasets/
 data/
 results/
 report/
 *logs/
 *.pkl
+*graphify*
 
 # Editor
 .vscode/
@@ -41,3 +42,6 @@ report/
 
 # Hypothesis
 .hypothesis/
+
+# Writing plan, not repo code
+/PAPER_PLAN.md

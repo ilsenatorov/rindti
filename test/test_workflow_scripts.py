@@ -2,9 +2,10 @@
 
 import pandas as pd
 import pytest
+from cluster import cluster_drugs, dedup_sequences, parse_mmseqs_clusters, write_fasta
 from distance_based import Structure, encode_residue
 from encd import encd
-from split_data import split_random
+from split_data import GROUP_COL, add_group_column, split_groups, split_random
 from utils import onehot_encode
 
 
@@ -97,3 +98,126 @@ class TestSplitRandom:
         out = split_random(inter, train_frac=0.7, val_frac=0.2)
         assert len(out) == len(inter)
         assert set(out["Drug_ID"]) == set(inter["Drug_ID"])
+
+
+class TestDedupSequences:
+    """W6: Davis carries exact duplicate sequences under different Target_IDs, so a
+    plain cold-target split trains and tests on the same protein."""
+
+    def test_duplicates_share_a_representative(self):
+        groups = dedup_sequences({"A": "MKV", "B": "MKV", "C": "AAA"})
+        assert groups["A"] == groups["B"]
+        assert groups["C"] != groups["A"]
+
+    def test_every_id_survives(self):
+        """Rows must not be dropped: prepare_all filters interactions against the
+        protein pickle, so a lost Target_ID silently shrinks the dataset."""
+        seqs = {"A": "MKV", "B": "MKV", "C": "AAA"}
+        assert dedup_sequences(seqs).keys() == seqs.keys()
+
+    def test_representative_is_deterministic(self):
+        """Alphabetically first, not insertion-ordered - the clustering happens
+        upstream of the split seed, so it has to be reproducible on its own."""
+        assert dedup_sequences({"B": "MKV", "A": "MKV"})["B"] == "A"
+        assert dedup_sequences({"A": "MKV", "B": "MKV"})["B"] == "A"
+
+
+class TestClusterDrugs:
+    """Leader clustering over ECFP4/Tanimoto. Never materialises the full matrix:
+    GLASS has 165,691 ligands, i.e. ~55 GB of condensed float32 distances."""
+
+    ETHANOL = "CCO"
+    PROPANOL = "CCCO"
+    BENZENE = "c1ccccc1"
+
+    def test_identical_molecules_cluster_together(self):
+        groups = cluster_drugs({"a": self.ETHANOL, "b": self.ETHANOL}, cutoff=0.6)
+        assert groups["a"] == groups["b"]
+
+    def test_dissimilar_molecules_do_not(self):
+        groups = cluster_drugs({"a": self.ETHANOL, "b": self.BENZENE}, cutoff=0.6)
+        assert groups["a"] != groups["b"]
+
+    def test_cutoff_of_one_only_merges_identical(self):
+        groups = cluster_drugs({"a": self.ETHANOL, "b": self.PROPANOL}, cutoff=1.0)
+        assert groups["a"] != groups["b"]
+
+    def test_unparseable_smiles_gets_its_own_cluster(self):
+        """It cannot be shown similar to anything, and it must not be dropped."""
+        groups = cluster_drugs({"a": self.ETHANOL, "bad": "not a molecule"}, cutoff=0.6)
+        assert groups["bad"] == "bad"
+        assert groups.keys() == {"a", "bad"}
+
+    def test_deterministic_across_input_order(self):
+        mols = {"a": self.ETHANOL, "b": self.PROPANOL, "c": self.BENZENE}
+        forward = cluster_drugs(mols, cutoff=0.4)
+        backward = cluster_drugs(dict(reversed(list(mols.items()))), cutoff=0.4)
+        assert forward == backward
+
+    def test_rejects_a_nonsense_cutoff(self):
+        with pytest.raises(ValueError, match="drug_similarity"):
+            cluster_drugs({"a": self.ETHANOL}, cutoff=0)
+
+
+class TestMmseqsIO:
+    """Target_IDs contain dots and parentheses (Davis `RSK1(KinDom.1-N-terminal)`),
+    which MMseqs2 mangles, so FASTA headers are surrogates mapped back afterwards."""
+
+    def test_roundtrip_through_surrogate_ids(self, tmp_path):
+        seqs = {"RSK1(KinDom.1-N-terminal)": "MKV", "plain": "MKV"}
+        fasta = tmp_path / "p.fasta"
+        mapping = write_fasta(seqs, str(fasta))
+        assert set(mapping.values()) == set(seqs)
+        assert "(" not in fasta.read_text().split("\n")[0]
+
+        clusters = tmp_path / "c.tsv"
+        surrogates = sorted(mapping)
+        clusters.write_text("".join(f"{surrogates[0]}\t{s}\n" for s in surrogates))
+        assignment = parse_mmseqs_clusters(str(clusters), mapping)
+        assert len(set(assignment.values())) == 1
+        assert assignment.keys() == seqs.keys()
+
+    def test_unassigned_sequence_is_an_error(self, tmp_path):
+        """Silently dropping a target would shrink the dataset downstream."""
+        seqs = {"A": "MKV", "B": "AAA"}
+        fasta = tmp_path / "p.fasta"
+        mapping = write_fasta(seqs, str(fasta))
+        clusters = tmp_path / "c.tsv"
+        clusters.write_text("s0\ts0\n")
+        with pytest.raises(ValueError, match="did not assign"):
+            parse_mmseqs_clusters(str(clusters), mapping)
+
+
+class TestGroupedSplit:
+    """W5/W6 reduce to: attach a grouping column, then split on it. `split_groups`
+    already accepts any column, so nothing about the split itself changes."""
+
+    @pytest.fixture
+    def inter(self):
+        # 60 targets, paired up into 30 groups.
+        targets = [f"T{i}" for i in range(60)]
+        return pd.DataFrame({"Target_ID": targets * 5, "Y": [0, 1] * 150})
+
+    @pytest.fixture
+    def assignment(self):
+        return {f"T{i}": f"T{i - i % 2}" for i in range(60)}
+
+    def test_no_group_spans_two_splits(self, inter, assignment):
+        """The guarantee the cold-cluster split exists to provide."""
+        out = split_groups(add_group_column(inter, "Target_ID", assignment), col_name=GROUP_COL)
+        assert (out.groupby(GROUP_COL)["split"].nunique() == 1).all()
+
+    def test_nothing_lost_or_duplicated(self, inter, assignment):
+        out = split_groups(add_group_column(inter, "Target_ID", assignment), col_name=GROUP_COL)
+        assert len(out) == len(inter)
+        assert set(out["Target_ID"]) == set(inter["Target_ID"])
+
+    def test_unknown_id_becomes_its_own_group(self, inter):
+        """An ID missing from the assignment must not be dropped or crash."""
+        out = add_group_column(inter, "Target_ID", {"T0": "T0"})
+        assert out.loc[out["Target_ID"] == "T5", GROUP_COL].unique().tolist() == ["T5"]
+        assert len(out) == len(inter)
+
+    def test_all_three_splits_are_populated(self, inter, assignment):
+        out = split_groups(add_group_column(inter, "Target_ID", assignment), col_name=GROUP_COL)
+        assert set(out["split"]) == {"train", "val", "test"}

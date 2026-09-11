@@ -3,9 +3,14 @@
 #   python run_snakemake.py config/snakemake/benchmark_splits.yaml --threads 8
 #
 # IterDict expands the list below into one snakemake run per split, so this
-# produces three prepare_all pickles: random, cold-drug and cold-target.
-# Point `source` at the dataset you want, and copy the parse_dataset block from
-# that dataset's own config (KIBA in particular needs unit: score).
+# produces five prepare_all pickles: random, cold-drug, cold-target (deduplicated),
+# and the two similarity-clustered cold splits. Point `source` at the dataset you
+# want, and copy the parse_dataset block from that dataset's own config (KIBA in
+# particular needs unit: score).
+#
+# The cluster splits need conda on PATH: run_snakemake.py always passes
+# --software-deployment-method conda, which builds workflow/envs/mmseqs.yaml on
+# first use.
 source: datasets/davis/resources
 prots:
   structs:
@@ -14,4 +19,6 @@ parse_dataset:
   unit: nM
   threshold: 100
 split_data:
-  method: [random, drug, target]
+  # One factor at a time: no `cluster_both`, because clustering proteins and drugs
+  # simultaneously leaves ~(1-train-val)^2 of the interactions in test.
+  method: [random, drug, target, cluster_target, cluster_drug]

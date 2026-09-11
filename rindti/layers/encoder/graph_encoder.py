@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from torch import Tensor, nn
 from torch_geometric.data import Data
 

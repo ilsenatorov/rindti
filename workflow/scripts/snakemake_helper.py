@@ -17,37 +17,43 @@ class Namer:
     def __init__(self, cutoff: int = None):
         self.cutoff = cutoff
 
+    # Keys that name a location rather than describe the data, so they must not
+    # influence the name: the same dataset built from a different directory is the
+    # same dataset.
+    IGNORED_KEYS = ("source", "target")
+
+    def _letters(self, config: dict) -> list[tuple[str, str]]:
+        """The (key, value) pairs that contribute a letter to a name, in a stable order.
+
+        Sorted, not insertion-ordered: YAML preserves the order keys were written in,
+        so reordering two lines in a config with no semantic change would otherwise
+        produce a different name and orphan every artifact built before the reorder.
+        """
+        flat = flatten_config(config)
+        return [(k, v) for k, v in sorted(flat.items()) if k not in self.IGNORED_KEYS and isinstance(v, str)]
+
     def hash_config(self, config: dict) -> str:
-        """Hash a config dictionary."""
-        as_json = json.dumps(config).encode("utf-8")
+        """Hash a config dictionary.
+
+        ``sort_keys=True`` for the same reason ``_letters`` sorts: without it the hash
+        follows the order the keys happen to be written in.
+        """
+        as_json = json.dumps(config, sort_keys=True).encode("utf-8")
         return hashlib.md5(as_json).hexdigest()[: self.cutoff]
 
     def get_name(self, config: dict) -> str:
         """Get the name of a config.
         All the string entries are concatenated and the hash is appended.
         """
-        flat = flatten_config(config)
-        res = ""
-        for k, v in flat.items():
-            if k == "source":
-                continue
-            elif isinstance(v, str):
-                res += v[0]
-        return res + "_" + self.hash_config(config)
+        return "".join(v[0] for _, v in self._letters(config)) + "_" + self.hash_config(config)
 
     def explain_name(self, config: dict) -> str:
         """Explain config name"""
         print(f"{'Letter'.center(10)} # {'Value'.center(10)} # {'Key'.center(30)}")
         print("#" * 56)
-        flat = flatten_config(config)
-        res = ""
-        for k, v in flat.items():
-            if k in ["source", "target"]:
-                continue
-            elif isinstance(v, str):
-                res += v[0]
-                print(f"{v[0].center(10)} # {v.center(10)} # {k.center(30)}")
-        return res + "_" + self.hash_config(config)
+        for k, v in self._letters(config):
+            print(f"{v[0].center(10)} # {v.center(10)} # {k.center(30)}")
+        return self.get_name(config)
 
     def __call__(self, config: dict) -> str:
         return self.get_name(config)

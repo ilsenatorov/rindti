@@ -18,6 +18,7 @@ from lightning.pytorch.loggers import TensorBoardLogger
 
 from .data import DTIDataModule
 from .models import ClassificationModel, RegressionModel
+from .models.metrics import monitor_mode
 from .utils import IterDict, get_git_hash, read_config
 
 models = {
@@ -155,9 +156,12 @@ def single_run(folder: str, version: int, **kwargs) -> None:
         version=kwargs["seed"],
         default_hp_metric=False,
     )
+    monitor = kwargs["model"]["monitor"]
+    # Not hardcoded "min": `model.monitor` can be a higher-is-better metric.
+    mode = monitor_mode(monitor)
     callbacks = [
-        ModelCheckpoint(monitor=kwargs["model"]["monitor"], save_top_k=3, mode="min"),
-        EarlyStopping(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
+        ModelCheckpoint(monitor=monitor, save_top_k=3, mode=mode),
+        EarlyStopping(monitor=monitor, mode=mode, **kwargs["early_stop"]),
         RichModelSummary(),
         RichProgressBar(),
     ]

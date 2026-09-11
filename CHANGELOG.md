@@ -61,6 +61,10 @@ model unable to report any classification metric.
 - `PNAConvNet` (referenced attributes its constructor never created),
   `SweetNetEncoder` and `PretrainedEncoder` (already disabled), and `rindti.losses`.
 - The `dash/` app, scratch notebooks, committed Sphinx build output, and dead configs.
+- The RINerator protein path (`parse_rinerator.py` and its workflow rule). Proteins are
+  now always residue-level contact graphs built from C-alpha distances
+  (`distance_based.py`) or ESM-1b embeddings; no true residue interaction network is
+  computed anywhere in the pipeline.
 
 ## [v1.5.0]
 

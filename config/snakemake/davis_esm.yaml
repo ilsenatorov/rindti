@@ -1,0 +1,16 @@
+# Davis with ESM-1b sequence embeddings instead of structure contact graphs.
+#
+# This is the sequence-only arm of the structure-vs-sequence comparison: proteins
+# become one mean-pooled 1280-d vector each, with no graph at all. Train it with
+# `model.prot.method: vector` (see config/dti/esm.yaml) - the graph encoder cannot
+# consume this input.
+#
+# Needs the optional dependency: `uv sync --extra esm`.
+source: datasets/davis/resources
+prots:
+  features:
+    method: esm
+parse_dataset:
+  # Davis reports Kd in nM; 100 nM is pKd >= 7, the conventional cutoff.
+  unit: nM
+  threshold: 100

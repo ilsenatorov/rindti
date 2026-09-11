@@ -1,0 +1,15 @@
+# Davis with the CA-CA distance kept as a continuous edge attribute, rather than
+# thresholded away into an unlabelled contact graph.
+#
+# Only `model.prot.node.module: transformer` consumes this. GIN/GAT/Cheb ignore
+# edges entirely, and FiLM takes discrete relation types, so a run with any of
+# those is indistinguishable from the plain config/snakemake/davis.yaml.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+  features:
+    edge_feats: distance
+parse_dataset:
+  unit: nM
+  threshold: 100

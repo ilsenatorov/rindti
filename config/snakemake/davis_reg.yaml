@@ -1,0 +1,18 @@
+# Davis as a regression task: predict pKd directly instead of a binary label.
+# The classification variant is config/snakemake/davis.yaml.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole # whole, template, bsite, plddt
+parse_dataset:
+  task: reg
+  # Davis reports Kd in nM.
+  unit: nM
+  # Required by the schema, but unused for reg: nothing is binarized.
+  threshold: 100
+  # Mandatory for reg. parse_dataset.py raises if a reg task carries the default
+  # `posneg` filtering or any sampling, since both assume binary labels.
+  filtering: all
+  sampling: none
+  # log10(Kd in nM), i.e. the pKd-style scale the DeepDTA lineage reports.
+  log: true

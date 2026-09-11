@@ -1,0 +1,62 @@
+# The ESM-1b sequence arm of the structure-vs-sequence comparison.
+#
+# Standalone (rindti-train takes exactly one config file), so this is
+# config/dti/base.yaml with the protein side swapped for a vector encoder:
+#
+#   rindti-train config/dti/esm.yaml \
+#       --set datamodule.filename=datasets/davis/results/prepare_all/<hash>.pkl \
+#       --set datamodule.exp_name=davis_esm
+#
+# Build the dataset with config/snakemake/davis_esm.yaml first.
+seed: 42
+runs: 5 # report mean +- std over 5 seeds
+
+datamodule:
+  filename: null # set me: datasets/<name>/results/prepare_all/<hash>.pkl
+  exp_name: null # set me: used to name the tb_logs/ directory
+  batch_size: 128
+  num_workers: 4
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  max_epochs: 300
+  gradient_clip_val: 100
+  profiler: null
+
+early_stop:
+  patience: 30
+
+model:
+  module: class
+  monitor: val_loss
+  feat_method: concat
+  prot:
+    # Not `graph`: the ESM featurisation is one mean-pooled 1280-d vector per
+    # protein with no edge_index, so GraphEncoder raises KeyError on it.
+    method: vector
+    hidden_dim: 128
+    num_layers: 2
+    dropout: 0.1
+  drug:
+    method: graph
+    hidden_dim: 128
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      hidden_dim: 128
+  mlp:
+    hidden_dim: 256
+    num_layers: 2
+    dropout: 0.2
+  optimizer:
+    module: adam
+    lr: 0.0005
+    weight_decay: 0.0001
+    reduce_lr:
+      factor: 0.1
+      patience: 10

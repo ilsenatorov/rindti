@@ -5,7 +5,7 @@
 [![Documentation](https://readthedocs.org/projects/rindti/badge/?version=master)](https://rindti.readthedocs.io/en/master/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Drug–target interaction (DTI) prediction from protein **residue interaction networks**.
+Drug–target interaction (DTI) prediction from protein **structure contact graphs**.
 
 Proteins are represented as graphs whose nodes are amino-acid residues and whose edges
 encode spatial contacts derived from a 3D structure; drugs are represented as molecular

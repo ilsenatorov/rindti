@@ -1,1 +1,1 @@
-Summary of the residue interaction network of {{ snakemake.wildcards.protein }}.
+Summary of the residue contact graph of {{ snakemake.wildcards.protein }}.

@@ -5,10 +5,10 @@
 #       --set datamodule.filename=datasets/davis/results/prepare_all/<hash>.pkl
 #
 # As written: 4 feat_method x 5 prot node modules x 2 pools = 40 configurations
-# x 3 seeds = 120 runs. Trim to one list at a time for a one-factor-at-a-time
+# x 5 seeds = 200 runs. Trim to one list at a time for a one-factor-at-a-time
 # ablation, which is what you normally want to report.
 seed: 42
-runs: 3
+runs: 5
 
 datamodule:
   filename: null # set me

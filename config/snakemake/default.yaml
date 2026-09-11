@@ -20,9 +20,14 @@ drugs:
   node_feats: label # label, onehot, rich, glycan
   edge_feats: none # label, onehot, none
 split_data:
-  method: random # random, target, drug
+  method: random # random, target, drug, cluster_target, cluster_drug
   train: 0.7 # test is created as a remainder of train and val
   val: 0.2
+  # Nested, not flat: a top-level `threshold` here would collide with
+  # parse_dataset.threshold in the merged name hash of the split_data rule.
+  cluster:
+    prot_identity: 0.3 # mmseqs2 --min-seq-id, for cluster_target
+    drug_similarity: 0.6 # Tanimoto on ECFP4, for cluster_drug
 parse_dataset:
   filtering: posneg # all, posneg, balanced
   sampling: none # over, under, none

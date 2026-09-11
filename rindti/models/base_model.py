@@ -17,6 +17,7 @@ from torchmetrics import (
 )
 
 from ..data import TwoGraphData
+from .metrics import RM2, ConcordanceIndex, monitor_mode
 
 
 class BaseModel(LightningModule):
@@ -45,8 +46,9 @@ class BaseModel(LightningModule):
         self.test_metrics = metrics.clone(prefix="test_")
 
     def _set_reg_metrics(self):
-        # Pearson/Spearman are what the affinity-regression literature reports;
-        # Spearman is the rank-based analogue of the concordance index.
+        # MSE, CI and rm2 are the three numbers the DeepDTA -> GraphDTA -> DGraphDTA ->
+        # GEFA lineage reports, so they are what any comparison table needs. Pearson
+        # and Spearman come along cheaply; Spearman is the rank-based analogue of CI.
         metrics = MetricCollection(
             [
                 MeanAbsoluteError(),
@@ -54,6 +56,8 @@ class BaseModel(LightningModule):
                 ExplainedVariance(),
                 PearsonCorrCoef(),
                 SpearmanCorrCoef(),
+                ConcordanceIndex(),
+                RM2(),
             ]
         )
         self.train_metrics = metrics.clone(prefix="train_")
@@ -194,6 +198,9 @@ class BaseModel(LightningModule):
                 "monitor": self.hparams["model"]["monitor"],
                 "scheduler": ReduceLROnPlateau(
                     optimizer,
+                    # ReduceLROnPlateau defaults to "min" too, so a higher-is-better
+                    # monitor would have had its LR cut whenever the model improved.
+                    mode=monitor_mode(self.hparams["model"]["monitor"]),
                     factor=opt_params["reduce_lr"]["factor"],
                     patience=opt_params["reduce_lr"]["patience"],
                 ),

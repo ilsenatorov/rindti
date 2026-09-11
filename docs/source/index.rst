@@ -7,7 +7,9 @@ RINDTI Documentation
 =====================
 
 Welcome to RINDTI's documentation!
-This is a collection of various models and utilities that are focused on using protein Residue Interaction Networks for predicting Drug-Target Interactions.
+This is a collection of various models and utilities that are focused on using residue-level
+protein contact graphs - one node per residue, edges between residues whose C-alpha atoms lie
+within a distance cutoff - for predicting Drug-Target Interactions.
 
 
 

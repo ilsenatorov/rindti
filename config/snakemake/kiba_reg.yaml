@@ -1,0 +1,19 @@
+# KIBA as a regression task: predict the KIBA score directly instead of a binary
+# label. The classification variant is config/snakemake/kiba.yaml.
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole # whole, template, bsite, plddt
+parse_dataset:
+  task: reg
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default.
+  unit: score
+  # Required by the schema, but unused for reg: nothing is binarized.
+  threshold: 12.1
+  # Mandatory for reg. parse_dataset.py raises if a reg task carries the default
+  # `posneg` filtering or any sampling, since both assume binary labels.
+  filtering: all
+  sampling: none
+  # KIBA scores are already on a log-transformed scale; do not log them again.
+  log: false

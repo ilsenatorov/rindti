@@ -71,6 +71,38 @@ Filtering and sampling
     decoy generation, which injects false negatives whenever the drug does in fact
     bind. Prefer ``under`` or ``none``.
 
+Splitting
+---------
+
+``split_data.method`` decides what the test set is allowed to have seen:
+
+- ``random`` - split interactions. Both the protein and the drug of a test pair are
+  usually in the training set too, so this measures interpolation, not generalisation.
+- ``target`` / ``drug`` - cold-entity: no test protein (resp. drug) appears in
+  training. ``target`` additionally merges exact duplicate sequences, which real
+  datasets contain under different ``Target_ID``\ s - Davis collapses from 442 to
+  361 distinct targets that way, and without the merge the same protein sits on both
+  sides of the split.
+- ``cluster_target`` / ``cluster_drug`` - cold-cluster: no test entity is *similar* to
+  a training one. Proteins are clustered with MMseqs2 at
+  ``split_data.cluster.prot_identity`` sequence identity (0.3 by default, the
+  PDB/PDBbind convention); drugs by Tanimoto similarity over ECFP4 fingerprints at
+  ``split_data.cluster.drug_similarity`` (0.6 by default).
+
+.. Note::
+   ``cluster_target`` needs MMseqs2, which comes from ``workflow/envs/mmseqs.yaml``,
+   so the run needs conda: ``--software-deployment-method conda``. The environment is
+   only pulled into the DAG when that split method is actually selected.
+
+There is deliberately no method that clusters proteins and drugs at once: a
+both-cold split leaves roughly ``(1 - train - val)^2`` of the interactions in test,
+which is a different and much harder experiment than the one-factor-at-a-time grid.
+
+Clustering runs in its own rules, upstream of the seeded split, so re-splitting with
+a new seed does not re-cluster. Both clusterers iterate in sorted ID order and
+MMseqs2 is pinned to a single thread, so the grouping is reproducible - otherwise the
+seed would no longer describe the experiment.
+
 Features
 --------
 
