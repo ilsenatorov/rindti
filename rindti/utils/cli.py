@@ -1,6 +1,7 @@
 import collections
 import itertools
-from typing import Any, Callable, Dict, Union
+from collections.abc import Callable
+from typing import Any
 
 import git
 import yaml
@@ -37,7 +38,11 @@ def add_arg_prefix(prefix: str, kwargs: dict) -> dict:
     Returns:
         dict: Sub-dict of arguments
     """
-    return {prefix + k: v for (k, v) in kwargs.items() if k != "index_mapping" and v is not None}
+    return {
+        prefix + k: v
+        for (k, v) in kwargs.items()
+        if k != "index_mapping" and v is not None
+    }
 
 
 def read_config(filename: str) -> dict:
@@ -103,7 +108,7 @@ class IterDict:
         return [self._unflatten(v) for v in variants]
 
 
-def recursive_apply(ob: Union[Dict, Any], func: Callable) -> Union[Dict, Any]:
+def recursive_apply(ob: dict | Any, func: Callable) -> dict | Any:
     """Apply a function to the nested dict recursively."""
     if isinstance(ob, dict):
         return {k: recursive_apply(v, func) for k, v in ob.items()}

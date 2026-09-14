@@ -6,4 +6,4 @@ import rindti.utils
 
 from .version import version as __version__
 
-__all__ = ["rindti", "__version__"]
+__all__ = ["__version__", "rindti"]
