@@ -12,7 +12,7 @@ It should be run with the following command:
 
   snakemake -j 1 --software-deployment-method conda --configfile your_config_file.yaml
 
-Confuguration
+Configuration
 -------------
 
 The config files for the snakemake workflow are located in the ``config/snakemake/`` file.

@@ -4,7 +4,7 @@ from ..base_layer import BaseLayer
 
 
 class MLP(BaseLayer):
-    """Simple Multi-layer perceptron.
+    """Simple Multi-layer perceptron: The final predictor used by ClassificationModel and RegressionModel to model DTIs encoded by the GNN.
 
     Refer to :class:`torch.nn.Sequential` for more details.
 

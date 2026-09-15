@@ -6,13 +6,20 @@ Data
 TwoGraphData
 ------------
 
-A subclass of :class:`torch_geometric.data.Data`, that handles an entry of two graphs.
+A subclass of :class:`torch_geometric.data.Data` that stores two independent graphs (here, a protein and a drug) within a single data object. Such an architecture allows batching of multiple samples (protein-drug pairs) for GPU-based training.
 
-The two graph are indicated by certain prefix, thus `x` and `edge_index` become `drug_x` and `drug_edge_index`.
+Usually, an `Data` object stores all information associated with a graph. Some of its core fields include `x`: node feature matrix; `edge_index`: defines the graph connectivity in COO format; `y`: stores graph or node labels. Each attribute is represented as a tensor, with dimensions corresponding to the number of nodes, edges, or associated features. Further details can be found at :class:`torch_geometric.data.Data`.
 
-This has an effect on batching during training and prediction, since the `prot_edge_index` entry gets modified `according to the standard processing rules of torch_geometric <https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs>`_
+To distinguish the attributes of the two graphs stored in the same `Data` object, they are indicated by prefixes. For example, `x` and `edge_index` become `drug_x` and `drug_edge_index`. However, the prefixes are removed in the `shared_step` function of the classification and regression tasks for further processing.
 
-Otherwise it is just a dictionary.
+`Batching` is the process of combining multiple graph samples (drug-target pairs) into a single disconnected graph, which allows parallel processing of all samples in a single forward pass. To create a correct independent graph, node indices in `edge_index` are shifted to reference the correct nodes after concatenation.
+
+For example, There are two proteins in a batch: Protein A (5 nodes) and Protein B (7 nodes) which are concatenated. Then, each `edge_index` of Protein B is automatically shifted by +5 so they refer to the correct nodes. However, there are two `edge_index` (one each associated with the drug and the protein), hence, the `__inc__` function was modified to address this.
+
+:class:`torch_geometric.loader.DataLoader` is responsible for merging data objects from a :class:`torch_geometric.data.Dataset` to a mini-batch. For further information, see the `standard processing rules of torch_geometric. <https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs>`_
+
+Apart from the batching functionality, an `Data` object is just a dictionary.
+
 
 .. code:: python
 
@@ -28,7 +35,7 @@ Otherwise it is just a dictionary.
         print(tgd)
         >>> TwoGraphData(prot_x=[100, 32], drug_x=[30, 32], prot_edge_index=[2, 100], drug_edge_index=[2, 30])
 
-Then such objects can be given directly to the dataloader with
+Then such objects can be given directly to the `DataLoader` with:
 
 .. code:: python
 
@@ -42,14 +49,18 @@ Then such objects can be given directly to the dataloader with
 Datasets
 --------
 
-
-
 Custom datasets are based on `torch_geometric Datasets <https://pytorch-geometric.readthedocs.io/en/latest/notes/create_dataset.html>`_
 
 They are designed to take in the results of the snakemake workflows, and create a quick-to-load pytorch objects.
 
+For example, it specifies how protein structures and features are generated (`prots`), how drug graphs are constructed (`drugs`), how the dataset is split into training/validation/test sets (`split_data`), and how samples are filtered or labeled (`parse_dataset`).
+
+Every dataset loads these preprocessed files as `Data` objects, avoiding repeated preprocessing during training. This is implemented using :class:`torch_geometric.data.InMemoryDataset`, which processes the raw data only once, saves the processed representation to disk, and then loads the complete dataset into memory when called upon. Both `DTIDataset` and `PreTrainDataset` inherit from `InMemoryDataset`.
+
 DTI datasets
 ^^^^^^^^^^^^
+
+They represent a dataset of drug–target interaction (DTI) samples. The model learns to predict interactions between proteins and drugs. The samples have two graph stored as a `TwoGraphData` object, along with the interaction label. The dataset assumes that the input is a pickle file produced by the preprocessing (`Snakemake`) pipeline.
 
 Since the splits in DTI predictions are often non-random (scaffold split/cold target split), for each DTI pair a string indicating the split is provided.
 
@@ -69,8 +80,9 @@ Thus to create DTI datasets one needs to specialize the split:
 DataModules
 -----------
 
-Datamodules are based on `Lightning DataModules <https://lightning.ai/docs/pytorch/stable/data/datamodule.html>`_ and aim to put all data-related functionality (dataloaders, splitting, sampling) into a single object.
-Can be invoked simply with:
+Datamodules are based on `pytorch_lightning DataModules <https://pytorch-lightning.readthedocs.io/en/stable/extensions/datamodules.html>`_ and aim to put all data-related functionality (dataloaders, splitting, sampling) into a single object. `BaseDataModule` provides the aforementioned shared functionality. `DTIDataModule` implements loading the splits from `DTIDataset` and using dataloaders to create batches. It propagate dataset metadata to the model configuration through `update_config()`. This ensures consistency between preprocessing and training.
+
+Both the modules can be invoked simply with:
 
 .. code:: python
 

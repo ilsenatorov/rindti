@@ -10,7 +10,7 @@ from .data import TwoGraphData
 
 
 class SizeFilter:
-    """Filters out graph that are too big/small."""
+    """Filters out graph that are too big/small. A dataset pre-filter that checks graph sizes using node counts and discards any graphs falling outside a user-defined minimum and maximum range."""
 
     def __init__(self, min_nnodes: int, max_nnodes: int = 0):
         self.min_nnodes = min_nnodes
@@ -60,7 +60,7 @@ class DataCorruptor:
 
 
 def corrupt_features(features: torch.Tensor, frac: float) -> tuple[torch.Tensor, list]:
-    """Return corrupt features.
+    """Randomly masks or replaces a specified fraction of node features across configured attributes, while saving the original values and indices for self-supervised training loss calculation. Return corrupt features.
 
     Args:
         features (torch.Tensor): Node features
@@ -78,7 +78,7 @@ def corrupt_features(features: torch.Tensor, frac: float) -> tuple[torch.Tensor,
 
 
 def mask_features(features: torch.Tensor, frac: float) -> tuple[torch.Tensor, list]:
-    """Return masked features.
+    """calculates how many nodes to modify based on a given fraction, randomly selects their indices, and returns zero-tensors to overwrite those features.
 
     Args:
         features (torch.Tensor): Node features

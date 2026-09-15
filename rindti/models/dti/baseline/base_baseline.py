@@ -10,7 +10,7 @@ from torchmetrics.functional import (
 
 
 class BaseBaseline:
-    """Parent of all baseline models."""
+    """Base (Parent) class for all baseline models that use simple, non-neural network based strategies to predict the outcome for a pair of a protein and a drug interaction."""
 
     def __init__(self, prob: bool = False, **kwargs):
         self.prob = prob
@@ -20,11 +20,11 @@ class BaseBaseline:
         raise NotImplementedError()
 
     def predict_pair(self, prot_id: str, drug_id: str) -> float:
-        """Predict the outcome for a pair of a protein and a drug."""
+        """Predict the outcome for a pair of a protein and a drug. Implemented by sub-classes."""
         raise NotImplementedError()
 
     def test_metrics(self, test: pd.DataFrame) -> dict:
-        """Calculate the metrics for the test dataframe."""
+        """Calculate the metrics for the test dataframe. Available options: Accuracy, AUROC, Matthews correlation coefficient"""
         pred = self.predict(test)
         y_hat = torch.tensor(pred["pred"].values)
         y = torch.tensor(pred["Y"].values)

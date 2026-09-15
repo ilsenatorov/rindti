@@ -17,7 +17,7 @@ poolers = {"diffpool": DiffPoolNet, "mean": MeanPool}
 
 
 class GraphEncoder(nn.Module):
-    r"""Encoder for graphs.
+    r"""Encoder for graphs that connects GNN and pooling layers.
 
     Args:
         return_nodes (bool, optional): Return node embeddings as well. Defaults to False.
@@ -75,7 +75,7 @@ class GraphEncoder(nn.Module):
         data: dict | Data,
         **kwargs,
     ) -> Tensor | tuple[Tensor, Tensor]:
-        r"""Encode a graph.
+        r"""Encode a graph by converting raw node data into initial vectors, updating them using a Graph Neural Network (GNN) and aggregating them into a single vector representation for the entire graph.
 
         Args:
             data (Union[dict, Data]): Graph to encode. Must contain the following keys:
