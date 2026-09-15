@@ -1,8 +1,8 @@
-from torch import nn
+from pytorch_lightning import LightningModule
 
 
-class BaseLayer(nn.Module):
-    """Base class for all layers."""
+class BaseLayer(LightningModule):
+    """Base class for all layers. This class extends :class:`pytorch_lightning.LightningModule`, refer it for more details."""
 
     def __init__(self, *args, **kwargs):
         super().__init__()

@@ -60,3 +60,17 @@ Other layers
    :undoc-members:
    :exclude-members: training
    :show-inheritance:
+   
+Encoder
+------------------
+
+.. currentmodule:: rindti.layers.encoder
+.. autosummary::
+   :nosignatures:
+   :recursive:
+
+.. automodule:: rindti.layers.encoder
+   :members:
+   :undoc-members:
+   :exclude-members: training
+   :show-inheritance:

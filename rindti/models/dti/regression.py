@@ -6,7 +6,7 @@ from .classification import ClassificationModel
 
 
 class RegressionModel(ClassificationModel):
-    """Model for DTI prediction as a reg problem."""
+    """Model for DTI prediction as a reg problem. Based on the same MLP architecture of the classification class but using mean square error (mse) loss function."""
 
     def _setup_metrics(self):
         self._set_reg_metrics()

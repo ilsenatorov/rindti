@@ -1,4 +1,6 @@
-from torch import Tensor
+from argparse import ArgumentParser
+
+from torch.functional import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import FiLMConv
 from torch_geometric.typing import Adj
@@ -7,9 +9,9 @@ from ..base_layer import BaseLayer
 
 
 class FilmConvNet(BaseLayer):
-    r"""FiLM Convolution.
+    r"""FiLM Convolution: Alters the feature map of a neighbor's message using an affine transformation. Instead of applying the same static weight matrix to all neighbors, it uses a hypernetwork to dynamically generate custom weights for each connection. In context of DTI, it can be used, for example, to weigh importance of a particular amino acid interaction.
 
-    Refer to :class:`torch_geometric.nn.conv.FiLMConv` for more details.
+    Refer to :class:`torch_geometric.nn.conv.FiLMConv` for more details. 
 
 
     Args:
@@ -30,11 +32,7 @@ class FilmConvNet(BaseLayer):
         **kwargs,
     ):
         super().__init__()
-        # `not edge_dim`, not `is None`: workflow/scripts/utils.py reports edge_dim 0
-        # for a dataset with no edge features, which is the shipped default. Passing
-        # num_relations=0 to FiLMConv builds no relation weights at all and raises
-        # `IndexError: index 0 is out of range` on the first forward pass.
-        if not edge_dim:
+        if edge_dim is None:
             edge_dim = 1
         self.edge_dim = edge_dim
         self.inp = FiLMConv(input_dim, hidden_dim, num_relations=edge_dim)
@@ -45,11 +43,6 @@ class FilmConvNet(BaseLayer):
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """"""
-        # FiLMConv takes discrete relation types, not a continuous attribute, so a
-        # 1-dimensional edge feature (`prots.features.edge_feats: distance`) is
-        # dropped here. A filmconv run with distance edges is therefore identical to
-        # one without - do not read the null difference as a scientific result; use
-        # `transformer` to actually measure continuous edge features.
         if self.edge_dim <= 1:
             edge_feats = None
         x = self.inp(x, edge_index, edge_feats)
