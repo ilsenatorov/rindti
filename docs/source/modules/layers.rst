@@ -60,7 +60,7 @@ Other layers
    :undoc-members:
    :exclude-members: training
    :show-inheritance:
-   
+
 Encoder
 ------------------
 

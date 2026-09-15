@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch import nn
 from torch.functional import Tensor
 from torch_geometric.nn import GINConv
@@ -31,18 +29,20 @@ class GINConvNet(BaseLayer):
                 nn.BatchNorm1d(hidden_dim),
             )
         )
-        self.mid_layers = nn.ModuleList([
-            GINConv(
-                nn.Sequential(
-                    nn.Linear(hidden_dim, hidden_dim),
-                    nn.BatchNorm1d(hidden_dim),
-                    nn.PReLU(),
-                    nn.Linear(hidden_dim, hidden_dim),
-                    nn.BatchNorm1d(hidden_dim),
+        self.mid_layers = nn.ModuleList(
+            [
+                GINConv(
+                    nn.Sequential(
+                        nn.Linear(hidden_dim, hidden_dim),
+                        nn.BatchNorm1d(hidden_dim),
+                        nn.PReLU(),
+                        nn.Linear(hidden_dim, hidden_dim),
+                        nn.BatchNorm1d(hidden_dim),
+                    )
                 )
-            )
-            for _ in range(num_layers - 2)
-        ])
+                for _ in range(num_layers - 2)
+            ]
+        )
         self.out = GINConv(
             nn.Sequential(
                 nn.Linear(hidden_dim, hidden_dim),

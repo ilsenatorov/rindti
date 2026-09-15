@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch.functional import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import GATConv

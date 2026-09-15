@@ -8,13 +8,13 @@ TwoGraphData
 
 A subclass of :class:`torch_geometric.data.Data` that stores two independent graphs (here, a protein and a drug) within a single data object. Such an architecture allows batching of multiple samples (protein-drug pairs) for GPU-based training.
 
-Usually, an `Data` object stores all information associated with a graph. Some of its core fields include `x`: node feature matrix; `edge_index`: defines the graph connectivity in COO format; `y`: stores graph or node labels. Each attribute is represented as a tensor, with dimensions corresponding to the number of nodes, edges, or associated features. Further details can be found at :class:`torch_geometric.data.Data`. 
+Usually, an `Data` object stores all information associated with a graph. Some of its core fields include `x`: node feature matrix; `edge_index`: defines the graph connectivity in COO format; `y`: stores graph or node labels. Each attribute is represented as a tensor, with dimensions corresponding to the number of nodes, edges, or associated features. Further details can be found at :class:`torch_geometric.data.Data`.
 
 To distinguish the attributes of the two graphs stored in the same `Data` object, they are indicated by prefixes. For example, `x` and `edge_index` become `drug_x` and `drug_edge_index`. However, the prefixes are removed in the `shared_step` function of the classification and regression tasks for further processing.
 
-`Batching` is the process of combining multiple graph samples (drug-target pairs) into a single disconnected graph, which allows parallel processing of all samples in a single forward pass. To create a correct independent graph, node indices in `edge_index` are shifted to reference the correct nodes after concatenation. 
+`Batching` is the process of combining multiple graph samples (drug-target pairs) into a single disconnected graph, which allows parallel processing of all samples in a single forward pass. To create a correct independent graph, node indices in `edge_index` are shifted to reference the correct nodes after concatenation.
 
-For example, There are two proteins in a batch: Protein A (5 nodes) and Protein B (7 nodes) which are concatenated. Then, each `edge_index` of Protein B is automatically shifted by +5 so they refer to the correct nodes. However, there are two `edge_index` (one each associated with the drug and the protein), hence, the `__inc__` function was modified to address this. 
+For example, There are two proteins in a batch: Protein A (5 nodes) and Protein B (7 nodes) which are concatenated. Then, each `edge_index` of Protein B is automatically shifted by +5 so they refer to the correct nodes. However, there are two `edge_index` (one each associated with the drug and the protein), hence, the `__inc__` function was modified to address this.
 
 :class:`torch_geometric.loader.DataLoader` is responsible for merging data objects from a :class:`torch_geometric.data.Dataset` to a mini-batch. For further information, see the `standard processing rules of torch_geometric. <https://pytorch-geometric.readthedocs.io/en/latest/notes/batching.html#pairs-of-graphs>`_
 
@@ -53,7 +53,7 @@ Custom datasets are based on `torch_geometric Datasets <https://pytorch-geometri
 
 They are designed to take in the results of the snakemake workflows, and create a quick-to-load pytorch objects.
 
-For example, it specifies how protein structures and features are generated (`prots`), how drug graphs are constructed (`drugs`), how the dataset is split into training/validation/test sets (`split_data`), and how samples are filtered or labeled (`parse_dataset`). 
+For example, it specifies how protein structures and features are generated (`prots`), how drug graphs are constructed (`drugs`), how the dataset is split into training/validation/test sets (`split_data`), and how samples are filtered or labeled (`parse_dataset`).
 
 Every dataset loads these preprocessed files as `Data` objects, avoiding repeated preprocessing during training. This is implemented using :class:`torch_geometric.data.InMemoryDataset`, which processes the raw data only once, saves the processed representation to disk, and then loads the complete dataset into memory when called upon. Both `DTIDataset` and `PreTrainDataset` inherit from `InMemoryDataset`.
 

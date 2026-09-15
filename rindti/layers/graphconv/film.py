@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch.functional import Tensor
 from torch.nn import ModuleList
 from torch_geometric.nn import FiLMConv
@@ -11,7 +9,7 @@ from ..base_layer import BaseLayer
 class FilmConvNet(BaseLayer):
     r"""FiLM Convolution: Alters the feature map of a neighbor's message using an affine transformation. Instead of applying the same static weight matrix to all neighbors, it uses a hypernetwork to dynamically generate custom weights for each connection. In context of DTI, it can be used, for example, to weigh importance of a particular amino acid interaction.
 
-    Refer to :class:`torch_geometric.nn.conv.FiLMConv` for more details. 
+    Refer to :class:`torch_geometric.nn.conv.FiLMConv` for more details.
 
 
     Args:

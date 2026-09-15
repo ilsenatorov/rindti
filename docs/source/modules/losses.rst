@@ -21,4 +21,3 @@ Soft Nearest Neighbor Loss
     :members:
     :exclude-members:
     :show-inheritance:
-
