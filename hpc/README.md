@@ -63,7 +63,24 @@ cat ../runlogs/smoke.*.out    # should print torch version and a GPU name
 
 ## Running jobs
 
-Always submit from the repo root (`/scratch/chair_kalinina/$USER/rindti`).
+Use [`hpc/submit.sh`](submit.sh), from a local checkout or from the clone on the submit
+node — it works out which by looking for `condor_submit` on `PATH`:
+
+```bash
+./hpc/submit.sh smoke
+./hpc/submit.sh train hpc/runs/train_main.txt
+./hpc/submit.sh --dry-run sweep hpc/runs/prepare_sweeps.txt   # validate, queue nothing
+```
+
+It checks the local tree is clean and pushed, fast-forwards the cluster clone to that
+commit, validates the queue file against the rules in [runs/README.md](runs/README.md),
+submits, and appends the result to `$root/runlogs/submissions.tsv` with a copy of the
+queue file in `$root/runlogs/queues/`. Those records are the only way back from a results
+row to the lines that produced it: train queue files are generated on the cluster and
+never committed.
+
+The rest of this section describes what `submit.sh` drives, for when you need to reach
+past it. Always submit from the repo root (`/scratch/chair_kalinina/$USER/rindti`).
 
 | Job | Default queue file | What it runs |
 |---|---|---|
