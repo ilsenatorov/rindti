@@ -7,7 +7,7 @@ import biotite.structure as struc
 import numpy as np
 import pandas as pd
 import pytest
-from cluster import cluster_drugs, dedup_sequences, parse_mmseqs_clusters, write_fasta
+from cluster import cluster_drugs, dedup_sequences, dedup_smiles, parse_mmseqs_clusters, write_fasta
 from distance_based import Structure, encode_residue
 from encd import encd
 from parse_structs import (
@@ -18,7 +18,7 @@ from parse_structs import (
     select_plddt,
     write_structure,
 )
-from split_data import GROUP_COL, add_group_column, split_groups, split_random
+from split_data import GROUP_COL, add_group_column, allocation_pattern, split_groups, split_random
 from utils import onehot_encode
 
 
@@ -331,3 +331,117 @@ class TestParseStructs:
             write_structure(path, result)
             parsed = Structure(path, "label")
         assert len(parsed.residues) == struc.get_residue_count(result)
+
+
+class TestSplitGroups:
+    """`min(len(subset), int(bin_size * frac))` measured the proportions against
+    bin_size rather than the bin in hand, so the final partial bin was always biased
+    toward train and a dataset with fewer than bin_size entities went entirely to it."""
+
+    @staticmethod
+    def _inter(n_entities, rows_each=5):
+        return pd.DataFrame(
+            {"Target_ID": [f"T{i}" for i in range(n_entities)] * rows_each, "Y": 0},
+        )
+
+    @staticmethod
+    def _per_entity(out):
+        return out.drop_duplicates("Target_ID")["split"].value_counts().to_dict()
+
+    def test_pattern_sums_to_bin_size(self):
+        assert len(allocation_pattern(10, 0.7, 0.2)) == 10
+        assert allocation_pattern(10, 0.7, 0.2).count("train") == 7
+        assert allocation_pattern(10, 0.7, 0.2).count("val") == 2
+        assert allocation_pattern(10, 0.7, 0.2).count("test") == 1
+
+    def test_pattern_rejects_impossible_fractions(self):
+        with pytest.raises(ValueError, match="exceed 1"):
+            allocation_pattern(10, 0.8, 0.5)
+
+    @pytest.mark.parametrize("n_entities", [60, 200])
+    def test_full_bins_hit_the_configured_fractions(self, n_entities):
+        counts = self._per_entity(split_groups(self._inter(n_entities)))
+        assert counts["train"] / n_entities == pytest.approx(0.7, abs=0.02)
+        assert counts["val"] / n_entities == pytest.approx(0.2, abs=0.02)
+        assert counts["test"] / n_entities == pytest.approx(0.1, abs=0.02)
+
+    def test_fewer_entities_than_a_bin_do_not_all_go_to_train(self):
+        """Five targets used to produce train=5, val=0, test=0, every time.
+
+        Five entities cannot be divided 70/20/10 exactly, so which splits a single draw
+        reaches is chance - the guarantee is that train no longer swallows all of them.
+        """
+        counts = self._per_entity(split_groups(self._inter(5)))
+        assert counts.get("train", 0) < 5
+        assert sum(counts.values()) == 5
+
+    def test_every_split_is_reachable_with_fewer_entities_than_a_bin(self):
+        """Across draws, all three splits come up - the allocation is unbiased, not
+        merely less biased."""
+        seen = set()
+        for _ in range(50):
+            seen.update(self._per_entity(split_groups(self._inter(5))))
+        assert seen == {"train", "val", "test"}
+
+    def test_partial_bin_is_not_all_train(self):
+        """Ranks 10-12 of a 13-entity list form the short bin."""
+        seen = set()
+        for _ in range(25):
+            out = split_groups(self._inter(13))
+            per_entity = out.drop_duplicates("Target_ID").set_index("Target_ID")["split"]
+            seen.update(per_entity[f"T{i}"] for i in (10, 11, 12))
+        assert seen == {"train", "val", "test"}
+
+    def test_every_entity_is_assigned(self):
+        out = split_groups(self._inter(37))
+        assert out["split"].notna().all()
+        assert set(out["Target_ID"]) == {f"T{i}" for i in range(37)}
+
+    def test_an_entity_lands_in_exactly_one_split(self):
+        out = split_groups(self._inter(37))
+        per_entity = out.groupby("Target_ID")["split"].nunique()
+        assert (per_entity == 1).all()
+
+
+class TestDedupSmiles:
+    """The ligand-side counterpart of dedup_sequences, which had no counterpart: a
+    `target` split collapsed identical sequences while a `drug` split grouped on the raw
+    Drug_ID, so the two cold splits controlled leakage to different standards."""
+
+    def test_identical_molecules_share_a_representative(self):
+        groups = dedup_smiles({"A": "c1ccccc1", "B": "C1=CC=CC=C1", "C": "CCO"})
+        assert groups["A"] == groups["B"]
+        assert groups["C"] != groups["A"]
+
+    def test_representative_is_stable(self):
+        """Alphabetically first, so a rebuild reproduces the same grouping."""
+        assert dedup_smiles({"B": "CCO", "A": "OCC"})["B"] == "A"
+
+    def test_unparseable_smiles_gets_its_own_group(self):
+        groups = dedup_smiles({"A": "CCO", "X": "not a molecule", "Y": "also not"})
+        assert groups["X"] == "X"
+        assert groups["Y"] == "Y"
+
+    def test_nothing_is_dropped(self):
+        ids = {"A": "CCO", "B": "OCC", "X": "!!!", "C": "c1ccccc1"}
+        assert set(dedup_smiles(ids)) == set(ids)
+
+
+class TestEsmTruncation:
+    """ESM-1b's context stops at 1022 residues and the pipeline cut longer chains
+    silently. The structure arm uses the whole chain, so in the comparison the two arms
+    are meant to make, a truncated protein is a confound that has to be disclosed."""
+
+    @staticmethod
+    def _report(sequences):
+        # Imported lazily: prot_esm pulls in fair-esm, an optional extra.
+        pytest.importorskip("esm")
+        from prot_esm import truncation_report
+
+        return truncation_report(sequences)
+
+    def test_short_sequences_are_untouched(self):
+        assert self._report({"a": "M" * 100, "b": "M" * 1022}) == (0, 0)
+
+    def test_counts_and_worst_excess_are_reported(self):
+        assert self._report({"a": "M" * 1522, "b": "M" * 1100, "c": "M" * 10}) == (2, 500)

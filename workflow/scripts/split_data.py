@@ -3,6 +3,18 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
+def allocation_pattern(bin_size: int, train_frac: float, val_frac: float) -> list[str]:
+    """One split label per slot in a bin, e.g. 7 train + 2 val + 1 test for the defaults.
+
+    Test takes the remainder of the bin rather than its own rounded share, so the three
+    always sum to ``bin_size`` and no slot is left unassigned.
+    """
+    pattern = ["train"] * round(bin_size * train_frac) + ["val"] * round(bin_size * val_frac)
+    if len(pattern) > bin_size:
+        raise ValueError(f"train_frac + val_frac exceed 1 for bin_size {bin_size}")
+    return pattern + ["test"] * (bin_size - len(pattern))
+
+
 def split_groups(
     inter: pd.DataFrame,
     col_name: str = "Target_ID",
@@ -10,41 +22,46 @@ def split_groups(
     train_frac: float = 0.7,
     val_frac: float = 0.2,
 ) -> pd.DataFrame:
-    """Split data by protein (cold-target)
-    Tries to ensure good size of all sets by sorting the prots by number of interactions
-    and performing splits within bins of 10
+    """Split by entity (cold-target, cold-drug, or a cluster of either).
+
+    Entities are sorted by interaction count and allocated within bins of ``bin_size``,
+    so each split gets a comparable mix of well- and sparsely-measured entities rather
+    than test inheriting only the rare ones.
+
+    Allocation deals a shuffled pattern of split labels across each bin. It used to take
+    ``min(len(subset), int(bin_size * train_frac))`` for train and then the same for val,
+    which is correct for a full bin but not for a short one: the proportions were
+    relative to ``bin_size`` instead of to the bin actually in hand, so the final partial
+    bin was always biased toward train, and a dataset with fewer than ``bin_size``
+    entities went *entirely* to train - leaving val and test empty, and training then
+    early-stopping on a validation set that did not exist. Dealing from a shuffled
+    pattern is unbiased for a partial bin and identical for a full one.
+
+    Small datasets can still end up with an empty split - five groups cannot be divided
+    70/20/10 - but that is now a property of the arithmetic rather than a systematic
+    bias, and ``workflow/scripts/dataset_stats.py`` reports it.
 
     Args:
         inter (pd.DataFrame): interaction DataFrame
-        col_name (str): Which column to split on (col_name or 'Drug_ID' usually)
-        bin_size (int, optional): Size of the bins to perform individual splits in. Defaults to 10.
-        train_frac (float, optional): value from 0 to 1, how much of the data goes into train
-        val_frac (float, optional): value from 0 to 1, how much of the data goes into validation
+        col_name (str): which column to split on ('Target_ID', 'Drug_ID' or a group column)
+        bin_size (int): size of the bins to allocate within. Defaults to 10.
+        train_frac (float): value from 0 to 1, how much of the data goes into train
+        val_frac (float): value from 0 to 1, how much of the data goes into validation
 
     Returns:
         pd.DataFrame: DataFrame with a new 'split' column
     """
-    sorted_index = [x for x in inter[col_name].value_counts().index]
-    train_prop = int(bin_size * train_frac)
-    val_prop = int(bin_size * val_frac)
-    train = []
-    val = []
-    test = []
-    for i in range(0, len(sorted_index), bin_size):
-        subset = sorted_index[i : i + bin_size]
-        train_bin = list(np.random.choice(subset, min(len(subset), train_prop), replace=False))
-        train += train_bin
-        subset = [x for x in subset if x not in train_bin]
-        val_bin = list(np.random.choice(subset, min(len(subset), val_prop), replace=False))
-        val += val_bin
-        subset = [x for x in subset if x not in val_bin]
-        test += subset
-    train_idx = inter[inter[col_name].isin(train)].index
-    val_idx = inter[inter[col_name].isin(val)].index
-    test_idx = inter[inter[col_name].isin(test)].index
-    inter.loc[train_idx, "split"] = "train"
-    inter.loc[val_idx, "split"] = "val"
-    inter.loc[test_idx, "split"] = "test"
+    sorted_index = list(inter[col_name].value_counts().index)
+    pattern = allocation_pattern(bin_size, train_frac, val_frac)
+
+    assignment = {}
+    for start in range(0, len(sorted_index), bin_size):
+        subset = sorted_index[start : start + bin_size]
+        # Shuffled per bin, so which slot a given rank lands in is not fixed across bins.
+        for entity, split in zip(subset, np.random.permutation(pattern), strict=False):
+            assignment[entity] = split
+
+    inter["split"] = inter[col_name].map(assignment)
     return inter
 
 
@@ -108,8 +125,13 @@ def read_sequences(path: str) -> dict:
     return pd.read_csv(path, sep="\t", index_col="Target_ID")["Target"].to_dict()
 
 
+def read_smiles(path: str) -> dict:
+    """Read the ``Drug_ID -> SMILES`` table straight from the source tables."""
+    return pd.read_csv(path, sep="\t", index_col="Drug_ID")["Drug"].to_dict()
+
+
 if __name__ == "__main__":
-    from cluster import dedup_sequences
+    from cluster import dedup_sequences, dedup_smiles
     from lightning.pytorch import seed_everything
 
     seed_everything(snakemake.config["seed"])
@@ -124,7 +146,10 @@ if __name__ == "__main__":
         assignment = dedup_sequences(read_sequences(snakemake.input.seqs))
         inter = split_groups(add_group_column(inter, "Target_ID", assignment), col_name=GROUP_COL, **fracs)
     elif method == "drug":
-        inter = split_groups(inter, col_name="Drug_ID", **fracs)
+        # Cold-drug, deduplicated, for the same reason `target` is: the same molecule
+        # under two Drug_IDs would otherwise be in train and test at once.
+        assignment = dedup_smiles(read_smiles(snakemake.input.smiles))
+        inter = split_groups(add_group_column(inter, "Drug_ID", assignment), col_name=GROUP_COL, **fracs)
     elif method == "cluster_target":
         assignment = read_assignment(snakemake.input.clusters, "Target_ID")
         inter = split_groups(add_group_column(inter, "Target_ID", assignment), col_name=GROUP_COL, **fracs)

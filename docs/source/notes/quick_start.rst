@@ -50,7 +50,12 @@ We can run the training script with the following code:
 
 .. code:: console
 
-    rindti-train config/dti/glass.yaml
+    rindti-train config/dti/glass.yaml \
+        --set datamodule.filename=datasets/glass/results/prepare_all/<hash>.pkl
+
+``datamodule.filename`` is deliberately ``null`` in every shipped config: the pickle is
+named by a hash of the snakemake config that produced it, so hardcoding one would point
+at whichever dataset happened to exist when the file was written.
 
 
 

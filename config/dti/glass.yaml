@@ -1,58 +1,67 @@
+# GLASS (GPCRs) - the non-kinase dataset, for checking that nothing here is specific to
+# the kinome. Identical to config/dti/base.yaml apart from the batch size: GLASS is the
+# largest supported dataset (~660 targets, ~166k ligands), so a larger batch keeps the
+# epoch count sane.
+#
+#   python run_snakemake.py config/snakemake/glass.yaml --threads 16
+#   rindti-train config/dti/glass.yaml \
+#       --set datamodule.filename=datasets/glass/results/prepare_all/<hash>.pkl
+#
+# glass.yaml on the pipeline side uses `structs.method: plddt`, which drops the
+# low-confidence tails AlphaFold predicts for GPCR termini.
 seed: 42
-runs: 1
-exp_name: glass
+runs: 5 # report mean +- std over 5 seeds
+
 datamodule:
-  filename: datasets/glass/results/prepare_all/tdlnpnclnr_9dc97485.pkl
-  exp_name: test
+  filename: null # set me: datasets/glass/results/prepare_all/<hash>.pkl
+  exp_name: glass
   batch_size: 512
   num_workers: 4
+
 trainer:
+  accelerator: gpu
   devices: 1
-  max_epochs: 5
-  profiler: null
+  max_epochs: 300
   gradient_clip_val: 100
+  profiler: null
+
 early_stop:
-  patience: 60
+  patience: 30
+
 model:
-  monitor: val_loss
   module: class
-  feat_method: element_l1
-  drug:
-    method: graph
-    hidden_dim: 16
-    node:
-      module: ginconv
-      dropout: 0.1
-      hidden_dim: 16
-      num_layers: 3
-    pool:
-      module: mean
-      num_heads: 4
-      hidden_dim: 16
-      ratio: 0.25
+  monitor: val_loss
+  feat_method: concat
   prot:
     method: graph
-    hidden_dim: 16
+    hidden_dim: 128
     node:
       module: ginconv
       dropout: 0.1
-      hidden_dim: 16
+      hidden_dim: 128
       num_layers: 3
     pool:
       module: mean
-      num_heads: 4
-      hidden_dim: 16
-      ratio: 0.25
+      hidden_dim: 128
+  drug:
+    method: graph
+    hidden_dim: 128
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 128
+      num_layers: 3
+    pool:
+      module: mean
+      hidden_dim: 128
   mlp:
+    hidden_dim: 256
+    num_layers: 2
     dropout: 0.2
-    hidden_dim: 512
   optimizer:
     module: adam
-    lr: 0.0001
-    prot_lr: 0.0001
-    drug_lr: 0.0001
-    weight_decay: 0.01
-    momentum: 0.01
+    lr: 0.0005
+    weight_decay: 0.0001
     reduce_lr:
       factor: 0.1
-      patience: 20
+      patience: 10

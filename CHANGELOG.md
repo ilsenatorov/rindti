@@ -4,6 +4,43 @@
 
 ### Fixed
 
+- **`split_groups` sent short bins entirely to train.** It allocated
+  `min(len(subset), int(bin_size * frac))` per bin, so the proportions were relative to
+  `bin_size` rather than to the bin in hand. The final partial bin was always biased
+  toward train, and a dataset with fewer than `bin_size` entities went *entirely* to it -
+  leaving val and test empty, and training then early-stopping on a validation set that
+  did not exist. Allocation now deals a shuffled pattern of split labels across each bin:
+  identical for a full bin, unbiased for a short one. Five entities now split 3/1/1
+  instead of 5/0/0. **Cold-split datasets must be rebuilt.**
+
+- **Cold-drug splits did not deduplicate.** `target` collapsed exact duplicate sequences
+  via `dedup_sequences` while `drug` grouped on the raw `Drug_ID`, so the same molecule
+  under two IDs - or written two ways - could sit on both sides of the boundary. The two
+  cold splits controlled leakage to different standards, in a pipeline whose point is
+  controlling leakage. `dedup_smiles` compares RDKit canonical SMILES.
+
+- **`DTIDataset` raced between concurrent jobs.** The cache key is the directory, so
+  several model configs submitted against one dataset all found the cache cold and all
+  wrote into the same `processed/`; `InMemoryDataset.save` is not atomic, so a loser
+  could read a half-written `.pt`. `process()` is now guarded by an `O_CREAT | O_EXCL`
+  lock, with stale-lock recovery if the holder dies.
+
+- **ESM truncation is reported.** `prot_esm.py` cut sequences to ESM-1b's 1022-residue
+  context silently, while the structure arm uses the whole chain - a confound in the
+  comparison the two arms exist to make. It now prints how many sequences were truncated
+  and by how much. Its scratch files also moved from a relative `./esms/` - not a declared
+  output, not content-hashed, and on a cluster shared between concurrent jobs - into a
+  per-invocation temporary directory.
+
+- **`distance_based.py`'s standalone CLI never ran.** It called `.to_pickle()` on a dict.
+  Its contact threshold also defaulted to 5 A where the workflow schema says 7, so a
+  hand-built dataset silently differed from a pipeline-built one, and `edge_feats` was
+  not exposed at all.
+
+- **`drugs.node_feats` accepted values the schema rejects.** `prepare_drugs` asserted
+  against `{label, onehot, rich, glycan, glycanone, IUPAC}` while the config schema allows
+  only the first four, and `DTIDataset._get_datum` carried an unreachable `IUPAC` branch.
+
 - **`trainer.test` evaluated the wrong weights.** `rindti-train` ran
   `trainer.test(model, datamodule)` straight after `fit`, which tests the weights
   training stopped on - `early_stop.patience` (30 by default) epochs past the optimum -
@@ -49,6 +86,19 @@
   The temporary config also moved out of the repo into `tempfile`.
 
 ### Removed
+
+- `workflow/envs/pymol.yaml`, `workflow/scripts/create_pymol_scripts.py` and
+  `workflow/report/pymol_png.rst`, along with the `pymol_scripts` and `pymol_logs`
+  output directories.
+
+- **Dead configs.** `config/dti/glylec.yaml` (`method: pretrained`, an encoder deleted in
+  v2.0.0, plus a hardcoded `/scratch/SCRATCH_SAS/roman/...` path),
+  `config/dti/hparams_search.yaml` (hardcoded `/home/ilya/...` path in a pre-hash naming
+  scheme, and no `model.monitor`), `config/prot/{ec,pfam}/*` and
+  `config/test/default_pfam.yaml` (pretraining, whose models and datamodules were removed
+  in v2.0.0). `config/dti/glass.yaml` was repaired rather than removed - the quick-start
+  references it - dropping its stale hardcoded pickle path, its debug-sized hidden
+  dimensions and its leftover DiffPool `ratio`/`num_heads` keys.
 
 - **`DiffPoolNet`, replaced by two sparse poolers.** It densified the batch - an
   `(B, max_nodes, max_nodes)` adjacency - so at `batch_size: 128` its peak allocation was
@@ -116,12 +166,6 @@
 
 - An empty selection fails in the parsing rule with the threshold or radius named,
   rather than writing a zero-residue PDB and failing later during graph construction.
-
-### Removed
-
-- `workflow/envs/pymol.yaml`, `workflow/scripts/create_pymol_scripts.py` and
-  `workflow/report/pymol_png.rst`, along with the `pymol_scripts` and `pymol_logs`
-  output directories.
 
 ## [v2.0.0]
 

@@ -121,7 +121,7 @@ if __name__ == "__main__":
         df["ID"] = df["filename"].apply(lambda x: osp.splitext(osp.basename(x))[0])
         df.set_index("ID", inplace=True)
         df.drop("filename", axis=1, inplace=True)
-        df = df.to_pickle(snakemake.output.pickle)
+        df.to_pickle(snakemake.output.pickle)
     else:
         import os
 
@@ -131,14 +131,20 @@ if __name__ == "__main__":
             pdb_dir: str,
             output: str,
             threads: int = 1,
-            threshold: float = 5,
+            threshold: float = 7,
             node_feats: str = "label",
+            edge_feats: str = "none",
         ):
-            """Run the pipeline"""
+            """Build the protein graph pickle outside of snakemake.
+
+            ``threshold`` defaults to 7 A here as it does in the workflow schema; this
+            branch used to say 5, so a hand-built dataset silently differed from a
+            pipeline-built one. ``edge_feats`` was not exposed at all.
+            """
 
             def get_graph(filename: str) -> dict:
                 """Calculate a single graph from a file"""
-                return Structure(filename, node_feats).get_graph(threshold)
+                return Structure(filename, node_feats).get_graph(threshold, edge_feats)
 
             pdbs = [osp.join(pdb_dir, x) for x in os.listdir(pdb_dir)]
             data = Parallel(n_jobs=threads)(delayed(get_graph)(i) for i in tqdm(pdbs))
@@ -147,7 +153,8 @@ if __name__ == "__main__":
             df["ID"] = df["filename"].apply(lambda x: osp.splitext(osp.basename(x))[0])
             df.set_index("ID", inplace=True)
             df.drop("filename", axis=1, inplace=True)
-            df = df.to_dict("index")
+            # `df.to_dict("index")` then `.to_pickle()` - a dict has no `.to_pickle`, so
+            # this branch raised AttributeError every time it was run.
             df.to_pickle(output)
 
         cli = CLI(run)

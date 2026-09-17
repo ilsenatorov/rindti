@@ -82,6 +82,9 @@ def split_inputs() -> dict:
         # Sequences, for exact-duplicate deduplication. They are not in `inter`:
         # parse_dataset leaves only Drug_ID, Target_ID and Y.
         inputs["seqs"] = sh.tables["prot"]
+    elif method == "drug":
+        # SMILES, for the same deduplication on the ligand side.
+        inputs["smiles"] = sh.tables["lig"]
     return inputs
 
 
