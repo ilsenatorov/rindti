@@ -1,0 +1,3 @@
+config/snakemake/benchmark_splits_davis.yaml
+config/snakemake/benchmark_splits_kiba.yaml
+config/snakemake/benchmark_splits_bindingdb_kd.yaml

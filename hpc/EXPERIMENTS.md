@@ -155,6 +155,25 @@ Yields **15 split datasets + 8 distinct ablation datasets + 3 singles**. The abl
 axes share their baseline arm with the Davis random split, and snakemake's caching means
 that arm is built once.
 
+> **Do not run two sweeps against the same `source` at the same time.** Every Davis
+> ablation config rebuilds the same `parse_dataset`, `prot_data` and `structs`
+> intermediates in the same results tree, and snakemake locks its working directory. Eight
+> concurrent sweeps produced exactly one unexplained failure
+> (`ablation/drugfeat.yaml`, the `rich` variant); the identical config re-run on its own
+> exited 0 with all three variants. Submit the sweeps **grouped by dataset** - the three
+> `benchmark_splits_*` files touch three different trees and are safe together, while the
+> six `ablation/*` files all touch Davis and belong in one sequential job:
+>
+> ```bash
+> cat config/snakemake/ablation/*.yaml > /dev/null   # they all share source: davis
+> condor_submit -a 'runfile=hpc/runs/prepare_sweeps_datasets.txt' hpc/sweep.sub
+> # then, after those finish:
+> condor_submit -a 'runfile=hpc/runs/prepare_sweeps_ablation.txt' hpc/sweep.sub
+> ```
+>
+> A sweep that fails this way exits non-zero and names the run, so it is recoverable -
+> re-run the one config and snakemake skips everything already built.
+
 Notes:
 
 - The `cluster_target` splits run MMseqs2 over every target and dominate the wall clock;
@@ -395,7 +414,8 @@ Logs land in `$(root)/runlogs/<job>.<cluster>.<proc>.{out,err}`.
 | Job idle forever | `GPUs_Capability >= 7.5` excludes the P100 and V100 nodes; the qualifying ones are busy | `condor_q -better-analyze`. Wait. Do **not** relax the requirement — the cu129 wheels have no sm_60/sm_70 kernels and the job would die at the first launch |
 | `manifest unknown` | GHCR package went private | Make it public again in the package settings; execute nodes pull anonymously |
 | `0 job(s) submitted` | Queue file empty, or `-a 'runfile=...'` did not take | `condor_q -l <id> \| grep -i args` to see which file was read. If the override is ignored, edit the `runfile` default in the `.sub` directly |
-| Sweep job exits non-zero | One or more snakemake runs failed | It names the failing `logs/logN.txt`. Fix, re-run — snakemake skips what already exists |
+| Sweep job exits non-zero | One or more snakemake runs failed | It names the failing log under `logs/<config>-<pid>/`. Re-run that one config alone — snakemake skips what already exists |
+| A sweep fails with no explanation, and re-running it alone succeeds | Two sweeps sharing a `source` contended for the snakemake working-directory lock | Group sweeps by dataset; never run two against the same `source` concurrently |
 | Two runs overwrote each other | Two jobs shared an `exp_name` and a dataset | Unique `exp_name` per job; see [runs/README.md](runs/README.md) |
 | Training dies immediately on a `reg` dataset | `model.module` left at `class` | `--set model.module=reg`; `check_task_matches` is what caught it |
 | Root-owned `.snakemake/`, `data/`, `tb_logs/` | A **local** `docker run` (HTCondor passes `--user`, a hand test does not) | Use a throwaway copy of the repo for local image tests |

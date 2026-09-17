@@ -22,8 +22,15 @@ def run(config_path: str, threads: int = 1, conda: bool = True) -> None:
     """
     orig_config = read_config(config_path)
     all_configs = IterDict()(orig_config)
-    os.makedirs("logs", exist_ok=True)
-    print(f"Running {len(all_configs)} runs.")
+    # Namespaced by sweep config and pid. "logs/log<i>.txt" is relative to the working
+    # directory, so concurrent sweeps in one checkout all wrote logs/log0.txt,
+    # logs/log1.txt, ... and overwrote each other. When one run of an eight-sweep batch
+    # failed on the cluster, the log it named had already been replaced by a *different*
+    # sweep's - and that log showed a successful run, which is a worse than useless
+    # diagnostic. Same class of collision the temporary config file was fixed for.
+    log_dir = os.path.join("logs", f"{os.path.splitext(os.path.basename(config_path))[0]}-{os.getpid()}")
+    os.makedirs(log_dir, exist_ok=True)
+    print(f"Running {len(all_configs)} runs; logs in {log_dir}/")
 
     deployment = "--software-deployment-method conda " if conda else ""
     # A unique temporary file rather than `tmp_config<random 1-100>.yaml` next to the
@@ -36,7 +43,7 @@ def run(config_path: str, threads: int = 1, conda: bool = True) -> None:
         for i, config in tqdm(enumerate(all_configs), total=len(all_configs)):
             with open(tmp_config_path, "w") as file:
                 yaml.dump(config, file)
-            log = f"logs/log{i}.txt"
+            log = os.path.join(log_dir, f"log{i}.txt")
             result = subprocess.run(
                 f"snakemake -s workflow/Snakefile -j {threads} --configfile {tmp_config_path} "
                 f"{deployment}> {log} 2>&1",
