@@ -34,6 +34,32 @@ def dedup_sequences(sequences: dict[str, str]) -> dict[str, str]:
     return {id_: members[0] for members in groups.values() for id_ in members}
 
 
+def dedup_smiles(smiles: dict[str, str]) -> dict[str, str]:
+    """Map each drug ID to a canonical representative of its identical-molecule group.
+
+    The counterpart of :func:`dedup_sequences` on the ligand side, and it was missing:
+    a ``target`` split collapsed exact duplicate sequences while a ``drug`` split
+    grouped on the raw ``Drug_ID``, so the same molecule under two IDs - or written two
+    ways, which canonicalisation catches and string equality does not - could sit on
+    both sides of the boundary. That is the leakage a cold split exists to prevent, and
+    the asymmetry made the two cold splits mean different things.
+
+    Comparison is on RDKit canonical SMILES. An unparseable molecule gets its own group:
+    it cannot be shown identical to anything, so the conservative choice is to assume it
+    is not.
+    """
+    from rdkit import Chem, RDLogger
+
+    RDLogger.DisableLog("rdApp.*")
+    groups: dict[str, list[str]] = {}
+    for id_ in sorted(smiles):
+        mol = Chem.MolFromSmiles(smiles[id_])
+        # The ID itself as the key for a failure keeps it in a group of one.
+        key = Chem.MolToSmiles(mol) if mol is not None else f"\0unparseable:{id_}"
+        groups.setdefault(key, []).append(id_)
+    return {id_: members[0] for members in groups.values() for id_ in members}
+
+
 def _fingerprints(smiles: dict[str, str], radius: int = 2, n_bits: int = 2048):
     """ECFP4 fingerprints, in a stable ID order.
 
