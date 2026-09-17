@@ -2,7 +2,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
-from rindti.layers.graphpool import DiffPoolNet, MeanPool
+from rindti.layers.graphpool import AttentionPool, MeanPool, Set2SetPool
 
 default_config = {
     "K": 1,
@@ -47,8 +47,19 @@ class BaseTestGraphPool:
         assert ((length - 1.0).abs() < 1e-6).all()  # soft equal
 
 
-class TestDiffPool(BaseTestGraphPool):
-    module = DiffPoolNet
+class TestAttentionPool(BaseTestGraphPool):
+    module = AttentionPool
+
+    def test_exposes_one_weight_per_node(self):
+        """The interpretability readout: a scalar per residue after a forward pass."""
+        module = self.module(**default_config)
+        module.forward(fake_data.x, fake_data.edge_index, fake_data.batch)
+        assert module.attention_weights.shape == (fake_data.x.size(0),)
+        assert not module.attention_weights.requires_grad
+
+
+class TestSet2SetPool(BaseTestGraphPool):
+    module = Set2SetPool
 
 
 class TestMeanPool(BaseTestGraphPool):

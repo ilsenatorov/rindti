@@ -107,7 +107,7 @@ rindti-train config/dti/ablation.yaml \
 ```
 
 Each configuration logs to its own directory named by what it changed
-(`node.module=gatconv-pool.module=diffpool`), and the collector reads the
+(`node.module=gatconv-pool.module=attention`), and the collector reads the
 `hparams.yaml` Lightning writes beside each run, keeping the hyperparameters that
 vary as columns:
 

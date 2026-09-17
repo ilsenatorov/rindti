@@ -7,7 +7,7 @@ from .graphconv import (
     GINConvNet,
     TransformerNet,
 )
-from .graphpool import DiffPoolNet, MeanPool
+from .graphpool import AttentionPool, MeanPool, Set2SetPool
 from .other import MLP
 
 __all__ = [
@@ -18,7 +18,8 @@ __all__ = [
     "GatConvNet",
     "GINConvNet",
     "TransformerNet",
-    "DiffPoolNet",
+    "AttentionPool",
+    "Set2SetPool",
     "MeanPool",
     "MLP",
 ]

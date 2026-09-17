@@ -48,6 +48,28 @@
   cannot satisfy. It now exits non-zero listing the failed runs, and takes `--conda`.
   The temporary config also moved out of the repo into `tempfile`.
 
+### Removed
+
+- **`DiffPoolNet`, replaced by two sparse poolers.** It densified the batch - an
+  `(B, max_nodes, max_nodes)` adjacency - so at `batch_size: 128` its peak allocation was
+  0.31 GB for 300-residue proteins, 1.85 GB at 800 and **6.2 GB at 1500**, while
+  whole-protein AlphaFold graphs reach well past that. The pooling ablation was therefore
+  the one axis that could not run on the same structures as every other axis.
+  `pool.module` is now `mean` (unchanged default), `attention` or `set2set`, measured at
+  0.17 / 0.27 / 0.37 GB respectively at 1500 residues.
+
+  `AttentionPool` additionally exposes `attention_weights`, one scalar per residue after a
+  forward pass - the readout the interpretability analysis needs, which neither mean
+  pooling nor DiffPool's soft many-to-many cluster assignments provided.
+
+  With no pooler producing auxiliary losses, `BaseModel.collect_aux_loss` and the
+  `train_aux_loss` logging it fed are gone too, as is `pool.max_nodes`, which existed
+  only for the dense batching.
+
+- **`feat_method: element_l2`.** It computed `sqrt((d - p) ** 2 + 1e-6)`, which is
+  `element_l1` to six decimal places, so the ablation ran one arm twice under two names.
+  `element_l1` is kept as the element-wise distance merge.
+
 ### Added
 
 - `nn.LayerNorm` on the joint drug/protein embedding before the MLP head. Both poolers

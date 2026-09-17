@@ -11,7 +11,7 @@ model:
       module: [ginconv, gatconv]
       hidden_dim: 16
     pool:
-      module: [diffpool, mean]
+      module: [attention, mean, set2set]
       hidden_dim: 16
       num_heads: 1
 
