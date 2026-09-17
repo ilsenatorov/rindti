@@ -23,7 +23,13 @@ when `pyproject.toml` dependencies change.
 
 ## One-time setup
 
-**1. Build and push the image** (locally, needs `docker` and an authenticated `gh`):
+**1. Build and push the image** (locally, needs `docker` and a `gh` token carrying
+`write:packages` - the default login scopes do not include it):
+
+```bash
+gh auth refresh -h github.com -s write:packages -s delete:packages
+```
+
 
 ```bash
 ./hpc/build.sh
