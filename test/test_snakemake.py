@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 import pytest
 from snakemake.utils import update_config, validate
@@ -7,9 +7,12 @@ from rindti.utils import IterDict, read_config
 
 from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
 
-snakemake_configs = [
-    os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
-]
+# rglob, not listdir: the one-factor-at-a-time pipeline ablation lives in the
+# config/snakemake/ablation/ subdirectory, and a flat listdir both missed those configs
+# and handed the directory itself to read_config as if it were one.
+snakemake_configs = sorted(
+    str(path) for path in Path(SNAKEMAKE_CONFIG_DIR).rglob("*.yaml") if path.name != "default.yaml"
+)
 
 
 @pytest.mark.snakemake

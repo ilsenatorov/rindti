@@ -1,0 +1,13 @@
+# Ablation axis: class rebalancing by resampling.
+#
+# `over` is excluded on purpose: it fabricates negatives by relabelling other targets'
+# rows, so it invents data rather than reweighting it. See the warning at the top of
+# workflow/scripts/parse_dataset.py.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: nM
+  threshold: 100
+  sampling: [none, under]

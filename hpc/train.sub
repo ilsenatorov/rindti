@@ -1,27 +1,40 @@
-# GPU training.
+# GPU training. One condor job per line of the queue file, one GPU each.
 #
 #   cd /scratch/chair_kalinina/$USER/rindti
-#   $EDITOR hpc/runs/train_runs.txt
-#   condor_submit hpc/train.sub
+#   condor_submit -a 'runfile=hpc/runs/train_main.txt' hpc/train.sub
 #
-# One queued line per (config, dataset, experiment name). Note that a single job can
-# already cover a whole sweep: rindti.cli expands any list-valued config entry into a
-# variant and config/dti/base.yaml repeats each over `runs: 5` seeds. Keep the queue file
-# for datasets and use config lists for hyperparameters - that keeps every job on one GPU.
+# Four comma-separated columns: configfile, dataset pickle, experiment name, and
+# `extra` - arbitrary `--set key.path=value` overrides for this job alone.
+#
+# The `extra` column is what keeps an ablation parallel. Without it a list-valued
+# config is expanded by rindti.cli into a sweep that runs *serially inside one job*
+# on one GPU (config/dti/ablation.yaml is 45 configurations x 5 seeds that way).
+# One value per line instead, and the pool runs them at once.
+#
+# `extra` MUST NOT CONTAIN A COMMA: `queue ... from` splits columns on commas, so a
+# YAML list (`[a, b]`) would be read as two extra columns. That is the constraint the
+# column exists to work around - use one job per value.
+#
+# It is also mandatory - every line carries at least `--set runs=N`, which is how the
+# two seed budgets (5 for headline results, 3 for ablations) are applied.
 
 include : hpc/common.sub
 
 job = train
 
-arguments = rindti-train $(configfile) --set datamodule.filename=$(dataset) --set datamodule.exp_name=$(expname)
+# Default queue file; override per phase with `condor_submit -a 'runfile=...'`, which
+# condor inserts immediately before the `queue` command below.
+runfile = $(root)/rindti/hpc/runs/train_runs.txt
+
+arguments = rindti-train $(configfile) --set datamodule.filename=$(dataset) --set datamodule.exp_name=$(expname) $(extra)
 
 request_GPUs   = 1
 request_CPUs   = 8
 request_memory = 32G
 
 # GPUs_Capability >= 7.5 is load-bearing. The pool ranges from P100 (sm 6.0) to Blackwell
-# RTX PRO 6000 (sm 12.0); the cu129 torch wheels in the image ship sm_70 and up, so a job
+# RTX PRO 6000 (sm 12.0); the cu129 torch wheels in the image ship sm_75 and up, so a job
 # landing on idun/lofn/tenos/thera/uller would die at the first kernel launch.
 requirements = UidDomain == "cs.uni-saarland.de" && GPUs_Capability >= 7.5
 
-queue configfile,dataset,expname from $(root)/rindti/hpc/runs/train_runs.txt
+queue configfile,dataset,expname,extra from $(runfile)

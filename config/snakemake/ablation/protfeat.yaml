@@ -1,0 +1,11 @@
+# Ablation axis: how a residue node is encoded.
+# `label` is a single integer per residue; `onehot` is a 20-dim indicator.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+  features:
+    node_feats: [label, onehot]
+parse_dataset:
+  unit: nM
+  threshold: 100

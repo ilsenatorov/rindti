@@ -1,0 +1,9 @@
+config/snakemake/benchmark_splits_davis.yaml
+config/snakemake/benchmark_splits_kiba.yaml
+config/snakemake/benchmark_splits_bindingdb_kd.yaml
+config/snakemake/ablation/protfeat.yaml
+config/snakemake/ablation/edgefeat.yaml
+config/snakemake/ablation/drugfeat.yaml
+config/snakemake/ablation/filtering.yaml
+config/snakemake/ablation/sampling.yaml
+config/snakemake/ablation/structs.yaml

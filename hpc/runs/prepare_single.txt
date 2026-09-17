@@ -1,0 +1,3 @@
+config/snakemake/davis_esm.yaml
+config/snakemake/davis_reg.yaml
+config/snakemake/kiba_reg.yaml

@@ -1,2 +1,5 @@
-config/dti/base.yaml, datasets/davis/results/prepare_all/<hash>.pkl, davis_random
-config/dti/base.yaml, datasets/kiba/results/prepare_all/<hash>.pkl,  kiba_random
+config/dti/base.yaml, datasets/davis/results/prepare_all/<hash>.pkl, davis_random, --set runs=5
+config/dti/base.yaml, datasets/kiba/results/prepare_all/<hash>.pkl, kiba_cluster_target, --set runs=5
+config/dti/esm.yaml, datasets/davis/results/prepare_all/<hash>.pkl, davis_esm, --set runs=5
+config/dti/base.yaml, datasets/davis/results/prepare_all/<hash>.pkl, davis_reg, --set runs=5 --set model.module=reg
+config/dti/base.yaml, datasets/davis/results/prepare_all/<hash>.pkl, davis_random_node=gatconv, --set runs=3 --set model.prot.node.module=gatconv

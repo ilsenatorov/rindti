@@ -1,0 +1,13 @@
+# Ablation axis: how much of the AlphaFold model becomes the contact graph.
+# `whole` keeps the full chain; `plddt` drops residues below the confidence threshold,
+# which mostly removes the disordered tails AlphaFold predicts at the termini.
+#
+# `bsite` and `template` are absent: both need a template library in <source>/templates
+# that the downloaded datasets do not ship.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: [whole, plddt]
+parse_dataset:
+  unit: nM
+  threshold: 100

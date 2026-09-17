@@ -1,0 +1,16 @@
+# Sweep config for run_snakemake.py: every split variant of KIBA.
+# The Davis counterpart, with the shared explanation, is benchmark_splits_davis.yaml.
+#
+#   python run_snakemake.py config/snakemake/benchmark_splits_kiba.yaml --threads 8 --conda false
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger interaction -
+  # the opposite direction to the nM default. Getting this wrong yields a single-class
+  # dataset, which the pipeline rejects rather than silently emitting.
+  unit: score
+  threshold: 12.1
+split_data:
+  method: [random, drug, target, cluster_target, cluster_drug]

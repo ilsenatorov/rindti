@@ -1,0 +1,12 @@
+# Ablation axis: how a drug atom is encoded.
+# `label`/`onehot` describe an atom by element alone; `rich` adds degree, formal charge,
+# hydrogen count, hybridisation, aromaticity, ring membership and chirality.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+drugs:
+  node_feats: [label, onehot, rich]
+parse_dataset:
+  unit: nM
+  threshold: 100

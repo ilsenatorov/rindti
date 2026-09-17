@@ -1,0 +1,29 @@
+# Build a SWEEP of graph datasets: one queued configfile whose list-valued entries
+# run_snakemake.py expands into one snakemake invocation each. CPU only.
+#
+#   cd /scratch/chair_kalinina/$USER/rindti
+#   condor_submit -a 'runfile=hpc/runs/prepare_sweeps.txt' hpc/sweep.sub
+#
+# Use this for config/snakemake/benchmark_splits_*.yaml and config/snakemake/ablation/*,
+# and hpc/prepare.sub for a config with no lists in it.
+#
+# --conda false is required here and has no default that would work: run_snakemake.py
+# passes --software-deployment-method conda unless told otherwise, and this image has
+# MMseqs2 on PATH and no conda at all.
+#
+# run_snakemake.py exits non-zero listing the runs that failed, so the condor exit status
+# actually means something - a sweep cannot "finish" with half its datasets missing.
+
+include : hpc/common.sub
+
+job = sweep
+
+runfile = $(root)/rindti/hpc/runs/prepare_sweeps.txt
+
+arguments = python run_snakemake.py $(configfile) --threads $(request_cpus) --conda false
+
+request_CPUs   = 16
+request_memory = 64G
+request_disk   = 100G
+
+queue configfile from $(runfile)

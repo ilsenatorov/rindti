@@ -1,0 +1,11 @@
+# Ablation axis: which interactions survive binarization.
+# `all` keeps everything, `posneg` (the default) keeps only confident positives and
+# negatives, `balanced` equalises the classes.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: nM
+  threshold: 100
+  filtering: [posneg, all, balanced]

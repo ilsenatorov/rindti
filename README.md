@@ -73,8 +73,16 @@ Unknown keys are rejected, so a typo fails immediately instead of being ignored.
 To build every split variant of a dataset, use the sweep config:
 
 ```bash
-python run_snakemake.py config/snakemake/benchmark_splits.yaml --threads 8
+python run_snakemake.py config/snakemake/benchmark_splits_davis.yaml --threads 8
 ```
+
+There is one per dataset (`benchmark_splits_{davis,kiba,bindingdb_kd}.yaml`); they differ
+only in `source` and the `parse_dataset` unit/threshold.
+
+To run the whole benchmark on the Saarland HPC, follow
+[`hpc/EXPERIMENTS.md`](hpc/EXPERIMENTS.md), which covers the campaign end to end —
+download, dataset construction, the two correctness gates, training and collection.
+[`hpc/README.md`](hpc/README.md) is the reference for the cluster setup itself.
 
 Then turn the TensorBoard logs into a table:
 
@@ -92,7 +100,16 @@ python workflow/scripts/dataset_stats.py datasets/davis/results/prepare_all/*.pk
     --table dataset_stats.tsv
 ```
 
-It exits non-zero on two failures worth catching before a GPU run rather than after:
+`dataset_index.py` is its lightweight counterpart: `prepare_all` names its output by a
+hash of the config, so once a sweep has produced two dozen pickles this is what maps them
+back to what built them — and generates the HPC queue lines directly:
+
+```bash
+python workflow/scripts/dataset_index.py 'datasets/*/results/prepare_all/*.pkl' --table index.tsv
+```
+
+`dataset_stats.py` exits non-zero on two failures worth catching before a GPU run rather
+than after:
 
 - **leakage** — a cold split (`target`, `drug`, `cluster_target`, `cluster_drug`) with an
   entity on both sides of the train/test boundary.

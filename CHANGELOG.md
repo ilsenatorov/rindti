@@ -2,6 +2,55 @@
 
 ## [Unreleased]
 
+### Added
+
+- **An experiment runbook and the tooling it needs.** `hpc/EXPERIMENTS.md` takes the
+  benchmark campaign from an empty `/scratch` tree to `results.csv` in eight phases, with
+  two blocking gates: Davis structure naming (`get_datasets.py` fetches AlphaFold models
+  by `Target_ID` and drops targets it cannot find, so a gene-name/UniProt mismatch yields
+  an *empty dataset with no error*), and `dataset_stats.py`'s exit code before any GPU
+  time is spent.
+
+- **`hpc/train.sub` takes per-job `--set` overrides.** A fourth queue column, so an
+  ablation is one condor job per configuration, parallel across the pool, rather than one
+  job expanding a list-valued config into 45 configurations run *serially on one GPU*.
+  It also carries the seed budget (`runs=5` for headline results, `runs=3` for ablations).
+
+  The column brings a constraint worth knowing: `rindti.cli` only appends a
+  `describe_variant` tag to the log directory when the **config file** holds lists, so
+  `--set` produces no tag. Two jobs sharing an `exp_name` and a dataset both call
+  `next_version()` on the same directory, pick the same `version_N`, and - since the seed
+  list is a deterministic function of `seed` and `runs` - overwrite each other. Queue
+  files therefore put the axis in `exp_name`, and `hpc/gen_model_ablation.sh` generates
+  them that way.
+
+- **`workflow/scripts/dataset_index.py`.** `prepare_all` names its output by a hash of the
+  whole config, and the documented way to find a particular dataset was to `ls` the
+  directory - unworkable at the two dozen pickles this campaign builds. The pickle already
+  carries the config that built it, so this reads it back, prints only the axes that vary,
+  and emits `train.sub` queue lines directly. Separate from `dataset_stats.py`, which
+  unpickles every graph and exits non-zero on a bad split: right for a QA gate, wrong for
+  a lookup.
+
+- **`hpc/sweep.sub`**, for configs holding lists. `prepare.sub` runs `snakemake`, which
+  does not expand them; `run_snakemake.py` does, and needs `--conda false` in the image.
+
+- **`config/snakemake/ablation/`** - six one-factor-at-a-time pipeline ablation configs,
+  which is the shape `config/snakemake/ablation.yaml` recommends in its own header but
+  does not implement (it takes the full 216-run cross product). Plus
+  `benchmark_splits_{kiba,bindingdb_kd}.yaml` beside the renamed
+  `benchmark_splits_davis.yaml`.
+
+  `test_snakemake.py` discovered shipped configs with a flat `os.listdir`, so it validated
+  nothing in a subdirectory and handed the directory itself to `read_config` as though it
+  were one. It now walks the tree, which also brings the six new configs under the
+  "every shipped config validates against the schema" check.
+
+### Changed
+
+- Every submit file reads `$(runfile)`, so the queue file is selected per phase with
+  `condor_submit -a 'runfile=...'` instead of by editing the `.sub` file.
+
 ### Fixed
 
 - **`split_groups` sent short bins entirely to train.** It allocated

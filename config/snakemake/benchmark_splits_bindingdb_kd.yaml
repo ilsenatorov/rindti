@@ -1,0 +1,19 @@
+# Sweep config for run_snakemake.py: every split variant of BindingDB restricted to Kd.
+# The Davis counterpart, with the shared explanation, is benchmark_splits_davis.yaml.
+#
+#   python run_snakemake.py config/snakemake/benchmark_splits_bindingdb_kd.yaml --threads 16 --conda false
+#
+# Kd rather than Ki or IC50: it is the same quantity Davis reports, so the two are
+# directly comparable. IC50 is assay-dependent and must not be pooled with either.
+#
+# This is by far the largest of the three datasets here - expect the cluster_target
+# split (MMseqs2 over every target) to dominate the wall clock.
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: nM
+  threshold: 100
+split_data:
+  method: [random, drug, target, cluster_target, cluster_drug]

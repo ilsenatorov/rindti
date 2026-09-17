@@ -11,10 +11,12 @@ include : hpc/common.sub
 
 job = download
 
+runfile = $(root)/rindti/hpc/runs/datasets.txt
+
 arguments = uv run workflow/scripts/get_datasets.py $(dataset) --min_num_aa 100 --download_structures true --structure_cache $(root)/cache/structures
 
 request_CPUs   = 4
 request_memory = 16G
 request_disk   = 100G
 
-queue dataset from $(root)/rindti/hpc/runs/datasets.txt
+queue dataset from $(runfile)

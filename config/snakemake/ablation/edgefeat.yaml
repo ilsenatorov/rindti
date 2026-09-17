@@ -1,0 +1,17 @@
+# Ablation axis: whether the CA-CA distance survives as a continuous edge attribute
+# or is thresholded away into an unlabelled contact graph.
+#
+# IMPORTANT: only `model.prot.node.module: transformer` consumes edge attributes.
+# GIN/GAT/Cheb ignore edges entirely and FiLM expects discrete relation types, so
+# training the `distance` dataset with the default ginconv gives a result identical
+# to the `none` dataset and measures nothing. Pair this dataset with the transformer
+# arm of the model ablation (see hpc/runs/train_model_ablation.txt).
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+  features:
+    edge_feats: [none, distance]
+parse_dataset:
+  unit: nM
+  threshold: 100

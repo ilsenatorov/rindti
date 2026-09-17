@@ -1,6 +1,10 @@
-# Build graph datasets with snakemake. CPU only.
+# Build ONE graph dataset with snakemake, per queued configfile. CPU only.
 #
-#   cd /scratch/chair_kalinina/$USER/rindti && condor_submit hpc/prepare.sub
+#   cd /scratch/chair_kalinina/$USER/rindti
+#   condor_submit -a 'runfile=hpc/runs/prepare_single.txt' hpc/prepare.sub
+#
+# For a config holding LISTS (a sweep - every split, an ablation axis), use
+# hpc/sweep.sub instead: snakemake itself does not expand lists, run_snakemake.py does.
 #
 # No --software-deployment-method conda: mmseqs2 is baked into the image and on PATH, so
 # the `conda:` directive in workflow/rules/data.smk falls back to it. There is no conda in
@@ -10,10 +14,12 @@ include : hpc/common.sub
 
 job = prepare
 
+runfile = $(root)/rindti/hpc/runs/prepare_configs.txt
+
 arguments = snakemake -s workflow/Snakefile -j $(request_cpus) --configfile $(configfile)
 
 request_CPUs   = 16
 request_memory = 64G
 request_disk   = 50G
 
-queue configfile from $(root)/rindti/hpc/runs/prepare_configs.txt
+queue configfile from $(runfile)

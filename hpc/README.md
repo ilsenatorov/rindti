@@ -2,7 +2,11 @@
 
 The cluster (`conduit.hpc.uni-saarland.de` / `conduit2`) **only accepts containerised
 jobs** — `SUBMIT_REQUIREMENT_UseDocker` rejects anything that is not `universe = docker`
-or a local `.sif`. These files build the image and submit the three kinds of job.
+or a local `.sif`. These files build the image and submit the four kinds of job.
+
+This file is the **reference** for how the setup works. For the experiment campaign
+itself - which jobs to run, in what order, and how to tell each phase worked - see
+[EXPERIMENTS.md](EXPERIMENTS.md).
 
 The image carries **only the environment**. The repo is bind-mounted from `/scratch` at
 job time, so a code change needs a `git pull` on the cluster, not a rebuild. Rebuild only
@@ -61,20 +65,33 @@ cat ../runlogs/smoke.*.out    # should print torch version and a GPU name
 
 Always submit from the repo root (`/scratch/chair_kalinina/$USER/rindti`).
 
-| Job | Queue file | What it runs |
+| Job | Default queue file | What it runs |
 |---|---|---|
 | `hpc/download.sub` | `hpc/runs/datasets.txt` | `uv run workflow/scripts/get_datasets.py` — TDC tables + AlphaFold structures |
-| `hpc/prepare.sub` | `hpc/runs/prepare_configs.txt` | `snakemake` — builds the graph dataset `.pkl` |
+| `hpc/prepare.sub` | `hpc/runs/prepare_configs.txt` | `snakemake` — one graph dataset per queued config |
+| `hpc/sweep.sub` | `hpc/runs/prepare_sweeps.txt` | `run_snakemake.py` — a config **holding lists**, expanded into many datasets |
 | `hpc/train.sub` | `hpc/runs/train_runs.txt` | `rindti-train` — one GPU per job |
 
-Each submit file queues one job per non-comment line of its queue file, so the normal
-loop is: edit the queue file, `condor_submit`. `train_runs.txt` ships with only comments —
-fill it in or `condor_submit` will (correctly) report `0 job(s) submitted`.
+Every submit file reads `$(runfile)`, so the queue file is chosen per phase rather than by
+editing the `.sub`:
 
-A training job does not have to be a single run: `rindti.cli` expands any list-valued
-config entry into a sweep variant and `config/dti/base.yaml` repeats each over `runs: 5`
-seeds. Use the queue file for **datasets** and config lists for **hyperparameters** — that
-keeps every job on one GPU and keeps the `describe_variant` run naming intact.
+```bash
+condor_submit -a 'runfile=hpc/runs/train_main.txt' hpc/train.sub
+```
+
+`condor_submit -a` inserts its argument immediately before the `queue` command, which is
+what lets it override the default set higher up in the file.
+
+`train_runs.txt` ships empty — fill it in or `condor_submit` will (correctly) report
+`0 job(s) submitted`.
+
+Train queue files have **four** columns: configfile, dataset pickle, experiment name, and
+`extra` — arbitrary `--set` overrides for that job alone. The fourth column is what keeps
+an ablation parallel. `rindti.cli` will happily expand a list-valued config into a sweep,
+but it runs those variants *serially inside one job* on one GPU — 45 configurations ×
+5 seeds for `config/dti/ablation.yaml`. One value per queued line instead, and the pool
+runs them at once. See [runs/README.md](runs/README.md) for the two constraints that come
+with it (no commas in `extra`; `exp_name` must be unique per job).
 
 Collect results the same way as locally:
 
