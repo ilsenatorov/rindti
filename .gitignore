@@ -46,5 +46,7 @@ report/
 # Writing plan, not repo code
 /PAPER_PLAN.md
 
-# Claude Code scratch (worktrees, session state) - never part of the project.
-.claude/
+# Claude Code scratch. Only the worktrees and local overrides - .claude/settings.json is
+# project configuration and belongs in the repo.
+.claude/worktrees/
+.claude/settings.local.json

@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(condor_q:*)",
+      "Bash(condor_status:*)",
+      "Bash(condor_history:*)",
+      "Bash(condor_userprio:*)",
+      "Bash(condor_tail:*)",
+      "Bash(condor_submit:*)",
+      "Bash(condor_rm:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git pull:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(du:*)",
+      "Bash(df:*)",
+      "Bash(awk:*)",
+      "Bash(sed:*)",
+      "Bash(sort:*)",
+      "Bash(cut:*)",
+      "Bash(python workflow/scripts/dataset_stats.py:*)",
+      "Bash(python workflow/scripts/dataset_index.py:*)",
+      "Bash(python -m rindti.utils.results:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)"
+    ]
+  }
+}
