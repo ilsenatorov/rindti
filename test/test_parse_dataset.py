@@ -101,3 +101,33 @@ class TestBalancedFilter:
 
     def test_single_class_yields_empty(self):
         assert balanced_filter(_frame([1, 1, 1])).empty
+
+
+class TestLogAffinity:
+    """`log: true` has to produce the scale the affinity literature reports.
+
+    It used to emit log10(Kd in nM) for `unit: nM`. MSE and the rank-based CI survive
+    that affine flip, but RM2 does not - its r0^2 is a regression forced through the
+    origin, so it is offset-dependent - and RM2 exists precisely to be compared against
+    the DeepDTA lineage, which reports pKd.
+    """
+
+    def test_nm_becomes_pkd(self):
+        from parse_dataset import log_affinity
+
+        # 1 nM = 1e-9 M -> pKd 9; 100 nM -> pKd 7; 10000 nM -> pKd 5.
+        values = pd.Series([1.0, 100.0, 10_000.0])
+        assert np.allclose(log_affinity(values, "nM"), [9.0, 7.0, 5.0])
+
+    def test_nm_is_higher_is_better(self):
+        """A stronger binder (lower nM) must get the larger label."""
+        from parse_dataset import log_affinity
+
+        result = log_affinity(pd.Series([1.0, 10_000.0]), "nM")
+        assert result.iloc[0] > result.iloc[1]
+
+    def test_score_is_plain_log10(self):
+        """A unitless score has no molar concentration to invert."""
+        from parse_dataset import log_affinity
+
+        assert np.allclose(log_affinity(pd.Series([1.0, 100.0]), "score"), [0.0, 2.0])
