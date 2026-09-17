@@ -11,7 +11,7 @@ set -euo pipefail
 
 ROOT="${RINDTI_ROOT:-/scratch/chair_kalinina/$USER}"
 REPO_URL="${RINDTI_REPO_URL:-https://github.com/ilsenatorov/rindti}"
-BRANCH="${RINDTI_BRANCH:-dev}"
+BRANCH="${RINDTI_BRANCH:-hpc}"
 
 mkdir -p "$ROOT"/{datasets,tb_logs,cache,runlogs}
 
