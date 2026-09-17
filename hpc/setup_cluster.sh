@@ -2,7 +2,7 @@
 # One-time setup on the submit node (conduit / conduit2).
 #
 #   ssh conduit
-#   git clone https://github.com/ilsenatorov/rindti /tmp/rindti-bootstrap
+#   git clone git@github.com:ilsenatorov/rindti.git /tmp/rindti-bootstrap
 #   bash /tmp/rindti-bootstrap/hpc/setup_cluster.sh
 #
 # Creates the scratch tree the submit files expect and clones the repo into it.
@@ -10,7 +10,10 @@
 set -euo pipefail
 
 ROOT="${RINDTI_ROOT:-/scratch/chair_kalinina/$USER}"
-REPO_URL="${RINDTI_REPO_URL:-https://github.com/ilsenatorov/rindti}"
+# SSH, not HTTPS: the submit nodes cannot complete a TLS handshake to github.com
+# ("gnutls_handshake() failed"), so an HTTPS clone works once at best and can never be
+# pulled again. git@ works from a key in ~/.ssh with no agent forwarding.
+REPO_URL="${RINDTI_REPO_URL:-git@github.com:ilsenatorov/rindti.git}"
 BRANCH="${RINDTI_BRANCH:-hpc}"
 
 mkdir -p "$ROOT"/{datasets,tb_logs,cache,runlogs}

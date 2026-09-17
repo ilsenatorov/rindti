@@ -61,12 +61,25 @@ gh auth refresh -h github.com -s write:packages -s delete:packages   # one-off
 On the cluster:
 
 ```bash
-ssh conduit
+ssh conduit          # or conduit2
 cd /scratch/chair_kalinina/$USER/rindti && git pull
 condor_submit hpc/smoke.sub
 condor_q
 cat ../runlogs/smoke.*.out
 ```
+
+> **The remote must be SSH, not HTTPS.** HTTPS to github.com fails from the submit nodes
+> with `gnutls_handshake() failed: The TLS connection was non-properly terminated`, while
+> `git@github.com:` works from a key in `~/.ssh` with no agent forwarding. A clone made
+> with the HTTPS URL will sit silently at whatever commit it was created at — check with
+> `git remote -v` and fix it once:
+>
+> ```bash
+> git remote set-url origin git@github.com:ilsenatorov/rindti.git
+> ```
+>
+> `setup_cluster.sh` defaults to the HTTPS URL, so pass
+> `RINDTI_REPO_URL=git@github.com:ilsenatorov/rindti.git` when bootstrapping.
 
 **Worked if:** the output names a GPU, prints `cuda ok True`, a capability ≥ 7.5, and an
 mmseqs version.
@@ -386,6 +399,9 @@ Logs land in `$(root)/runlogs/<job>.<cluster>.<proc>.{out,err}`.
 | Two runs overwrote each other | Two jobs shared an `exp_name` and a dataset | Unique `exp_name` per job; see [runs/README.md](runs/README.md) |
 | Training dies immediately on a `reg` dataset | `model.module` left at `class` | `--set model.module=reg`; `check_task_matches` is what caught it |
 | Root-owned `.snakemake/`, `data/`, `tb_logs/` | A **local** `docker run` (HTCondor passes `--user`, a hand test does not) | Use a throwaway copy of the repo for local image tests |
+| `git pull` hangs or fails with `gnutls_handshake()` | The clone uses the HTTPS remote, which the submit nodes cannot reach | `git remote set-url origin git@github.com:ilsenatorov/rindti.git` |
+| `Disk quota exceeded` writing into **some** directories while others are fine and `df` shows terabytes free | Not a quota. BeeGFS stripes each directory over storage targets; the targets behind that directory are full | Probe with `echo x > <dir>/.p` per directory. A **newly created** directory gets fresh targets, so re-clone into a new path and swap it in. Raise the target exhaustion with the admins — it will recur as `datasets/` grows |
+| A download job dies in `uv` before fetching anything | A dependency with no wheel for the image's Python is being source-built | Check the `.err` for `CalledProcessError`. `get_datasets.py` is pinned to `<3.12` for exactly this reason; see its PEP 723 header |
 
 To re-run one line of a queue file, put that line in a file of its own and submit it —
 there is no need to resubmit the rest.

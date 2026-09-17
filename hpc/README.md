@@ -48,7 +48,7 @@ with `manifest unknown`.
 
 ```bash
 ssh conduit
-git clone https://github.com/ilsenatorov/rindti /tmp/rindti-bootstrap
+git clone git@github.com:ilsenatorov/rindti.git /tmp/rindti-bootstrap
 bash /tmp/rindti-bootstrap/hpc/setup_cluster.sh
 ```
 
