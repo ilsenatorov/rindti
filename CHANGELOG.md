@@ -72,6 +72,13 @@
 
 ### Added
 
+- **`workflow/scripts/dataset_stats.py`** — describes a built dataset: the attrition chain
+  from the raw tables through AlphaFold coverage and filtering to the graphs actually
+  trained on, label balance, split sizes and graph dimensions. `--table` writes one row per
+  dataset. Exits non-zero on a cold split that leaks an entity across the train/test
+  boundary, or on an empty `val`/`test` split.
+
+
 - `nn.LayerNorm` on the joint drug/protein embedding before the MLP head. Both poolers
   L2-normalise, so each tower emits a unit vector and the merge operators landed on very
   different scales - the joint embedding's norm was ~1.41 for `concat` and the

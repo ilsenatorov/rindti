@@ -82,6 +82,24 @@ Then turn the TensorBoard logs into a table:
 python -m rindti.utils.results --logdir tb_logs --output results.csv --summary true
 ```
 
+## Describing a dataset
+
+`dataset_stats.py` reports what a built dataset actually contains — how many entities each
+stage discarded, the label balance, the split sizes and the graph dimensions:
+
+```bash
+python workflow/scripts/dataset_stats.py datasets/davis/results/prepare_all/*.pkl \
+    --table dataset_stats.tsv
+```
+
+It exits non-zero on two failures worth catching before a GPU run rather than after:
+
+- **leakage** — a cold split (`target`, `drug`, `cluster_target`, `cluster_drug`) with an
+  entity on both sides of the train/test boundary.
+- **a degenerate split** — an empty `val` or `test`. `split_data.split_groups` allocates
+  `int(bin_size * frac)` within bins of ten, so a group column with fewer than ten distinct
+  values sends every interaction to train.
+
 ## Ablations
 
 Any list in a config is expanded into a sweep, on both sides of the pipeline.
