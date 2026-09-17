@@ -19,7 +19,7 @@ print("cuda ok  ", torch.cuda.is_available())
 if torch.cuda.is_available():
     print("device   ", torch.cuda.get_device_name(0))
     cap = torch.cuda.get_device_capability(0)
-    print("capability", "%d.%d" % cap)
+    print("capability", f"{cap[0]}.{cap[1]}")
     print("arch list", torch.cuda.get_arch_list())
     x = torch.randn(1024, 1024, device="cuda")
     print("matmul   ", float((x @ x).sum()))
