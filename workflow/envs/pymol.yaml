@@ -1,9 +1,0 @@
-name: pymol
-channels:
-  - conda-forge
-  - speleo3
-dependencies:
-  - python>=3.11
-  - pymol-open-source>=3.1
-  - pymol-psico>=4.3
-  - tmalign

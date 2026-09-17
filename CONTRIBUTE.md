@@ -30,7 +30,7 @@ uv run pytest -m "not gpu and not snakemake"
 | Command | Scope |
 |---|---|
 | `pytest -m "not gpu and not snakemake"` | Fast unit tests, no external tools |
-| `pytest -m "snakemake and not gpu"` | Full pipeline; builds a conda env for PyMOL on first run |
+| `pytest -m "snakemake and not gpu"` | Full pipeline; builds a conda env for MMseqs2 on first run |
 | `pytest -m "not gpu"` | Everything except GPU tests |
 
 Tests marked `snakemake` execute the real workflow on `test/test_data`, so keep them

@@ -4,8 +4,9 @@
 #
 # IterDict takes the FULL CROSS PRODUCT of every list below, and each combination
 # builds a complete dataset. As written this is 2 x 2 x 3 x 3 x 3 x 2 = 216 runs.
-# Adding structs.method (4 values) quadruples that and needs PyMOL for three of
-# them, so that axis is commented out - enable it deliberately (it would make 864).
+# Adding structs.method (4 values) quadruples that, so that axis is commented out -
+# enable it deliberately (it would make 864). It no longer needs an external tool,
+# but `bsite` and `template` still need a template library in <source>/templates.
 #
 # For a one-factor-at-a-time ablation, keep a single list and scalars elsewhere,
 # then re-run per axis. That is far fewer runs and is usually what you
@@ -17,7 +18,7 @@ source: datasets/davis/resources
 
 prots:
   structs:
-    # method: [whole, plddt, bsite, template]  # bsite/template need templates/ + PyMOL
+    # method: [whole, plddt, bsite, template]  # bsite/template need <source>/templates
     method: whole
   features:
     method: distance

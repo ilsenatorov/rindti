@@ -1,10 +1,23 @@
 """Regression tests for the pure helpers in workflow/scripts."""
 
+import os
+import tempfile
+
+import biotite.structure as struc
+import numpy as np
 import pandas as pd
 import pytest
 from cluster import cluster_drugs, dedup_sequences, parse_mmseqs_clusters, write_fasta
 from distance_based import Structure, encode_residue
 from encd import encd
+from parse_structs import (
+    best_template,
+    organic_atoms,
+    parse_structure,
+    read_structure,
+    select_plddt,
+    write_structure,
+)
 from split_data import GROUP_COL, add_group_column, split_groups, split_random
 from utils import onehot_encode
 
@@ -221,3 +234,100 @@ class TestGroupedSplit:
     def test_all_three_splits_are_populated(self, inter, assignment):
         out = split_groups(add_group_column(inter, "Target_ID", assignment), col_name=GROUP_COL)
         assert set(out["split"]) == {"train", "val", "test"}
+
+
+class TestParseStructs:
+    """The biotite replacement for the PyMOL structure-parsing scripts."""
+
+    QUERY = "test/test_data/resources/structures/A5A4K9.pdb"
+    TEMPLATE = "test/test_data/resources/templates/5cgd.pdb"
+
+    @pytest.fixture
+    def query(self):
+        return read_structure(self.QUERY)
+
+    @pytest.fixture
+    def template(self):
+        return read_structure(self.TEMPLATE)
+
+    def test_plddt_keeps_whole_residues(self, query):
+        """The PyMOL version thresholded atoms, so a residue could lose its CA.
+
+        `distance_based.Structure` builds one node per CA, so a residue without one
+        silently vanished from the graph while its neighbours stayed.
+        """
+        selected = select_plddt(query, 70)
+        kept = set(zip(selected.chain_id, selected.res_id, strict=True))
+        assert len(kept) == struc.get_residue_count(selected)
+        # Every atom of a kept residue is present, not only those above the threshold.
+        in_kept = [(c, r) in kept for c, r in zip(query.chain_id, query.res_id, strict=True)]
+        assert selected.array_length() == sum(in_kept)
+
+    def test_plddt_threshold_is_exclusive_and_ordered(self, query):
+        """A higher threshold may never keep more than a lower one."""
+        counts = [struc.get_residue_count(select_plddt(query, t)) for t in (50, 70, 90)]
+        assert counts == sorted(counts, reverse=True)
+        assert 0 < counts[-1] < struc.get_residue_count(query)
+
+    def test_plddt_keeps_only_confident_residues(self, query):
+        selected = select_plddt(query, 70)
+        assert (selected[selected.atom_name == "CA"].b_factor > 70).all()
+
+    def test_best_template_picks_the_higher_score(self, query):
+        """With one real template and one copy of the query, the query must win."""
+        import shutil
+
+        with tempfile.TemporaryDirectory() as tmp:
+            twin = os.path.join(tmp, "twin.pdb")
+            shutil.copy(self.QUERY, twin)
+            _, path, score = best_template(query, [self.TEMPLATE, twin])
+        assert path == twin
+        assert score > 0.9  # a structure aligned against itself
+
+    def test_best_template_needs_a_template(self, query):
+        with pytest.raises(ValueError, match="no templates"):
+            best_template(query, [])
+
+    def test_organic_excludes_water_and_ions(self, template):
+        organic = organic_atoms(template)
+        assert organic.array_length() > 0
+        assert not struc.filter_solvent(organic).any()
+        assert not struc.filter_monoatomic_ions(organic).any()
+        assert not struc.filter_amino_acids(organic).any()
+
+    @pytest.mark.parametrize("method", ["bsite", "template"])
+    def test_selection_is_a_strict_subset(self, method, query):
+        """Both template methods narrow the structure; neither may invent residues."""
+        params = {"bsite": {"radius": 5}, "template": {"radius": 2}}
+        result = parse_structure(self.QUERY, method, params, [self.TEMPLATE])
+        assert 0 < struc.get_residue_count(result) < struc.get_residue_count(query)
+        assert set(result.res_id) <= set(query.res_id)
+
+    def test_bsite_stays_near_the_ligand(self, query):
+        """Every selected residue must have an atom within the radius, by construction."""
+        radius = 5
+        result = parse_structure(self.QUERY, "bsite", {"bsite": {"radius": radius}}, [self.TEMPLATE])
+        fitted, _, _ = best_template(query, [self.TEMPLATE])
+        ligand = organic_atoms(fitted)
+        distances = np.linalg.norm(result.coord[:, None, :] - ligand.coord[None, :, :], axis=-1)
+        # Per residue, not per atom: `br.` pulls in atoms that are themselves far away.
+        for res_id in set(result.res_id):
+            assert distances[result.res_id == res_id].min() <= radius
+
+    def test_empty_selection_is_rejected(self):
+        """The old pipeline wrote a zero-residue PDB and failed much later."""
+        with pytest.raises(ValueError, match="selected no atoms"):
+            parse_structure(self.QUERY, "plddt", {"plddt": {"threshold": 100}})
+
+    def test_unknown_method_is_rejected(self):
+        with pytest.raises(ValueError, match="unknown structure method"):
+            parse_structure(self.QUERY, "whole", {})
+
+    def test_roundtrip_is_readable_by_the_graph_builder(self, query):
+        """The output has to stay a plain PDB: `distance_based` parses fixed columns."""
+        result = select_plddt(query, 70)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "out.pdb")
+            write_structure(path, result)
+            parsed = Structure(path, "label")
+        assert len(parsed.residues) == struc.get_residue_count(result)

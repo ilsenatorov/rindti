@@ -199,8 +199,6 @@ After running the snakemake workflow for dataset1 and dataset2, the following fi
   ├── prepare_all
   ├── prepare_drugs
   ├── prot_data
-  ├── pymol_logs
-  ├── pymol_scripts
   └── split_data
 
 

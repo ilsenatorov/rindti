@@ -36,9 +36,9 @@ One pipeline option needs an external tool that is **not** pip-installable:
 
 | Feature | Requirement | How |
 |---|---|---|
-| `prots.structs.method` = `bsite` / `template` / `plddt` | PyMOL, psico, TMalign | Provided by `workflow/envs/pymol.yaml`; run snakemake with `--software-deployment-method conda` |
+| `split_data.method` = `cluster_target` | MMseqs2 | Provided by `workflow/envs/mmseqs.yaml`; run snakemake with `--software-deployment-method conda` |
 
-The default config (`structs.method: whole`, `features.method: distance`) does not need it.
+The default config (`split_data.method: random`) does not need it.
 
 ## Quick start
 

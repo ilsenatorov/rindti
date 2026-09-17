@@ -35,16 +35,18 @@ External tools
 
 One pipeline option relies on a program that cannot be installed from PyPI.
 
-**PyMOL** is needed for ``prots.structs.method`` set to ``bsite``, ``template`` or
-``plddt``. It is declared in ``workflow/envs/pymol.yaml``, so snakemake will build
-the environment for you provided you pass:
+**MMseqs2** is needed for ``split_data.method: cluster_target``, which groups proteins
+by sequence identity so that no test target is homologous to a training one. It is
+declared in ``workflow/envs/mmseqs.yaml``, so snakemake will build the environment for
+you provided you pass:
 
 .. code:: console
 
     snakemake --software-deployment-method conda ...
 
-The default configuration (``structs.method: whole``, ``features.method: distance``)
-does not require PyMOL.
+The default configuration (``split_data.method: random``) does not require it, and
+neither do the structure-parsing methods: ``bsite``, ``template`` and ``plddt`` are
+implemented with ``biotite``, which comes from the ``workflow`` extra.
 
 Testing
 -------
@@ -56,5 +58,5 @@ To check the installation:
     pytest -m "not gpu and not snakemake"   # fast unit tests
     pytest -m "not gpu"                     # also runs the full pipeline
 
-The ``snakemake``-marked tests build a conda environment for PyMOL the first time
-they run, so expect the first invocation to be slow.
+The ``snakemake``-marked tests build a conda environment for MMseqs2 the first time
+they reach the ``cluster_target`` split, so expect that one to be slow initially.

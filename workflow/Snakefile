@@ -1,6 +1,7 @@
 from snakemake.utils import validate
 from scripts.snakemake_helper import SnakemakeHelper
 import os
+import glob
 
 
 configfile: "config/snakemake/default.yaml"

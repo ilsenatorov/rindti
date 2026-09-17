@@ -2,42 +2,32 @@ parsed_structs_dir = sh._target(
     "parsed_structs",
     sh.namer(config["prots"]["structs"]),
 )
-pymol_scripts = sh._target(
-    "pymol_scripts",
-    sh.namer(config["prots"]["structs"]),
-    "{prot}.pml",
-)
+structs_method = config["prots"]["structs"]["method"]
 
-if config["prots"]["structs"]["method"] == "whole":
+if structs_method == "whole":
     parsed_structs = sh._source("structures", "{prot}.pdb")
 else:
     parsed_structs = os.path.join(parsed_structs_dir, "{prot}.pdb")
 
+# Declared as rule inputs rather than globbed inside the script: the template library
+# is data the selection depends on, so adding or removing a template has to invalidate
+# the parsed structures. The old PyMOL script globbed at runtime and the DAG never
+# knew the templates existed.
+templates = (
+    sorted(glob.glob(sh._source("templates", "*.pdb")))
+    if structs_method in ("bsite", "template")
+    else []
+)
 
-rule create_pymol_scripts:
+
+rule parse_structs:
     input:
-        sh.raw_structs,
+        struct=sh._source("structures", "{prot}.pdb"),
+        templates=templates,
     output:
-        scripts=expand(pymol_scripts, prot=sh.prot_ids),
+        struct=parsed_structs,
     params:
-        parsed_structs_dir=parsed_structs_dir,
-        resources=sh.source_dir,
-        results=sh.target_dir,
-        method=config["prots"]["structs"]["method"],
+        method=structs_method,
         other_params=config["prots"]["structs"],
     script:
-        "../scripts/create_pymol_scripts.py"
-
-
-rule run_pymol:
-    input:
-        script=pymol_scripts,
-        struct=sh._source("structures", "{prot}.pdb"),
-    output:
-        structs=parsed_structs,
-    log:
-        sh._target("pymol_logs", sh.namer(config["prots"]["structs"]), "{prot}.log"),
-    conda:
-        "../envs/pymol.yaml"
-    shell:
-        "pymol -k -y -c {input.script} > {log} 2>&1"
+        "../scripts/parse_structs.py"

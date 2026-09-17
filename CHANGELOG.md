@@ -1,5 +1,45 @@
 # CHANGELOG
 
+## [Unreleased]
+
+### Changed
+
+- **Structure parsing no longer uses PyMOL.** `prots.structs.method` values `plddt`,
+  `bsite` and `template` were implemented by generating a `.pml` script per protein and
+  running it in a conda environment (`workflow/envs/pymol.yaml`: pymol-open-source,
+  pymol-psico, tmalign, pulling in the third-party `speleo3` channel). They are now
+  `workflow/scripts/parse_structs.py`, built on [biotite](https://www.biotite-python.org),
+  which installs from PyPI with the `workflow` extra. MMseqs2 is the only external tool
+  the pipeline still needs, and only for `split_data.method: cluster_target`.
+
+  Two semantics changed with the port, so **graphs built with these methods differ from
+  v2.0.0**:
+
+  - `plddt` selects whole residues whose CA B-factor passes the threshold. The PyMOL
+    selection was `b > threshold` with no `br.`, i.e. atom-level, so a residue could
+    reach the graph without the CA that represents it - or lose its CA and vanish while
+    its neighbours stayed.
+  - `bsite` and `template` measure against the best-scoring template only. The old
+    script loaded every template, superimposed them all onto the best one, and then
+    selected against all of them at once, so a template that matched poorly still
+    contributed residues to the binding site.
+
+  Template ranking now uses biotite's `superimpose_structural_homologs`/`tm_score`, a
+  TM-align-inspired heuristic rather than the TM-align binary psico called. Scores are
+  close but not identical; they are only used to rank templates against each other.
+
+- Template PDBs are declared as rule inputs instead of being globbed at runtime, so
+  changing the template library now invalidates the parsed structures.
+
+- An empty selection fails in the parsing rule with the threshold or radius named,
+  rather than writing a zero-residue PDB and failing later during graph construction.
+
+### Removed
+
+- `workflow/envs/pymol.yaml`, `workflow/scripts/create_pymol_scripts.py` and
+  `workflow/report/pymol_png.rst`, along with the `pymol_scripts` and `pymol_logs`
+  output directories.
+
 ## [v2.0.0]
 
 Modernization release. The project was revived after an extended pause; this
