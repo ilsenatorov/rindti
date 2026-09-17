@@ -92,7 +92,11 @@ combination builds a full dataset, so mind the cross product (216 as shipped):
 
 ```bash
 python run_snakemake.py config/snakemake/ablation.yaml --threads 8
+python run_snakemake.py config/snakemake/ablation.yaml --threads 8 --conda false  # in the HPC image
 ```
+
+The sweep exits non-zero if any individual snakemake run failed, rather than
+leaving the missing datasets to surface later as failed training jobs.
 
 **Model** — `config/dti/ablation.yaml` covers the merge method, convolution and
 pooling. One command runs every combination over `runs` seeds:

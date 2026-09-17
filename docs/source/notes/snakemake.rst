@@ -128,6 +128,8 @@ product, one pipeline run per combination:
 .. code:: console
 
   python run_snakemake.py config/snakemake/ablation.yaml --threads 8
+  # inside the HPC image, which has MMseqs2 on PATH and no conda:
+  python run_snakemake.py config/snakemake/ablation.yaml --threads 8 --conda false
 
 ``config/snakemake/ablation.yaml`` sweeps filtering, sampling, splitting and the
 feature options above. Mind the cross product - it is 216 runs as shipped, each

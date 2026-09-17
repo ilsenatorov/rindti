@@ -8,9 +8,9 @@
 # want, and copy the parse_dataset block from that dataset's own config (KIBA in
 # particular needs unit: score).
 #
-# The cluster splits need conda on PATH: run_snakemake.py always passes
-# --software-deployment-method conda, which builds workflow/envs/mmseqs.yaml on
-# first use.
+# The cluster splits need MMseqs2. Locally, run_snakemake.py's `--conda true` default
+# builds workflow/envs/mmseqs.yaml on first use. Inside the HPC image pass
+# `--conda false`: MMseqs2 is already on PATH there and there is no conda.
 source: datasets/davis/resources
 prots:
   structs:

@@ -14,5 +14,6 @@ parse_dataset:
   # `posneg` filtering or any sampling, since both assume binary labels.
   filtering: all
   sampling: none
-  # log10(Kd in nM), i.e. the pKd-style scale the DeepDTA lineage reports.
+  # pKd = 9 - log10(Kd in nM), the scale the DeepDTA lineage reports. Higher is a
+  # stronger binder, the opposite direction to the raw nM value.
   log: true
