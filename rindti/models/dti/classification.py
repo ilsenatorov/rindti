@@ -1,5 +1,5 @@
 import torch.nn.functional as F
-from torch import Tensor
+from torch import Tensor, nn
 
 from ...data import TwoGraphData
 from ...layers.encoder import GraphEncoder, VectorEncoder
@@ -29,6 +29,12 @@ class ClassificationModel(BaseModel):
         )
         self.prot_encoder = encoders[kwargs["model"]["prot"]["method"]](**kwargs["model"]["prot"])
         self.drug_encoder = encoders[kwargs["model"]["drug"]["method"]](**kwargs["model"]["drug"])
+        # Both poolers L2-normalise, so each tower emits a unit vector. The merge
+        # operators then land on very different scales - the joint embedding's norm is
+        # ~1.41 for concat and the two element-wise differences, but ~0.088 for `mult`,
+        # a 16x gap that the MLP sees as a much weaker signal. Without this the
+        # `feat_method` ablation measures input scale as much as merge semantics.
+        self.joint_norm = nn.LayerNorm(self.embed_dim)
         self.mlp = MLP(input_dim=self.embed_dim, out_dim=1, **kwargs["model"]["mlp"])
         self._setup_metrics()
 
@@ -40,7 +46,7 @@ class ClassificationModel(BaseModel):
         """"""
         prot_embed = self.prot_encoder(prot)
         drug_embed = self.drug_encoder(drug)
-        joint_embedding = self.merge_features(drug_embed, prot_embed)
+        joint_embedding = self.joint_norm(self.merge_features(drug_embed, prot_embed))
         return dict(
             pred=self.mlp(joint_embedding),
             prot_embed=prot_embed,

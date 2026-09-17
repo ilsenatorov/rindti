@@ -23,6 +23,7 @@ class GINConvNet(BaseLayer):
         output_dim: int,
         hidden_dim: int = 64,
         num_layers: int = 3,
+        dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__()
@@ -46,6 +47,9 @@ class GINConvNet(BaseLayer):
             for _ in range(num_layers - 2)
         ]
         self.mid_layers = nn.ModuleList(mid_layers)
+        # Unlike the other modules GINConv already carries its own PReLU, so only the
+        # dropout is added here - `node.dropout` was accepted and discarded before.
+        self.dropouts = nn.ModuleList([nn.Dropout(dropout) for _ in range(1 + len(mid_layers))])
         self.out = GINConv(
             nn.Sequential(
                 nn.Linear(hidden_dim, hidden_dim),
@@ -57,8 +61,8 @@ class GINConvNet(BaseLayer):
 
     def forward(self, x: Tensor, edge_index: Adj, **kwargs) -> Tensor:
         """"""
-        x = self.inp(x, edge_index)
-        for module in self.mid_layers:
-            x = module(x, edge_index)
+        x = self.dropouts[0](self.inp(x, edge_index))
+        for module, drop in zip(self.mid_layers, self.dropouts[1:], strict=True):
+            x = drop(module(x, edge_index))
         x = self.out(x, edge_index)
         return x

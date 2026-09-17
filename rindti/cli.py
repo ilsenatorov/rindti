@@ -91,6 +91,25 @@ def _flatten_config(config: dict, prefix: str = "") -> dict:
     return flat
 
 
+def check_task_matches(datamodule: DTIDataModule, module: str) -> None:
+    """Raise if the dataset was built for a different task than the model solves.
+
+    ``parse_dataset.task`` (snakemake) and ``model.module`` (training) live in separate
+    config files and nothing used to relate them, so a ``reg`` dataset trained as
+    ``class`` ran ``binary_cross_entropy_with_logits`` against continuous affinities and
+    reported AUROC on them - without error, and without meaning. The two vocabularies
+    happen to coincide (``class``/``reg``), so this is a direct comparison.
+    """
+    task = datamodule.config.get("snakemake", {}).get("parse_dataset", {}).get("task")
+    if task is None:  # a dataset built before the task was recorded in the config
+        return
+    if task != module:
+        raise ValueError(
+            f"Dataset was built with parse_dataset.task={task!r} but model.module={module!r}. "
+            f"Use model.module={task!r}, or rebuild the dataset with the matching task."
+        )
+
+
 def train(**kwargs) -> None:
     """Train the model, expanding any list-valued config entry into a sweep.
 
@@ -149,6 +168,7 @@ def single_run(folder: str, version: int, **kwargs) -> None:
     datamodule = DTIDataModule(**kwargs["datamodule"])
     datamodule.setup()
     datamodule.update_config(kwargs)
+    check_task_matches(datamodule, kwargs["model"]["module"])
 
     logger = TensorBoardLogger(
         save_dir=folder,
@@ -174,7 +194,11 @@ def single_run(folder: str, version: int, **kwargs) -> None:
     )
     model = models[kwargs["model"]["module"]](**kwargs)
     trainer.fit(model, datamodule)
-    trainer.test(model, datamodule)
+    # ckpt_path="best", not the in-memory model: `early_stop.patience` epochs separate
+    # the weights training stopped on from the weights ModelCheckpoint kept. Testing
+    # the former reports a model well past its own optimum, which is what every run
+    # used to do.
+    trainer.test(model, datamodule, ckpt_path="best")
 
 
 def apply_override(config: dict, assignment: str) -> None:

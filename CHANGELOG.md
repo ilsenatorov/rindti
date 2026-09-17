@@ -2,6 +2,60 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- **`trainer.test` evaluated the wrong weights.** `rindti-train` ran
+  `trainer.test(model, datamodule)` straight after `fit`, which tests the weights
+  training stopped on - `early_stop.patience` (30 by default) epochs past the optimum -
+  while `ModelCheckpoint` had saved the best ones and never loaded them. Every reported
+  test metric was systematically pessimistic and noisier than it should have been. Now
+  `ckpt_path="best"`.
+
+- **A task/model mismatch is now rejected.** `parse_dataset.task` (snakemake) and
+  `model.module` (training) live in separate config files and nothing related them, so a
+  `reg` dataset trained with `model.module: class` ran
+  `binary_cross_entropy_with_logits` against continuous affinities and reported AUROC on
+  them without error. `rindti.cli.check_task_matches` raises instead.
+
+- **Regression labels for `unit: nM` are now pKd, not `log10(Kd)`.** The DeepDTA ->
+  GraphDTA -> DGraphDTA -> GEFA lineage reports `pKd = 9 - log10(Kd in nM)`. MSE and the
+  rank-based CI are invariant to that affine flip, but `RM2` is not - its `r0^2` is a
+  regression forced through the origin, so it is offset-dependent - and `RM2` exists
+  specifically to be compared against those papers. **Regression datasets built with
+  `log: true` and `unit: nM` must be rebuilt.**
+
+- **Convolution stacks were linear.** Only `GINConvNet` had a non-linearity between
+  layers (inside the `GINConv` MLP). `ChebConvNet` was measurably *exactly* affine - a
+  three-layer stack collapsed to a single linear operator - and `GatConvNet` and
+  `TransformerNet` were non-linear only through their attention softmax, so a
+  `node.module` ablation compared a real GNN against a linear model. All five modules now
+  apply a `PReLU` after each non-final convolution
+  (`rindti.layers.base_layer.interlayer_activations`), guarded by a test.
+
+- **`element_l1` and `element_l2` were the same function.** `_element_l2` computed
+  `sqrt((d - p) ** 2 + 1e-6)`, which equals `|d - p|` to six decimal places, so a
+  `feat_method` ablation ran two identical arms and reported them as separate results.
+  It is now the element-wise squared difference.
+
+- **`node.dropout` was inert.** Every conv module except `TransformerNet` swallowed it in
+  `**kwargs`; in `TransformerNet` it configured *attention* dropout rather than feature
+  dropout. It is now applied as feature dropout between layers in all five.
+
+- **`run_snakemake.py` swallowed failures and could not run on the cluster.** It
+  discarded each subprocess's return code with output redirected to a log file, so a
+  sweep could "finish" with half its datasets missing; and it hardcoded
+  `--software-deployment-method conda`, which the HPC image (MMseqs2 on `PATH`, no conda)
+  cannot satisfy. It now exits non-zero listing the failed runs, and takes `--conda`.
+  The temporary config also moved out of the repo into `tempfile`.
+
+### Added
+
+- `nn.LayerNorm` on the joint drug/protein embedding before the MLP head. Both poolers
+  L2-normalise, so each tower emits a unit vector and the merge operators landed on very
+  different scales - the joint embedding's norm was ~1.41 for `concat` and the
+  element-wise differences but ~0.088 for `mult`. The `feat_method` ablation was partly
+  measuring input scale.
+
 ### Changed
 
 - **Structure parsing no longer uses PyMOL.** `prots.structs.method` values `plddt`,

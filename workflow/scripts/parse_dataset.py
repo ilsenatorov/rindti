@@ -103,6 +103,20 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
     return pd.concat(total)
 
 
+# pKd/pKi = -log10(M) = 9 - log10(nM). The DeepDTA -> GraphDTA -> DGraphDTA -> GEFA
+# lineage reports on this scale, and RM2 is the reason the offset matters: its r0^2 is a
+# regression forced through the origin, so unlike MSE and the rank-based CI it is *not*
+# invariant to the affine flip between log10(Kd) and pKd. Emitting log10(Kd) put a number
+# in the rm2 column that could not be compared against the papers that column exists for.
+def log_affinity(values: pd.Series, unit: str) -> pd.Series:
+    """Log-transform affinities onto the scale the literature reports."""
+    if unit == "nM":
+        return 9 - np.log10(values)
+    # A unitless score (KIBA) is already on a log scale and higher-is-better; there is no
+    # molar concentration to invert, so this is a plain log10.
+    return np.log10(values)
+
+
 def check_not_degenerate(inter: pd.DataFrame, task: str, stage: str) -> None:
     """Fail loudly rather than writing an empty or single-class dataset.
 
@@ -143,7 +157,7 @@ if __name__ == "__main__":
         inter = binarize(inter, config["threshold"], unit)
     elif config["task"] == "reg":
         if config["log"]:
-            inter["Y"] = inter["Y"].apply(np.log10)
+            inter["Y"] = log_affinity(inter["Y"], unit)
     else:
         raise ValueError("Unknown task!")
 

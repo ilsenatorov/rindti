@@ -2,7 +2,7 @@ from torch import Tensor, nn
 from torch_geometric.nn import TransformerConv
 from torch_geometric.typing import Adj
 
-from ..base_layer import BaseLayer
+from ..base_layer import BaseLayer, interlayer_activations
 
 
 class TransformerNet(BaseLayer):
@@ -69,6 +69,10 @@ class TransformerNet(BaseLayer):
             edge_dim=edge_dim,
             concat=False,
         )
+        # The `dropout` passed to TransformerConv above is its *attention* dropout. self.acts
+        # applies the same rate as feature dropout between layers, which is what the config
+        # key means for every other module.
+        self.acts = interlayer_activations(1 + len(self.mid_layers), dropout)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """"""
@@ -76,8 +80,8 @@ class TransformerNet(BaseLayer):
             edge_feats = None
         elif self.edge_type == "label":
             edge_feats = self.edge_embed(edge_feats)
-        x = self.inp(x, edge_index, edge_feats)
-        for module in self.mid_layers:
-            x = module(x, edge_index, edge_feats)
+        x = self.acts[0](self.inp(x, edge_index, edge_feats))
+        for module, act in zip(self.mid_layers, self.acts[1:], strict=True):
+            x = act(module(x, edge_index, edge_feats))
         x = self.out(x, edge_index, edge_feats)
         return x
