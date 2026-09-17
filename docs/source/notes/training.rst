@@ -51,7 +51,7 @@ That is four configurations. ``config/dti/ablation.yaml`` sweeps the merge metho
 convolution and pooling; as shipped it is 40 configurations over 3 seeds.
 
 Each configuration logs to its own directory tagged with what it changed, for
-example ``node.module=gatconv-pool.module=diffpool``. Tags use the shortest
+example ``node.module=gatconv-pool.module=attention``. Tags use the shortest
 unambiguous suffix of the config path, so ``node.module`` and ``pool.module`` stay
 distinguishable.
 

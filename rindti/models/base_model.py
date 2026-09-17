@@ -75,10 +75,6 @@ class BaseModel(LightningModule):
         if feat_method == "concat":
             self.merge_features = self._concat
             self.embed_dim = drug_hidden_dim + prot_hidden_dim
-        elif feat_method == "element_l2":
-            assert drug_hidden_dim == prot_hidden_dim
-            self.merge_features = self._element_l2
-            self.embed_dim = drug_hidden_dim
         elif feat_method == "element_l1":
             assert drug_hidden_dim == prot_hidden_dim
             self.merge_features = self._element_l1
@@ -94,50 +90,25 @@ class BaseModel(LightningModule):
         """Concatenation."""
         return torch.cat((drug_embed, prot_embed), dim=1)
 
-    def _element_l2(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """Element-wise squared difference.
-
-        This used to be ``sqrt((d - p) ** 2 + 1e-6)``, which is ``|d - p|`` to six decimal
-        places - i.e. numerically identical to ``_element_l1``. A ``feat_method`` ablation
-        therefore ran two arms that were the same function and reported them as separate
-        results. The squared difference is the element-wise L2 term and is genuinely
-        distinct from the L1 one.
-        """
-        return (drug_embed - prot_embed) ** 2
-
     def _element_l1(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """L1 distance."""
+        """Element-wise absolute difference.
+
+        The only element-wise distance merge. There used to be an ``element_l2`` beside
+        it computing ``sqrt((d - p) ** 2 + 1e-6)``, which is this function to six decimal
+        places, so the ablation ran one arm twice under two names.
+        """
         return (drug_embed - prot_embed).abs()
 
     def _mult(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
         """Multiplication."""
         return drug_embed * prot_embed
 
-    def collect_aux_loss(self) -> Tensor:
-        """Sum the auxiliary losses stashed by submodules during the forward pass.
-
-        DiffPool's link-prediction and entropy regularizers are produced inside the
-        pooling layer, which has no way to return them through the encoder, so it
-        stores them on ``aux_loss`` and they are gathered here.
-        """
-        total = None
-        for module in self.modules():
-            aux = getattr(module, "aux_loss", None)
-            if aux is not None:
-                total = aux if total is None else total + aux
-        return total
-
     def training_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during training step."""
         ss = self.shared_step(data)
         self.train_metrics.update(ss["preds"], ss["labels"])
         self.log("train_loss", ss["loss"], batch_size=self.batch_size, on_epoch=True)
-        loss = ss["loss"]
-        aux = self.collect_aux_loss()
-        if aux is not None:
-            self.log("train_aux_loss", aux, batch_size=self.batch_size, on_epoch=True)
-            loss = loss + aux
-        return loss
+        return ss["loss"]
 
     def validation_step(self, data: TwoGraphData, data_idx: int) -> Tensor:
         """What to do during validation step. Also logs the values for various callbacks."""

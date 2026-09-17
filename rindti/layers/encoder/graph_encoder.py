@@ -4,7 +4,7 @@ from torch import Tensor, nn
 from torch_geometric.data import Data
 
 from ..graphconv import ChebConvNet, FilmConvNet, GatConvNet, GINConvNet, TransformerNet
-from ..graphpool import DiffPoolNet, MeanPool
+from ..graphpool import AttentionPool, MeanPool, Set2SetPool
 
 node_embedders = {
     "ginconv": GINConvNet,
@@ -13,7 +13,7 @@ node_embedders = {
     "filmconv": FilmConvNet,
     "transformer": TransformerNet,
 }
-poolers = {"diffpool": DiffPoolNet, "mean": MeanPool}
+poolers = {"mean": MeanPool, "attention": AttentionPool, "set2set": Set2SetPool}
 
 
 class GraphEncoder(nn.Module):
@@ -41,7 +41,6 @@ class GraphEncoder(nn.Module):
         every edge feature in the dataset was ignored.
         """
         data_params = kwargs["data"]
-        kwargs["pool"]["max_nodes"] = data_params["max_nodes"]
         kwargs.update(data_params)
         kwargs["node"]["input_dim"] = kwargs["hidden_dim"]
         kwargs["node"]["output_dim"] = kwargs["hidden_dim"]
