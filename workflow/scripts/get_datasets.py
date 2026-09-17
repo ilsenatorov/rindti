@@ -1,10 +1,12 @@
 # /// script
-# Upper-bounded at 3.12, not just ">=3.11": PyTDC 1.1.15 pins
-# cellxgene-census==1.15.0, which requires tiledbsoma~=1.11.4 and declares
-# requires_python <3.12. tiledbsoma 1.11.4 publishes cp38/cp310/cp311 wheels and no
-# cp312 one, so on 3.12 uv falls back to building it from source and the build dies in
-# `./bld`. Nothing in this script touches tiledbsoma - it arrives through PyTDC's
-# single-cell extras - so the fix is to run on the interpreter that tree supports.
+# # Upper-bounded at 3.12, not just ">=3.11": PyTDC 1.1.15 pins
+# # cellxgene-census==1.15.0, which requires tiledbsoma~=1.11.4 and declares
+# # requires_python <3.12. tiledbsoma 1.11.4 publishes cp38/cp310/cp311 wheels and no
+# # cp312 one, so on 3.12 uv falls back to building it from source and the build dies
+# # in `./bld`. Nothing here touches tiledbsoma - it arrives through PyTDC's
+# # single-cell extras - so the fix is to run on the interpreter that tree supports.
+# # (These are TOML comments: PEP 723 strips the leading "# " and parses the rest as
+# # TOML, so a bare prose line here is a parse error, not a comment.)
 # requires-python = ">=3.11,<3.12"
 # dependencies = [
 #     "PyTDC>=1.1",
