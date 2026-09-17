@@ -1,0 +1,19 @@
+# Build graph datasets with snakemake. CPU only.
+#
+#   cd /scratch/chair_kalinina/$USER/rindti && condor_submit hpc/prepare.sub
+#
+# No --software-deployment-method conda: mmseqs2 is baked into the image and on PATH, so
+# the `conda:` directive in workflow/rules/data.smk falls back to it. There is no conda in
+# the image to deploy with.
+
+include : hpc/common.sub
+
+job = prepare
+
+arguments = snakemake -s workflow/Snakefile -j $(request_cpus) --configfile $(configfile)
+
+request_CPUs   = 16
+request_memory = 64G
+request_disk   = 50G
+
+queue configfile from $(root)/rindti/hpc/runs/prepare_configs.txt

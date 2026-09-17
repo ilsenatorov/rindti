@@ -1,0 +1,29 @@
+# Shared preamble for every RINDTI submit file. Pulled in with
+#   include : hpc/common.sub
+#
+# Edit `root` here if your scratch tree lives somewhere else; nothing else hardcodes it.
+root = /scratch/chair_kalinina/s8ilsena
+
+universe                = docker
+docker_image            = ghcr.io/ilsenatorov/rindti:latest
+
+# job.sh sets up the environment and execs the arguments. Everything - code, datasets,
+# logs - lives on the shared filesystem (CONTAINER_SHARED_FS covers /home and /scratch),
+# so nothing is transferred and absolute paths are valid on the execute node.
+executable              = $(root)/rindti/hpc/job.sh
+initialdir              = $(root)
+should_transfer_files   = NO
+
+# +WantGPUHomeMounted mounts /home, +WantScratchMounted mounts /scratch.
+# DO NOT add an `environment = ...` line to any of these files: the cluster's
+# JOB_TRANSFORM_AddHomeEnv only injects HOME when `environment` is unset or empty.
+# Per-job variables belong in hpc/job.sh.
++WantGPUHomeMounted     = true
++WantScratchMounted     = true
+
+requirements            = UidDomain == "cs.uni-saarland.de"
+
+output                  = runlogs/$(job).$(ClusterId).$(ProcId).out
+error                   = runlogs/$(job).$(ClusterId).$(ProcId).err
+log                     = runlogs/$(job).$(ClusterId).log
+notification            = Error

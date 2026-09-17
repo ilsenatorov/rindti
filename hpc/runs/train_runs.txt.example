@@ -1,0 +1,2 @@
+config/dti/base.yaml, datasets/davis/results/prepare_all/<hash>.pkl, davis_random
+config/dti/base.yaml, datasets/kiba/results/prepare_all/<hash>.pkl,  kiba_random

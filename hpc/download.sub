@@ -1,0 +1,20 @@
+# Download a DTI dataset and its AlphaFold structures. CPU only, network-bound, slow.
+#
+#   cd /scratch/chair_kalinina/$USER/rindti && condor_submit hpc/download.sub
+#
+# get_datasets.py is a PEP 723 script: PyTDC pins numpy<2 and cannot share an environment
+# with the training stack, so `uv run` builds it a throwaway env (cached under
+# $ROOT/cache/uv). This needs outbound network from the execute node - if the job fails
+# resolving tdcommons.ai or alphafold.ebi.ac.uk, run it on the submit node instead.
+
+include : hpc/common.sub
+
+job = download
+
+arguments = uv run workflow/scripts/get_datasets.py $(dataset) --min_num_aa 100 --download_structures true --structure_cache $(root)/cache/structures
+
+request_CPUs   = 4
+request_memory = 16G
+request_disk   = 100G
+
+queue dataset from $(root)/rindti/hpc/runs/datasets.txt

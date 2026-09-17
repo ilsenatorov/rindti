@@ -1,0 +1,27 @@
+# The build context is the repo root, but the image only needs pyproject.toml,
+# README.md, LICENSE and rindti/version.py. Keep the context to a few kB.
+.git/
+.github/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.snakemake/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.ipynb_checkpoints/
+datasets/
+data/
+results/
+report/
+tb_logs/
+*logs/
+*.pkl
+docs/
+test/
+workflow/
+config/
+uv.lock

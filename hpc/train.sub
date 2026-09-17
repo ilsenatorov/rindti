@@ -1,0 +1,27 @@
+# GPU training.
+#
+#   cd /scratch/chair_kalinina/$USER/rindti
+#   $EDITOR hpc/runs/train_runs.txt
+#   condor_submit hpc/train.sub
+#
+# One queued line per (config, dataset, experiment name). Note that a single job can
+# already cover a whole sweep: rindti.cli expands any list-valued config entry into a
+# variant and config/dti/base.yaml repeats each over `runs: 5` seeds. Keep the queue file
+# for datasets and use config lists for hyperparameters - that keeps every job on one GPU.
+
+include : hpc/common.sub
+
+job = train
+
+arguments = rindti-train $(configfile) --set datamodule.filename=$(dataset) --set datamodule.exp_name=$(expname)
+
+request_GPUs   = 1
+request_CPUs   = 8
+request_memory = 32G
+
+# GPUs_Capability >= 7.5 is load-bearing. The pool ranges from P100 (sm 6.0) to Blackwell
+# RTX PRO 6000 (sm 12.0); the cu129 torch wheels in the image ship sm_70 and up, so a job
+# landing on idun/lofn/tenos/thera/uller would die at the first kernel launch.
+requirements = UidDomain == "cs.uni-saarland.de" && GPUs_Capability >= 7.5
+
+queue configfile,dataset,expname from $(root)/rindti/hpc/runs/train_runs.txt

@@ -1,0 +1,19 @@
+# First thing to submit after building the image. Proves the image pulls, /scratch is
+# mounted, the mounted repo imports, and the GPU is visible.
+#
+#   cd /scratch/chair_kalinina/$USER/rindti && condor_submit hpc/smoke.sub
+
+include : hpc/common.sub
+
+job = smoke
+
+arguments = python hpc/smoke.py
+
+request_GPUs   = 1
+request_CPUs   = 2
+request_memory = 8G
+
+# cu129 torch wheels carry sm_75 and up. See hpc/train.sub for why this matters.
+requirements = UidDomain == "cs.uni-saarland.de" && GPUs_Capability >= 7.5
+
+queue 1
