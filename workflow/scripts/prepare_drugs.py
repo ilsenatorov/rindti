@@ -38,7 +38,10 @@ class DrugEncoder:
     """
 
     def __init__(self, node_feats: str, edge_feats: str, max_num_atoms: int = 150):
-        assert node_feats in {"label", "onehot", "rich", "glycan", "glycanone", "IUPAC"}
+        # Kept in step with workflow/schemas/config.schema.yaml, which rejects anything
+        # else: the assert used to also accept `glycanone` and `IUPAC`, so those failed
+        # config validation long before reaching this check.
+        assert node_feats in {"label", "onehot", "rich", "glycan"}
         assert edge_feats in {"label", "onehot", "none"}
         self.node_feats = node_feats
         self.edge_feats = edge_feats
