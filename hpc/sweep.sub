@@ -22,8 +22,12 @@ runfile = $(root)/rindti/hpc/runs/prepare_sweeps.txt
 
 arguments = python run_snakemake.py $(configfile) --threads $(request_cpus) --conda false
 
-request_CPUs   = 16
-request_memory = 64G
+# 8 CPUs / 32G rather than 16 / 64: on this pool the larger ask matched only 8 of 51
+# slots and sat idle behind them, while 8/32 matches immediately. run_snakemake.py takes
+# --threads $(request_cpus), so fewer cores costs wall clock inside the job and nothing
+# else - which is a far better trade than waiting for a slot that never frees.
+request_CPUs   = 8
+request_memory = 32G
 request_disk   = 100G
 
 queue configfile from $(runfile)
