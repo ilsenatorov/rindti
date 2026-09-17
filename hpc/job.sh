@@ -25,6 +25,17 @@ export PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}"
 
 # Everything cacheable goes to scratch: the container filesystem is thrown away, and
 # $HOME is the shared NFS home we would rather not fill with model weights.
+# HTCondor's docker universe runs the container with --user <uid>, and the image's
+# /etc/passwd has no entry for it, so anything calling getpass.getuser() dies with
+# "KeyError: getpwuid(): uid not found". Snakemake does exactly that while building the
+# info header it prints at startup, which killed every run of the first sweep before a
+# single rule executed. getpass checks LOGNAME/USER/LNAME/USERNAME before it touches the
+# password database, so setting these skips the lookup rather than needing a passwd entry.
+# Derived from the scratch tree (".../<user>/rindti") rather than hardcoded, with a
+# fallback since this only ever labels a log header.
+export USER="${USER:-$(basename "$ROOT" 2>/dev/null || echo rindti)}"
+export LOGNAME="$USER"
+
 export UV_CACHE_DIR="$ROOT/cache/uv"
 # The image bakes UV_PYTHON_INSTALL_DIR=/opt/python, which is root-owned; HTCondor's
 # docker universe runs the job as the submitting user, so uv cannot install an
