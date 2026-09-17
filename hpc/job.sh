@@ -26,11 +26,16 @@ export PYTHONPATH="$REPO${PYTHONPATH:+:$PYTHONPATH}"
 # Everything cacheable goes to scratch: the container filesystem is thrown away, and
 # $HOME is the shared NFS home we would rather not fill with model weights.
 export UV_CACHE_DIR="$ROOT/cache/uv"
+# The image bakes UV_PYTHON_INSTALL_DIR=/opt/python, which is root-owned; HTCondor's
+# docker universe runs the job as the submitting user, so uv cannot install an
+# interpreter there. get_datasets.py needs a 3.11 one (see its PEP 723 header), so point
+# uv at scratch, where it can download and then cache it across jobs.
+export UV_PYTHON_INSTALL_DIR="$ROOT/cache/python"
 export TORCH_HOME="$ROOT/cache/torch"   # fair-esm downloads its checkpoints here
 export HF_HOME="$ROOT/cache/hf"
 export MPLCONFIGDIR="$ROOT/cache/mpl"
 export XDG_CACHE_HOME="$ROOT/cache/xdg"
-mkdir -p "$UV_CACHE_DIR" "$TORCH_HOME" "$HF_HOME" "$MPLCONFIGDIR" "$XDG_CACHE_HOME"
+mkdir -p "$UV_CACHE_DIR" "$UV_PYTHON_INSTALL_DIR" "$TORCH_HOME" "$HF_HOME" "$MPLCONFIGDIR" "$XDG_CACHE_HOME"
 
 # Condor captures stdout to a file; a progress bar refreshing 10x/second makes it huge.
 export TQDM_MININTERVAL=10
