@@ -42,6 +42,12 @@ echo "==> pushing"
 docker push "${IMAGE}:${TAG}"
 docker push "${IMAGE}:latest"
 
+# Record which commit :latest was built from. hpc/submit.sh diffs pyproject.toml and the
+# Dockerfile against this, and warns when a job is about to run a stale environment - the
+# repo is bind-mounted, so nothing else would reveal it.
+git rev-parse HEAD > hpc/.image-tag
+echo "==> wrote hpc/.image-tag ($(git rev-parse --short HEAD)); commit it"
+
 cat <<MSG
 
 Pushed ${IMAGE}:${TAG} and ${IMAGE}:latest.

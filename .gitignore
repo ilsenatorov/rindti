@@ -45,3 +45,6 @@ report/
 
 # Writing plan, not repo code
 /PAPER_PLAN.md
+
+# Claude Code worktrees, not repo content
+/.claude/worktrees/
