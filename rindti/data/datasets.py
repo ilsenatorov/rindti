@@ -1,6 +1,7 @@
 import json
 import os
 import pickle
+import time
 from collections.abc import Callable, Iterable
 
 import numpy as np
@@ -43,6 +44,18 @@ class DTIDataset(InMemoryDataset):
         self.filename = filename
         return os.path.join("data", exp_name, basefilename)
 
+    def _process_lock(self) -> str:
+        """Lock file guarding ``process()`` for this (exp_name, dataset) pair.
+
+        The cache key is the directory, so two jobs sharing an ``exp_name`` and a dataset
+        pickle - which is what submitting several model configs against one dataset does -
+        both find the cache cold and both call ``process()`` into the same
+        ``processed/`` directory. ``InMemoryDataset.save`` is not atomic, so the loser
+        can read a half-written ``.pt``. On a cluster filesystem this surfaces much later
+        as an unpickling error in a job that looks unrelated.
+        """
+        return os.path.join(self.root, "processing.lock")
+
     @property
     def config_path(self) -> str:
         """Sidecar file holding the snakemake config the dataset was built from."""
@@ -64,15 +77,14 @@ class DTIDataset(InMemoryDataset):
             json.dump(self.config, file, indent=2, default=self._jsonable)
 
     def _get_datum(self, all_data: dict, id: str, which: str, **kwargs) -> dict:
-        """Get either prot or drug data."""
+        """Get either prot or drug data.
+
+        There used to be an extra branch here copying an ``IUPAC`` column for
+        ``drugs.node_feats: IUPAC``. The config schema has never accepted that value, so
+        no dataset could reach it.
+        """
         graph = all_data[which].loc[id, "data"]
         graph["id"] = id
-        if (
-            which == "drugs"
-            and "drugs" in kwargs["snakemake"]
-            and kwargs["snakemake"]["drugs"]["node_feats"] == "IUPAC"
-        ):
-            graph["IUPAC"] = all_data[which].loc[id, "IUPAC"]
         return {which.rstrip("s") + "_" + k: v for k, v in graph.items()}
 
     @property
@@ -81,7 +93,49 @@ class DTIDataset(InMemoryDataset):
         return [k + ".pt" for k in self.splits.keys()]
 
     def process(self):
-        """If the dataset was not seen before, process everything."""
+        """If the dataset was not seen before, process everything.
+
+        Serialised across processes: the first to create the lock builds, the rest wait
+        and then find the cache warm. ``O_CREAT | O_EXCL`` is atomic on POSIX and on NFS
+        for files, which is what the cluster runs on.
+        """
+        os.makedirs(self.root, exist_ok=True)
+        lock = self._process_lock()
+        try:
+            handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            self._wait_for_other_process(lock)
+            if all(os.path.exists(path) for path in self.processed_paths):
+                return
+            # The holder died without finishing. Take the lock over rather than
+            # deadlocking every subsequent job on a stale file.
+            print(f"Stale {lock}; reprocessing")
+            os.unlink(lock)
+            handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        try:
+            os.close(handle)
+            self._build_splits()
+        finally:
+            # Leave no lock behind even on failure, or the next run inherits a stale one.
+            if os.path.exists(lock):
+                os.unlink(lock)
+
+    @staticmethod
+    def _wait_for_other_process(lock: str, timeout: float = 1800, poll: float = 5) -> None:
+        """Block while another process holds ``lock``, up to ``timeout`` seconds."""
+        waited = 0.0
+        while os.path.exists(lock) and waited < timeout:
+            time.sleep(poll)
+            waited += poll
+
+    def _build_splits(self):
+        """Build and save the three splits.
+
+        Not named ``_process``: that is ``torch_geometric.data.Dataset``'s own method,
+        the one that checks whether the cache is warm and calls ``process()``. Defining
+        it here would override that check, so every construction would rebuild and
+        ``process()`` - along with the lock above - would never run at all.
+        """
         with open(self.filename, "rb") as file:
             all_data = pickle.load(file)
         self.config = {"snakemake": all_data["config"]}
