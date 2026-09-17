@@ -95,8 +95,15 @@ class BaseModel(LightningModule):
         return torch.cat((drug_embed, prot_embed), dim=1)
 
     def _element_l2(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
-        """L2 distance."""
-        return torch.sqrt(((drug_embed - prot_embed) ** 2) + 1e-6).float()
+        """Element-wise squared difference.
+
+        This used to be ``sqrt((d - p) ** 2 + 1e-6)``, which is ``|d - p|`` to six decimal
+        places - i.e. numerically identical to ``_element_l1``. A ``feat_method`` ablation
+        therefore ran two arms that were the same function and reported them as separate
+        results. The squared difference is the element-wise L2 term and is genuinely
+        distinct from the L1 one.
+        """
+        return (drug_embed - prot_embed) ** 2
 
     def _element_l1(self, drug_embed: Tensor, prot_embed: Tensor) -> Tensor:
         """L1 distance."""

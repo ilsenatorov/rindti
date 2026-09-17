@@ -3,7 +3,7 @@ from torch.nn import ModuleList
 from torch_geometric.nn import FiLMConv
 from torch_geometric.typing import Adj
 
-from ..base_layer import BaseLayer
+from ..base_layer import BaseLayer, interlayer_activations
 
 
 class FilmConvNet(BaseLayer):
@@ -27,6 +27,7 @@ class FilmConvNet(BaseLayer):
         hidden_dim: int = 32,
         edge_dim: int = None,
         num_layers: int = 10,
+        dropout: float = 0.0,
         **kwargs,
     ):
         super().__init__()
@@ -42,6 +43,7 @@ class FilmConvNet(BaseLayer):
         self.mid_layers = ModuleList(mid_layers)
 
         self.out = FiLMConv(hidden_dim, output_dim, num_relations=edge_dim)
+        self.acts = interlayer_activations(1 + len(mid_layers), dropout)
 
     def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
         """"""
@@ -52,8 +54,8 @@ class FilmConvNet(BaseLayer):
         # `transformer` to actually measure continuous edge features.
         if self.edge_dim <= 1:
             edge_feats = None
-        x = self.inp(x, edge_index, edge_feats)
-        for module in self.mid_layers:
-            x = module(x, edge_index, edge_feats)
+        x = self.acts[0](self.inp(x, edge_index, edge_feats))
+        for module, act in zip(self.mid_layers, self.acts[1:], strict=True):
+            x = act(module(x, edge_index, edge_feats))
         x = self.out(x, edge_index, edge_feats)
         return x

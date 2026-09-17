@@ -65,3 +65,40 @@ class TestClassificationModel(BaseTestModel):
 
 class TestRegressionModel(BaseTestModel):
     model_class = RegressionModel
+
+
+class TestMergeFeatures:
+    """The four `feat_method` arms must be four different functions."""
+
+    @staticmethod
+    def _model():
+        model = ClassificationModel.__new__(ClassificationModel)
+        return model
+
+    def test_l1_and_l2_differ(self):
+        """`element_l2` was sqrt((d - p)**2 + 1e-6), i.e. |d - p| to six decimals.
+
+        The ablation therefore ran two arms that were numerically the same function and
+        reported them as separate results.
+        """
+        import torch
+
+        model = self._model()
+        drug, prot = torch.randn(8, 16), torch.randn(8, 16)
+        l1 = ClassificationModel._element_l1(model, drug, prot)
+        l2 = ClassificationModel._element_l2(model, drug, prot)
+        assert not torch.allclose(l1, l2, atol=1e-3)
+
+    def test_all_merges_are_distinct(self):
+        import torch
+
+        model = self._model()
+        drug, prot = torch.randn(8, 16), torch.randn(8, 16)
+        merges = [
+            ClassificationModel._element_l1(model, drug, prot),
+            ClassificationModel._element_l2(model, drug, prot),
+            ClassificationModel._mult(model, drug, prot),
+        ]
+        for i, left in enumerate(merges):
+            for right in merges[i + 1 :]:
+                assert not torch.allclose(left, right, atol=1e-3)
