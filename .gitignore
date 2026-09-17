@@ -45,3 +45,6 @@ report/
 
 # Writing plan, not repo code
 /PAPER_PLAN.md
+
+# Claude Code scratch (worktrees, session state) - never part of the project.
+.claude/
