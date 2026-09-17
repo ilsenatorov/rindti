@@ -108,7 +108,16 @@ condor_rm <id>
   compatibility. Consequence: the image is pinned by tag, not by lockfile.
 - **No conda in the image.** MMseqs2 is baked in and on `PATH`, so snakemake runs
   *without* `--software-deployment-method conda` and the `conda:` directive in
-  `workflow/rules/data.smk` falls back to it.
+  `workflow/rules/data.smk` falls back to it. `prepare.sub` already invokes snakemake
+  directly, but a pipeline-side *sweep* goes through `run_snakemake.py`, which needs
+  `--conda false` here for the same reason:
+
+  ```bash
+  python run_snakemake.py config/snakemake/ablation.yaml --threads 16 --conda false
+  ```
+
+  It exits non-zero listing any sweep runs that failed, so check the exit code rather
+  than assuming a finished sweep built everything.
 - **Locally, `docker run` writes files as root.** HTCondor's docker universe passes
   `--user <your uid>`, so cluster jobs write as you; a local test run does not. If you
   test the image by hand against a working copy, expect root-owned `.snakemake/`,
