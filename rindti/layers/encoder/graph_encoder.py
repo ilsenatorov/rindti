@@ -1,5 +1,3 @@
-from typing import Tuple, Union
-
 from pytorch_lightning import LightningModule
 from torch import nn
 from torch.functional import Tensor
@@ -55,7 +53,7 @@ class GraphEncoder(LightningModule):
     def _get_onehot_embed(self, params: dict) -> nn.Linear:
         return nn.Linear(params["feat_dim"], params["hidden_dim"], bias=False)
 
-    def _get_feat_embed(self, params: dict) -> Union[nn.Embedding, nn.Linear]:
+    def _get_feat_embed(self, params: dict) -> nn.Embedding | nn.Linear:
         if params["feat_type"] == "onehot":
             return self._get_onehot_embed(params)
         elif params["feat_type"] == "label":
@@ -65,9 +63,9 @@ class GraphEncoder(LightningModule):
 
     def forward(
         self,
-        data: Union[dict, Data],
+        data: dict | Data,
         **kwargs,
-    ) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    ) -> Tensor | tuple[Tensor, Tensor]:
         r"""Encode a graph.
 
         Args:

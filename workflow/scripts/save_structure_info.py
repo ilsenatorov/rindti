@@ -1,14 +1,11 @@
-from typing import no_type_check
-
 import numpy as np
 import pandas as pd
-from numpy.core.fromnumeric import squeeze
 
 plddt_scores = {}
 for structure in snakemake.input.structs:
     calphas_plddt = []
     with open(structure, "r") as file:
-        for line in file.readlines():
+        for line in file:
             if line.startswith("ATOM") and line[13:15] == "CA":
                 calphas_plddt.append(float(line[61:66]))
         structure_id = structure.split("/")[-1].split(".")[0]
