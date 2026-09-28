@@ -1,7 +1,4 @@
-import pickle
-from copy import deepcopy
 from math import ceil
-from typing import Dict, Tuple, Union
 
 import numpy as np
 import torch
@@ -31,7 +28,7 @@ class DataCorruptor:
         type (str, optional): 'corrupt' or 'mask'. Corrupt puts new values sampled from old, mask puts zeroes. Defaults to 'mask'.
     """
 
-    def __init__(self, frac: Dict[str, float], type: str = "mask"):
+    def __init__(self, frac: dict[str, float], type: str = "mask"):
         self.type = type
         self.frac = {k: v for k, v in frac.items() if v > 0}
         self._set_corr_func()
@@ -43,7 +40,7 @@ class DataCorruptor:
         elif self.type == "corrupt":
             self.corr_func = corrupt_features
 
-    def __call__(self, data: Union[Data, TwoGraphData]) -> TwoGraphData:
+    def __call__(self, data: Data | TwoGraphData) -> TwoGraphData:
         """Apply corruption.
 
         Args:
@@ -60,7 +57,7 @@ class DataCorruptor:
         return data
 
 
-def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
+def corrupt_features(features: torch.Tensor, frac: float) -> tuple[torch.Tensor, list]:
     """Return corrupt features.
 
     Args:
@@ -78,7 +75,7 @@ def corrupt_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor,
     return features[new], idx
 
 
-def mask_features(features: torch.Tensor, frac: float) -> Tuple[torch.Tensor, list]:
+def mask_features(features: torch.Tensor, frac: float) -> tuple[torch.Tensor, list]:
     """Return masked features.
 
     Args:

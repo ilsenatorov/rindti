@@ -38,7 +38,9 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
             elif how == "over":
                 total.append(possample)
                 total.append(negsample)
-                subsample = inter[inter["Target_ID"] != prot].sample(poscount - negcount)
+                subsample = inter[inter["Target_ID"] != prot].sample(
+                    poscount - negcount
+                )
                 subsample["Target_ID"] = prot
                 subsample["Y"] = 0
                 total.append(subsample)
@@ -51,7 +53,6 @@ def sample(inter: pd.DataFrame, how: str = "under") -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-
     from pytorch_lightning import seed_everything
 
     seed_everything(snakemake.config["seed"])
@@ -69,9 +70,15 @@ if __name__ == "__main__":
     else:
         raise ValueError("Unknown task!")
 
-    if config["filtering"] != "all" and config["sampling"] != "none" and config["task"] == "reg":
+    if (
+        config["filtering"] != "all"
+        and config["sampling"] != "none"
+        and config["task"] == "reg"
+    ):
         raise ValueError(
-            "Can't use filtering {filter} with task {task}!".format(filter=config["filtering"], task=config["task"])
+            "Can't use filtering {filter} with task {task}!".format(
+                filter=config["filtering"], task=config["task"]
+            )
         )
 
     if config["filtering"] == "posneg":

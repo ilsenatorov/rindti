@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 import torch.nn.functional as F
 from torch.functional import Tensor
 from torch_geometric.nn import global_mean_pool
