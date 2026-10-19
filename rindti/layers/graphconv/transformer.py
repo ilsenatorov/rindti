@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-
 from torch import Tensor, nn
 from torch_geometric.nn import TransformerConv
 from torch_geometric.typing import Adj
@@ -63,9 +61,18 @@ class TransformerNet(BaseLayer):
                 for _ in range(num_layers - 2)
             ]
         )
-        self.out = TransformerConv(hidden_dim, output_dim, heads=1, dropout=dropout, edge_dim=edge_dim, concat=False)
+        self.out = TransformerConv(
+            hidden_dim,
+            output_dim,
+            heads=1,
+            dropout=dropout,
+            edge_dim=edge_dim,
+            concat=False,
+        )
 
-    def forward(self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs) -> Tensor:
+    def forward(
+        self, x: Tensor, edge_index: Adj, edge_feats: Tensor = None, **kwargs
+    ) -> Tensor:
         """"""
         if self.edge_type == "none":
             edge_feats = None
