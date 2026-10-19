@@ -25,7 +25,7 @@ def get_type(data: dict, key: str) -> str:
         return "onehot"
     if feat is None:
         return "none"
-    raise ValueError("Unknown data type {}".format(type(data[key])))
+    raise ValueError(f"Unknown data type {type(data[key])}")
 
 
 def max_nodes(df: pd.DataFrame) -> int:

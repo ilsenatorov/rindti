@@ -1,5 +1,4 @@
 import warnings
-from typing import Tuple, Union
 
 import torch
 import torch.nn.functional as F
@@ -14,7 +13,11 @@ from torch_geometric.nn import global_mean_pool as gap
 if torch.cuda.is_available():
     from glycowork.ml.models import SweetNet, init_weights, trained_SweetNet
 else:
-    trained_SweetNet, SweetNet, init_weights = torch.nn.Module, torch.nn.Module, torch.nn.Module
+    trained_SweetNet, SweetNet, init_weights = (
+        torch.nn.Module,
+        torch.nn.Module,
+        torch.nn.Module,
+    )
     warnings.warn("GPU not available")
 
 
@@ -25,7 +28,7 @@ class SweetNetEncoder(LightningModule):
         super().__init__()
         self.sweetnet = SweetNetAdapter(trainable, **kwargs).cuda()
 
-    def forward(self, data: Union[dict, Data], **kwargs) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def forward(self, data: dict | Data, **kwargs) -> Tensor | tuple[Tensor, Tensor]:
         if not isinstance(data, dict):
             data = data.to_dict()
         return self.sweetnet(data["IUPAC"])

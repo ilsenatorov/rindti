@@ -1,7 +1,4 @@
-from typing import Tuple, Union
-
 from pytorch_lightning import LightningModule
-from torch import nn
 from torch.functional import Tensor
 from torch_geometric.data import Data
 
@@ -25,7 +22,7 @@ class PretrainedEncoder(LightningModule):
 
     def forward(
         self,
-        data: Union[dict, Data],
+        data: dict | Data,
         **kwargs,
     ) -> Tensor:
         r"""Encode an entry.
