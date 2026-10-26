@@ -4,13 +4,13 @@ from .datasets import DTIDataset, PreTrainDataset
 from .transforms import DataCorruptor, SizeFilter, corrupt_features, mask_features
 
 __all__ = [
-    "TwoGraphData",
     "DTIDataModule",
     "DTIDataset",
+    "DataCorruptor",
     "PreTrainDataModule",
     "PreTrainDataset",
-    "DataCorruptor",
     "SizeFilter",
+    "TwoGraphData",
     "corrupt_features",
     "mask_features",
 ]

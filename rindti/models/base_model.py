@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import torch
 from pytorch_lightning import LightningModule
 from torch import Tensor
@@ -154,7 +152,7 @@ class BaseModel(LightningModule):
 
     def configure_optimizers(
         self,
-    ) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
+    ) -> tuple[torch.optim.Optimizer, torch.optim.lr_scheduler._LRScheduler]:
         """Configure the optimizer and/or lr schedulers"""
         opt_params = self.hparams.model["optimizer"]
         optimizer = {"adamw": AdamW, "adam": Adam, "sgd": SGD, "rmsprop": RMSprop}[
