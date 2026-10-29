@@ -19,7 +19,7 @@ from parse_structs import (
     write_structure,
 )
 from split_data import GROUP_COL, add_group_column, allocation_pattern, split_groups, split_random
-from utils import onehot_encode
+from utils import get_type, onehot_encode
 
 
 class TestOnehotEncode:
@@ -87,6 +87,17 @@ class TestMultiChain:
         pdb = tmp_path / "one_chain.pdb"
         pdb.write_text(self._atom("A", 1) + self._atom("A", 2))
         assert len(Structure(str(pdb), "label").residues) == 2
+
+    @pytest.mark.parametrize("node_feats", ["label", "onehot"])
+    def test_node_dtype_matches_feature_kind(self, tmp_path, node_feats):
+        """Training picks Embedding vs Linear from the tensor dtype (`utils.get_type`).
+
+        One-hot rows used to come out as int64, were read as labels, and the
+        protein encoder crashed on the first batch.
+        """
+        pdb = tmp_path / "one_chain.pdb"
+        pdb.write_text(self._atom("A", 1) + self._atom("A", 2, name="XYZ", x=1.0))
+        assert get_type(Structure(str(pdb), node_feats).get_graph(7), "x") == node_feats
 
 
 class TestSplitRandom:
