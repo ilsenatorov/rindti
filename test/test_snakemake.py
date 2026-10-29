@@ -1,11 +1,12 @@
 import os
+from pathlib import Path
 
 import pytest
 from snakemake.utils import update_config, validate
 
 from rindti.utils import IterDict, read_config
 
-from .conftest import SNAKEMAKE_CONFIG_DIR, run_snakemake
+from .conftest import SNAKEMAKE_CONFIG_DIR, TEST_CONFIG, run_snakemake
 
 snakemake_configs = [
     os.path.join(SNAKEMAKE_CONFIG_DIR, x) for x in os.listdir(SNAKEMAKE_CONFIG_DIR) if x != "default.yaml"
@@ -117,3 +118,29 @@ class TestSnakeMake:
         snakemake_config["parse_dataset"]["filtering"] = filtering
         snakemake_config["parse_dataset"]["sampling"] = sampling
         run_snakemake(snakemake_config, tmpdir_factory)
+
+
+def _rule_outputs(seed: int) -> dict:
+    """Every rule's output paths, from parsing the Snakefile - nothing is executed."""
+    from snakemake.api import SnakemakeApi
+    from snakemake.settings.types import ConfigSettings, ResourceSettings
+
+    with SnakemakeApi() as api:
+        workflow = api.workflow(
+            snakefile=Path("workflow/Snakefile"),
+            config_settings=ConfigSettings(configfiles=[Path(TEST_CONFIG)], config={"seed": seed}),
+            resource_settings=ResourceSettings(cores=1),
+        )._workflow
+        return {rule.name: list(rule.output) for rule in workflow.rules}
+
+
+def test_seed_names_exactly_the_seeded_stages():
+    """Output names are a hash of a stage's config, and `seed` is top-level.
+
+    parse_dataset and split_data used to hash only their own sections, so a re-seeded
+    run found the old files under the same names and silently reused them. The
+    deterministic stages must stay shared, or every new seed re-featurises everything.
+    """
+    seeded = {"parse_dataset", "split_data", "prepare_all"}
+    a, b = _rule_outputs(42), _rule_outputs(1)
+    assert {rule for rule in a if a[rule] != b[rule]} == seeded
