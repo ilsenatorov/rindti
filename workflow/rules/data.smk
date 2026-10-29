@@ -108,6 +108,23 @@ rule split_data:
         "../scripts/split_data.py"
 
 
+# The naive baselines on the exact split a model is trained on: the floor every reported
+# number has to clear. Cheap, so it runs on every build rather than on request.
+rule baseline:
+    input:
+        split_data=rules.split_data.output.split_data,
+    output:
+        baseline=sh._target("baseline", os.path.basename(rules.split_data.output.split_data)[: -len(".tsv")] + ".json"),
+    params:
+        task=config["parse_dataset"]["task"],
+    run:
+        import json
+        from rindti.models.dti.baseline.run import report
+
+        with open(output.baseline, "w") as handle:
+            json.dump(report(input.split_data, task=params.task), handle, indent=2)
+
+
 rule prepare_all:
     input:
         drugs=rules.prepare_drugs.output.pickle,

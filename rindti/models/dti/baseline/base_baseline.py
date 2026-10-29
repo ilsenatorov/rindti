@@ -5,15 +5,25 @@ from torchmetrics.functional import (
     accuracy,
     auroc,
     average_precision,
+    explained_variance,
     matthews_corrcoef,
+    mean_absolute_error,
+    mean_squared_error,
+    pearson_corrcoef,
+    spearman_corrcoef,
 )
+
+from ...metrics import concordance_index, rm2
 
 
 class BaseBaseline:
     """Parent of all baseline models."""
 
-    def __init__(self, prob: bool = False, **kwargs):
+    def __init__(self, prob: bool = False, task: str = "class", **kwargs):
+        if task not in ("class", "reg"):
+            raise ValueError(f"Unknown task {task!r}, expected 'class' or 'reg'")
         self.prob = prob
+        self.task = task
 
     def fit(self, train: pd.DataFrame):
         """Fit the model to the training dataframe. Has to have 'Drug_ID', 'Target_ID' and 'Y' columns."""
@@ -24,10 +34,26 @@ class BaseBaseline:
         raise NotImplementedError()
 
     def test_metrics(self, test: pd.DataFrame) -> dict:
-        """Calculate the metrics for the test dataframe."""
+        """Calculate the metrics for the test dataframe.
+
+        Regression reports the same set ``RegressionModel`` logs, so a baseline row sits
+        directly under a model row. A constant predictor (``Max``) has no correlation, so
+        pearson, spearman and rm2 come out NaN and CI 0.5 - that is the honest answer.
+        """
         pred = self.predict(test)
-        y_hat = torch.tensor(pred["pred"].values)
+        y_hat = torch.tensor(pred["pred"].values, dtype=torch.float)
         y = torch.tensor(pred["Y"].values)
+        if self.task == "reg":
+            y = y.float()
+            return dict(
+                mae=mean_absolute_error(y_hat, y).item(),
+                mse=mean_squared_error(y_hat, y).item(),
+                explained_variance=explained_variance(y_hat, y).item(),
+                pearson=pearson_corrcoef(y_hat, y).item(),
+                spearman=spearman_corrcoef(y_hat, y).item(),
+                ci=concordance_index(y_hat, y).item(),
+                rm2=rm2(y_hat, y).item(),
+            )
         return dict(
             acc=accuracy(y_hat, y, task="binary").float().item(),
             auc=auroc(y_hat, y, task="binary").float().item(),

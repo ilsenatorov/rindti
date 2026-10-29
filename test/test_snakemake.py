@@ -141,6 +141,6 @@ def test_seed_names_exactly_the_seeded_stages():
     run found the old files under the same names and silently reused them. The
     deterministic stages must stay shared, or every new seed re-featurises everything.
     """
-    seeded = {"parse_dataset", "split_data", "prepare_all"}
+    seeded = {"parse_dataset", "split_data", "baseline", "prepare_all"}
     a, b = _rule_outputs(42), _rule_outputs(1)
     assert {rule for rule in a if a[rule] != b[rule]} == seeded

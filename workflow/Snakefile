@@ -20,3 +20,4 @@ include: "rules/data.smk"
 rule all:
     input:
         final_output,
+        rules.baseline.output.baseline,
