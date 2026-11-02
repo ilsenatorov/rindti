@@ -1,5 +1,3 @@
-from typing import Union
-
 import torch
 import torch.nn.functional as F
 from pytorch_lightning import LightningModule
@@ -32,11 +30,15 @@ class SoftNearestNeighborLoss(LightningModule):
         self.optim_temperature = optim_temperature
         self.grad_step = grad_step
 
-    def _forward(self, embeds: Tensor, fam_idx: LongTensor, temp_frac: Union[int, Tensor]) -> Tensor:
+    def _forward(
+        self, embeds: Tensor, fam_idx: LongTensor, temp_frac: int | Tensor
+    ) -> Tensor:
         """Calculate the soft nearest neighbor loss for a given temp denominator."""
         embeds = F.normalize(embeds)
         sim = 1 - torch.matmul(embeds, embeds.t())
-        expsim = torch.exp(-sim / (self.temperature / temp_frac)) * (1 - torch.eye(sim.size(0), device=self.device))
+        expsim = torch.exp(-sim / (self.temperature / temp_frac)) * (
+            1 - torch.eye(sim.size(0), device=self.device)
+        )
         f = expsim / (self.eps + expsim.sum(dim=1))
         fam_mask = (fam_idx == fam_idx.t()).float()
         f = f * fam_mask
@@ -50,7 +52,9 @@ class SoftNearestNeighborLoss(LightningModule):
         if not self.optim_temperature:
             return self._forward(embeds, fam_idx, 1.0)
 
-        temp_frac = torch.tensor(1, device=self.device, dtype=torch.float32, requires_grad=True)
+        temp_frac = torch.tensor(
+            1, device=self.device, dtype=torch.float32, requires_grad=True
+        )
         loss = self._forward(embeds, fam_idx, temp_frac)
         loss.mean().backward(inputs=[temp_frac])
         with torch.no_grad():
