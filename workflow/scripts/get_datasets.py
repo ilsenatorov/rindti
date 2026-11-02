@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -50,7 +49,7 @@ class DatasetFetcher:
         Path(self.tables_folder).mkdir(parents=True, exist_ok=True)
         Path(self.structures_folder).mkdir(parents=True, exist_ok=True)
 
-    def _get_glass(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def _get_glass(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Download the GLASS dataset."""
         colnames = {
             "UniProt ID": "Target_ID",
@@ -59,9 +58,15 @@ class DatasetFetcher:
             "Value": "Y",
             "FASTA Sequence": "Target",
         }
-        inter = pd.read_csv("https://zhanggroup.org/GLASS/downloads/interactions_total.tsv", sep="\t")
-        lig = pd.read_csv("https://zhanggroup.org/GLASS/downloads/ligands.tsv", sep="\t")
-        prot = pd.read_csv("https://zhanggroup.org/GLASS/downloads/targets.tsv", sep="\t")
+        inter = pd.read_csv(
+            "https://zhanggroup.org/GLASS/downloads/interactions_total.tsv", sep="\t"
+        )
+        lig = pd.read_csv(
+            "https://zhanggroup.org/GLASS/downloads/ligands.tsv", sep="\t"
+        )
+        prot = pd.read_csv(
+            "https://zhanggroup.org/GLASS/downloads/targets.tsv", sep="\t"
+        )
         inter = inter[inter["Parameter"].isin(["Ki", "IC50", "EC50"])]
         inter = inter.rename(
             colnames,
@@ -75,10 +80,12 @@ class DatasetFetcher:
         inter["Y"] = inter["Y"].apply(get_float)
         return inter, lig, prot
 
-    def load_data(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def load_data(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Load the necessary dataset."""
         if self.dataset_name == "BindingDB":
-            data = pd.concat([DTI(name=f"BindingDB_{x}").get_data() for x in ["IC50", "Kd", "Ki"]])
+            data = pd.concat(
+                [DTI(name=f"BindingDB_{x}").get_data() for x in ["IC50", "Kd", "Ki"]]
+            )
         elif self.dataset_name == "glass":
             return self._get_glass()
         elif self.dataset_name.lower() == "davis":
@@ -94,7 +101,9 @@ class DatasetFetcher:
     def get_pdb(self, pdb_id: str) -> None:
         """Download PDB structure from AlphaFoldDB."""
         if not os.path.exists(f"{self.structures_folder}/{pdb_id}.pdb"):
-            response = requests.get(f"https://alphafold.ebi.ac.uk/files/AF-{pdb_id}-F1-model_v2.pdb")
+            response = requests.get(
+                f"https://alphafold.ebi.ac.uk/files/AF-{pdb_id}-F1-model_v2.pdb"
+            )
             if response:
                 n_res = count_residues(response.text)
                 if n_res >= self.min_num_aa and n_res <= self.max_num_aa:
@@ -108,7 +117,9 @@ class DatasetFetcher:
         inter = inter.groupby(["Drug_ID", "Target_ID"]).agg("median").reset_index()
         for i in tqdm(inter["Target_ID"].unique()):
             self.get_pdb(i)
-        available_structures = [x.split(".")[0] for x in os.listdir(self.structures_folder)]
+        available_structures = [
+            x.split(".")[0] for x in os.listdir(self.structures_folder)
+        ]
         inter = inter[inter["Target_ID"].isin(available_structures)]
         prot = prot[prot["Target_ID"].isin(available_structures)]
         lig = lig[lig["Drug_ID"].isin(inter["Drug_ID"].unique())]
@@ -119,15 +130,13 @@ class DatasetFetcher:
 
 
 if __name__ == "__main__":
-    from typing import Union
-
     from jsonargparse import CLI
 
     def run(
         dataset_name: str,
         dataset_dir: str = "datasets",
         min_num_aa: int = 0,
-        max_num_aa: Union[int, float] = float("inf"),
+        max_num_aa: float = float("inf"),
     ):
         """Run the script."""
         DatasetFetcher(dataset_name, dataset_dir, min_num_aa, max_num_aa).run()

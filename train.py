@@ -2,7 +2,12 @@ import os
 import random
 
 from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichModelSummary, RichProgressBar
+from pytorch_lightning.callbacks import (
+    EarlyStopping,
+    ModelCheckpoint,
+    RichModelSummary,
+    RichProgressBar,
+)
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from rindti.data import DTIDataModule
@@ -33,15 +38,17 @@ def train(**kwargs):
     else:
         next_version = str(
             int(
-                [d for d in os.listdir(folder) if "version" in d and os.path.isdir(os.path.join(folder, d))][-1].split(
-                    "_"
-                )[1]
+                [
+                    d
+                    for d in os.listdir(folder)
+                    if "version" in d and os.path.isdir(os.path.join(folder, d))
+                ][-1].split("_")[1]
             )
             + 1
         )
 
     for i, seed in enumerate(seeds):
-        print(f"Run {i+1} of {kwargs['runs']} with seed {seed}")
+        print(f"Run {i + 1} of {kwargs['runs']} with seed {seed}")
         kwargs["seed"] = seed
         single_run(folder, next_version, **kwargs)
 
@@ -62,7 +69,9 @@ def single_run(folder, version, **kwargs):
 
     callbacks = [
         ModelCheckpoint(monitor=kwargs["model"]["monitor"], save_top_k=3, mode="min"),
-        EarlyStopping(monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]),
+        EarlyStopping(
+            monitor=kwargs["model"]["monitor"], mode="min", **kwargs["early_stop"]
+        ),
         RichModelSummary(),
         RichProgressBar(),
     ]

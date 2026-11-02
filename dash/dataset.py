@@ -38,8 +38,14 @@ app.layout = html.Div(
                     },
                 },
                 # Class selectors
-                {"selector": ".prot", "style": {"background-color": "red", "line-color": "red"}},
-                {"selector": ".drug", "style": {"background-color": "blue", "line-color": "blue"}},
+                {
+                    "selector": ".prot",
+                    "style": {"background-color": "red", "line-color": "red"},
+                },
+                {
+                    "selector": ".drug",
+                    "style": {"background-color": "blue", "line-color": "blue"},
+                },
             ],
         )
     ]
