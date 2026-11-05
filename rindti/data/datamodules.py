@@ -17,6 +17,8 @@ class BaseDataModule(LightningDataModule):
     ):
         super().__init__()
         self.filename = filename
+        # Not a cache key (DTIDataset keys on the dataset pickle alone), but still a
+        # config field every job sets: `rindti.cli` reads it to name the tb_logs run.
         self.exp_name = exp_name
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -43,9 +45,9 @@ class DTIDataModule(BaseDataModule):
 
     def setup(self, stage: str = None):
         """Load the individual datasets"""
-        self.train = DTIDataset(self.filename, self.exp_name, split="train").shuffle()
-        self.val = DTIDataset(self.filename, self.exp_name, split="val").shuffle()
-        self.test = DTIDataset(self.filename, self.exp_name, split="test").shuffle()
+        self.train = DTIDataset(self.filename, split="train").shuffle()
+        self.val = DTIDataset(self.filename, split="val").shuffle()
+        self.test = DTIDataset(self.filename, split="test").shuffle()
         self.config = self.train.config
 
     def _dl_kwargs(self, shuffle: bool = False):

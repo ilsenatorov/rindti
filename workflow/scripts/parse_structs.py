@@ -92,10 +92,17 @@ def align_template(query: struc.AtomArray, template: struc.AtomArray) -> tuple[s
     TM-score-based substitution matrix. Scores are close to, but not identical with,
     the TM-align binary the PyMOL version called through psico. They are only used to
     rank templates against each other, so the absolute value does not matter.
+
+    ``max_iterations`` is capped because biotite's default is unbounded, and the
+    refinement failed to converge on roughly 1% of AlphaFold models (MET, TNIK, ADCK3 and
+    others), where the rule simply never returned. Pairs that do converge reach their
+    fixed point well inside the cap, so their scores are unchanged.
     """
     query_chain = largest_peptide_chain(query)
     template_chain = largest_peptide_chain(template)
-    _, transform, query_idx, template_idx = struc.superimpose_structural_homologs(query_chain, template_chain)
+    _, transform, query_idx, template_idx = struc.superimpose_structural_homologs(
+        query_chain, template_chain, max_iterations=100
+    )
     score = struc.tm_score(query_chain, transform.apply(template_chain), query_idx, template_idx)
     return transform.apply(template), score
 

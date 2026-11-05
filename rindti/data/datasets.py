@@ -27,32 +27,41 @@ class DTIDataset(InMemoryDataset):
     def __init__(
         self,
         filename: str,
-        exp_name: str,
         split: str = "train",
         transform: Callable = None,
         pre_transform: Callable = None,
         pre_filter: Callable = None,
     ):
-        root = self._set_filenames(filename, exp_name)
+        root = self._set_filenames(filename)
         super().__init__(root, transform, pre_transform, pre_filter)
         self.load(self.processed_paths[self.splits[split]])
         self.config = self._read_config()
 
-    def _set_filenames(self, filename: str, exp_name: str) -> str:
+    def _set_filenames(self, filename: str) -> str:
+        """Cache root for ``filename``, keyed by the dataset alone.
+
+        ``basefilename`` is already the md5 of the snakemake config that built the pickle
+        (``workflow/scripts/snakemake_helper.py``), so it is the whole cache key. The
+        processed output is a pure function of the pickle - ``_build_splits`` reads only
+        ``self.filename``, and no transforms are passed - so an ``exp_name`` layer on top
+        made every experiment rebuild a byte-identical copy. Three jobs on one pickle were
+        observed writing three identical 9.3 GB caches.
+        """
         basefilename = os.path.basename(filename)
         basefilename = os.path.splitext(basefilename)[0]
         self.filename = filename
-        return os.path.join("data", exp_name, basefilename)
+        return os.path.join("data", basefilename)
 
     def _process_lock(self) -> str:
-        """Lock file guarding ``process()`` for this (exp_name, dataset) pair.
+        """Lock file guarding ``process()`` for this dataset.
 
-        The cache key is the directory, so two jobs sharing an ``exp_name`` and a dataset
-        pickle - which is what submitting several model configs against one dataset does -
-        both find the cache cold and both call ``process()`` into the same
-        ``processed/`` directory. ``InMemoryDataset.save`` is not atomic, so the loser
-        can read a half-written ``.pt``. On a cluster filesystem this surfaces much later
-        as an unpickling error in a job that looks unrelated.
+        The cache key is the directory, so every job built from one dataset pickle - which
+        is what submitting several model configs against one dataset does - finds the
+        cache cold together and calls ``process()`` into the same ``processed/``
+        directory. ``InMemoryDataset.save`` is not atomic, so the loser can read a
+        half-written ``.pt``. On a cluster filesystem this surfaces much later as an
+        unpickling error in a job that looks unrelated. Keying the cache by dataset alone
+        makes this race more likely, not less, which is why the lock comes first.
         """
         return os.path.join(self.root, "processing.lock")
 
