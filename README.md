@@ -88,6 +88,10 @@ python run_snakemake.py config/snakemake/benchmark_splits_davis.yaml --threads 8
 There is one per dataset (`benchmark_splits_{davis,kiba,bindingdb_kd}.yaml`); they differ
 only in `source` and the `parse_dataset` unit/threshold.
 
+To reproduce the numbers in the application note, follow
+[`REPRODUCING.md`](REPRODUCING.md): clone to tables, which table comes from which file,
+and an explicit list of what cannot be reproduced exactly and why.
+
 To run the whole benchmark on the Saarland HPC, follow
 [`hpc/EXPERIMENTS.md`](hpc/EXPERIMENTS.md), which covers the campaign end to end —
 download, dataset construction, the two correctness gates, training and collection.

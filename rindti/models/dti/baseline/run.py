@@ -70,6 +70,11 @@ def score(model_metrics: dict, baselines: str | dict) -> dict:
         except KeyError:
             continue
         scored[metric] = {"model": value, "baseline": base, "boss": boss(metric, value, base)}
+
+    if not scored:
+        print("No metric is reported on both sides; nothing to score.")
+    for metric, row in scored.items():
+        print(f"{metric:10} model {row['model']:.3f}  floor {row['baseline']:.3f}  BOSS {row['boss']:+.3f}")
     return scored
 
 

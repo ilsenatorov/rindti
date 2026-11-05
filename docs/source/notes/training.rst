@@ -43,8 +43,7 @@ run against the label-only floor the pipeline writes beside every split:
 .. code:: console
 
     python -m rindti.models.dti.baseline.run score \
-        --model_metrics '{"auc": 0.887}' \
-        --baselines datasets/davis/results/baseline/<split name>.json
+        '{"auc": 0.887}' datasets/davis/results/baseline/<split name>.json
 
 That reports BOSS, the fraction of the gap between the floor and a perfect score that
 the model closes. 0 means it only matched what the labels already gave away.
