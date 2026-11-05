@@ -61,8 +61,15 @@ class Structure:
         return torch.tensor(coords)
 
     def get_nodes(self) -> torch.Tensor:
-        """Get features of all nodes of a graph"""
-        return torch.tensor([encode_residue(res.name, self.node_feats) for res in self.residues.values()])
+        """Get features of all nodes of a graph.
+
+        The dtype is what tells training which feature kind this is (``utils.get_type``:
+        long -> label embedding, float -> linear projection). One-hot rows built from
+        Python ints used to come out as long, were taken for labels, and crashed the
+        first forward pass. ``prepare_drugs`` casts the same way.
+        """
+        dtype = torch.float32 if self.node_feats == "onehot" else torch.long
+        return torch.tensor([encode_residue(res.name, self.node_feats) for res in self.residues.values()], dtype=dtype)
 
     def get_edges(self, threshold: float) -> tuple:
         """Get edges of a graph using threshold as a cutoff.

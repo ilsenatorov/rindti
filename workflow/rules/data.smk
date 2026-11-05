@@ -1,12 +1,16 @@
 final_output = sh._target("prepare_all", sh.namer(config) + ".pkl")
 cluster_name = sh.namer(config["split_data"]["cluster"])
+# parse_dataset (balanced filtering, over/undersampling) and split_data draw random
+# numbers, so the seed has to be in their names or a re-seeded run silently reuses the
+# old files. Every other stage is deterministic and stays shared across seeds.
+seed = {"seed": config["seed"]}
 
 
 rule parse_dataset:
     input:
         inter=sh.tables["inter"],
     output:
-        inter=sh._target("parse_dataset", sh.namer(config["parse_dataset"]) + ".tsv"),
+        inter=sh._target("parse_dataset", sh.namer({**config["parse_dataset"], **seed}) + ".tsv"),
     script:
         "../scripts/parse_dataset.py"
 
@@ -94,7 +98,7 @@ rule split_data:
     output:
         split_data=sh._target(
             "split_data",
-            sh.namer({**config["split_data"], **config["parse_dataset"]}) + ".tsv",
+            sh.namer({**config["split_data"], **config["parse_dataset"], **seed}) + ".tsv",
         ),
     params:
         method=config["split_data"]["method"],
@@ -102,6 +106,23 @@ rule split_data:
         val=config["split_data"]["val"],
     script:
         "../scripts/split_data.py"
+
+
+# The naive baselines on the exact split a model is trained on: the floor every reported
+# number has to clear. Cheap, so it runs on every build rather than on request.
+rule baseline:
+    input:
+        split_data=rules.split_data.output.split_data,
+    output:
+        baseline=sh._target("baseline", os.path.basename(rules.split_data.output.split_data)[: -len(".tsv")] + ".json"),
+    params:
+        task=config["parse_dataset"]["task"],
+    run:
+        import json
+        from rindti.models.dti.baseline.run import report
+
+        with open(output.baseline, "w") as handle:
+            json.dump(report(input.split_data, task=params.task), handle, indent=2)
 
 
 rule prepare_all:
