@@ -13,6 +13,8 @@ import torch
 from rindti.models.metrics import (
     RM2,
     ConcordanceIndex,
+    best_baseline,
+    boss,
     concordance_index,
     monitor_mode,
     rm2,
@@ -151,3 +153,70 @@ class TestMonitorMode:
     def test_unknown_metric_falls_back_to_min(self):
         """The previous behaviour, so nothing silently changes for an unlisted name."""
         assert monitor_mode("val_SomethingNew") == "min"
+
+
+class TestBoss:
+    """The published worked example and the edges where the algebra breaks down."""
+
+    def test_paper_worked_example(self):
+        """Fig. 1c: DeepDTA's CI 0.878 on Davis against a label-only floor of 0.791."""
+        assert boss("ci", 0.878, 0.791) == pytest.approx(0.4163, abs=1e-4)
+
+    def test_perfect_model_scores_one(self):
+        assert boss("auc", 1.0, 0.75) == 1.0
+
+    def test_matching_the_baseline_scores_zero(self):
+        assert boss("auc", 0.8, 0.8) == 0.0
+
+    def test_losing_to_the_baseline_is_negative(self):
+        """KIBA clustered cold-target: the baseline's 0.793 beats the model's 0.704."""
+        assert boss("auc", 0.704, 0.793) < 0
+
+    def test_unbounded_below(self):
+        """Bounded above by 1, but not below - a floor near the oracle magnifies a loss."""
+        assert boss("auc", 0.5, 0.99) == pytest.approx(-49.0)
+
+    def test_error_metrics_count_down_to_zero(self):
+        """MSE's oracle is 0, so halving the baseline's error is a BOSS of 0.5."""
+        assert boss("mse", 0.5, 1.0) == 0.5
+        assert boss("mse", 0.0, 1.0) == 1.0
+
+    def test_baseline_at_oracle_is_undefined(self):
+        """The paper requires M_baseline != M_oracle; NaN beats dividing by zero."""
+        assert math.isnan(boss("auc", 1.0, 1.0))
+        assert math.isnan(boss("mse", 0.0, 0.0))
+
+    def test_metric_without_a_finite_best_is_rejected(self):
+        """Loudly, rather than inventing an oracle for it."""
+        with pytest.raises(KeyError):
+            boss("loss", 0.3, 0.5)
+
+
+class TestBestBaseline:
+    """`report`-shaped input: {baseline name: {metric: value}}."""
+
+    BASELINES = {
+        "max": {"auc": 0.5, "mcc": 0.074, "mse": 1.4},
+        "prot_drug_max_both": {"auc": 0.843, "mcc": 0.066, "mse": 0.9},
+        "prot_drug_max_prot": {"auc": 0.669, "mcc": 0.067, "mse": 1.1},
+        "prot_drug_max_drug": {"auc": 0.794, "mcc": 0.231, "mse": 1.0},
+    }
+
+    def test_picks_the_largest_when_the_oracle_is_one(self):
+        assert best_baseline("auc", self.BASELINES) == 0.843
+
+    def test_picks_the_smallest_when_the_oracle_is_zero(self):
+        """An error metric's strongest baseline is its lowest."""
+        assert best_baseline("mse", self.BASELINES) == 0.9
+
+    def test_strongest_baseline_is_not_always_the_same_one(self):
+        """Davis random: 'both' wins on AUROC but the drug-only prior wins on MCC.
+
+        The reason the reported floor has to be chosen per metric rather than fixed.
+        """
+        assert best_baseline("auc", self.BASELINES) == self.BASELINES["prot_drug_max_both"]["auc"]
+        assert best_baseline("mcc", self.BASELINES) == self.BASELINES["prot_drug_max_drug"]["mcc"]
+
+    def test_unreported_metric_is_rejected(self):
+        with pytest.raises(KeyError):
+            best_baseline("ci", self.BASELINES)

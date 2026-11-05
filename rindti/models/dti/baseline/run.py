@@ -1,3 +1,6 @@
+import json
+
+from ...metrics import ORACLE, best_baseline, boss
 from .max_likelihood import Max
 from .prot_drug_max_likelihood import ProtDrugMax
 
@@ -43,7 +46,34 @@ def report(filename: str, task: str = "class", split: str = "test") -> dict:
     }
 
 
+def score(model_metrics: dict, baselines: str | dict) -> dict:
+    """BOSS of a model against the label-only floor, as ``{metric: {...}}``.
+
+    Turns a metric a reader cannot calibrate ("AUROC 0.89") into one they can ("the model
+    closes 28% of the gap the labels alone leave"). ``baselines`` is the JSON the pipeline
+    writes beside each split, by path or already loaded; ``model_metrics`` is a test-metric
+    dict keyed the same short way (``auc``, ``mcc``, ``ci``, ...).
+
+    Only metrics present on both sides and holding a finite best value are scored, so
+    passing a classification model against a regression floor yields an empty result
+    rather than nonsense.
+    """
+    if isinstance(baselines, str):
+        with open(baselines) as handle:
+            baselines = json.load(handle)
+    scored = {}
+    for metric, value in model_metrics.items():
+        if metric not in ORACLE:
+            continue
+        try:
+            base = best_baseline(metric, baselines)
+        except KeyError:
+            continue
+        scored[metric] = {"model": value, "baseline": base, "boss": boss(metric, value, base)}
+    return scored
+
+
 if __name__ == "__main__":
     from jsonargparse import CLI
 
-    cli = CLI(run)
+    cli = CLI([run, report, score])

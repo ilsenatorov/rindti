@@ -191,3 +191,56 @@ def monitor_mode(monitor: str) -> str:
             monitor = monitor[len(prefix) :]
             break
     return "max" if monitor in _MAXIMISE else "min"
+
+
+# The best achievable ("oracle") value of every metric the baselines report, keyed by the
+# short names `BaseBaseline.test_metrics` uses. Correlations, areas and rank indices top
+# out at 1; errors bottom out at 0. A metric with no finite best value has no BOSS.
+ORACLE = {
+    "acc": 1.0,
+    "auc": 1.0,
+    "auprc": 1.0,
+    "mcc": 1.0,
+    "mae": 0.0,
+    "mse": 0.0,
+    "explained_variance": 1.0,
+    "pearson": 1.0,
+    "spearman": 1.0,
+    "ci": 1.0,
+    "rm2": 1.0,
+}
+
+
+def boss(metric: str, model: float, baseline: float) -> float:
+    """Baseline-Oracle Skill Score of ``model`` against ``baseline`` on ``metric``.
+
+    A skill score (Murphy 1988) whose reference forecast is a label-only baseline:
+
+        BOSS = (model - baseline) / (oracle - baseline)
+
+    1 is a perfect model, 0 is one that only matches the baseline, and below 0 means the
+    baseline wins. It is bounded above by 1 but not below, and is comparable across models
+    on one metric and split, not across metrics. Undefined when the baseline already
+    scores the oracle value, which returns NaN rather than dividing by zero.
+
+    Raises:
+        KeyError: if ``metric`` is not one with a finite best value.
+    """
+    oracle = ORACLE[metric]
+    if baseline == oracle:
+        return float("nan")
+    return (model - baseline) / (oracle - baseline)
+
+
+def best_baseline(metric: str, baselines: dict) -> float:
+    """The label-only baseline closest to the oracle on ``metric``.
+
+    Deliberately optimistic: picking the strongest of several baselines per metric makes
+    the resulting BOSS a *lower bound* on the model's skill, so a positive score cannot be
+    an artefact of having chosen a weak reference. ``baselines`` is what ``report`` writes,
+    ``{baseline name: {metric: value}}``.
+    """
+    values = [m[metric] for m in baselines.values() if metric in m]
+    if not values:
+        raise KeyError(f"No baseline reports {metric!r}")
+    return max(values) if ORACLE[metric] == 1.0 else min(values)
