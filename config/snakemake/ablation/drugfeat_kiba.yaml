@@ -1,0 +1,14 @@
+# Ablation axis: how a drug atom is encoded.
+# `label`/`onehot` describe an atom by element alone; `rich` adds degree, formal charge,
+# hydrogen count, hybridisation, aromaticity, ring membership and chirality.
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+drugs:
+  node_feats: [label, onehot, rich]
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default. 12.1 is the conventional cutoff.
+  unit: score
+  threshold: 12.1

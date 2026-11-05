@@ -1,0 +1,11 @@
+# Paper Table 3: template-based structure cropping (random split). The library in
+# <source>/templates holds three kinase-ligand complexes, stripped to one chain and
+# one ligand: ABL1-imatinib 1IEP, CDK2-staurosporine 1AQ1, PKA-ATP 1ATP.
+# best_template picks the highest TM-score per target. Kinase datasets only.
+source: datasets/davis/resources
+prots:
+  structs:
+    method: [template, bsite]
+parse_dataset:
+  unit: nM
+  threshold: 100

@@ -1,0 +1,17 @@
+# Ablation axis: how much of the AlphaFold model becomes the contact graph.
+# `whole` keeps the full chain; `plddt` drops residues below the confidence threshold,
+# which mostly removes the disordered tails AlphaFold predicts at the termini.
+#
+# `bsite` and `template` are absent because they are not a like-for-like comparison on
+# every dataset: both align each target to a ligand-bound template of one protein family,
+# so they apply only to a single-family dataset. For the kinase panels, copy the shipped
+# library (`resources/templates/`) into <source>/templates and run
+# config/snakemake/extra/structs_template_{davis,kiba}.yaml.
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: [whole, plddt]
+parse_dataset:
+  # BindingDB_Kd reports Kd in nM; 100 nM is pKd >= 7, as for Davis.
+  unit: nM
+  threshold: 100

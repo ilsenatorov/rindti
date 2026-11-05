@@ -1,0 +1,13 @@
+# Ablation axis: how a drug atom is encoded.
+# `label`/`onehot` describe an atom by element alone; `rich` adds degree, formal charge,
+# hydrogen count, hybridisation, aromaticity, ring membership and chirality.
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: whole
+drugs:
+  node_feats: [label, onehot, rich]
+parse_dataset:
+  # BindingDB_Kd reports Kd in nM; 100 nM is pKd >= 7, as for Davis.
+  unit: nM
+  threshold: 100

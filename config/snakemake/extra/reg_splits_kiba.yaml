@@ -1,0 +1,14 @@
+# Paper Table 1: regression on the three reported splits (cloned from kiba_reg/davis_reg).
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  task: reg
+  unit: score
+  threshold: 12.1
+  filtering: all
+  sampling: none
+  log: false
+split_data:
+  method: [random, cluster_target, cluster_drug]

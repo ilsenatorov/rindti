@@ -1,0 +1,12 @@
+# Ablation axis: which interactions survive binarization.
+# `all` keeps everything, `posneg` (the default) keeps only confident positives and
+# negatives, `balanced` equalises the classes.
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  # BindingDB_Kd reports Kd in nM; 100 nM is pKd >= 7, as for Davis.
+  unit: nM
+  threshold: 100
+  filtering: [posneg, all, balanced]

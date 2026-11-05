@@ -1,0 +1,10 @@
+# Paper Table 2: ESM-1b vectors on the two cluster splits (cloned from kiba_esm).
+source: datasets/kiba/resources
+prots:
+  features:
+    method: esm
+parse_dataset:
+  unit: score
+  threshold: 12.1
+split_data:
+  method: [cluster_target, cluster_drug]

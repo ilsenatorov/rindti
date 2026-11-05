@@ -1,0 +1,19 @@
+# Ablation axis: whether the CA-CA distance survives as a continuous edge attribute
+# or is thresholded away into an unlabelled contact graph.
+#
+# IMPORTANT: only `model.prot.node.module: transformer` consumes edge attributes.
+# GIN/GAT/Cheb ignore edges entirely and FiLM expects discrete relation types, so
+# training the `distance` dataset with the default ginconv gives a result identical
+# to the `none` dataset and measures nothing. Pair this dataset with the transformer
+# arm of the model ablation (see hpc/runs/train_model_ablation.txt).
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+  features:
+    edge_feats: [none, distance]
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default. 12.1 is the conventional cutoff.
+  unit: score
+  threshold: 12.1

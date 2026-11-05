@@ -1,0 +1,14 @@
+# Paper Table 1: regression on the three reported splits (cloned from davis_reg/davis_reg).
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  task: reg
+  unit: nM
+  threshold: 100
+  filtering: all
+  sampling: none
+  log: true
+split_data:
+  method: [random, cluster_target, cluster_drug]

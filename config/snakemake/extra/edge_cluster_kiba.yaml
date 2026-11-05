@@ -1,0 +1,12 @@
+# Paper Table 2: distance-edge dataset on the two cluster splits (cloned from ablation/edgefeat).
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+  features:
+    edge_feats: distance
+parse_dataset:
+  unit: score
+  threshold: 12.1
+split_data:
+  method: [cluster_target, cluster_drug]

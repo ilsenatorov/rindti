@@ -1,0 +1,15 @@
+# Ablation axis: class rebalancing by resampling.
+#
+# `over` is excluded on purpose: it fabricates negatives by relabelling other targets'
+# rows, so it invents data rather than reweighting it. See the warning at the top of
+# workflow/scripts/parse_dataset.py.
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default. 12.1 is the conventional cutoff.
+  unit: score
+  threshold: 12.1
+  sampling: [none, under]

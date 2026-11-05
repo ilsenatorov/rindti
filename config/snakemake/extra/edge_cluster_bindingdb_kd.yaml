@@ -1,0 +1,12 @@
+# Paper Table 2: distance-edge dataset on the two cluster splits (cloned from ablation/edgefeat).
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: whole
+  features:
+    edge_feats: distance
+parse_dataset:
+  unit: nM
+  threshold: 100
+split_data:
+  method: [cluster_target, cluster_drug]

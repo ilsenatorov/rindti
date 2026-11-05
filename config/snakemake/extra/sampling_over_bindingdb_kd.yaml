@@ -1,0 +1,11 @@
+# Paper Table 3: per-target oversampling (random split). `over` fills a target's
+# shortfall of negatives with decoys relabelled from other targets' rows - see the
+# warning in workflow/scripts/parse_dataset.py.
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: nM
+  threshold: 100
+  sampling: over

@@ -1,0 +1,17 @@
+# KIBA with ESM-1b sequence embeddings instead of structure contact graphs.
+#
+# This is the sequence-only arm of the structure-vs-sequence comparison: proteins
+# become one mean-pooled 1280-d vector each, with no graph at all. Train it with
+# `model.prot.method: vector` (see config/dti/esm.yaml) - the graph encoder cannot
+# consume this input.
+#
+# Needs the optional dependency: `uv sync --extra esm`.
+source: datasets/kiba/resources
+prots:
+  features:
+    method: esm
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default. 12.1 is the conventional cutoff.
+  unit: score
+  threshold: 12.1

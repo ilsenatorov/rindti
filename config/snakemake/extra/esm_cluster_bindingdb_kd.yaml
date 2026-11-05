@@ -1,0 +1,10 @@
+# Paper Table 2: ESM-1b vectors on the two cluster splits (cloned from bindingdb_kd_esm).
+source: datasets/bindingdb_kd/resources
+prots:
+  features:
+    method: esm
+parse_dataset:
+  unit: nM
+  threshold: 100
+split_data:
+  method: [cluster_target, cluster_drug]

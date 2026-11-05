@@ -1,0 +1,8 @@
+# Paper Table 3: binarisation threshold either side of the default 100 (random split).
+source: datasets/davis/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: nM
+  threshold: [30, 1000]

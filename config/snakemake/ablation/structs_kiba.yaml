@@ -1,0 +1,18 @@
+# Ablation axis: how much of the AlphaFold model becomes the contact graph.
+# `whole` keeps the full chain; `plddt` drops residues below the confidence threshold,
+# which mostly removes the disordered tails AlphaFold predicts at the termini.
+#
+# `bsite` and `template` are absent because they are not a like-for-like comparison on
+# every dataset: both align each target to a ligand-bound template of one protein family,
+# so they apply only to a single-family dataset. For the kinase panels, copy the shipped
+# library (`resources/templates/`) into <source>/templates and run
+# config/snakemake/extra/structs_template_{davis,kiba}.yaml.
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: [whole, plddt]
+parse_dataset:
+  # KIBA scores are a unitless 0-17.2 scale where HIGHER means a stronger
+  # interaction - the opposite of the nM default. 12.1 is the conventional cutoff.
+  unit: score
+  threshold: 12.1

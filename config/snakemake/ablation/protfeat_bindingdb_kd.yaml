@@ -1,0 +1,12 @@
+# Ablation axis: how a residue node is encoded.
+# `label` is a single integer per residue; `onehot` is a 20-dim indicator.
+source: datasets/bindingdb_kd/resources
+prots:
+  structs:
+    method: whole
+  features:
+    node_feats: [label, onehot]
+parse_dataset:
+  # BindingDB_Kd reports Kd in nM; 100 nM is pKd >= 7, as for Davis.
+  unit: nM
+  threshold: 100

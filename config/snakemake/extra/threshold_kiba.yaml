@@ -1,0 +1,8 @@
+# Paper Table 3: binarisation threshold either side of the default 12.1 (random split).
+source: datasets/kiba/resources
+prots:
+  structs:
+    method: whole
+parse_dataset:
+  unit: score
+  threshold: [11.5, 12.5]
