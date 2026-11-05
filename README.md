@@ -42,20 +42,29 @@ The default config (`split_data.method: random`) does not need it.
 
 ## Quick start
 
-The repository ships a small test dataset, so you can run the whole thing in a minute:
+The repository ships a small test dataset, so you can run the whole thing in a minute,
+on a GPU or without one:
 
 ```bash
 # 1. Build the graph dataset
-snakemake -s workflow/Snakefile -j4 \
-    --software-deployment-method conda \
-    --configfile config/snakemake/test.yaml
+snakemake -s workflow/Snakefile -j4 --configfile config/snakemake/test.yaml
 
 # 2. Train
-rindti-train config/test/default_dti.yaml
+rindti-train config/dti/quickstart.yaml
 
 # 3. Inspect
 tensorboard --logdir=tb_logs
 ```
+
+Step 1 needs no `--software-deployment-method conda`, because the test config uses the
+default random split; add it for a `cluster_target` split, which needs MMseqs2.
+
+`config/dti/quickstart.yaml` is one short run on the dataset step 1 builds, with
+`accelerator: auto` so a GPU is used when there is one. It replaces
+`config/test/default_dti.yaml` here: that file is a test fixture which expands into
+twelve model variants and omits the keys a real run needs, so training it failed on the
+first missing key (`KeyError: 'runs'`). Use `config/dti/base.yaml` for anything you
+intend to report.
 
 ## Running the benchmarks
 

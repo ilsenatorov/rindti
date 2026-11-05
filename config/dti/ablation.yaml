@@ -17,7 +17,8 @@ datamodule:
   num_workers: 4
 
 trainer:
-  accelerator: gpu
+  # `auto` so a missing GPU is a slow run, not a crash; see config/dti/base.yaml.
+  accelerator: auto
   devices: 1
   max_epochs: 300
   gradient_clip_val: 100

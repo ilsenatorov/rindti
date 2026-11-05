@@ -1,0 +1,67 @@
+# The smallest complete training config: one run, on the bundled test dataset, on
+# whatever hardware is present. This is what the README quick start trains.
+#
+# `config/test/default_dti.yaml` is not usable for this - it is a test fixture that
+# expands into twelve model variants and omits the top-level keys a real run needs
+# (`runs`, `early_stop`, `datamodule.filename`), so training it fails on the first
+# missing key. Use `base.yaml` for anything you intend to report.
+seed: 42
+runs: 1
+
+datamodule:
+  # Output of step 1 of the quick start, built from config/snakemake/test.yaml. The name
+  # is the md5 of that config, so it is stable: rebuild with the same config, same path.
+  filename: test/test_data/results/prepare_all/nlpncnndlwr_5f8b1046.pkl
+  exp_name: quickstart
+  batch_size: 8
+  num_workers: 0
+
+trainer:
+  # `auto` so this runs on a laptop as well as a GPU node. The benchmark configs set it
+  # too; a GPU is used when there is one and is never required.
+  accelerator: auto
+  devices: 1
+  max_epochs: 5
+  gradient_clip_val: 100
+  profiler: null
+
+early_stop:
+  patience: 3
+
+model:
+  module: class
+  monitor: val_loss
+  feat_method: concat
+  prot:
+    method: graph
+    hidden_dim: 16
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 16
+      num_layers: 2
+    pool:
+      module: mean
+      hidden_dim: 16
+  drug:
+    method: graph
+    hidden_dim: 16
+    node:
+      module: ginconv
+      dropout: 0.1
+      hidden_dim: 16
+      num_layers: 2
+    pool:
+      module: mean
+      hidden_dim: 16
+  mlp:
+    hidden_dim: 32
+    num_layers: 2
+    dropout: 0.2
+  optimizer:
+    module: adam
+    lr: 0.0005
+    weight_decay: 0.0001
+    reduce_lr:
+      factor: 0.1
+      patience: 2

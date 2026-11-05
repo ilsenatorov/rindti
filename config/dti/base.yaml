@@ -14,7 +14,10 @@ datamodule:
   num_workers: 4
 
 trainer:
-  accelerator: gpu
+  # `auto`, not `gpu`: a GPU is used whenever one is present, but hardcoding `gpu` made
+  # every config fail outright on a machine without one. Set it to `gpu` explicitly if
+  # you would rather a missing GPU were an error than a very slow run.
+  accelerator: auto
   devices: 1
   max_epochs: 300
   gradient_clip_val: 100
