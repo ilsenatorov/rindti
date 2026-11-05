@@ -24,11 +24,15 @@ docs/build/
 docs/source/_build/
 docs/source/_autosummary/
 
-# Data & results (fetched and built via workflow/scripts/, never committed)
-datasets/
-data/
+# Data & results (fetched and built via workflow/scripts/, never committed).
+# The generated directories are root-anchored: unanchored `data/` and `report/` also
+# matched `rindti/data/` and `workflow/report/`, so a new file in either source
+# directory was silently unstageable. `results/` stays unanchored - the workflow writes
+# it as <source>/../results, which is not at the root.
+/datasets/
+/data/
 results/
-report/
+/report/
 *logs/
 *.pkl
 *graphify*
