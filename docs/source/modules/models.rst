@@ -38,8 +38,11 @@ Calculate embeddings for drugs and proteins, then use an MLP to predict the fina
 Baseline models
 ----------------
 
-These models are used to predict the baseline values for datasets.
-They do not have access to the actual features and operate solely on the labels of drugs and proteins.
+These models predict the baseline values for datasets.
+They have no access to the features and operate solely on the labels of drugs and proteins,
+so they measure how much of a benchmark is solvable from label frequencies alone.
+The pipeline runs them on every split it builds and writes
+``results/baseline/<split name>.json``.
 
 .. currentmodule:: rindti.models.dti.baseline
 .. autosummary::
@@ -50,4 +53,23 @@ They do not have access to the actual features and operate solely on the labels 
 .. automodule:: rindti.models.dti.baseline
    :members:
    :undoc-members:
+   :show-inheritance:
+
+
+Metrics
+----------------
+
+The two metrics the affinity literature reports that torchmetrics does not provide,
+plus the skill score that makes any of them interpretable against a baseline.
+
+.. currentmodule:: rindti.models.metrics
+.. autosummary::
+   :nosignatures:
+   :recursive:
+
+
+.. automodule:: rindti.models.metrics
+   :members:
+   :undoc-members:
+   :exclude-members: training
    :show-inheritance:

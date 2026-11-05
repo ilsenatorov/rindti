@@ -47,6 +47,24 @@ Pooling layers
    :show-inheritance:
 
 
+Encoders
+------------------
+
+The two arms of ``model.<prot|drug>.method``: ``graph`` for a contact or molecular
+graph, ``vector`` for a precomputed embedding such as ESM-1b.
+
+.. currentmodule:: rindti.layers.encoder
+.. autosummary::
+   :nosignatures:
+   :recursive:
+
+.. automodule:: rindti.layers.encoder
+   :members:
+   :undoc-members:
+   :exclude-members: training
+   :show-inheritance:
+
+
 Other layers
 ------------------
 

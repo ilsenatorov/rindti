@@ -184,7 +184,9 @@ def monitor_mode(monitor: str) -> str:
     ``"min"``. That is right for ``val_loss`` but silently inverts anything else:
     checkpointing the *worst* AUROC, stopping early when concordance improves, and
     cutting the learning rate on every gain. Names are the torchmetrics class names
-    that MetricCollection uses, minus the train_/val_/test_ prefix it prepends.
+    that MetricCollection uses, minus the ``train_``/``val_``/``test_`` prefix it
+    prepends. The backticks matter: bare trailing underscores are reference syntax to
+    docutils, so this docstring used to emit three errors when rendered.
     """
     for prefix in ("train_", "val_", "test_"):
         if monitor.startswith(prefix):

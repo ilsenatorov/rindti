@@ -25,7 +25,10 @@ Optional dependency groups:
 
   - ``workflow`` - snakemake and the data-preparation pipeline
   - ``esm`` - protein language model features (``prots.features.method: esm``)
-  - ``data`` - dataset download helpers (PyTDC, gdown)
+  - ``data`` - dataset download helpers (gdown, requests). Deliberately *not* PyTDC,
+    which pins ``numpy<2`` and so cannot share an environment with the training stack;
+    ``workflow/scripts/get_datasets.py`` declares it inline (PEP 723) and runs under
+    ``uv run`` in an environment of its own.
   - ``baseline`` - XGBoost baselines
   - ``dev`` - pytest, ruff, pre-commit
   - ``docs`` - sphinx

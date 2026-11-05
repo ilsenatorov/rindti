@@ -72,7 +72,10 @@ intersphinx_mapping = {
 }
 
 add_module_names = False
-fail_on_warning = True
+# No `fail_on_warning` here: that is a Read the Docs setting, not a Sphinx one, so
+# setting it in conf.py does nothing. The effective value is in .readthedocs.yaml
+# (`sphinx.fail_on_warning`, currently false), which this line used to contradict.
+# Locally, `sphinx-build -W` is what turns warnings into errors.
 
 
 def _fix_mocked_class_signature(app, what, name, obj, options, signature, return_annotation):

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [Unreleased]
+## [v3.0.0] - 2026-11-05
 
 ### Added
 
@@ -46,10 +46,53 @@
   were one. It now walks the tree, which also brings the six new configs under the
   "every shipped config validates against the schema" check.
 
+- **`workflow/scripts/dataset_stats.py`** — describes a built dataset: the attrition chain
+  from the raw tables through AlphaFold coverage and filtering to the graphs actually
+  trained on, label balance, split sizes and graph dimensions. `--table` writes one row per
+  dataset. Exits non-zero on a cold split that leaks an entity across the train/test
+  boundary, or on an empty `val`/`test` split.
+
+
+- `nn.LayerNorm` on the joint drug/protein embedding before the MLP head. Both poolers
+  L2-normalise, so each tower emits a unit vector and the merge operators landed on very
+  different scales - the joint embedding's norm was ~1.41 for `concat` and the
+  element-wise differences but ~0.088 for `mult`. The `feat_method` ablation was partly
+  measuring input scale.
+
 ### Changed
 
 - Every submit file reads `$(runfile)`, so the queue file is selected per phase with
   `condor_submit -a 'runfile=...'` instead of by editing the `.sub` file.
+
+- **Structure parsing no longer uses PyMOL.** `prots.structs.method` values `plddt`,
+  `bsite` and `template` were implemented by generating a `.pml` script per protein and
+  running it in a conda environment (`workflow/envs/pymol.yaml`: pymol-open-source,
+  pymol-psico, tmalign, pulling in the third-party `speleo3` channel). They are now
+  `workflow/scripts/parse_structs.py`, built on [biotite](https://www.biotite-python.org),
+  which installs from PyPI with the `workflow` extra. MMseqs2 is the only external tool
+  the pipeline still needs, and only for `split_data.method: cluster_target`.
+
+  Two semantics changed with the port, so **graphs built with these methods differ from
+  v2.0.0**:
+
+  - `plddt` selects whole residues whose CA B-factor passes the threshold. The PyMOL
+    selection was `b > threshold` with no `br.`, i.e. atom-level, so a residue could
+    reach the graph without the CA that represents it - or lose its CA and vanish while
+    its neighbours stayed.
+  - `bsite` and `template` measure against the best-scoring template only. The old
+    script loaded every template, superimposed them all onto the best one, and then
+    selected against all of them at once, so a template that matched poorly still
+    contributed residues to the binding site.
+
+  Template ranking now uses biotite's `superimpose_structural_homologs`/`tm_score`, a
+  TM-align-inspired heuristic rather than the TM-align binary psico called. Scores are
+  close but not identical; they are only used to rank templates against each other.
+
+- Template PDBs are declared as rule inputs instead of being globbed at runtime, so
+  changing the template library now invalidates the parsed structures.
+
+- An empty selection fails in the parsing rule with the threshold or radius named,
+  rather than writing a zero-residue PDB and failing later during graph construction.
 
 ### Fixed
 
@@ -168,53 +211,6 @@
 - **`feat_method: element_l2`.** It computed `sqrt((d - p) ** 2 + 1e-6)`, which is
   `element_l1` to six decimal places, so the ablation ran one arm twice under two names.
   `element_l1` is kept as the element-wise distance merge.
-
-### Added
-
-- **`workflow/scripts/dataset_stats.py`** — describes a built dataset: the attrition chain
-  from the raw tables through AlphaFold coverage and filtering to the graphs actually
-  trained on, label balance, split sizes and graph dimensions. `--table` writes one row per
-  dataset. Exits non-zero on a cold split that leaks an entity across the train/test
-  boundary, or on an empty `val`/`test` split.
-
-
-- `nn.LayerNorm` on the joint drug/protein embedding before the MLP head. Both poolers
-  L2-normalise, so each tower emits a unit vector and the merge operators landed on very
-  different scales - the joint embedding's norm was ~1.41 for `concat` and the
-  element-wise differences but ~0.088 for `mult`. The `feat_method` ablation was partly
-  measuring input scale.
-
-### Changed
-
-- **Structure parsing no longer uses PyMOL.** `prots.structs.method` values `plddt`,
-  `bsite` and `template` were implemented by generating a `.pml` script per protein and
-  running it in a conda environment (`workflow/envs/pymol.yaml`: pymol-open-source,
-  pymol-psico, tmalign, pulling in the third-party `speleo3` channel). They are now
-  `workflow/scripts/parse_structs.py`, built on [biotite](https://www.biotite-python.org),
-  which installs from PyPI with the `workflow` extra. MMseqs2 is the only external tool
-  the pipeline still needs, and only for `split_data.method: cluster_target`.
-
-  Two semantics changed with the port, so **graphs built with these methods differ from
-  v2.0.0**:
-
-  - `plddt` selects whole residues whose CA B-factor passes the threshold. The PyMOL
-    selection was `b > threshold` with no `br.`, i.e. atom-level, so a residue could
-    reach the graph without the CA that represents it - or lose its CA and vanish while
-    its neighbours stayed.
-  - `bsite` and `template` measure against the best-scoring template only. The old
-    script loaded every template, superimposed them all onto the best one, and then
-    selected against all of them at once, so a template that matched poorly still
-    contributed residues to the binding site.
-
-  Template ranking now uses biotite's `superimpose_structural_homologs`/`tm_score`, a
-  TM-align-inspired heuristic rather than the TM-align binary psico called. Scores are
-  close but not identical; they are only used to rank templates against each other.
-
-- Template PDBs are declared as rule inputs instead of being globbed at runtime, so
-  changing the template library now invalidates the parsed structures.
-
-- An empty selection fails in the parsing rule with the threshold or radius named,
-  rather than writing a zero-residue PDB and failing later during graph construction.
 
 ## [v2.0.0]
 

@@ -13,12 +13,16 @@ abstract: >-
   RINDTI predicts drug-target interactions by representing proteins as residue-level
   contact graphs built from 3D structures - one node per residue, edges between
   residues whose C-alpha atoms fall within a distance cutoff - or as ESM-1b sequence
-  embeddings, and drugs as molecular graphs, encoding both with graph neural networks. It ships a reproducible Snakemake pipeline that turns
-  protein structures and interaction tables into ready-to-train graph datasets.
+  embeddings, and drugs as molecular graphs, encoding both with graph neural networks.
+  It ships a reproducible Snakemake pipeline that turns protein structures and
+  interaction tables into ready-to-train graph datasets under five split protocols,
+  and scores every run against label-only baselines so that performance attributable
+  to dataset composition is separated from the rest.
 keywords:
   - drug-target interaction
   - graph neural networks
   - protein contact graph
   - structural bioinformatics
+  - data leakage
 license: MIT
-version: 2.0.0
+version: 3.0.0

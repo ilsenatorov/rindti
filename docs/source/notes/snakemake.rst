@@ -108,16 +108,40 @@ Features
 
 Proteins (``prots.features``):
 
+- ``method``: ``distance`` for a residue contact graph, or ``esm`` to replace the graph
+  with one mean-pooled ESM-1b vector per protein. See *Sequence instead of structure*
+  below; the two are the arms of the structure-vs-sequence comparison.
 - ``node_feats``: ``label`` or ``onehot`` residue identity.
 - ``edge_feats``: ``none``, or ``distance`` to keep the Cα-Cα distance as a
   continuous edge attribute. Only the ``transformer`` node module consumes it -
   GIN, GAT and Cheb ignore edges, and FiLM expects discrete relation types.
 
-Drugs (``drugs.node_feats``):
+Drugs:
 
-- ``label`` / ``onehot`` - element only, 14 features per atom.
-- ``rich`` - adds degree, formal charge, hydrogen count, hybridisation,
-  aromaticity, ring membership and chirality, for 47 features per atom.
+- ``node_feats``: ``label`` / ``onehot`` - element only, 14 features per atom.
+  ``rich`` adds degree, formal charge, hydrogen count, hybridisation, aromaticity,
+  ring membership and chirality, for 47 features per atom. ``glycan`` is a
+  carbohydrate-specific encoding carrying only C/N/O and chirality.
+- ``edge_feats``: ``none`` (default), or ``label`` / ``onehot`` bond type.
+
+Sequence instead of structure
+-----------------------------
+
+``prots.features.method: esm`` embeds each protein with ESM-1b instead of building a
+graph, which is a two-key change rather than one: the dataset side needs ``esm``, and
+the model side needs ``model.prot.method: vector``, because
+:class:`rindti.layers.encoder.GraphEncoder` cannot consume a lone vector. Ready-made
+pairs are ``config/snakemake/{davis,kiba,bindingdb_kd}_esm.yaml`` with
+``config/dti/esm.yaml``.
+
+It needs the optional dependency (``uv sync --extra esm``) and downloads a
+650M-parameter checkpoint on first use.
+
+.. Warning::
+    ESM-1b truncates at 1,022 residues, keeping the N-terminal part. On Davis that
+    affects 70 of 379 sequences and removes the whole annotated catalytic domain of 13
+    targets, while the graph arm sees the full-length structure. The two arms are
+    therefore not seeing the same proteins for the longest entries.
 
 Sweeps and ablations
 --------------------

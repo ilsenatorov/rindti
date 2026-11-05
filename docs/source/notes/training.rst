@@ -25,13 +25,29 @@ Metrics
 -------
 
 Classification reports accuracy, AUROC, average precision (AUPRC) and Matthews
-correlation coefficient. Regression reports MAE, MSE, explained variance, Pearson
-and Spearman.
+correlation coefficient. Regression reports MAE, MSE, explained variance, Pearson,
+Spearman, the concordance index and :math:`r_m^2`.
 
 .. Note::
     AUPRC is the one to read on these datasets. Davis is roughly 7% positive, and
-    AUROC flatters heavily at that imbalance. Spearman is the rank-based analogue
-    of the concordance index that affinity-regression papers quote.
+    AUROC flatters heavily at that imbalance. The concordance index and
+    :math:`r_m^2` are the two the DeepDTA-to-GEFA lineage quotes, so they are what a
+    comparison against that literature needs. The concordance index here is the
+    Gonen-Heller index, not torchmetrics' ``ConcordanceCorrCoef``, which is Lin's CCC
+    and a different statistic.
+
+None of these numbers means much on its own: how high a metric can go depends on the
+split, and a random split is largely solvable from label frequencies alone. Score a
+run against the label-only floor the pipeline writes beside every split:
+
+.. code:: console
+
+    python -m rindti.models.dti.baseline.run score \
+        --model_metrics '{"auc": 0.887}' \
+        --baselines datasets/davis/results/baseline/<split name>.json
+
+That reports BOSS, the fraction of the gap between the floor and a perfect score that
+the model closes. 0 means it only matched what the labels already gave away.
 
 Sweeps and ablations
 --------------------
@@ -48,7 +64,9 @@ each repeated over ``runs`` seeds:
           module: [ginconv, gatconv]
 
 That is four configurations. ``config/dti/ablation.yaml`` sweeps the merge method,
-convolution and pooling; as shipped it is 40 configurations over 3 seeds.
+convolution and pooling; as shipped that is 3 x 5 x 3 = 45 configurations over
+``runs: 5`` seeds, so 225 runs. For the one-factor-at-a-time ablation that usually
+gets reported, vary one list at a time instead and re-run per axis.
 
 Each configuration logs to its own directory tagged with what it changed, for
 example ``node.module=gatconv-pool.module=attention``. Tags use the shortest
