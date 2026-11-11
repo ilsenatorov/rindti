@@ -1,9 +1,11 @@
 import json
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from rindti.models.dti.baseline import ProtDrugMax
+from rindti.models.dti.baseline import KNN, ProtDrugMax
+from rindti.models.dti.baseline.knn import ecfp_matrix, kmer_matrix, tanimoto
 from rindti.models.dti.baseline.run import report, run, score
 
 
@@ -108,3 +110,73 @@ class TestScore:
         path = tmp_path / "baseline.json"
         path.write_text(json.dumps(self.BASELINES))
         assert score({"auc": 0.887}, str(path)) == score({"auc": 0.887}, self.BASELINES)
+
+
+class TestKNN:
+    """Similarity-weighted nearest training pairs, on cases small enough to work by hand."""
+
+    # P1 and P1m differ by one residue; P2 shares no 3-mer with either.
+    SEQS = {"P1": "MKTAYIAKQRQISFVKSHFSRQ", "P1m": "MKTAYIAKQRQISFVKSHFSRA", "P2": "GGGGGGGGGG"}
+    # D1 and D1m are benzene and toluene; D2 is unrelated.
+    SMILES = {"D1": "c1ccccc1O", "D1m": "Cc1ccccc1O", "D2": "CCCCCCCCCC(=O)O"}
+
+    def _fit(self, rows, **kwargs) -> KNN:
+        model = KNN(self.SEQS, self.SMILES, **kwargs)
+        model.fit(pd.DataFrame(rows, columns=["Target_ID", "Drug_ID", "Y"]))
+        return model
+
+    def _predict(self, model: KNN, pairs) -> list[float]:
+        test = pd.DataFrame(pairs, columns=["Target_ID", "Drug_ID"]).assign(Y=0)
+        return model.predict(test)["pred"].tolist()
+
+    def test_tanimoto_by_hand(self):
+        """{AAA} against {AAA, AAB} shares one of two k-mers; two empty sets score 0."""
+        m = kmer_matrix(["AAAA", "AAAB", "", ""])
+        sim = tanimoto(m, m)
+        assert sim[0, 1] == pytest.approx(0.5)
+        assert sim[0, 0] == pytest.approx(1.0)
+        assert sim[2, 3] == 0.0
+        assert not np.isnan(sim).any()
+
+    def test_nearest_neighbour_wins(self):
+        """k=1: a slightly mutated protein and drug take the label of their close relative."""
+        model = self._fit([("P1", "D1", 1), ("P2", "D2", 0)], k=1)
+        assert self._predict(model, [("P1m", "D1m"), ("P2", "D2")]) == [1.0, 0.0]
+
+    def test_weighted_mean_by_hand(self):
+        """k=2 over two training pairs is their similarity-weighted mean label."""
+        model = self._fit([("P1", "D1", 1), ("P1m", "D2", 0)], k=2)
+        kmers = kmer_matrix([self.SEQS["P1"], self.SEQS["P1"], self.SEQS["P1m"]])
+        prot = tanimoto(kmers[:1], kmers[1:])[0]
+        drug = tanimoto(ecfp_matrix([self.SMILES["D1m"]]), ecfp_matrix([self.SMILES["D1"], self.SMILES["D2"]]))[0]
+        w = prot * drug
+        expected = w[0] / (w[0] + w[1])
+        assert 0 < expected < 1  # both neighbours contribute, so this is not a trivial case
+        assert self._predict(model, [("P1", "D1m")])[0] == pytest.approx(expected)
+
+    def test_no_similarity_falls_back_to_train_mean(self):
+        """A protein sharing no 3-mer with any training protein has zero weight everywhere."""
+        model = self._fit([("P1", "D1", 1), ("P1m", "D1", 0), ("P1", "D2", 1)], k=2)
+        assert self._predict(model, [("P2", "D1")])[0] == pytest.approx(2 / 3)
+
+    def test_missing_id_fails_loudly(self):
+        """An ID without a sequence must not silently score as dissimilar to everything."""
+        model = self._fit([("P1", "D1", 1)])
+        with pytest.raises(KeyError, match="protein"):
+            self._predict(model, [("P9", "D1")])
+
+    def test_run_needs_tables(self, tmp_path):
+        with pytest.raises(ValueError, match="--prots and --drugs"):
+            run("knn", str(tmp_path / "unused.tsv"))
+
+    def test_run_end_to_end(self, tmp_path):
+        """Through the CLI entry point, with tables on disk as the pipeline writes them."""
+        prots, drugs, split = tmp_path / "prot.tsv", tmp_path / "lig.tsv", tmp_path / "split.tsv"
+        pd.DataFrame({"Target_ID": list(self.SEQS), "Target": list(self.SEQS.values())}).to_csv(prots, sep="\t")
+        pd.DataFrame({"Drug_ID": list(self.SMILES), "Drug": list(self.SMILES.values())}).to_csv(drugs, sep="\t")
+        pd.DataFrame(
+            [("P1", "D1", 1, "train"), ("P2", "D2", 0, "train"), ("P1m", "D1m", 1, "test"), ("P2", "D1m", 0, "test")],
+            columns=["Target_ID", "Drug_ID", "Y", "split"],
+        ).to_csv(split, sep="\t")
+        summary = run("knn", str(split), prots=str(prots), drugs=str(drugs), k=1)
+        assert summary["auc"][0] == pytest.approx(1.0)

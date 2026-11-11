@@ -1,10 +1,11 @@
 import json
 
 from ...metrics import ORACLE, best_baseline, boss
+from .knn import KNN
 from .max_likelihood import Max
 from .prot_drug_max_likelihood import ProtDrugMax
 
-models = {"max": Max, "prot_drug_max": ProtDrugMax}
+models = {"max": Max, "prot_drug_max": ProtDrugMax, "knn": KNN}
 
 
 def run(
@@ -15,19 +16,30 @@ def run(
     which: str = "both",
     prob: bool = False,
     task: str = "class",
+    prots: str | None = None,
+    drugs: str | None = None,
+    k: int = 10,
 ) -> dict:
     """Assess the performance of a baseline model on a dataset.
 
     Args:
-        model: which baseline, one of ``max`` or ``prot_drug_max``.
+        model: which baseline, one of ``max``, ``prot_drug_max`` or ``knn``.
         filename: split_data TSV with a ``split`` column.
         split: which held-out split to report on. Defaults to ``test``.
         n_runs: repeats, only meaningful for ``prob=True``.
         which: for ``prot_drug_max``, use ``prot``, ``drug`` or ``both`` priors.
         prob: sample predictions instead of returning the mean.
         task: ``class`` or ``reg``, as ``parse_dataset.task``; picks the metric set.
+        prots: for ``knn``, a TSV with ``Target_ID`` and ``Target`` (sequence) columns.
+        drugs: for ``knn``, a TSV with ``Drug_ID`` and ``Drug`` (SMILES) columns.
+        k: for ``knn``, how many nearest training pairs to average.
     """
-    model = models[model](which=which, prob=prob, task=task)
+    if model == "knn":
+        if prots is None or drugs is None:
+            raise ValueError("knn needs --prots and --drugs tables")
+        model = KNN(prots, drugs, k=k, task=task)
+    else:
+        model = models[model](which=which, prob=prob, task=task)
     return model.assess_dataset(filename, split=split, n_runs=n_runs)
 
 
